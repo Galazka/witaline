@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Green circle background -->
+  <circle cx="100" cy="100" r="95" fill="#72B176" stroke="#000000" stroke-width="4"/>
+  
+  <!-- Person with headset silhouette -->
+  <g fill="#000000">
+    <!-- Head -->
+    <ellipse cx="100" cy="80" rx="28" ry="32"/>
+    <!-- Neck -->
+    <rect x="92" y="108" width="16" height="12" rx="4"/>
+    <!-- Body -->
+    <path d="M60 140 Q60 120 100 120 Q140 120 140 140 L140 175 Q140 180 135 180 L65 180 Q60 180 60 175 Z"/>
+    <!-- Headset band -->
+    <path d="M70 78 Q70 50 100 50 Q130 50 130 78" stroke="#000000" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <!-- Left arm holding phone -->
+    <path d="M65 125 Q45 130 40 155 L55 155 Q60 140 75 135" fill="#000000"/>
+    <!-- Right arm holding phone -->
+    <path d="M135 125 Q155 130 160 155 L145 155 Q140 140 125 135" fill="#000000"/>
+    <!-- Phone -->
+    <rect x="85" y="95" width="22" height="40" rx="4" fill="#000000"/>
+    <!-- Phone screen detail -->
+    <rect x="88" y="100" width="16" height="28" rx="2" fill="#72B176"/>
+    <!-- Ear piece -->
+    <ellipse cx="100" cy="92" rx="8" ry="5" fill="#000000"/>
+  </g>
+</svg>

@@ -1,0 +1,529 @@
+## Table `leads`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `company_name` | `text` |  |
+| `nip` | `text` |  |
+| `industry` | `text` |  Nullable |
+| `knowledge_base_raw` | `text` |  |
+| `status` | `text` |  |
+| `contact_email` | `text` |  |
+| `created_at` | `timestamptz` |  Nullable |
+| `phone` | `text` |  Nullable |
+| `business_id` | `uuid` |  Nullable |
+| `type` | `text` |  |
+| `message` | `text` |  Nullable |
+
+## Table `businesses`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `owner_uid` | `uuid` |  |
+| `name` | `text` |  |
+| `twilio_number` | `text` |  Nullable |
+| `current_plan` | `text` |  |
+| `minutes_used_this_week` | `int4` |  Nullable |
+| `system_prompt` | `text` |  Nullable |
+| `menu_catalog` | `jsonb` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `calendar_settings` | `jsonb` |  Nullable |
+| `services` | `jsonb` |  Nullable |
+| `stripe_customer_id` | `text` |  Nullable |
+| `stripe_subscription_id` | `text` |  Nullable |
+| `subscription_status` | `text` |  Nullable |
+| `trial_ends_at` | `timestamptz` |  Nullable |
+| `reseller_id` | `uuid` |  Nullable |
+| `reseller_markup` | `numeric` |  Nullable |
+| `suspended` | `bool` |  Nullable |
+| `industry` | `text` |  Nullable |
+| `website_url` | `text` |  Nullable |
+| `phone` | `text` |  Nullable |
+| `extension` | `text` |  Nullable |
+| `voice_id` | `uuid` |  Nullable |
+| `dtmf_code` | `text` |  Nullable |
+| `sms_limit` | `int4` |  Nullable |
+| `sms_used` | `int4` |  Nullable |
+| `sms_extra_purchased` | `int4` |  Nullable |
+| `verification_status` | `text` |  Nullable |
+| `verified_at` | `timestamptz` |  Nullable |
+| `verified_by` | `uuid` |  Nullable |
+| `nip` | `text` |  Nullable |
+| `krs` | `text` |  Nullable |
+| `verification_doc_url` | `text` |  Nullable |
+| `two_factor_secret` | `text` |  Nullable |
+| `two_factor_enabled` | `bool` |  Nullable |
+| `two_factor_verified_at` | `timestamptz` |  Nullable |
+| `slug` | `text` |  Nullable Unique |
+| `tokens_used_this_month` | `int4` |  Nullable |
+| `subscription_current_period_end` | `timestamptz` |  Nullable |
+| `custom_monthly_revenue` | `numeric` |  Nullable |
+| `wa_limit` | `int4` |  Nullable |
+| `wa_used` | `int4` |  Nullable |
+| `wa_extra_purchased` | `int4` |  Nullable |
+| `whatsapp_number` | `text` |  Nullable |
+
+## Table `call_logs`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  Nullable |
+| `duration_seconds` | `int4` |  |
+| `cost_pln` | `numeric` |  |
+| `caller_id` | `text` |  Nullable |
+| `transcript` | `text` |  Nullable |
+| `classification` | `text` |  |
+| `ai_summary` | `text` |  Nullable |
+| `was_helpful` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `recording_url` | `text` |  Nullable |
+| `started_at` | `timestamptz` |  Nullable |
+| `ended_at` | `timestamptz` |  Nullable |
+| `twilio_call_sid` | `text` |  Nullable |
+| `from_number` | `text` |  Nullable |
+| `routed_from_main` | `bool` |  Nullable |
+| `routed_to_extension` | `text` |  Nullable |
+| `routed_business_name` | `text` |  Nullable |
+| `to_number` | `text` |  Nullable |
+| `rodo_consent_played` | `bool` |  Nullable |
+| `rodo_consent_at` | `timestamptz` |  Nullable |
+| `status` | `text` |  Nullable |
+| `cost_elevenlabs` | `numeric` |  Nullable |
+| `cost_twilio` | `numeric` |  Nullable |
+| `cost_openrouter` | `numeric` |  Nullable |
+| `total_cost` | `numeric` |  Nullable |
+| `revenue_pln` | `numeric` |  Nullable |
+| `tokens_input` | `int4` |  Nullable |
+| `tokens_output` | `int4` |  Nullable |
+| `tokens_total` | `int4` |  Nullable |
+| `has_human_handoff` | `bool` |  Nullable |
+| `handoff_status` | `text` |  Nullable |
+| `handoff_reason` | `text` |  Nullable |
+| `handoff_target_number` | `text` |  Nullable |
+| `handoff_started_at` | `timestamptz` |  Nullable |
+| `handoff_ended_at` | `timestamptz` |  Nullable |
+| `handoff_duration_seconds` | `int4` |  Nullable |
+| `handoff_recording_sid` | `text` |  Nullable |
+| `handoff_recording_url` | `text` |  Nullable |
+| `post_handoff_transcript` | `text` |  Nullable |
+| `post_handoff_summary` | `text` |  Nullable |
+| `post_handoff_transcription_status` | `text` |  Nullable |
+| `post_handoff_transcribed_at` | `timestamptz` |  Nullable |
+| `post_handoff_error` | `text` |  Nullable |
+
+## Table `coupons`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `code` | `text` |  Unique |
+| `description` | `text` |  Nullable |
+| `discount_percent` | `numeric` |  Nullable |
+| `discount_amount` | `numeric` |  Nullable |
+| `max_uses` | `int4` |  Nullable |
+| `used_count` | `int4` |  Nullable |
+| `valid_from` | `timestamptz` |  Nullable |
+| `valid_until` | `timestamptz` |  Nullable |
+| `applicable_plans` | `_text` |  Nullable |
+| `active` | `bool` |  Nullable |
+| `created_by` | `uuid` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `coupon_usages`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `coupon_id` | `uuid` |  |
+| `business_id` | `uuid` |  |
+| `applied_at` | `timestamptz` |  Nullable |
+| `original_price` | `numeric` |  |
+| `final_price` | `numeric` |  |
+
+## Table `discount_rules`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `name` | `text` |  |
+| `description` | `text` |  Nullable |
+| `discount_percent` | `numeric` |  Nullable |
+| `discount_amount` | `numeric` |  Nullable |
+| `target_plans` | `_text` |  Nullable |
+| `start_at` | `timestamptz` |  |
+| `end_at` | `timestamptz` |  |
+| `max_uses_total` | `int4` |  Nullable |
+| `used_count` | `int4` |  Nullable |
+| `active` | `bool` |  Nullable |
+| `created_by` | `uuid` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `reservations`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `call_log_id` | `uuid` |  Nullable |
+| `caller_name` | `text` |  |
+| `caller_phone` | `text` |  |
+| `service_type` | `text` |  |
+| `reserved_at` | `timestamptz` |  |
+| `duration_minutes` | `int4` |  Nullable |
+| `notes` | `text` |  Nullable |
+| `status` | `text` |  |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+| `service_id` | `uuid` |  Nullable |
+| `change_token` | `text` |  Nullable |
+| `pending_changes` | `jsonb` |  Nullable |
+| `caller_notified` | `bool` |  Nullable |
+| `google_event_id` | `text` |  Nullable |
+| `confirmed_at` | `timestamptz` |  Nullable |
+| `sms_confirmation_sent` | `bool` |  Nullable |
+| `sms_reminder_sent` | `bool` |  Nullable |
+
+## Table `feedback`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `call_log_id` | `uuid` |  Nullable |
+| `caller_phone` | `text` |  Nullable |
+| `rating` | `int4` |  |
+| `comment` | `text` |  Nullable |
+| `category` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `conversation_id` | `uuid` |  Nullable |
+| `source` | `text` |  Nullable |
+| `deleted_at` | `timestamptz` |  Nullable |
+
+## Table `calendar_tokens`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `access_token` | `text` |  |
+| `refresh_token` | `text` |  |
+| `expires_at` | `timestamptz` |  Nullable |
+| `calendar_email` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `conversations`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `channel` | `text` |  |
+| `caller_id` | `text` |  Nullable |
+| `caller_name` | `text` |  Nullable |
+| `status` | `text` |  |
+| `summary` | `text` |  Nullable |
+| `sentiment` | `text` |  Nullable |
+| `tags` | `_text` |  Nullable |
+| `duration_seconds` | `int4` |  Nullable |
+| `message_count` | `int4` |  Nullable |
+| `started_at` | `timestamptz` |  Nullable |
+| `ended_at` | `timestamptz` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `deleted_at` | `timestamptz` |  Nullable |
+| `tokens_input` | `int4` |  Nullable |
+| `tokens_output` | `int4` |  Nullable |
+| `tokens_total` | `int4` |  Nullable |
+
+## Table `messages`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `conversation_id` | `uuid` |  |
+| `business_id` | `uuid` |  |
+| `role` | `text` |  |
+| `content` | `text` |  |
+| `metadata` | `jsonb` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `transcriptions`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `conversation_id` | `uuid` |  Nullable |
+| `business_id` | `uuid` |  |
+| `call_log_id` | `uuid` |  Nullable |
+| `audio_url` | `text` |  Nullable |
+| `transcript` | `text` |  |
+| `language` | `text` |  Nullable |
+| `duration_seconds` | `int4` |  Nullable |
+| `speaker` | `text` |  Nullable |
+| `confidence` | `numeric` |  Nullable |
+| `summary` | `text` |  Nullable |
+| `key_phrases` | `_text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `business_knowledge`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `category` | `text` |  |
+| `title` | `text` |  |
+| `content` | `text` |  |
+| `metadata` | `jsonb` |  Nullable |
+| `active` | `bool` |  Nullable |
+| `sort_order` | `int4` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `dashboard_configs`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  Unique |
+| `layout` | `jsonb` |  Nullable |
+| `theme` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `contact_messages`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `company` | `text` |  |
+| `contact` | `text` |  |
+| `website` | `text` |  Nullable |
+| `message` | `text` |  |
+| `read` | `bool` |  |
+| `created_at` | `timestamptz` |  |
+| `deleted_at` | `timestamptz` |  Nullable |
+
+## Table `callback_requests`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `caller_number` | `text` |  |
+| `caller_name` | `text` |  Nullable |
+| `matter` | `text` |  Nullable |
+| `call_sid` | `text` |  Nullable |
+| `business_id` | `uuid` |  Nullable |
+| `handled` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `deleted_at` | `timestamptz` |  Nullable |
+
+## Table `voices`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `display_name` | `text` |  |
+| `gender` | `text` |  |
+| `elevenlabs_voice_id` | `text` |  Unique |
+| `is_default` | `bool` |  Nullable |
+| `min_plan` | `text` |  Nullable |
+| `active` | `bool` |  Nullable |
+| `sort_order` | `int4` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `sms_logs`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  Nullable |
+| `call_log_id` | `uuid` |  Nullable |
+| `to_number` | `text` |  |
+| `message_body` | `text` |  |
+| `status` | `text` |  |
+| `twilio_sid` | `text` |  Nullable |
+| `error_message` | `text` |  Nullable |
+| `sent_at` | `timestamptz` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `reservation_id` | `uuid` |  Nullable |
+
+## Table `blocked_callers`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `phone` | `text` |  |
+| `reason` | `text` |  Nullable |
+| `blocked_by` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `page_visits`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `path` | `text` |  |
+| `business_id` | `uuid` |  Nullable |
+| `visitor_ip` | `text` |  Nullable |
+| `user_agent` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `dtmf_logs`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  Nullable |
+| `from_number` | `text` |  Nullable |
+| `dtmf_code` | `text` |  Nullable |
+| `matched_extension` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `business_members`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `user_id` | `uuid` |  |
+| `role` | `text` |  |
+| `invited_by` | `uuid` |  Nullable |
+| `invited_at` | `timestamptz` |  Nullable |
+| `accepted_at` | `timestamptz` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `invite_token` | `text` |  Nullable |
+| `invite_email` | `text` |  Nullable |
+
+## Table `audit_log`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `user_id` | `uuid` |  |
+| `action` | `text` |  |
+| `field_name` | `text` |  Nullable |
+| `old_value` | `text` |  Nullable |
+| `new_value` | `text` |  Nullable |
+| `ip_address` | `text` |  Nullable |
+| `user_agent` | `text` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `notifications`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `type` | `text` |  |
+| `title` | `text` |  |
+| `message` | `text` |  |
+| `metadata` | `jsonb` |  Nullable |
+| `is_read` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `voice_clones`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  Unique |
+| `elevenlabs_voice_id` | `text` |  |
+| `display_name` | `text` |  |
+| `status` | `text` |  Nullable |
+| `samples_urls` | `jsonb` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `weekly_reports`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  |
+| `week_start` | `date` |  |
+| `week_end` | `date` |  |
+| `total_calls` | `int4` |  Nullable |
+| `total_duration_minutes` | `int4` |  Nullable |
+| `total_leads` | `int4` |  Nullable |
+| `total_bookings` | `int4` |  Nullable |
+| `total_sms_sent` | `int4` |  Nullable |
+| `classification_breakdown` | `jsonb` |  Nullable |
+| `peak_day` | `text` |  Nullable |
+| `peak_hour` | `int4` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `wa_logs`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `business_id` | `uuid` |  Nullable |
+| `call_log_id` | `uuid` |  Nullable |
+| `to_number` | `text` |  |
+| `message_body` | `text` |  |
+| `status` | `text` |  Nullable |
+| `direction` | `text` |  Nullable |
+| `twilio_sid` | `text` |  Nullable |
+| `error_message` | `text` |  Nullable |
+| `profile_name` | `text` |  Nullable |
+| `has_media` | `bool` |  Nullable |
+| `sent_at` | `timestamptz` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+

@@ -1,0 +1,31 @@
+       else if (toolName === "transfer_to_human") {
+         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+
+         let targetNumber = "";
+         const { data: consultants } = await supabaseAdmin
+           .from("business_consultants")
+           .select("phone")
+           .eq("business_id", bizId)
+           .order("sort_order", { ascending: true });
+         if (consultants && consultants.length > 0) {
+           targetNumber = consultants[0].phone;
+         } else {
+           const { data: biz } = await supabaseAdmin
+             .from("businesses")
+             .select("phone")
+             .eq("id", bizId)
+             .maybeSingle();
+           targetNumber = biz?.phone || process.env.WITALINE_CONSULTANT_NUMBER || "";
+         }
+
+         if (!targetNumber) {
+           result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
+         } else {
+           // Simple success response for now
+           result = JSON.stringify({
+             ok: true,
+             target: targetNumber,
+             message: "Transfer initiated (simplified)",
+           });
+         }
+       }

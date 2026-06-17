@@ -1,0 +1,16 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://169.254.83.107:3000
+- Environments: .env
+✓ Ready in 444ms
+
+ GET /admin 200 in 753ms (next.js: 74ms, proxy.ts: 427ms, application-code: 252ms)
+ GET /api/admin/dashboard 200 in 579ms (next.js: 103ms, application-code: 476ms)
+ GET /api/admin/sms/usage 200 in 198ms (next.js: 29ms, application-code: 169ms)
+ GET /api/admin/dashboard?range=all 200 in 254ms (next.js: 4ms, application-code: 250ms)
+ GET /api/admin/sms/usage 200 in 110ms (next.js: 1695µs, application-code: 108ms)
+ GET /api/admin/dashboard 200 in 319ms (next.js: 33ms, application-code: 286ms)
+ GET /api/admin/dashboard?range=all 200 in 215ms (next.js: 1826µs, application-code: 213ms)
+ GET /api/admin/dashboard 200 in 229ms (next.js: 4ms, application-code: 225ms)
+ GET /admin 200 in 517ms (next.js: 189ms, proxy.ts: 294ms, application-code: 33ms)
+[?25h

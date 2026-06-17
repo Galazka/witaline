@@ -1,0 +1,14 @@
+{
+  "name": "witaline-sync-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sync call logs from ElevenLabs to Supabase (opcjonalny)",
+  "scripts": {
+    "sync": "node server.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
+    "dotenv": "^16.4.5"
+  }
+}

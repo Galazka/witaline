@@ -1,0 +1,52 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://169.254.83.107:3000
+- Environments: .env
+✓ Ready in 437ms
+
+ GET /admin 200 in 712ms (next.js: 73ms, proxy.ts: 361ms, application-code: 278ms)
+ GET /api/admin/dashboard 200 in 623ms (next.js: 91ms, application-code: 532ms)
+ GET /api/admin/dashboard?range=all 200 in 254ms (next.js: 4ms, application-code: 250ms)
+ GET /api/admin/sms/usage 200 in 296ms (next.js: 33ms, application-code: 262ms)
+ GET /api/admin/dashboard 200 in 354ms (next.js: 37ms, application-code: 317ms)
+ GET /api/admin/sms/usage 200 in 125ms (next.js: 1451µs, application-code: 123ms)
+ GET /api/admin/dashboard?range=all 200 in 239ms (next.js: 3ms, application-code: 236ms)
+ GET /api/admin/dashboard 200 in 202ms (next.js: 4ms, application-code: 198ms)
+ GET /admin 200 in 311ms (next.js: 5ms, proxy.ts: 251ms, application-code: 55ms)
+ GET /api/admin/dashboard 200 in 279ms (next.js: 2ms, application-code: 277ms)
+ GET /api/admin/sms/usage 200 in 209ms (next.js: 7ms, application-code: 203ms)
+ GET /api/admin/dashboard?range=all 200 in 224ms (next.js: 3ms, application-code: 221ms)
+ GET /api/admin/sms/usage 200 in 106ms (next.js: 1534µs, application-code: 105ms)
+ GET /api/admin/dashboard 200 in 352ms (next.js: 12ms, application-code: 340ms)
+ GET /api/admin/dashboard?range=all 200 in 215ms (next.js: 1549µs, application-code: 213ms)
+ GET /api/admin/dashboard 200 in 196ms (next.js: 3ms, application-code: 193ms)
+ GET /api/admin/dashboard 200 in 195ms (next.js: 1468µs, application-code: 194ms)
+[spam-filter] registering call: {
+  from: '+48789381638',
+  to: '+48732125752',
+  callSid: 'CAd9499424cc4859d2dd1e2e28915b9b6d',
+  businessId: '00000000-0000-0000-0000-000000000001',
+  voiceId: undefined
+}
+[registerCall] ElevenLabs response: 200 <?xml version="1.0" encoding="UTF-8"?><Response><Connect><Stream url="wss://api.elevenlabs.io/v1/convai/conversation"><Parameter name="conversation_id" value="conv_8301kv8kfmt0fjpagymamjh5f5mc" /></Stream></Connect></Response>
+ POST /api/twilio/spam-filter 200 in 1637ms (next.js: 36ms, application-code: 1602ms)
+ POST /api/mcp 500 in 1089ms (next.js: 981ms, application-code: 108ms)
+ POST /api/mcp 500 in 30ms (next.js: 22ms, application-code: 8ms)
+ POST /api/mcp 500 in 13ms (next.js: 5ms, application-code: 8ms)
+ POST /api/mcp 500 in 12ms (next.js: 5ms, application-code: 7ms)
+ POST /api/twilio/spam-filter 500 in 11ms (next.js: 4ms, application-code: 7ms)
+ POST /api/twilio/spam-filter 500 in 11ms (next.js: 4ms, application-code: 6ms)
+ POST /api/elevenlabs/call-completed 500 in 15ms (next.js: 9ms, application-code: 6ms)
+ POST /api/elevenlabs/call-completed 500 in 11ms (next.js: 4ms, application-code: 7ms)
+ POST /api/twilio/spam-filter 500 in 11ms (next.js: 3ms, application-code: 7ms)
+ GET /admin 500 in 684ms (next.js: 9ms, proxy.ts: 668ms, application-code: 8ms)
+ GET /admin 500 in 66ms (next.js: 4ms, proxy.ts: 54ms, application-code: 8ms)
+ GET /admin 500 in 447ms (next.js: 5ms, proxy.ts: 434ms, application-code: 8ms)
+ GET /admin 500 in 415ms (next.js: 6ms, proxy.ts: 402ms, application-code: 7ms)
+ GET /admin 500 in 310ms (next.js: 6ms, proxy.ts: 297ms, application-code: 7ms)
+ GET /admin 500 in 870ms (next.js: 8ms, proxy.ts: 855ms, application-code: 7ms)
+ GET /admin 500 in 407ms (next.js: 6ms, proxy.ts: 394ms, application-code: 7ms)
+ GET /admin 500 in 474ms (next.js: 6ms, proxy.ts: 461ms, application-code: 7ms)
+ GET /admin 500 in 365ms (next.js: 4ms, proxy.ts: 351ms, application-code: 9ms)
+ GET /admin 500 in 752ms (next.js: 4ms, proxy.ts: 736ms, application-code: 11ms)
+[?25h

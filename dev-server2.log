@@ -1,0 +1,83 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://169.254.83.107:3000
+- Environments: .env
+✓ Ready in 585ms
+
+ GET /api/admin/dashboard 200 in 595ms (next.js: 102ms, application-code: 494ms)
+ GET /admin 200 in 433ms (next.js: 80ms, proxy.ts: 117ms, application-code: 236ms)
+ GET /api/admin/dashboard 200 in 268ms (next.js: 3ms, application-code: 265ms)
+ GET /api/admin/dashboard?range=all 200 in 201ms (next.js: 3ms, application-code: 198ms)
+ GET /api/admin/sms/usage 200 in 252ms (next.js: 28ms, application-code: 225ms)
+ GET /api/admin/sms/usage 200 in 110ms (next.js: 2ms, application-code: 108ms)
+ GET /api/admin/dashboard 200 in 385ms (next.js: 32ms, application-code: 353ms)
+ GET /api/admin/dashboard?range=all 200 in 202ms (next.js: 1781µs, application-code: 200ms)
+ GET /api/admin/dashboard 200 in 201ms (next.js: 3ms, application-code: 198ms)
+[spam-filter] registering call: {
+  from: '+48789381638',
+  to: '+48732125752',
+  callSid: 'CAfe01874390b57700e0a56a8939bbd76d',
+  businessId: '00000000-0000-0000-0000-000000000001',
+  voiceId: undefined
+}
+[registerCall] ElevenLabs response: 200 <?xml version="1.0" encoding="UTF-8"?><Response><Connect><Stream url="wss://api.elevenlabs.io/v1/convai/conversation"><Parameter name="conversation_id" value="conv_9101kv80jf79eck88kn2rv1gg8c6" /></Stream></Connect></Response>
+ POST /api/twilio/spam-filter 200 in 1100ms (next.js: 38ms, application-code: 1062ms)
+ POST /api/mcp 200 in 28ms (next.js: 23ms, application-code: 4ms)
+ POST /api/mcp 200 in 4ms (next.js: 1430µs, application-code: 3ms)
+ POST /api/mcp 200 in 4ms (next.js: 1476µs, application-code: 3ms)
+ POST /api/mcp 200 in 5ms (next.js: 1594µs, application-code: 3ms)
+ POST /api/mcp 200 in 4ms (next.js: 1387µs, application-code: 2ms)
+ POST /api/mcp 200 in 4ms (next.js: 1431µs, application-code: 3ms)
+ GET /api/admin/dashboard 200 in 595ms (next.js: 1447µs, application-code: 594ms)
+ GET /api/admin/sms/usage 200 in 211ms (next.js: 5ms, application-code: 207ms)
+ GET /api/admin/dashboard?range=all 200 in 302ms (next.js: 2ms, application-code: 300ms)
+ GET /api/admin/sms/usage 200 in 138ms (next.js: 3ms, application-code: 135ms)
+ GET /api/admin/dashboard 200 in 364ms (next.js: 11ms, application-code: 353ms)
+ GET /api/admin/dashboard?range=all 200 in 227ms (next.js: 14ms, application-code: 214ms)
+ GET /api/admin/dashboard 200 in 198ms (next.js: 1281µs, application-code: 196ms)
+ GET /api/admin/sms/usage 200 in 165ms (next.js: 6ms, application-code: 159ms)
+ GET /api/admin/dashboard?range=all 200 in 189ms (next.js: 3ms, application-code: 186ms)
+ GET /api/admin/sms/usage 200 in 100ms (next.js: 3ms, application-code: 97ms)
+ GET /api/admin/dashboard 200 in 276ms (next.js: 10ms, application-code: 266ms)
+ GET /api/admin/dashboard?range=all 200 in 194ms (next.js: 1551µs, application-code: 192ms)
+ GET /api/admin/dashboard 200 in 290ms (next.js: 3ms, application-code: 287ms)
+ GET /api/admin/sms/usage 200 in 173ms (next.js: 3ms, application-code: 170ms)
+ GET /api/admin/dashboard?range=all 200 in 209ms (next.js: 3ms, application-code: 206ms)
+ GET /api/admin/dashboard 200 in 268ms (next.js: 4ms, application-code: 264ms)
+ GET /api/admin/sms/usage 200 in 108ms (next.js: 1544µs, application-code: 107ms)
+ GET /api/admin/dashboard?range=all 200 in 198ms (next.js: 1374µs, application-code: 197ms)
+ POST /api/mcp 200 in 5ms (next.js: 2ms, application-code: 2ms)
+ POST /api/mcp 200 in 5ms (next.js: 2ms, application-code: 2ms)
+[MCP tools/call] raw: save_lead stripped: save_lead args: {"name":"Kasia Kowalska","phone":"548941269","message":"Wiadomość dla Pana Tomka: bluza wyschła. Klientka prosi o kontakt z człowiekiem.","business_id":"00000000-0000-0000-0000-000000000001"}
+[MCP save_lead] result: ok id=57fc3e3c-4db0-4091-ae07-b4a99b23b33e
+ POST /api/mcp 200 in 244ms (next.js: 1253µs, application-code: 243ms)
+ POST /api/mcp 200 in 4ms (next.js: 1255µs, application-code: 2ms)
+ POST /api/mcp 200 in 4ms (next.js: 1719µs, application-code: 2ms)
+ POST /api/mcp 200 in 4ms (next.js: 1216µs, application-code: 2ms)
+[MCP tools/call] raw: transfer_to_human stripped: transfer_to_human args: {"business_id":"00000000-0000-0000-0000-000000000001","caller_phone":"548941269","to_number":"konsultant"}
+[MCP transfer_to_human] redirect: true 200 Call redirected to human handoff
+ POST /api/mcp 200 in 1065ms (next.js: 1436µs, application-code: 1064ms)
+ POST /api/mcp 200 in 4ms (next.js: 1726µs, application-code: 2ms)
+[call-completed] received payload: {"type":"post_call_transcription_otel","keys":["type","event_timestamp","data"]}
+[call-completed] full payload preview: {"type":"post_call_transcription_otel","event_timestamp":1781606854,"data":{"conversation_id":"conv_9101kv80jf79eck88kn2rv1gg8c6","agent_id":"agent_1501krvm9y90e549tyg96mgczsfv","branch_id":"agtbrch_5601krvma03gf479y4bx7t0t4zg8","version_id":"agtvrsn_3701kv7vpqn9epcr09w70pvd6gy6","environment":"production","otlp_traces":{"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"elevenlabs-convai"}},{"key":"elevenlabs.conversation_id","value":{"stringValue":"conv_9
+ POST /api/elevenlabs/call-completed 400 in 37ms (next.js: 28ms, application-code: 8ms)
+[call-completed] received payload: {"type":"post_call_audio","keys":["type","event_timestamp","data"]}
+[call-completed] full payload preview: {"type":"post_call_audio","event_timestamp":1781606855,"data":{"agent_id":"agent_1501krvm9y90e549tyg96mgczsfv","agent_name":"Rob","conversation_id":"conv_9101kv80jf79eck88kn2rv1gg8c6","user_id":"+48789381638","full_audio":"SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2LjEwMAAAAAAAAAAAAAAA//PIxAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+ POST /api/elevenlabs/call-completed 400 in 655ms (next.js: 1328µs, application-code: 654ms)
+ GET /api/admin/sms/usage 200 in 222ms (next.js: 4ms, application-code: 217ms)
+ GET /api/admin/dashboard?range=all 200 in 348ms (next.js: 1632µs, application-code: 346ms)
+ GET /api/admin/dashboard 200 in 215ms (next.js: 1375µs, application-code: 214ms)
+ GET /api/admin/sms/usage 200 in 409ms (next.js: 5ms, application-code: 404ms)
+ GET /api/admin/sms/usage 200 in 96ms (next.js: 1324µs, application-code: 95ms)
+ GET /api/admin/dashboard?range=all 200 in 516ms (next.js: 2ms, application-code: 514ms)
+ GET /api/admin/dashboard 200 in 547ms (next.js: 7ms, application-code: 540ms)
+ GET /api/admin/dashboard?range=all 200 in 211ms (next.js: 7ms, application-code: 204ms)
+ GET /api/admin/sms/usage 200 in 117ms (next.js: 6ms, application-code: 111ms)
+ GET /api/admin/dashboard?range=all 200 in 194ms (next.js: 3ms, application-code: 191ms)
+ GET /api/admin/sms/usage 200 in 104ms (next.js: 1822µs, application-code: 102ms)
+ GET /api/admin/dashboard?range=all 200 in 205ms (next.js: 6ms, application-code: 199ms)
+ GET /api/admin/real-costs?from=2026-06-01&to=2026-06-16&includePrev=false 200 in 467ms (next.js: 34ms, application-code: 433ms)
+ GET /api/admin/real-costs?from=2026-06-01&to=2026-06-16&includePrev=false 200 in 274ms (next.js: 3ms, application-code: 271ms)
+ GET /api/admin/dashboard 200 in 391ms (next.js: 1985µs, application-code: 389ms)
+ GET /admin 200 in 587ms (next.js: 339ms, proxy.ts: 187ms, application-code: 61ms)
+[?25h

@@ -1,0 +1,2 @@
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS prepaid_minutes DECIMAL(10,2) DEFAULT 0;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS lifetime_purchased_minutes DECIMAL(10,2) DEFAULT 0;

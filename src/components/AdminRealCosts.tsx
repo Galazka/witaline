@@ -1,0 +1,758 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+
+/* ── Types ── */
+
+interface BizCost {
+  id: string;
+  name: string;
+  plan: string;
+  is_centrala?: boolean;
+  calls: number;
+  minutes: number;
+  costElevenlabs: number;
+  costTwilio: number;
+  costOpenrouter: number;
+  costSms: number;
+  totalCost: number;
+  revenue: number;
+  customRevenue: number | null;
+  prevTotalCost: number | null;
+  prevRevenue: number | null;
+  prevCalls: number | null;
+}
+
+interface CostItem {
+  id: string;
+  name: string;
+  amount: number;
+  frequency: string;
+  category: string;
+  due_date: string | null;
+  is_paid: boolean;
+  paid_at: string | null;
+  notes: string | null;
+}
+
+interface OwnCostsSummary {
+  monthly_total: number;
+  unpaid_total: number;
+  unpaid_count: number;
+  total_items: number;
+  by_category: Record<string, { count: number; total: number; monthly: number }>;
+}
+
+/* ── Helpers ── */
+
+function fmtPLN(v: number): string {
+  const abs = Math.abs(v);
+  const s = abs.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return v < 0 ? `-${s} zl` : `${s} zl`;
+}
+
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function firstOfMonth(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+}
+
+function firstOfPrevMonth(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+}
+
+function csvEscape(val: string | number): string {
+  const s = String(val);
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+const planLabels: Record<string, string> = {
+  start_100: "Start 299",
+  pro_500: "Growth 599",
+  enterprise_2000: "Enterprise 1199",
+  elastic_0: "Elastyczny",
+  pro_249: "Pro 300 brutto",
+  lux_599: "Lux 600 brutto",
+};
+
+const PLAN_REVENUE: Record<string, number> = {
+  start_100: 299,
+  pro_500: 599,
+  enterprise_2000: 1199,
+  elastic_0: 0,
+  pro_249: 243.9,
+  lux_599: 487.8,
+};
+
+function freqLabel(f: string): string {
+  const m: Record<string, string> = { monthly: "mies.", quarterly: "kwart.", yearly: "rocznie", "one-time": "jednor.", irregular: "niereg." };
+  return m[f] || f;
+}
+
+/* ── Component ── */
+
+export default function AdminRealCosts() {
+  const [data, setData] = useState<BizCost[]>([]);
+  const [costItems, setCostItems] = useState<CostItem[]>([]);
+  const [ownCostsSummary, setOwnCostsSummary] = useState<OwnCostsSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingDiscount, setSavingDiscount] = useState<string | null>(null);
+  const [from, setFrom] = useState(firstOfMonth);
+  const [to, setTo] = useState(todayStr);
+  const [search, setSearch] = useState("");
+  const [showOwnCosts, setShowOwnCosts] = useState(true);
+  const [showCallCosts, setShowCallCosts] = useState(true);
+  const [showUnpaid, setShowUnpaid] = useState(false);
+  const [comparePrev, setComparePrev] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState("");
+  const [editItem, setEditItem] = useState<CostItem | null>(null);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [newItem, setNewItem] = useState({ name: "", amount: 0, frequency: "monthly", category: "other", due_date: "", is_paid: false, notes: "" });
+  const [callLogs, setCallLogs] = useState<Array<{ id: string; business_id: string; duration_seconds: number; cost_pln: number; internal_cost_pln: number; from_number: string; created_at: string; business_name: string }>>([]);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/real-costs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&includePrev=${comparePrev}`);
+      if (res.ok) {
+        const json = await res.json();
+        setData(json.businesses || []);
+        setOwnCostsSummary(json.own_costs || null);
+        setCostItems(json.cost_items || []);
+        setCallLogs(json.call_logs || []);
+      }
+    } catch { /* ignore */ }
+    setLoading(false);
+  }, [from, to, comparePrev]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const filtered = search.trim()
+    ? data.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()))
+    : data;
+
+  /* ── KPI summaries ── */
+  const totalCost = filtered.reduce((a, b) => a + b.totalCost, 0);
+  const centralaCost = filtered.filter(b => b.is_centrala).reduce((a, b) => a + b.totalCost, 0);
+  const clientCost = totalCost - centralaCost;
+  const totalRevenue = filtered.filter(b => !b.is_centrala).reduce((a, b) => a + (b.customRevenue ?? b.revenue), 0);
+  const totalOwnCosts = ownCostsSummary?.monthly_total || 0;
+  const totalAllCosts = totalCost + totalOwnCosts;
+  const totalMargin = totalRevenue - totalAllCosts;
+  const marginPct = totalRevenue > 0 ? (totalMargin / totalRevenue) * 100 : 0;
+  const totalCalls = filtered.reduce((s, b) => s + b.calls, 0);
+
+  const unprofitable = filtered.filter((b) => {
+    if (b.is_centrala) return false;
+    const rev = b.customRevenue ?? b.revenue;
+    return rev - b.totalCost < 0;
+  }).length;
+
+  const atRisk = filtered.filter((b) => {
+    if (b.is_centrala) return false;
+    const rev = b.customRevenue ?? b.revenue;
+    const margin = rev - b.totalCost;
+    const pct = rev > 0 ? (margin / rev) * 100 : 0;
+    return pct >= 0 && pct < 15;
+  }).length;
+
+  const prevTotalCalls = filtered.reduce((s, b) => s + (b.prevCalls || 0), 0);
+  const prevTotalCost_ = filtered.reduce((s, b) => s + (b.prevTotalCost || 0), 0);
+
+  /* ── Cost items ── */
+  const unpaidItems = costItems.filter((i) => !i.is_paid);
+  const upcomingItems = costItems
+    .filter((i) => !i.is_paid && i.due_date)
+    .sort((a, b) => (a.due_date || "").localeCompare(b.due_date || ""));
+
+  async function saveCostItem(item: typeof newItem) {
+    await fetch("/api/admin/cost-items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(item),
+    });
+    setShowAddItem(false);
+    setNewItem({ name: "", amount: 0, frequency: "monthly", category: "other", due_date: "", is_paid: false, notes: "" });
+    fetchData();
+  }
+
+  async function togglePaid(id: string, isPaid: boolean) {
+    await fetch("/api/admin/cost-items", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, is_paid: isPaid, paid_at: isPaid ? todayStr() : null }),
+    });
+    fetchData();
+  }
+
+  async function deleteCostItem(id: string) {
+    await fetch("/api/admin/cost-items", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    fetchData();
+  }
+
+  function exportCsv() {
+    const rows = [
+      ["Firma", "Plan", "Rozmowy", "Minuty", "ElevenLabs", "Twilio", "OpenRouter", "SMS",
+       "Koszt", "Przychod", "Rabat %", "Przychod efektywny", "Marza", "Marza %"],
+      ...filtered.map((b) => {
+        const stdRevenue = PLAN_REVENUE[b.plan] || 299;
+        const effectiveRevenue = b.customRevenue ?? b.revenue;
+        const discountPct = b.customRevenue !== null ? ((1 - b.customRevenue / stdRevenue) * 100).toFixed(1) : "0.0";
+        const margin = effectiveRevenue - b.totalCost;
+        const marginPctVal = effectiveRevenue > 0 ? ((margin / effectiveRevenue) * 100).toFixed(1) : "0.0";
+        return [
+          b.name, planLabels[b.plan] || b.plan, String(b.calls), b.minutes.toFixed(2),
+          b.costElevenlabs.toFixed(2), b.costTwilio.toFixed(2), b.costOpenrouter.toFixed(2),
+          b.costSms.toFixed(2), b.totalCost.toFixed(2), stdRevenue.toFixed(2),
+          discountPct, effectiveRevenue.toFixed(2), margin.toFixed(2), marginPctVal,
+        ];
+      }),
+    ];
+    const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `witaline-finanse-${from}-${to}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleDiscountChange(bizId: string, newRevenue: number) {
+    setSavingDiscount(bizId);
+    try {
+      await fetch("/api/admin/businesses", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: bizId, custom_monthly_revenue: newRevenue }),
+      });
+      fetchData();
+    } catch { /* ignore */ }
+    setSavingDiscount(null);
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* ── Header filters ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-zinc-400">Od:</label>
+            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
+              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-zinc-400">Do:</label>
+            <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
+              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+          </div>
+          <button onClick={fetchData}
+            className="px-3 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
+            Odswiez
+          </button>
+          <label className="flex items-center gap-1.5 text-xs text-zinc-500 cursor-pointer">
+            <input type="checkbox" checked={comparePrev} onChange={() => setComparePrev(!comparePrev)}
+              className="rounded border-zinc-300 text-brand-400 focus:ring-brand-200" />
+            Porownaj z poprzednim okresem
+          </label>
+          <button
+            onClick={async () => {
+              setSyncing(true); setSyncMsg("Synchronizowanie...");
+              try { const r = await fetch("/api/admin/sync-costs", { method: "POST" }); const d = await r.json(); setSyncMsg(d.message || "OK"); fetchData(); } catch { setSyncMsg("Blad synchronizacji"); }
+              setSyncing(false); setTimeout(() => setSyncMsg(""), 5000);
+            }}
+            disabled={syncing}
+            className="px-3 py-1.5 text-xs font-medium bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:opacity-50"
+          >
+            {syncing ? "Sync..." : "Sync koszty"}
+          </button>
+          {syncMsg && <span className="text-xs text-zinc-500">{syncMsg}</span>}
+        </div>
+        <div className="flex items-center gap-3">
+          <input type="text" placeholder="Szukaj firmy..." value={search} onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none focus:border-brand-400 w-48" />
+          <button onClick={exportCsv}
+            className="px-3 py-1.5 text-xs font-medium bg-brand-50 text-zinc-600 rounded-lg hover:bg-brand-100 transition">
+            CSV
+          </button>
+        </div>
+      </div>
+
+      {/* ── KPI cards ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug</p>
+          <p className="text-xl font-bold text-red-500 mt-1">{fmtPLN(totalCost)}</p>
+          <p className="text-[10px] text-zinc-400">w tym centrala: {fmtPLN(centralaCost)}</p>
+          {comparePrev && prevTotalCost_ > 0 && (
+            <p className={`text-[10px] mt-0.5 ${totalCost >= prevTotalCost_ ? "text-red-400" : "text-green-500"}`}>
+              {totalCost >= prevTotalCost_ ? "+" : ""}{((totalCost - prevTotalCost_) / prevTotalCost_ * 100).toFixed(0)}% vs poprz.
+            </p>
+          )}
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszty wlasne</p>
+          <p className="text-xl font-bold text-amber-500 mt-1">{fmtPLN(totalOwnCosts)}</p>
+          <p className="text-[10px] text-zinc-400 mt-0.5">{ownCostsSummary?.total_items || 0} pozycji</p>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Lacznie koszty</p>
+          <p className="text-xl font-bold text-red-600 mt-1">{fmtPLN(totalAllCosts)}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod</p>
+          <p className="text-xl font-bold text-brand-500 mt-1">{fmtPLN(totalRevenue)}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Marza</p>
+          <p className={`text-xl font-bold mt-1 ${totalMargin >= 0 ? "text-green-600" : "text-red-500"}`}>
+            {totalMargin >= 0 ? "+" : ""}{fmtPLN(totalMargin)}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Marza %</p>
+          <p className={`text-xl font-bold mt-1 ${marginPct >= 20 ? "text-green-600" : marginPct >= 0 ? "text-amber-600" : "text-red-500"}`}>
+            {marginPct.toFixed(1)}%
+          </p>
+          <div className="mt-2 h-1.5 bg-brand-50 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full ${marginPct >= 20 ? "bg-green-500" : marginPct >= 0 ? "bg-amber-500" : "bg-red-500"}`}
+              style={{ width: `${Math.min(100, Math.max(0, marginPct * 2))}%` }} />
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Firmy na minusie</p>
+          <p className={`text-xl font-bold mt-1 ${unprofitable > 0 ? "text-red-500" : "text-green-600"}`}>{unprofitable}</p>
+          <p className="text-xs text-zinc-400 mt-0.5">z {filtered.length} firm</p>
+        </div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+          <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Rozmowy</p>
+          <p className="text-xl font-bold text-zinc-900 mt-1">{totalCalls}</p>
+          {comparePrev && (
+            <p className={`text-[10px] mt-0.5 ${totalCalls >= prevTotalCalls ? "text-green-500" : "text-red-400"}`}>
+              {totalCalls >= prevTotalCalls ? "+" : ""}{totalCalls - prevTotalCalls} vs poprz.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Koszty polaczen (call logs) ── */}
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <button
+          onClick={() => setShowCallCosts(!showCallCosts)}
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-brand-50 transition"
+        >
+          <span className="flex items-center gap-2">
+            <span>📞 Koszty połączeń</span>
+            <span className="text-[10px] bg-brand-100 text-brand-700 rounded-full px-2 py-0.5 font-medium">
+              {callLogs.length} rozmów
+            </span>
+          </span>
+          <span className="text-zinc-300">{showCallCosts ? "▲" : "▼"}</span>
+        </button>
+        {showCallCosts && (
+          <div className="px-5 pb-4 space-y-4">
+            {/* Monthly summary */}
+            {(() => {
+              const monthGroups = new Map<string, { calls: number; minutes: number; cost: number }>();
+              for (const log of callLogs) {
+                const month = log.created_at?.slice(0, 7) || "nieznany";
+                if (!monthGroups.has(month)) monthGroups.set(month, { calls: 0, minutes: 0, cost: 0 });
+                const g = monthGroups.get(month)!;
+                g.calls += 1;
+                g.minutes += (log.duration_seconds || 0) / 60;
+                g.cost += (log.internal_cost_pln ?? log.cost_pln) || 0;
+              }
+              const totalCost = [...monthGroups.values()].reduce((s, g) => s + g.cost, 0);
+              const totalMin = [...monthGroups.values()].reduce((s, g) => s + g.minutes, 0);
+              return (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="bg-zinc-50 rounded-lg p-3">
+                      <p className="text-xs text-zinc-400">Liczba rozmów</p>
+                      <p className="text-lg font-bold text-zinc-800">{callLogs.length}</p>
+                    </div>
+                    <div className="bg-zinc-50 rounded-lg p-3">
+                      <p className="text-xs text-zinc-400">Łączny czas</p>
+                      <p className="text-lg font-bold text-zinc-800">{Math.round(totalMin)} min</p>
+                    </div>
+                    <div className="bg-zinc-50 rounded-lg p-3">
+                      <p className="text-xs text-zinc-400">Łączny koszt</p>
+                      <p className="text-lg font-bold text-red-500">{fmtPLN(totalCost)}</p>
+                    </div>
+                    <div className="bg-zinc-50 rounded-lg p-3">
+                      <p className="text-xs text-zinc-400">Średnio/min</p>
+                      <p className="text-lg font-bold text-zinc-800">{totalMin > 0 ? fmtPLN(totalCost / totalMin) : "—"}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    {[...monthGroups.entries()].sort(([a], [b]) => b.localeCompare(a)).map(([month, group]) => (
+                      <div key={month} className="flex items-center justify-between text-xs px-3 py-2 bg-white border border-zinc-100 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium text-zinc-700 w-20">{month}</span>
+                          <span className="text-zinc-400">{group.calls} rozmów</span>
+                          <span className="text-zinc-400">{Math.round(group.minutes)} min</span>
+                        </div>
+                        <span className="font-medium text-red-500">{fmtPLN(group.cost)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+
+      {/* ── Wlasne koszty / Cost items ── */}
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <button
+          onClick={() => setShowOwnCosts(!showOwnCosts)}
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-brand-50 transition"
+        >
+          <span className="flex items-center gap-2">
+            <span>📊 Koszty wlasne</span>
+            {unpaidItems.length > 0 && (
+              <span className="text-[10px] bg-red-100 text-red-600 rounded-full px-2 py-0.5 font-medium">
+                {unpaidItems.length} niezaplacone
+              </span>
+            )}
+          </span>
+          <span className="text-zinc-300">{showOwnCosts ? "▲" : "▼"}</span>
+        </button>
+        {showOwnCosts && (
+          <div className="px-5 pb-4 space-y-4">
+            {/* Summary */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-zinc-50 rounded-lg p-3">
+                <p className="text-xs text-zinc-400">Miesiecznie</p>
+                <p className="text-lg font-bold text-zinc-800">{fmtPLN(ownCostsSummary?.monthly_total || 0)}</p>
+              </div>
+              <div className="bg-zinc-50 rounded-lg p-3">
+                <p className="text-xs text-zinc-400">Niezaplacone</p>
+                <p className="text-lg font-bold text-red-500">{fmtPLN(ownCostsSummary?.unpaid_total || 0)}</p>
+              </div>
+              <div className="bg-zinc-50 rounded-lg p-3">
+                <p className="text-xs text-zinc-400">Pozycji</p>
+                <p className="text-lg font-bold text-zinc-800">{ownCostsSummary?.total_items || 0}</p>
+              </div>
+              <div className="bg-zinc-50 rounded-lg p-3">
+                <p className="text-xs text-zinc-400">Kategorii</p>
+                <p className="text-lg font-bold text-zinc-800">{ownCostsSummary ? Object.keys(ownCostsSummary.by_category).length : 0}</p>
+              </div>
+            </div>
+
+            {/* By category */}
+            {ownCostsSummary && Object.keys(ownCostsSummary.by_category).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(ownCostsSummary.by_category).map(([cat, info]) => (
+                  <div key={cat} className="bg-brand-50 rounded-lg px-3 py-1.5 text-xs">
+                    <span className="font-medium text-zinc-700 capitalize">{cat}</span>
+                    <span className="text-zinc-400 ml-2">{fmtPLN((info as any).monthly)}/mies</span>
+                    <span className="text-zinc-300 ml-1">· {(info as any).count} szt.</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Nabierajace platnosci (upcoming) */}
+            {upcomingItems.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                  Nabierajace platnosci ({upcomingItems.length})
+                </p>
+                <div className="space-y-1">
+                  {upcomingItems.slice(0, 10).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between text-xs px-3 py-2 bg-amber-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-zinc-700">{item.name}</span>
+                        <span className="text-zinc-400">{fmtPLN(item.amount)}</span>
+                        <span className="text-zinc-400">· {freqLabel(item.frequency)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-red-500">
+                          {item.due_date ? new Date(item.due_date + "T12:00:00").toLocaleDateString("pl-PL", { day: "numeric", month: "short" }) : "—"}
+                        </span>
+                        <button onClick={() => togglePaid(item.id, true)}
+                          className="text-[10px] text-green-600 hover:text-green-700 font-medium">
+                          Oplacono
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Lista kosztow */}
+            <div className="space-y-1">
+              {costItems.map((item) => {
+                const daysUntilDue = item.due_date
+                  ? Math.ceil((new Date(item.due_date + "T12:00:00").getTime() - Date.now()) / 86400000)
+                  : null;
+                return (
+                  <div key={item.id} className="flex items-center justify-between text-xs px-3 py-2 bg-white border border-zinc-100 rounded-lg hover:bg-zinc-50 group">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <input type="checkbox" checked={item.is_paid} onChange={() => togglePaid(item.id, !item.is_paid)}
+                        className="rounded border-zinc-300 text-brand-400 focus:ring-brand-200 shrink-0" />
+                      <div className="min-w-0">
+                        <p className={`font-medium truncate ${item.is_paid ? "text-zinc-400 line-through" : "text-zinc-700"}`}>
+                          {item.name}
+                        </p>
+                        <p className="text-zinc-400">
+                          <span className="capitalize">{item.category}</span>
+                          <span className="mx-1">·</span>
+                          {freqLabel(item.frequency)}
+                          {daysUntilDue !== null && !item.is_paid && (
+                            <>
+                              <span className="mx-1">·</span>
+                              <span className={daysUntilDue <= 7 ? "text-red-500 font-medium" : "text-zinc-400"}>
+                                {daysUntilDue <= 0 ? "termin!" : `${daysUntilDue} dni`}
+                              </span>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`font-medium ${item.is_paid ? "text-green-500" : "text-zinc-700"}`}>{fmtPLN(item.amount)}</span>
+                      {item.due_date && (
+                        <span className="text-zinc-400">{new Date(item.due_date + "T12:00:00").toLocaleDateString("pl-PL", { day: "numeric", month: "short" })}</span>
+                      )}
+                      <button onClick={() => deleteCostItem(item.id)}
+                        className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition">
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Add item button + form */}
+            {!showAddItem ? (
+              <button onClick={() => setShowAddItem(true)}
+                className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+                + Dodaj koszt
+              </button>
+            ) : (
+              <div className="bg-brand-50 rounded-xl p-4 space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    placeholder="Nazwa" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                  <input type="number" value={newItem.amount || ""} onChange={(e) => setNewItem({ ...newItem, amount: Number(e.target.value) })}
+                    placeholder="Kwota" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                  <select value={newItem.frequency} onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
+                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400">
+                    <option value="monthly">Miesieczny</option>
+                    <option value="quarterly">Kwartalny</option>
+                    <option value="yearly">Roczny</option>
+                    <option value="one-time">Jednorazowy</option>
+                    <option value="irregular">Nieregularny</option>
+                  </select>
+                  <input type="date" value={newItem.due_date} onChange={(e) => setNewItem({ ...newItem, due_date: e.target.value })}
+                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <select value={newItem.category} onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400">
+                    <option value="marketing">Marketing</option>
+                    <option value="server">Serwer / hosting</option>
+                    <option value="tools">Narzedzia</option>
+                    <option value="domain">Domena</option>
+                    <option value="api">API / keys</option>
+                    <option value="other">Inne</option>
+                  </select>
+                  <input value={newItem.notes} onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
+                    placeholder="Notatki" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => saveCostItem(newItem)} disabled={!newItem.name || !newItem.amount}
+                    className="px-4 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 disabled:opacity-50 transition">
+                    Dodaj
+                  </button>
+                  <button onClick={() => setShowAddItem(false)}
+                    className="px-4 py-1.5 text-xs font-medium bg-zinc-100 text-zinc-600 rounded-lg hover:bg-zinc-200 transition">
+                    Anuluj
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Tabela firm ── */}
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200 bg-white">
+                <th className="p-3 font-semibold">Firma</th>
+                <th className="p-3 font-semibold">Plan</th>
+                <th className="p-3 font-semibold">Rozmowy</th>
+                <th className="p-3 font-semibold">Minuty</th>
+                <th className="p-3 font-semibold">ElevenLabs</th>
+                <th className="p-3 font-semibold">Twilio</th>
+                <th className="p-3 font-semibold">OpenRouter</th>
+                <th className="p-3 font-semibold">SMS</th>
+                <th className="p-3 font-semibold">Koszt</th>
+                <th className="p-3 font-semibold">Przychod std</th>
+                <th className="p-3 font-semibold">Rabat</th>
+                <th className="p-3 font-semibold">Przychod</th>
+                <th className="p-3 font-semibold">Marza</th>
+                <th className="p-3 font-semibold">Marza %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={14} className="text-center py-8 text-zinc-400 text-xs">Ladowanie...</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={14} className="text-center py-8 text-zinc-400 text-xs">Brak danych</td></tr>
+              ) : (
+                filtered.map((b) => {
+                  const stdRevenue = b.is_centrala ? 0 : (PLAN_REVENUE[b.plan] ?? 0);
+                  const effectiveRevenue = b.customRevenue ?? b.revenue;
+                  const discountPct = stdRevenue > 0 && b.customRevenue !== null ? Math.round((1 - b.customRevenue / stdRevenue) * 100) : 0;
+                  const margin = effectiveRevenue - b.totalCost;
+                  const marginPctVal = effectiveRevenue > 0 ? (margin / effectiveRevenue) * 100 : 0;
+                  const marginColor = marginPctVal > 20 ? "text-green-600" : marginPctVal >= 0 ? "text-amber-600" : "text-red-500";
+                  const barColor = marginPctVal > 20 ? "bg-green-500" : marginPctVal >= 0 ? "bg-amber-500" : "bg-red-500";
+
+                  return (
+                    <tr key={b.id} className={`border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 transition ${b.is_centrala ? "bg-amber-50/50" : ""}`}>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-zinc-900">{b.name}</span>
+                          {b.is_centrala && <span className="text-[10px] bg-amber-100 text-amber-700 rounded-full px-1.5 py-0.5 font-medium">Centrala</span>}
+                          {b.plan === "elastic_0" && <span className="text-[10px] bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 font-medium">Pay-as-you-go</span>}
+                        </div>
+                        {b.calls === 0 && !b.is_centrala && b.plan !== "elastic_0" && <span className="text-[10px] text-zinc-400">(brak polaczen)</span>}
+                      </td>
+                      <td className="p-3 text-zinc-500 text-xs">{planLabels[b.plan] || b.plan}</td>
+                      <td className="p-3 text-zinc-700">{b.calls}</td>
+                      <td className="p-3 text-zinc-700">{b.minutes.toFixed(1)}</td>
+                      <td className="p-3 text-zinc-600">{fmtPLN(b.costElevenlabs)}</td>
+                      <td className="p-3 text-zinc-600">{fmtPLN(b.costTwilio)}</td>
+                      <td className="p-3 text-zinc-600">{fmtPLN(b.costOpenrouter)}</td>
+                      <td className="p-3 text-zinc-600">{fmtPLN(b.costSms)}</td>
+                      <td className="p-3 text-red-600 font-medium">{fmtPLN(b.totalCost)}</td>
+                      <td className="p-3 text-zinc-500">{fmtPLN(stdRevenue)}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-1.5">
+                          <input type="number" min={0} max={100} defaultValue={String(discountPct)}
+                            onChange={(e) => {
+                              const pct = Number(e.target.value);
+                              if (pct >= 0 && pct <= 100) handleDiscountChange(b.id, Math.round(stdRevenue * (1 - pct / 100) * 100) / 100);
+                            }}
+                            className="w-14 px-1.5 py-1 border border-zinc-200 rounded text-xs text-zinc-700 text-center focus:outline-none focus:border-brand-400"
+                            disabled={savingDiscount === b.id} />
+                          <span className="text-[10px] text-zinc-400">%</span>
+                        </div>
+                      </td>
+                      <td className={`p-3 font-medium ${b.customRevenue !== null ? "text-amber-600" : "text-brand-600"}`}>{fmtPLN(effectiveRevenue)}</td>
+                      <td className={`p-3 font-medium ${marginColor}`}>{margin >= 0 ? "+" : ""}{fmtPLN(margin)}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-2 bg-brand-50 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min(100, Math.max(0, marginPctVal))}%` }} />
+                          </div>
+                          <span className={`text-xs font-medium ${marginColor}`}>{marginPctVal.toFixed(1)}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Podsumowanie zyskow/strat ── */}
+      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <h3 className="text-sm font-semibold text-zinc-900 mb-4">📊 Podsumowanie finansowe</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod (klienci)</p>
+            <p className="text-lg font-bold text-brand-600">{fmtPLN(totalRevenue)}</p>
+          </div>
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug (klienci)</p>
+            <p className="text-lg font-bold text-red-500">{fmtPLN(clientCost)}</p>
+          </div>
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt centrali</p>
+            <p className="text-lg font-bold text-amber-600">{fmtPLN(centralaCost)}</p>
+          </div>
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszty wlasne</p>
+            <p className="text-lg font-bold text-amber-500">{fmtPLN(totalOwnCosts)}</p>
+          </div>
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Wynik (klienci)</p>
+            <p className={`text-lg font-bold ${totalRevenue - clientCost >= 0 ? "text-green-600" : "text-red-500"}`}>
+              {totalRevenue - clientCost >= 0 ? "+" : ""}{fmtPLN(totalRevenue - clientCost)}
+            </p>
+          </div>
+          <div className="bg-zinc-50 rounded-lg p-3">
+            <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Wynik calkowity</p>
+            <p className={`text-lg font-bold ${totalMargin >= 0 ? "text-green-600" : "text-red-500"}`}>
+              {totalMargin >= 0 ? "+" : ""}{fmtPLN(totalMargin)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Footer ── */}
+      <div className="bg-white rounded-xl border border-zinc-200 p-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <div className="flex items-center gap-4">
+          <span className="text-zinc-400">Wybrano: <strong className="text-zinc-700">{filtered.length}</strong> firm</span>
+          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-400">Uslugi: <strong className="text-red-600">{fmtPLN(totalCost)}</strong></span>
+          <span className="text-zinc-200">|</span>
+      <span className="text-zinc-400">Centrala: <strong className="text-amber-600">{fmtPLN(centralaCost)}</strong></span>
+      <span className="text-zinc-200">|</span>
+      <span className="text-zinc-400">Klienci: <strong className="text-red-500">{fmtPLN(clientCost)}</strong></span>
+      <span className="text-zinc-200">|</span>
+      <span className="text-zinc-400">Wlasne: <strong className="text-amber-600">{fmtPLN(totalOwnCosts)}</strong></span>
+          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-400">Lacznie: <strong className="text-red-700">{fmtPLN(totalAllCosts)}</strong></span>
+          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-400">Przychod: <strong className="text-brand-600">{fmtPLN(totalRevenue)}</strong></span>
+          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-400">Marza: <strong className={totalMargin >= 0 ? "text-green-600" : "text-red-500"}>{fmtPLN(totalMargin)}</strong></span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              if (!confirm("CZY NA PEWNO? To usunie WSZYSTKIE dane testowe: call_logs, rozmowy, SMS, notyfikacje, leady. Tej operacji NIE MOZNA cofnac. Kontynuowac?")) return;
+              if (!confirm("NAPRAWDE? Wszystkie statystyki zostana zresetowane do zera. To nie jest zabawa.")) return;
+              try {
+                const r = await fetch("/api/admin/reset-stats", { method: "POST" });
+                const d = await r.json();
+                alert(d.message || "OK");
+                if (r.ok) fetchData();
+              } catch { alert("Blad resetowania"); }
+            }}
+            className="text-[10px] px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 opacity-40 hover:opacity-100 transition"
+            title="Resetuj wszystkie statystyki (TESTY)"
+          >
+            🗑 Reset statystyk
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

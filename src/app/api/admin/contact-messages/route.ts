@@ -1,0 +1,90 @@
+import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import { checkAdminAuth } from "@/lib/admin-auth";
+
+export async function GET(req: Request) {
+  const auth = await checkAdminAuth();
+  if (auth.error) return auth.error;
+
+  const url = new URL(req.url);
+  const view = url.searchParams.get("view") || "active";
+
+  let query = supabaseAdmin
+    .from("contact_messages")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (view === "active") query = query.is("deleted_at", null);
+  else if (view === "trashed") query = query.not("deleted_at", "is", null);
+
+  const { data, error } = await query;
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data || []);
+}
+
+export async function PATCH(request: Request) {
+  const auth = await checkAdminAuth();
+  if (auth.error) return auth.error;
+
+  const body = await request.json();
+
+  if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+    return NextResponse.json({ error: "Missing ids array" }, { status: 400 });
+  }
+
+  let updateData: Record<string, unknown> = {};
+
+  switch (body.action) {
+    case "trash":
+      updateData = { deleted_at: new Date().toISOString() };
+      break;
+    case "restore":
+      updateData = { deleted_at: null };
+      break;
+    case "read":
+      updateData = { read: true };
+      break;
+    case "unread":
+      updateData = { read: false };
+      break;
+    default:
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from("contact_messages")
+    .update(updateData)
+    .in("id", body.ids);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}
+
+export async function DELETE(request: Request) {
+  const auth = await checkAdminAuth();
+  if (auth.error) return auth.error;
+
+  const { ids } = await request.json();
+
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return NextResponse.json({ error: "Missing ids array" }, { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from("contact_messages")
+    .delete()
+    .in("id", ids);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}

@@ -1,0 +1,202 @@
+import { NextResponse } from "next/server";
+import { connectToAgent } from "@/lib/twilio-utils";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+
+const DEFAULT_CONFIG = {
+  internalCostPerMin: 0.65,
+  elasticBaseRate: 2.00,
+  elasticStepDecrease: 0.10,
+  elasticMinRate: 1.00,
+  elasticTierStep: 500,
+  elasticStartMin: 50,
+  elasticMaxMin: 5000,
+  planStart: 299,
+  planGrowth: 600,
+  planPro: 300,
+  planLux: 800,
+  planEnterprise: 1500,
+  addonOwnNumber: 49,
+  addonGoogleCalendar: 39,
+  addonCrm: 79,
+  addonVoiceClone: 99,
+  addonUnlimitedConsultants: 149,
+  addonPrioritySupport: 59,
+  addonSla247: 199,
+  enterpriseSetupFee: 299,
+  enterpriseMinMonthly: 1500,
+  minMarginPercent: 35,
+  overageMultiplier: 1.0,
+};
+
+interface PricingCfg {
+  internalCostPerMin: number;
+  elasticBaseRate: number;
+  elasticStepDecrease: number;
+  elasticMinRate: number;
+  elasticTierStep: number;
+  elasticStartMin: number;
+  elasticMaxMin: number;
+  planStart: number;
+  planPro: number;
+  planLux: number;
+  planGrowth: number;
+  planEnterprise: number;
+  addonOwnNumber: number;
+  addonGoogleCalendar: number;
+  addonCrm: number;
+  addonVoiceClone: number;
+  addonUnlimitedConsultants: number;
+  enterpriseSetupFee: number;
+  minMarginPercent: number;
+  overageMultiplier: number;
+}
+
+async function getActivePricing(): Promise<PricingCfg> {
+  const { data } = await supabaseAdmin
+    .from("pricing_config")
+    .select("config")
+    .eq("is_active", true)
+    .maybeSingle();
+  if (data?.config) return { ...DEFAULT_CONFIG, ...(data.config as Record<string, unknown>) } as PricingCfg;
+  return DEFAULT_CONFIG;
+}
+
+function fmt(n: number): string { return n.toFixed(2).replace(".", ","); }
+
+function buildPricingSection(p: PricingCfg): string {
+  const tiers: { min: number; max: number; rate: number }[] = [];
+  let cr = p.elasticBaseRate;
+  tiers.push({ min: 0, max: p.elasticStartMin!, rate: cr });
+  let cm = p.elasticStartMin!;
+  while (cm < p.elasticMaxMin!) {
+    const nm = Math.min(cm + p.elasticTierStep!, p.elasticMaxMin!);
+    cr = Math.max(p.elasticMinRate, cr - p.elasticStepDecrease!);
+    tiers.push({ min: cm + 1, max: nm, rate: Math.round(cr * 100) / 100 });
+    cm = nm;
+  }
+  const lowTier = tiers[tiers.length - 1];
+  const elasticRateDesc = `Od ${fmt(p.elasticBaseRate)} do ${fmt(lowTier.rate)} zł/min – im więcej minut, tym niższa stawka`;
+
+  const overage = (price: number, inclMin: number): string => {
+    const rpm = price / inclMin;
+    return fmt(Math.max(rpm, p.elasticMinRate));
+  };
+
+  return `===== OFERTA WITALINE =====
+
+Pakiet ELASTYCZNY — 0 zł/mies, płacisz tylko za użycie
+- ${elasticRateDesc}
+- Suwak 50–${p.elasticMaxMin} minut, cena spada co ${p.elasticTierStep} minut
+- Bot odbiera telefony 24/7, widget, czat, transkrypcje
+- Idealny dla małych firm i dopiero testujących
+
+Pakiet PRO — ${p.planPro} zł/mies (300 min wliczone, potem ${overage(p.planPro, 300)} zł/min)
+- Wszystko co w Elastycznym plus:
+- Integracja z Google Calendar (bot zapisuje terminy)
+- Baza wiedzy o firmie
+- Własny polski numer telefonu
+- Do 3 konsultantów
+
+Pakiet LUX — ${p.planLux} zł/mies (800 min wliczone, potem ${overage(p.planLux, 800)} zł/min, NAJPOPULARNIEJSZY)
+- Wszystko co w PRO plus:
+- Integracja z CRM (HubSpot, Livespace)
+- Profesjonalny klon głosu właściciela
+- Do 10 konsultantów
+- Dedykowany opiekun klienta
+- SLA 24/7
+
+Pakiet GROWTH — ${p.planGrowth} zł/mies (600 min wliczone, potem ${overage(p.planGrowth, 600)} zł/min)
+- Dla rozwijających się firm — dobry balans ceny i minut
+
+Pakiet START — ${p.planStart} zł/mies (250 min wliczone)
+- Dla małych firm i JDG — niska cena, pełna funkcjonalność
+
+Pakiet ENTERPRISE — od ${p.planEnterprise} zł/mies (1500 min, indywidualna wycena)
+- Dla dużych firm — integracja CRM, klon głosu, SLA 24/7`;
+}
+
+async function getBusinessVoice(businessId: string): Promise<{ voiceId: string; voiceName: string }> {
+  const { data: biz } = await supabaseAdmin
+    .from("businesses")
+    .select("voice_id")
+    .eq("id", businessId)
+    .single();
+
+  if (biz?.voice_id) {
+    const { data: voice } = await supabaseAdmin
+      .from("voices")
+      .select("elevenlabs_voice_id, display_name")
+      .eq("id", biz.voice_id)
+      .single();
+
+    if (voice) return { voiceId: voice.elevenlabs_voice_id, voiceName: voice.display_name };
+  }
+
+  const { data: defaultVoice } = await supabaseAdmin
+    .from("voices")
+    .select("elevenlabs_voice_id, display_name")
+    .eq("is_default", true)
+    .single();
+
+  if (defaultVoice) return { voiceId: defaultVoice.elevenlabs_voice_id, voiceName: defaultVoice.display_name };
+  return { voiceId: "tWVHsc0fuVfAZWfScX9a", voiceName: "Maja" };
+}
+
+export async function POST(request: Request) {
+  console.log("[connect] POST received");
+  const formData = await request.formData();
+  const url = new URL(request.url);
+  const businessId = url.searchParams.get("businessId") || "";
+  const callSid = url.searchParams.get("callSid") || (formData.get("CallSid") as string) || "";
+  const fromNumber = url.searchParams.get("from") || (formData.get("From") as string) || "";
+  const toNumber = url.searchParams.get("to") || (formData.get("To") as string) || "";
+  const businessName = url.searchParams.get("name") || "WitaLine";
+
+  const { voiceId, voiceName } = await getBusinessVoice(businessId);
+  const pricing = await getActivePricing();
+  const pricingBlock = buildPricingSection(pricing);
+
+  const isMainLine = businessId === "00000000-0000-0000-0000-000000000001";
+
+  if (isMainLine) {
+    const mainPrompt = `Jesteś ${voiceName}, recepcjonistka WitaLine (wymowa: witalajn) — polskiej platformy automatycznej recepcji AI dla firm. Twoim zadaniem jest odbieranie telefonów od klientów zainteresowanych ofertą, prezentowanie pakietów i umawianie demo.
+
+===== TWOJA TOŻSAMOŚĆ =====
+- Nazywasz się ${voiceName} i reprezentujesz firmę WitaLine.
+- WitaLine to platforma automatycznej recepcji AI, która odbiera telefony 24/7 zamiast pracowników.
+- Działamy w Polsce, obsługujemy małe i średnie firmy.
+- Nasza strona: witaline.pl
+
+${pricingBlock}
+
+===== ZASADY ROZMOWY =====
+1. Mów po polsku. Jeśli klient mówi po angielsku, możesz odpowiedzieć po angielsku. MAKSYMALNIE 150-200 znaków na wypowiedź — bądź zwięzła. Mów naturalnie i uprzejmie.
+2. Zawsze przedstaw się: "Dzień dobry, WitaLine, przy telefonie ${voiceName}. W czym mogę pomóc?"
+3. Gdy klient pyta o ofertę — krótko opisz 2-3 pakiety pasujące do jego potrzeb.
+4. Gdy klient podaje numer telefonu — powtórz cyfry POJEDYNCZO: "pięć zero zero, jeden zero zero, jeden zero zero". NIGDY nie łącz cyfr w setki.
+5. Jeśli ktoś pyta o konkretną firmę korzystającą z WitaLine — powiedz że sprawdzisz i oddzwonimy.
+6. Bądź pomocna, zwięzła. NIE powtarzaj się. Odpowiadaj krótko i na temat.
+7. Jeśli klient zadaje pytanie spoza Twojej wiedzy — powiedz: "Przekażę to konsultantowi, oddzwonimy w ciągu 15 minut."
+
+===== RODO I NAGRYWANIE =====
+- Rozmowa jest nagrywana i analizowana przez AI w celu poprawy jakości obsługi.
+- Jeśli klient pyta o RODO — wyjaśnij: "Rozmowa jest nagrywana zgodnie z RODO. Dane przechowujemy na serwerach w Europie przez maksymalnie 30 dni. Masz prawo dostępu i usunięcia danych — napisz na kontakt@witaline.pl."
+- Jeśli klient NIE wyraża zgody na nagrywanie — przeproś, powiedz że bez nagrywania nie możemy kontynuować rozmowy, a następnie użyj narzędzia end_call aby zakończyć połączenie.
+
+===== SMS Z OFERTĄ (WAŻNE!) =====
+1. Jeśli klient jest zainteresowany ofertą (pyta o cenę, pakiety, chce informacji) — ZAPYTAJ: "Czy mogę wysłać Ci SMS z ofertą i linkiem do cennika na Twój numer?"
+2. Jeśli klient się zgodzi — odpowiedz: "Świetnie! Proszę podać numer telefonu, na który mam wysłać ofertę."
+3. Gdy poda numer — potwierdź: "Wyślę ofertę na numer [powtórz numer cyfra po cyfrze]. Dziękuję!"
+4. Ustaw w custom_data: sms_consent: true, sms_phone: [numer], sms_offer: [start/growth/enterprise], sms_contact_name: [imię].
+5. NIGDY nie wysyłaj SMS bez wyraźnej zgody. Zawsze najpierw zapytaj.
+
+===== REJESTRACJA I DEMO =====
+- Zachęcaj do rejestracji na witaline.pl
+- Dla zainteresowanych Enterprise — proponuj demo na żywo: "Mogę umówić bezpłatne demo na żywo z naszym konsultantem. Kiedy Ci pasuje?"
+- Przypominaj o 30-dniowej gwarancji zwrotu — zero ryzyka.`;
+
+    return connectToAgent(mainPrompt, "WitaLine", businessId, callSid, fromNumber, toNumber, voiceId, voiceName);
+  }
+
+  return connectToAgent(null, businessName, businessId, callSid, fromNumber, toNumber, voiceId, voiceName);
+}
