@@ -33,7 +33,8 @@ export function getPlanConfig(planKey: string) {
     pricePerMonth: price,
     minutes: plan === "START" ? 250 : plan === "PRO" ? 300 : plan === "GROWTH" ? 600 : plan === "LUX" ? 800 : 1500,
     features: [],
-    monthlyVoiceMinutes: plan === "START" ? 250 : plan === "PRO" ? 300 : plan === "GROWTH" ? 600 : plan === "LUX" ? 800 : 1500
+    monthlyVoiceMinutes: plan === "START" ? 250 : plan === "PRO" ? 300 : plan === "GROWTH" ? 600 : plan === "LUX" ? 800 : 1500,
+    monthlyTokens: plan === "START" ? 250000 : plan === "PRO" ? 300000 : plan === "GROWTH" ? 600000 : plan === "LUX" ? 800000 : 1500000
   };
 }
 
