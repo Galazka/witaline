@@ -38,6 +38,12 @@ export function getPlanConfig(planKey: string) {
   };
 }
 
+export const INTERNAL_COST_PER_MIN = 0.65;
+
+export function calculateCost(minutes: number): number {
+  return minutes * getElasticRate(minutes);
+}
+
 export function getElasticRate(minutes: number): number {
   for (const tier of ELASTIC_TIERS) {
     if (minutes >= tier.from && minutes <= tier.to) return tier.rate;
