@@ -40,8 +40,11 @@ export function getPlanConfig(planKey: string) {
 
 export const INTERNAL_COST_PER_MIN = 0.65;
 
-export function calculateCost(minutes: number): number {
-  return minutes * getElasticRate(minutes);
+export function calculateCost(durationSeconds: number, planKey: string): number {
+  const minutes = durationSeconds / 60;
+  if (planKey.startsWith("elastic")) return minutes * getElasticRate(minutes);
+  const config = getPlanConfig(planKey);
+  return config ? minutes * (config.price / config.minutes) : minutes * ELASTIC_TIERS[0].rate;
 }
 
 export function getElasticRate(minutes: number): number {
