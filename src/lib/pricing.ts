@@ -25,7 +25,9 @@ export const ELASTIC_TIERS = [
 export function getPlanConfig(planKey: string) {
   const normalized = planKey.toUpperCase().replace(/_?(\d+).*/, '').trim() as keyof typeof PLANS;
   const plan = Object.keys(PLANS).find(k => k === normalized) as keyof typeof PLANS | undefined;
-  if (!plan || !PLANS[plan]) return null;
+  if (!plan || !PLANS[plan]) {
+    return { name: "Custom", price: 0, pricePerMonth: 0, minutes: 0, features: [], monthlyVoiceMinutes: 0, monthlyTokens: 0, maxConsultants: 3 };
+  }
   const price = PLANS[plan];
   return {
     name: PLAN_NAMES[plan],
@@ -34,7 +36,8 @@ export function getPlanConfig(planKey: string) {
     minutes: plan === "START" ? 250 : plan === "PRO" ? 300 : plan === "GROWTH" ? 600 : plan === "LUX" ? 800 : 1500,
     features: [],
     monthlyVoiceMinutes: plan === "START" ? 250 : plan === "PRO" ? 300 : plan === "GROWTH" ? 600 : plan === "LUX" ? 800 : 1500,
-    monthlyTokens: plan === "START" ? 250000 : plan === "PRO" ? 300000 : plan === "GROWTH" ? 600000 : plan === "LUX" ? 800000 : 1500000
+    monthlyTokens: plan === "START" ? 250000 : plan === "PRO" ? 300000 : plan === "GROWTH" ? 600000 : plan === "LUX" ? 800000 : 1500000,
+    maxConsultants: plan === "START" ? 1 : plan === "PRO" ? 3 : plan === "GROWTH" ? 5 : plan === "LUX" ? 10 : 99
   };
 }
 
