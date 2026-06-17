@@ -84,7 +84,7 @@ async function main() {
     process.exit(1);
   }
 
-  const stripe = new Stripe(secretKey, { apiVersion: "2026-05-27.dahlia" });
+  const stripe = new Stripe(secretKey, { apiVersion: "2025-02-24.acacia" });
 
   console.log("Tworzenie produktów i cen w Stripe...\n");
 
