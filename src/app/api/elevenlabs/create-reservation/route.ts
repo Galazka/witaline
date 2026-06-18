@@ -31,7 +31,8 @@ export async function POST(request: Request) {
     });
 
     if (!result.ok) {
-      return NextResponse.json({ ok: false, error: result.error }, { status: 409 });
+      const err = (result as { ok: false; error: string }).error;
+      return NextResponse.json({ ok: false, error: err }, { status: 409 });
     }
 
     await supabaseAdmin.from("notifications").insert({

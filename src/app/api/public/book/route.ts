@@ -21,8 +21,9 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    const status = result.error.includes("zajęty") ? 409 : 400;
-    return NextResponse.json({ error: result.error }, { status });
+    const err = (result as { ok: false; error: string }).error;
+    const status = err.includes("zajęty") ? 409 : 400;
+    return NextResponse.json({ error: err }, { status });
   }
 
   await addNotification({

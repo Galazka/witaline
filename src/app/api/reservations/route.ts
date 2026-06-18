@@ -70,7 +70,8 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 409 });
+    const err = (result as { ok: false; error: string }).error;
+    return NextResponse.json({ error: err }, { status: 409 });
   }
 
   return NextResponse.json(result.reservation, { status: 201 });

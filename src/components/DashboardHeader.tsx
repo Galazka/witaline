@@ -36,7 +36,7 @@ export default function DashboardHeader({
   tokensUsed: tokensUsedProp,
 }: Props) {
   const config = getPlanConfig(plan);
-  const minsPct = getUsedPercentage(minutesUsed, plan);
+  const minsPct = getUsedPercentage(minutesUsed, config.monthlyVoiceMinutes);
   const tokensUsed = tokensUsedProp ?? Math.ceil(minutesUsed * 1000);
   const tokensPct = Math.min(100, Math.round((tokensUsed / config.monthlyTokens) * 100));
   const remainingMinutes = Math.max(0, config.monthlyVoiceMinutes - minutesUsed);

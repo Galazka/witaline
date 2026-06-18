@@ -37,7 +37,10 @@ export async function POST(request: Request) {
   }
 
   const result = await addMember(businessId, email, role, user.id);
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (!result.ok) {
+    const err = (result as { ok: false; error: string }).error;
+    return NextResponse.json({ error: err }, { status: 400 });
+  }
 
   const { ip, userAgent } = getRequestInfo(request);
   await logAudit({
@@ -70,7 +73,10 @@ export async function PATCH(request: Request) {
   }
 
   const result = await updateMemberRole(businessId, userId, role);
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (!result.ok) {
+    const err = (result as { ok: false; error: string }).error;
+    return NextResponse.json({ error: err }, { status: 400 });
+  }
 
   const { ip, userAgent } = getRequestInfo(request);
   await logAudit({
@@ -110,7 +116,10 @@ export async function DELETE(request: Request) {
   }
 
   const result = await removeMember(businessId, userId);
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (!result.ok) {
+    const err = (result as { ok: false; error: string }).error;
+    return NextResponse.json({ error: err }, { status: 400 });
+  }
 
   const { ip, userAgent } = getRequestInfo(request);
   await logAudit({

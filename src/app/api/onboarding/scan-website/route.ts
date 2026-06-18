@@ -189,7 +189,7 @@ function extractContact(html: string): {
 
   // Emails
   const emailRe = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
-  const emailMatches = text.match(emailRe) || [];
+  const emailMatches = (text.match(emailRe) || []) as string[];
   const emails = [...new Set(emailMatches.filter(e => !e.endsWith(".png") && !e.endsWith(".jpg")))];
 
   // Addresses (Polish patterns)

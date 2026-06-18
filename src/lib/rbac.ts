@@ -56,8 +56,9 @@ export async function addMember(
   invitedBy: string
 ): Promise<{ ok: boolean; error?: string; inviteToken?: string }> {
   // Find user by email
-  const { data: users } = await supabaseAdmin.auth.admin.listUsers();
-  const user = users?.users?.find(u => u.email === email);
+  const { data: usersResult } = await supabaseAdmin.auth.admin.listUsers();
+  const users = usersResult?.users as any[] | undefined;
+  const user = users?.find(u => u.email === email);
 
   // Check if already a member (by email or user_id)
   const { data: existing } = await supabaseAdmin

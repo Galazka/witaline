@@ -59,7 +59,7 @@ function registerCall(fromNumber: string, toNumber: string, businessId?: string,
   });
 }
 
-export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string): Promise<Response> {
+export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfiguracji. Prosimy spróbować później.</Say><Hangup/>`);
   try {

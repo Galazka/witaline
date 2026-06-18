@@ -67,7 +67,7 @@ export async function getBestDiscount(
   couponCode?: string
 ): Promise<DiscountResult> {
   const { getPlanConfig } = await import("@/lib/pricing");
-  const originalPrice = getPlanConfig(plan).pricePLN;
+  const originalPrice = getPlanConfig(plan).price;
 
   // Check auto-discount rules first
   const now = new Date().toISOString();

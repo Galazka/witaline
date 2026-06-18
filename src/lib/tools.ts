@@ -147,7 +147,8 @@ export const toolHandlers: Record<string, ToolHandler> = {
     });
 
     if (!result.ok) {
-      return result.error;
+      const err = (result as { ok: false; error: string }).error;
+      return err;
     }
 
     return JSON.stringify({

@@ -88,7 +88,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/coupons/validate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: couponCode, plan: selectedPlan }) });
       const data = await res.json();
       if (res.ok && data.valid) {
-        const original = plans[selectedPlan as keyof typeof plans].pricePLN;
+        const original = plans[selectedPlan as keyof typeof plans].price;
         let discounted = original;
         if (data.coupon.discount_percent) discounted = Math.round(original * (1 - data.coupon.discount_percent / 100) * 100) / 100;
         else if (data.coupon.discount_amount) discounted = Math.max(0, Math.round((original - data.coupon.discount_amount) * 100) / 100);

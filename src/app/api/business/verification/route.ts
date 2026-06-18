@@ -55,7 +55,10 @@ export async function POST(request: Request) {
   }
 
   const result = await submitVerification(businessId, user.id, { nip, krs, domain });
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (!result.ok) {
+    const err = (result as { ok: false; error: string }).error;
+    return NextResponse.json({ error: err }, { status: 400 });
+  }
 
   return NextResponse.json({ ok: true, status: result.status });
 }
@@ -76,7 +79,10 @@ export async function PATCH(request: Request) {
 
   const { setVerificationStatus } = await import("@/lib/verification");
   const result = await setVerificationStatus(businessId, user.id, status);
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (!result.ok) {
+    const err = (result as { ok: false; error: string }).error;
+    return NextResponse.json({ error: err }, { status: 400 });
+  }
 
   return NextResponse.json({ ok: true, status: result.status });
 }

@@ -56,7 +56,7 @@ export async function GET(request: Request) {
   // Get user emails
   const userIds = [...new Set((logs || []).map(l => l.user_id))];
   let userEmails: Record<string, string> = {};
-  for (const uid of userIds) {
+  for (const uid of userIds as string[]) {
     const { data: userData } = await supabaseAdmin.auth.admin.getUserById(uid);
     if (userData?.user?.email) userEmails[uid] = userData.user.email;
   }

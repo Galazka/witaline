@@ -139,7 +139,7 @@ export async function GET(request: Request) {
 
   // ── Top callers ──
   const topCallers = Object.entries(
-    (logs || []).reduce<Record<string, number>>((acc, l) => {
+    ((logs || []) as any[]).reduce<Record<string, number>>((acc, l) => {
       const num = l.from_number || "unknown";
       acc[num] = (acc[num] || 0) + 1;
       return acc;
