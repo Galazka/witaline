@@ -24,10 +24,12 @@ export async function POST(request: Request) {
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
-  const pending = getPendingTransfer(callSid);
+  // Szukaj po businessId (MCP handler zapisuje pod bizId), potem po callSid
+  let pending = getPendingTransfer(businessId) || getPendingTransfer(callSid);
 
   if (pending) {
     console.log("[transfer-router] pending transfer found →", pending.targetNumber);
+    deletePendingTransfer(businessId);
     deletePendingTransfer(callSid);
 
     const { data: consultants } = await supabaseAdmin
