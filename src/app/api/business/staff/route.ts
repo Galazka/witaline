@@ -77,8 +77,12 @@ export async function POST(request: Request) {
   const isOwner = await isBusinessOwnerOrSuperAdmin(user.id, user.email || "", businessId);
   if (!isOwner) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { data: invitedUser } = await supabaseAdmin.auth.admin.getUserByEmail(email);
-  if (!invitedUser?.user) {
+  const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+  if (usersError || !users?.users) {
+    return NextResponse.json({ error: "Failed to lookup user" }, { status: 500 });
+  }
+  const invitedUser = users.users.find(u => u.email === email);
+  if (!invitedUser) {
     return NextResponse.json({ error: "User not found. They must register first." }, { status: 404 });
   }
 
@@ -86,7 +90,7 @@ export async function POST(request: Request) {
     .from("business_staff")
     .select("id")
     .eq("business_id", businessId)
-    .eq("user_id", invitedUser.user.id)
+    .eq("user_id", invitedUser.id)
     .maybeSingle();
 
   if (existing) {
