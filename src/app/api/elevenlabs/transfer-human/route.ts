@@ -38,39 +38,59 @@ async function resolveTargetNumber(businessId: string): Promise<{ number: string
   };
 }
 
-/** Szuka aktywnego połączenia Twilio na wiele sposobów */
+/** Szuka aktywnego połączenia Twilio — najpierw po numerze Twilio, potem po dzwoniącym */
 async function findCallSid(fromNumber: string, toNumber: string, businessId: string): Promise<string | null> {
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
+  const ourNumber = process.env.TWILIO_PHONE_NUMBER || "+48732125752";
   if (!sid || !token) return null;
   const auth = Buffer.from(`${sid}:${token}`).toString("base64");
 
-  // Strategie wyszukiwania
-  const searches = [
-    // 1. Po From i To — dokładne dopasowanie (jak w register-call)
-    { From: fromNumber, To: toNumber },
-    // 2. Bez +
-    { From: fromNumber.replace(/^\+/, ""), To: toNumber.replace(/^\+/, "") },
-    // 3. Tylko cyfry
-    { From: fromNumber.replace(/\D/g, ""), To: toNumber.replace(/\D/g, "") },
-  ];
+  // 1. Szukaj po naszym numerze (To) — to najpewniejsze
+  const toVariants = [ourNumber, ourNumber.replace(/^\+/, ""), ourNumber.replace(/\D/g, "")];
+  if (toNumber) toVariants.push(toNumber, toNumber.replace(/^\+/, ""), toNumber.replace(/\D/g, ""));
 
   for (const status of ["in-progress", "ringing", "queued"]) {
-    for (const params of searches) {
-      const sp = new URLSearchParams({ ...params, Status: status, PageSize: "1" });
+    for (const to of [...new Set(toVariants)]) {
+      if (!to) continue;
       try {
+        const sp = new URLSearchParams({ To: to, Status: status, PageSize: "5" });
         const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Calls.json?${sp}`, {
           headers: { Authorization: `Basic ${auth}` },
         });
         if (res.ok) {
           const data = await res.json();
-          if (data?.calls?.[0]?.sid) return data.calls[0].sid;
+          if (data?.calls?.length) {
+            // Weź najnowsze połączenie
+            return data.calls.sort((a: any, b: any) => 
+              new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
+            )[0].sid;
+          }
         }
       } catch { /* ignore */ }
     }
   }
 
-  // 4. Ostatnia deska: szukaj po businessId w konwersacjach (jeśli mamy)
+  // 2. Szukaj po dzwoniącym (w różnych formatach)
+  if (fromNumber) {
+    const fromVariants = [fromNumber, fromNumber.replace(/^\+/, ""), fromNumber.replace(/\D/g, "")];
+    for (const status of ["in-progress", "ringing", "queued"]) {
+      for (const f of [...new Set(fromVariants)]) {
+        if (!f) continue;
+        try {
+          const sp = new URLSearchParams({ From: f, Status: status, PageSize: "1" });
+          const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Calls.json?${sp}`, {
+            headers: { Authorization: `Basic ${auth}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.calls?.[0]?.sid) return data.calls[0].sid;
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
+
   console.log("[transfer-human] findCallSid: not found for", fromNumber, toNumber, businessId);
   return null;
 }
