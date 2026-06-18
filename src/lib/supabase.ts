@@ -8,8 +8,7 @@ const stub = new Proxy({} as any, {
 
 export function createClient() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    if (typeof window === "undefined") return stub;
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    return stub;
   }
   if (!_client) {
     _client = createBrowserClient(
