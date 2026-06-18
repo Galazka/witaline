@@ -53,20 +53,8 @@ export async function POST(request: Request) {
     `);
   }
 
-  // Żaden konsultant nie odebrał — zapytaj czy zostawić wiadomość
-  // Zapisz też prośbę o callback
-  await supabaseAdmin.from("notifications").insert({
-    business_id: businessId,
-    type: "call",
-    title: "Konsultant nie odebrał - klient czekał",
-    message: `Klient ${from || "nieznany"} czeka\u0142 na konsultanta, ale nikt nie odebra\u0142.`,
-  }).maybeSingle();
-
-  return twiml(`
-    <Gather numDigits="1" timeout="5" method="POST" action="/api/twilio/voicemail?businessId=${encodeURIComponent(businessId)}&amp;from=${encodeURIComponent(from)}">
-      <Say language="pl-PL">Przepraszamy, \u017caden z konsultant\u00f3w nie mo\u017ce teraz odebra\u0107. Je\u015bli chcesz pozostawi\u0107 wiadomo\u015b\u0107, naci\u015bnij 1. Aby zako\u0144czy\u0107 rozmow\u0119, naci\u015bnij 2.</Say>
-    </Gather>
-    <Say language="pl-PL">Nie otrzymali\u015bmy odpowiedzi. Dzi\u0119kujemy za rozmow\u0119, oddzwonimy.</Say>
-    <Hangup/>
-  `);
+  // Żaden konsultant nie odebrał — Maja wraca do rozmowy (nowy Stream)
+  const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
+  const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
+  return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
 }
