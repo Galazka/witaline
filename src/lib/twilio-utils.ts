@@ -64,8 +64,14 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfiguracji. Prosimy spróbować później.</Say><Hangup/>`);
   try {
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
-    const match = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
-    if (match) return new NextResponse(xml, { status: 200, headers: { "Content-Type": "application/xml" } });
+    const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
+    if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
+    // Inject a <Redirect> after </Connect> so when the Stream ends naturally,
+    // Twilio follows the redirect and we can check for a pending transfer.
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+    const redirectUrl = `${baseUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
+    const wrapper = xml.replace("</Connect>", `</Connect><Redirect method="POST">${escapeXml(redirectUrl)}</Redirect>`);
+    return new NextResponse(wrapper, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) { console.error("[connectToAgent] register-call failed:", err instanceof Error ? err.message : String(err)); }
   return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z połączeniem. Proszę spróbować później.</Say><Hangup/>`);
 }
