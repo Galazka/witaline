@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm ls typescript 2>/dev/null || npm i --no-save typescript@^6.0.3 @types/react@^19.2.17; next build",
     "start": "next start",
     "lint": "next lint"
   },
