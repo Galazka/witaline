@@ -21,8 +21,6 @@ export async function POST(request: Request) {
   const url = new URL(request.url);
   const callSid = url.searchParams.get("callSid") || "";
   const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
-  const fromNumber = url.searchParams.get("fromNumber") || "";
-  const toNumber = url.searchParams.get("toNumber") || "";
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
@@ -38,29 +36,18 @@ export async function POST(request: Request) {
       .eq("business_id", pending.businessId)
       .order("sort_order", { ascending: true });
 
-    const callerId = pending.callerId || toNumber;
+    const callerId = pending.callerId || process.env.TWILIO_PHONE_NUMBER || "";
     const safeCallerId = escapeXml(callerId);
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
-    const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${pending.businessId}&idx=1`;
 
-    if (consultants && consultants.length > 0) {
-      return twiml(`
-        <Say language="pl-PL">Prosz\u0119 czeka\u0107, \u0142\u0105cz\u0119 z konsultantem.</Say>
-        <Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
-          <Number>${escapeXml(consultants[0].phone)}</Number>
-        </Dial>
-        <Say language="pl-PL">Przepraszamy, \u017caden z konsultant\u00f3w nie odebra\u0142. Prosz\u0119 zostawi\u0107 wiadomo\u015b\u0107 lub spr\u00f3bowa\u0107 p\u00f3\u017aniej.</Say>
-        <Hangup/>
-      `);
-    }
+    const consultantPhone = (consultants && consultants.length > 0) ? consultants[0].phone : pending.targetNumber;
+    const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&idx=${consultants?.length ? 1 : 0}`;
 
+    // Bez Say — Maja już powiedziała "przekazuję" zanim Stream się skończył
     return twiml(`
-      <Say language="pl-PL">Prosz\u0119 czeka\u0107, \u0142\u0105cz\u0119 z konsultantem.</Say>
       <Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
-        <Number>${escapeXml(pending.targetNumber)}</Number>
+        <Number>${escapeXml(consultantPhone)}</Number>
       </Dial>
-      <Say language="pl-PL">Przepraszamy, konsultant nie odebra\u0142. Oddzwonimy.</Say>
-      <Hangup/>
     `);
   }
 

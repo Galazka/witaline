@@ -24,6 +24,7 @@ export async function POST(request: Request) {
 
   console.log("[human-handoff/next] status:", dialCallStatus || "unknown", "from:", from, "to:", to);
 
+  // Jeśli ktoś odebrał — koniec
   if (dialCallStatus === "completed") {
     return twiml("<Hangup/>");
   }
@@ -38,20 +39,34 @@ export async function POST(request: Request) {
     .eq("business_id", businessId)
     .order("sort_order", { ascending: true });
 
-  if (!consultants || idx >= consultants.length) {
-    return twiml(`<Say language="pl-PL">Przepraszamy, \u017caden z konsultant\u00f3w nie odebra\u0142. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`);
+  if (consultants && idx < consultants.length) {
+    // Spróbuj kolejnego konsultanta
+    const nextConsultant = consultants[idx];
+    const callerId = to;
+    const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
+    const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
+
+    return twiml(`
+      <Dial callerId="${escapeXml(callerId)}" timeout="20" action="${escapeXml(actionUrl)}" method="POST">
+        <Number>${escapeXml(nextConsultant.phone)}</Number>
+      </Dial>
+    `);
   }
 
-  const nextConsultant = consultants[idx];
-  const callerId = to;
-  const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
-  const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
+  // Żaden konsultant nie odebrał — zapytaj czy zostawić wiadomość
+  // Zapisz też prośbę o callback
+  await supabaseAdmin.from("notifications").insert({
+    business_id: businessId,
+    type: "call",
+    title: "Konsultant nie odebrał - klient czekał",
+    message: `Klient ${from || "nieznany"} czeka\u0142 na konsultanta, ale nikt nie odebra\u0142.`,
+  }).maybeSingle();
 
   return twiml(`
-    <Dial callerId="${escapeXml(callerId)}" timeout="20" action="${escapeXml(actionUrl)}" method="POST">
-      <Number>${escapeXml(nextConsultant.phone)}</Number>
-    </Dial>
-    <Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say>
+    <Gather numDigits="1" timeout="5" method="POST" action="/api/twilio/voicemail?businessId=${encodeURIComponent(businessId)}&amp;from=${encodeURIComponent(from)}">
+      <Say language="pl-PL">Przepraszamy, \u017caden z konsultant\u00f3w nie mo\u017ce teraz odebra\u0107. Je\u015bli chcesz pozostawi\u0107 wiadomo\u015b\u0107, naci\u015bnij 1. Aby zako\u0144czy\u0107 rozmow\u0119, naci\u015bnij 2.</Say>
+    </Gather>
+    <Say language="pl-PL">Nie otrzymali\u015bmy odpowiedzi. Dzi\u0119kujemy za rozmow\u0119, oddzwonimy.</Say>
     <Hangup/>
   `);
 }
