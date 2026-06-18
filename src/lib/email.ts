@@ -1,8 +1,13 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM || "WitaLine <noreply@witaline.pl>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl";
+const RESEND_KEY = process.env.RESEND_API_KEY;
+
+function getResend(): Resend | null {
+  if (!RESEND_KEY) return null;
+  return new Resend(RESEND_KEY);
+}
 
 interface EmailResult {
   ok: boolean;
@@ -16,6 +21,9 @@ export async function sendWelcomeEmail(
   businessName: string,
   plan: string
 ): Promise<EmailResult> {
+  const resend = getResend();
+  if (!resend) return { ok: false, error: "RESEND_API_KEY not set" };
+
   const planLabel =
     plan === "start_100" ? "Start" :
     plan === "pro_500" ? "Growth" :
@@ -91,6 +99,8 @@ export async function sendTrialExpiryEmail(
   daysLeft: number
 ): Promise<EmailResult> {
   try {
+    const resend = getResend();
+    if (!resend) return { ok: false, error: "RESEND_API_KEY not set" };
     const { data, error } = await resend.emails.send({
       from: FROM,
       to,
@@ -154,6 +164,8 @@ export async function sendPaymentConfirmationEmail(
     plan === "lux_599" ? "Lux" : plan;
 
   try {
+    const resend = getResend();
+    if (!resend) return { ok: false, error: "RESEND_API_KEY not set" };
     const { data, error } = await resend.emails.send({
       from: FROM,
       to,
@@ -210,6 +222,8 @@ export async function sendPaymentFailedEmail(
   businessName: string
 ): Promise<EmailResult> {
   try {
+    const resend = getResend();
+    if (!resend) return { ok: false, error: "RESEND_API_KEY not set" };
     const { data, error } = await resend.emails.send({
       from: FROM,
       to,
@@ -260,6 +274,8 @@ export async function sendNewLeadEmail(
   leadInterest: string
 ): Promise<EmailResult> {
   try {
+    const resend = getResend();
+    if (!resend) return { ok: false, error: "RESEND_API_KEY not set" };
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: ownerEmail,
@@ -322,6 +338,8 @@ export async function sendWeeklySummaryEmail(
   }
 ): Promise<EmailResult> {
   try {
+    const resend = getResend();
+    if (!resend) return { ok: false, error: "RESEND_API_KEY not set" };
     const { data, error } = await resend.emails.send({
       from: FROM,
       to,
