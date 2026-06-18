@@ -100,6 +100,12 @@ export async function POST(request: Request) {
 
   // 5. Register call with ElevenLabs and return TwiML
   console.log("[spam-filter] registering call:", { from, to, callSid, businessId, voiceId });
+
+  // Pass the request origin as baseUrlOverride so the TwiML <Redirect> uses the correct URL
+  const host = request.headers.get("host") || "";
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  const origin = host ? `${proto}://${host}` : undefined;
+
   return connectToAgent(
     null,
     businessName,
@@ -108,7 +114,8 @@ export async function POST(request: Request) {
     from,
     to,
     voiceId,
-    voiceName
+    voiceName,
+    origin
   );
 }
 

@@ -59,17 +59,17 @@ function registerCall(fromNumber: string, toNumber: string, businessId?: string,
   });
 }
 
-export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string): Promise<Response> {
+export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfiguracji. Prosimy spróbować później.</Say><Hangup/>`);
   try {
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
     if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
-    // Inject a <Redirect> after </Connect> so when the Stream ends naturally,
-    // Twilio follows the redirect and we can check for a pending transfer.
-    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
-    const redirectUrl = `${baseUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
+    // Use baseUrlOverride (from request origin) or fallback to Railway server env or fallback
+    const baseUrl = baseUrlOverride || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const cleanUrl = baseUrl.replace(/\/+$/, "");
+    const redirectUrl = `${cleanUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
     const wrapper = xml.replace("</Connect>", `</Connect><Redirect method="POST">${escapeXml(redirectUrl)}</Redirect>`);
     return new NextResponse(wrapper, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) { console.error("[connectToAgent] register-call failed:", err instanceof Error ? err.message : String(err)); }
@@ -97,20 +97,20 @@ export function humanHandoffTwiMLString(targetNumber: string, callerId: string, 
   return `<Say language="pl-PL">Przekazuję połączenie do konsultanta firmy ${safeBusiness}. ${reasonText} Proszę czekać.</Say><Say language="pl-PL">Rozmowa z konsultantem może być nagrywana i analizowana w celu poprawy jakości obsługi.</Say><Dial callerId="${safeCallerId}" timeout="25" record="record-from-answer"><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Konsultant obecnie nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
 }
 
-export function humanHandoffHuntTwiML(targetNumber: string, callerId: string, businessName: string, businessId: string, idx: number, total: number): string {
+export function humanHandoffHuntTwiML(targetNumber: string, callerId: string, businessName: string, businessId: string, idx: number, total: number, baseUrlOverride?: string): string {
   const safeTarget = escapeXml(targetNumber);
   const safeCallerId = escapeXml(callerId);
   const safeBusiness = escapeXml(businessName);
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
   const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${businessId}&idx=${idx}`;
   const reasonText = idx === 0 ? "Klient poprosił o konsultanta." : "";
   return `<Say language="pl-PL">${reasonText ? reasonText + " " : ""}Proszę czekać.</Say><Dial callerId="${safeCallerId}" timeout="20" action="${actionUrl}" method="POST"><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
 }
 
-export function humanHandoffNextTwiML(targetNumber: string, callerId: string, businessId: string, idx: number): string {
+export function humanHandoffNextTwiML(targetNumber: string, callerId: string, businessId: string, idx: number, baseUrlOverride?: string): string {
   const safeTarget = escapeXml(targetNumber);
   const safeCallerId = escapeXml(callerId);
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
   const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${businessId}&idx=${idx}`;
   return `<Dial callerId="${safeCallerId}" timeout="20" action="${actionUrl}" method="POST"><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
 }

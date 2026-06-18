@@ -9,13 +9,20 @@ function twiml(body: string): NextResponse {
   });
 }
 
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get("host") || "";
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  if (host) return `${proto}://${host}`;
+  return process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline-production.up.railway.app";
+}
+
 export async function POST(request: Request) {
   const formData = await request.formData();
   const digits = String(formData.get("Digits") || "");
   const from = String(formData.get("From") || "");
   const to = String(formData.get("To") || "");
+  const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
 
-  // DTMF 0 — natychmiastowe przekierowanie do WitaLine (fallback)
   if (digits && digits !== "0") {
     return humanHandoffTwiML(process.env.WITALINE_CONSULTANT_NUMBER || "", to, "WitaLine", "dtmf");
   }
@@ -31,7 +38,6 @@ export async function POST(request: Request) {
   const businessName = business?.name || "WitaLine";
   const callerId = business?.twilio_number || to;
 
-  // Szukaj listy konsultantów
   const { data: consultants } = await supabaseAdmin
     .from("business_consultants")
     .select("phone")
@@ -40,10 +46,9 @@ export async function POST(request: Request) {
 
   if (consultants && consultants.length > 0) {
     const first = consultants[0].phone;
-    return twiml(humanHandoffHuntTwiML(first, callerId, businessName, businessId, 1, consultants.length));
+    return twiml(humanHandoffHuntTwiML(first, callerId, businessName, businessId, 1, consultants.length, baseUrl));
   }
 
-  // Brak listy — fallback do pojedyńczego numeru z businesses.phone
   const targetNumber = business?.phone || process.env.WITALINE_CONSULTANT_NUMBER;
   if (!targetNumber) {
     return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response><Say language="pl-PL">Nie skonfigurowano numeru konsultanta. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/></Response>`, {

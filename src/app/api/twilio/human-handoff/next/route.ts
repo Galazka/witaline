@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { humanHandoffNextTwiML } from "@/lib/twilio-utils";
+import { escapeXml } from "@/lib/twilio-utils";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
     status: 200,
     headers: { "Content-Type": "application/xml" },
   });
+}
+
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get("host") || "";
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  if (host) return `${proto}://${host}`;
+  return process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline-production.up.railway.app";
 }
 
 export async function POST(request: Request) {
@@ -17,7 +24,6 @@ export async function POST(request: Request) {
 
   console.log("[human-handoff/next] status:", dialCallStatus || "unknown", "from:", from, "to:", to);
 
-  // Jeśli ktoś odebrał — koniec
   if (dialCallStatus === "completed") {
     return twiml("<Hangup/>");
   }
@@ -26,7 +32,6 @@ export async function POST(request: Request) {
   const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
   const idx = parseInt(url.searchParams.get("idx") || "0", 10);
 
-  // Pobierz listę konsultantów
   const { data: consultants } = await supabaseAdmin
     .from("business_consultants")
     .select("phone")
@@ -34,13 +39,19 @@ export async function POST(request: Request) {
     .order("sort_order", { ascending: true });
 
   if (!consultants || idx >= consultants.length) {
-    // Koniec listy — nikt nie odebrał
-    return twiml(`<Say language="pl-PL">Przepraszamy, żaden z konsultantów nie odebrał. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`);
+    return twiml(`<Say language="pl-PL">Przepraszamy, \u017caden z konsultant\u00f3w nie odebra\u0142. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`);
   }
 
   const nextConsultant = consultants[idx];
   const callerId = to;
+  const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
+  const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
 
-  // Dzwoni do kolejnego z indeksem idx+1
-  return twiml(humanHandoffNextTwiML(nextConsultant.phone, callerId, businessId, idx + 1));
+  return twiml(`
+    <Dial callerId="${escapeXml(callerId)}" timeout="20" action="${escapeXml(actionUrl)}" method="POST">
+      <Number>${escapeXml(nextConsultant.phone)}</Number>
+    </Dial>
+    <Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say>
+    <Hangup/>
+  `);
 }
