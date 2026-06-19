@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getActiveCallSids } from "@/lib/active-call-store";
 
 const WITALINE_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -9,8 +10,6 @@ export async function POST(request: Request) {
     const callerId = body?.caller_id || "";
     const calledNumber = body?.called_number || "";
     const agentNumber = body?.phone_number?.agent_number || "";
-    const callSid = body?.call_sid || "";
-
     let businessId = WITALINE_BUSINESS_ID;
     let customVoiceId: string | null = null;
 
@@ -68,6 +67,13 @@ export async function POST(request: Request) {
         }
         break;
       }
+    }
+
+    // Try callSid from webhook body first, fall back to active-call-store by businessId
+    let callSid = body?.call_sid || "";
+    if (!callSid) {
+      const sids = getActiveCallSids(businessId);
+      callSid = sids.length > 0 ? sids[sids.length - 1] : "";
     }
 
     // Build response — ONLY override TTS if business has a custom voice

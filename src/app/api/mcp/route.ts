@@ -130,8 +130,8 @@ export async function POST(request: NextRequest) {
         const toNumber = args.to_number || "";
         let callSid = args.call_sid || "";
 
-        // If agent didn't pass callSid, try all stored call SIDs for this business
-        if (!callSid) {
+        // If agent didn't pass a valid callSid, try all stored call SIDs for this business
+        if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
           const allSids = getActiveCallSids(bizId);
           callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
         }
