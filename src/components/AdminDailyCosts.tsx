@@ -115,15 +115,19 @@ export default function AdminDailyCosts() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Auto-sync on mount
+  // Auto-sync on mount: first pull calls from ElevenLabs, then sync costs
   useEffect(() => {
     if (!syncing) {
       setSyncing(true);
-      setSyncMsg("Synchronizowanie kosztów...");
-      fetch("/api/admin/sync-costs", { method: "POST" })
+      setSyncMsg("Pobieranie rozmów z ElevenLabs...");
+      fetch("/api/admin/sync-calls", { method: "POST" })
         .then(r => r.json())
-        .then(d => {
-          setSyncMsg(d.message || "OK");
+        .then(d1 => {
+          setSyncMsg("Synchronizowanie kosztów...");
+          return fetch("/api/admin/sync-costs", { method: "POST" }).then(r => r.json());
+        })
+        .then(d2 => {
+          setSyncMsg(d2.message || "OK");
           fetchData();
         })
         .catch(() => setSyncMsg("Błąd synchronizacji"))

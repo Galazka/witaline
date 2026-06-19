@@ -228,7 +228,7 @@ export default function AdminPage() {
       {tab === "routing" && <AdminDtmfLogs />}
       {tab === "blocklist" && <AdminBlocklist />}
       {tab === "security" && <AdminSecurityDashboard />}
-      {tab === "costs" && <AdminRealCosts />}
+      {tab === "costs" && <AdminDailyCosts />}
       {tab === "porty" && <AdminPortRequests />}
       {tab === "numery" && <AdminPhoneStats />}
       {tab === "pricing" && <AdminPricingSimulator />}
