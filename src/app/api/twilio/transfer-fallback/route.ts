@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import { registerTransferFallback } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { escapeXml } from "@/lib/twilio-utils";
+
+function twiml(body: string): NextResponse {
+  return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
+    status: 200,
+    headers: { "Content-Type": "application/xml" },
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -31,9 +39,16 @@ export async function POST(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[transfer-fallback] failed:", msg);
-    return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response><Say language="pl-PL">Przepraszamy, wystąpił problem. Proszę spróbować później.</Say><Hangup/></Response>`, {
-      status: 200,
-      headers: { "Content-Type": "application/xml" },
-    });
+
+    // Maja nie wrocila — zaproponuj voicemail jako fallback
+    const voicemailUrl = `/api/twilio/voicemail?businessId=${encodeURIComponent(new URL(request.url).searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001")}`;
+    return twiml(`
+      <Say language="pl-PL">Przepraszamy, konsultant jest obecnie niedostępny.</Say>
+      <Gather numDigits="1" action="${escapeXml(voicemailUrl)}" method="POST">
+        <Say language="pl-PL">Naciśnij 1, aby zostawić wiadomość. Naciśnij 2, aby zakończyć.</Say>
+      </Gather>
+      <Say language="pl-PL">Nie rozpoznano wyboru. Dziękujemy za rozmowę.</Say>
+      <Hangup/>
+    `);
   }
 }

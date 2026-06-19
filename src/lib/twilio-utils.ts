@@ -94,7 +94,7 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
     if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
-    // Use baseUrlOverride (from request origin) or fallback to Railway server env or fallback
+    // Add fallback redirect — fires ONLY if REST API redirect doesn't happen (timout protection)
     const baseUrl = baseUrlOverride || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const cleanUrl = baseUrl.replace(/\/+$/, "");
     const redirectUrl = `${cleanUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
@@ -102,6 +102,31 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
     return new NextResponse(wrapper, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) { console.error("[connectToAgent] register-call failed:", err instanceof Error ? err.message : String(err)); }
   return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z połączeniem. Proszę spróbować później.</Say><Hangup/>`);
+}
+
+export async function redirectCallWithTransferTwiML(callSid: string, targetNumber: string, callerId: string, baseUrl: string, businessId: string, idx: number): Promise<{ ok: boolean; status?: number; message: string }> {
+  const safeTarget = escapeXml(targetNumber);
+  const safeCallerId = escapeXml(callerId);
+  const cleanUrl = baseUrl.replace(/\/+$/, "");
+  const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx}`;
+  const twimlBody = `
+<Play>${escapeXml("https://cdn.witaline.app/hold-music.mp3")}</Play>
+<Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
+<Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
+  <Number>${safeTarget}</Number>
+</Dial>
+<Redirect method="POST">${escapeXml(`${cleanUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}</Redirect>
+<Hangup/>`;
+  return redirectActiveCallToHumanHandoff(callSid, twimlBody);
+}
+
+export async function redirectCallToVoicemail(callSid: string, businessId: string, baseUrl: string): Promise<{ ok: boolean; status?: number; message: string }> {
+  const cleanUrl = baseUrl.replace(/\/+$/, "");
+  const voicemailUrl = `${cleanUrl}/api/twilio/voicemail?businessId=${encodeURIComponent(businessId)}`;
+  const twimlBody = `
+<Say language="pl-PL">Przepraszamy, konsultant jest obecnie niedostępny. Może Pan/Pani zostawić wiadomość po sygnale.</Say>
+<Redirect method="POST">${escapeXml(voicemailUrl)}</Redirect>`;
+  return redirectActiveCallToHumanHandoff(callSid, twimlBody);
 }
 
 export async function redirectActiveCallToHumanHandoff(callSid: string, twimlBody: string): Promise<{ ok: boolean; status?: number; message: string }> {

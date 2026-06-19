@@ -45,8 +45,12 @@ export async function POST(request: Request) {
     const consultantPhone = (consultants && consultants.length > 0) ? consultants[0].phone : pending.targetNumber;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&idx=${consultants?.length ? 1 : 0}`;
 
-    // Bez Say — Maja już powiedziała "przekazuję" zanim Stream się skończył
+    // Hold music + komunikat — Maja mogła nie zdążyć powiedzieć "przekazuję"
+    const holdMusicUrl = process.env.HOLD_MUSIC_URL || "";
+    const holdMusicTag = holdMusicUrl ? `<Play>${escapeXml(holdMusicUrl)}</Play>` : "";
     return twiml(`
+      ${holdMusicTag}
+      <Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
       <Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
         <Number>${escapeXml(consultantPhone)}</Number>
       </Dial>

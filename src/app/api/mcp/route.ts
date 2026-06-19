@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
-import { escapeXml, twimlDocument } from "@/lib/twilio-utils";
-import { setPendingTransfer } from "@/lib/transfer-store";
+import { escapeXml, twimlDocument, redirectCallWithTransferTwiML } from "@/lib/twilio-utils";
+import { setPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ const TOOLS = [
   { name: "create_reservation", description: "Utworz rezerwacje/spotkanie", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
   { name: "get_services", description: "Pobierz liste uslug firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
   { name: "get_business_hours", description: "Pobierz godziny otwarcia firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
-  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta" }, to_number: { type: "string", description: "Numer konsultanta" } }, required: ["business_id", "caller_phone", "to_number"] } },
+  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta" }, to_number: { type: "string", description: "Numer konsultanta" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id", "caller_phone", "to_number"] } },
   { name: "create_checkout", description: "Utworz sesje platnosci Stripe", inputSchema: { type: "object", properties: { plan: { type: "string", description: "Nazwa planu: start/growth/enterprise" }, business_id: { type: "string" } }, required: ["plan", "business_id"] } }
 ];
 
@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
         const callerPhone = args.caller_phone || "";
         const toNumber = args.to_number || "";
+        const callSid = args.call_sid || "";
 
         let targetNumber = "";
         const { data: consultants } = await supabaseAdmin
@@ -155,6 +156,7 @@ export async function POST(request: NextRequest) {
             .maybeSingle();
           const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
 
+          // Always store as fallback (in case REST API fails)
           setPendingTransfer(bizId, {
             businessId: bizId,
             targetNumber,
@@ -165,12 +167,28 @@ export async function POST(request: NextRequest) {
             createdAt: Date.now(),
           });
 
-          console.log("[MCP transfer_to_human] stored for", bizId, "→", targetNumber);
+          // Try immediate REST API redirect using callSid (most reliable)
+          let restApiOk = false;
+          if (callSid) {
+            const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+            const redirectResult = await redirectCallWithTransferTwiML(callSid, targetNumber, callerId, baseUrl, bizId, consultants?.length ? 1 : 0);
+            if (redirectResult.ok) {
+              restApiOk = true;
+              console.log("[MCP transfer_to_human] REST API redirect ok for", callSid);
+            } else {
+              console.warn("[MCP transfer_to_human] REST API redirect failed:", redirectResult.message);
+            }
+          }
+
+          console.log("[MCP transfer_to_human] stored for", bizId, "→", targetNumber, "restApi:", restApiOk);
           result = JSON.stringify({
             ok: true,
             target: targetNumber,
             business: biz?.name || "WitaLine",
-            message: "Transfer initiated. Caller will be connected when the conversation ends.",
+            rest_api_redirect: restApiOk,
+            message: restApiOk
+              ? "Transfer initiated. Call redirected to consultant."
+              : "Transfer initiated. Caller will be connected when the conversation ends.",
           });
         }
       }
