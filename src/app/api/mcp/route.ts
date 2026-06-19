@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
 import { escapeXml, twimlDocument, redirectCallWithTransferTwiML } from "@/lib/twilio-utils";
 import { setPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
+import { getActiveCallSid } from "@/lib/active-call-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -127,7 +128,12 @@ export async function POST(request: NextRequest) {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
         const callerPhone = args.caller_phone || "";
         const toNumber = args.to_number || "";
-        const callSid = args.call_sid || "";
+        let callSid = args.call_sid || "";
+
+        // If agent didn't pass callSid, try to look it up from active-call-store
+        if (!callSid) {
+          callSid = getActiveCallSid(bizId) || "";
+        }
 
         let targetNumber = "";
         const { data: consultants } = await supabaseAdmin

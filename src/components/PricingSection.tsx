@@ -28,6 +28,47 @@ interface PricingTr {
   chatUnlimited: string;
   overage: string;
   plnMin: string;
+  perMin: string;
+  monthly: string;
+  netto: string;
+  brutto: string;
+  exclVat: string;
+  inclVat: string;
+  summary: string;
+  totalNetto: string;
+  totalBrutto: string;
+  yourPlan: string;
+  rate: string;
+  minutes: string;
+  minuteSlider: string;
+  minuteDesc: string;
+  configurator: string;
+  enterprise: string;
+  enterpriseTitle: string;
+  enterpriseDesc: string;
+  startingFrom: string;
+  setupFee: string;
+  firstMonth: string;
+  callUs: string;
+  seeOffer: string;
+  ownNumber: string;
+  ownNumberDesc: string;
+  googleCalendar: string;
+  googleCalendarDesc: string;
+  crm: string;
+  crmDesc: string;
+  voiceClone: string;
+  voiceCloneDesc: string;
+  unlimitedConsultants: string;
+  unlimitedConsultantsDesc: string;
+  prioritySupport: string;
+  prioritySupportDesc: string;
+  sla247: string;
+  sla247Desc: string;
+  perMonth: string;
+  costBreakdown: string;
+  addons: string;
+  noCard: string;
   [key: string]: string;
 }
 
@@ -54,13 +95,13 @@ export default function PricingSection({
   }
 
   const addonDefs: { key: keyof typeof addons; label: string; desc: string; price: number }[] = [
-    { key: "ownNumber", label: "Własny numer +48", desc: "Dedykowany numer telefonu", price: CONFIG.addonOwnNumber },
-    { key: "googleCalendar", label: "Google Calendar", desc: "Bot sam umawia wizyty", price: CONFIG.addonGoogleCalendar },
-    { key: "crm", label: "Integracja CRM", desc: "HubSpot, Livespace, Pipedrive", price: CONFIG.addonCrm },
-    { key: "voiceClone", label: "Klon głosu", desc: "Profesjonalny klon Twojego głosu", price: CONFIG.addonVoiceClone },
-    { key: "unlimitedConsultants", label: "Nielimitowani konsultanci", desc: "Bez limitu przekierowań", price: CONFIG.addonUnlimitedConsultants },
-    { key: "prioritySupport", label: "Priorytetowe wsparcie", desc: "Odpowiedź w 1h", price: CONFIG.addonPrioritySupport },
-    { key: "sla247", label: "SLA 24/7", desc: "Gwarantowana dostępność", price: CONFIG.addonSla247 },
+    { key: "ownNumber", label: tr.ownNumber, desc: tr.ownNumberDesc, price: CONFIG.addonOwnNumber },
+    { key: "googleCalendar", label: tr.googleCalendar, desc: tr.googleCalendarDesc, price: CONFIG.addonGoogleCalendar },
+    { key: "crm", label: tr.crm, desc: tr.crmDesc, price: CONFIG.addonCrm },
+    { key: "voiceClone", label: tr.voiceClone, desc: tr.voiceCloneDesc, price: CONFIG.addonVoiceClone },
+    { key: "unlimitedConsultants", label: tr.unlimitedConsultants, desc: tr.unlimitedConsultantsDesc, price: CONFIG.addonUnlimitedConsultants },
+    { key: "prioritySupport", label: tr.prioritySupport, desc: tr.prioritySupportDesc, price: CONFIG.addonPrioritySupport },
+    { key: "sla247", label: tr.sla247, desc: tr.sla247Desc, price: CONFIG.addonSla247 },
   ];
 
   return (
@@ -75,11 +116,11 @@ export default function PricingSection({
         <div className="flex items-center justify-center gap-3 mb-10">
           <button onClick={() => setTab("configurator")}
             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "configurator" ? "bg-brand-400 text-white shadow-lg shadow-brand-500/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
-            {locale === "en" ? "Minute slider" : "Suwak minut"}
+            {tr.configurator}
           </button>
           <button onClick={() => setTab("enterprise")}
             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "enterprise" ? "bg-brand-400 text-white shadow-lg shadow-brand-500/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
-            {locale === "en" ? "Enterprise" : "Indywidualnie"}
+            {tr.enterprise}
           </button>
         </div>
 
@@ -87,15 +128,15 @@ export default function PricingSection({
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Slider card */}
             <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
-              <h3 className="text-lg font-semibold text-zinc-900 mb-1">{locale === "en" ? "How many minutes per month?" : "Ile minut miesięcznie?"}</h3>
-              <p className="text-sm text-zinc-500 mb-6">{locale === "en" ? "Slide to choose — price drops with every 500-minute tier" : "Przesuń — cena spada z każdym progiem 500 minut"}</p>
+              <h3 className="text-lg font-semibold text-zinc-900 mb-1">{tr.minuteSlider}</h3>
+              <p className="text-sm text-zinc-500 mb-6">{tr.minuteDesc}</p>
 
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-zinc-500">{locale === "en" ? "Minutes" : "Minuty"}</span>
+                    <span className="text-sm text-zinc-500">{tr.minutes}</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl md:text-5xl font-bold text-brand-500 font-display">{minutes}</span>
-                    <span className="text-sm text-zinc-400">{locale === "en" ? "min/mo" : "min/mies"}</span>
+                    <span className="text-sm text-zinc-400">{locale === "pl" ? "min/mies" : "min/mo"}</span>
                   </div>
                 </div>
                 <input type="range" min={50} max={5000} step={10} value={minutes}
@@ -118,26 +159,26 @@ export default function PricingSection({
               {/* Price summary */}
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{locale === "en" ? "Per minute" : "Cena za minutę"}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.perMin}</p>
                   <p className="text-2xl font-bold text-brand-600">{formatPLN(elastic.ratePerMin)}</p>
-                  <p className="text-[10px] text-zinc-400">{locale === "en" ? "netto" : "netto"}</p>
+                    <p className="text-[10px] text-zinc-400">{tr.netto}</p>
                 </div>
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{locale === "en" ? "Monthly (netto)" : "Miesięcznie netto"}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.monthly} ({tr.netto})</p>
                   <p className="text-2xl font-bold text-brand-600">{formatPLN(elastic.monthlyNetto)}</p>
-                  <p className="text-[10px] text-zinc-400">{locale === "en" ? "excl. VAT" : "+23% VAT"}</p>
+                  <p className="text-[10px] text-zinc-400">{tr.exclVat}</p>
                 </div>
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{locale === "en" ? "Monthly (brutto)" : "Miesięcznie brutto"}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.monthly} ({tr.brutto})</p>
                   <p className="text-2xl font-bold text-brand-600">{formatPLN(elastic.monthlyBrutto)}</p>
-                  <p className="text-[10px] text-zinc-400">{locale === "en" ? "incl. VAT" : "z VAT"}</p>
+                  <p className="text-[10px] text-zinc-400">{tr.inclVat}</p>
                 </div>
               </div>
             </div>
 
             {/* Add-ons */}
             <div className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8">
-              <h3 className="text-sm font-semibold text-zinc-900 mb-4">{locale === "en" ? "Optional add-ons" : "Dodatki opcjonalne"}</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 mb-4">{tr.addons}</h3>
               <div className="grid md:grid-cols-2 gap-2">
                 {addonDefs.map(a => (
                   <button key={a.key} onClick={() => toggleAddon(a.key)}
@@ -148,7 +189,7 @@ export default function PricingSection({
                       </div>
                       <span className="text-sm text-zinc-700">{a.label}</span>
                     </div>
-                    <span className="text-xs font-semibold text-zinc-500">{a.price} zł/mies</span>
+                    <span className="text-xs font-semibold text-zinc-500">{a.price} {tr.perMonth}</span>
                   </button>
                 ))}
               </div>
@@ -158,7 +199,7 @@ export default function PricingSection({
             <div className="grid md:grid-cols-5 gap-6">
               <div className="md:col-span-3 space-y-4">
                 <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-                  <h3 className="text-sm font-semibold text-zinc-900 mb-3">{locale === "en" ? "Cost breakdown" : "Podsumowanie kosztów"}</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 mb-3">{tr.costBreakdown}</h3>
                   <div className="space-y-2">
                     {full.details.map(d => (
                       <div key={d.label} className="flex justify-between text-sm">
@@ -167,11 +208,11 @@ export default function PricingSection({
                       </div>
                     ))}
                     <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold">
-                      <span className="text-zinc-700">{locale === "en" ? "Total netto" : "Razem netto"}</span>
+                      <span className="text-zinc-700">{tr.totalNetto}</span>
                       <span className="text-brand-500">{formatPLN(full.monthlyNetto)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-zinc-500">{locale === "en" ? "Total brutto" : "Razem brutto"}</span>
+                      <span className="text-zinc-500">{tr.totalBrutto}</span>
                       <span className="font-semibold text-zinc-800">{formatPLN(full.monthlyBrutto)}</span>
                     </div>
                   </div>
@@ -182,7 +223,7 @@ export default function PricingSection({
                     <svg className="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-zinc-700">{locale === "en" ? "Test our AI assistant now" : "Sprawdź naszego asystenta AI"}</p>
+                    <p className="text-sm font-medium text-zinc-700">{locale === "pl" ? "Sprawdź naszego asystenta AI" : "Test our AI assistant now"}</p>
                     <a href="tel:+48732125752" className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">+48 732 125 752</a>
                   </div>
                 </div>
@@ -190,29 +231,29 @@ export default function PricingSection({
 
               <div className="md:col-span-2">
                 <div className="sticky top-24 bg-white border-2 border-brand-400 rounded-2xl p-6 shadow-lg shadow-brand-500/10">
-                  <p className="text-sm font-semibold text-zinc-700 mb-1">{locale === "en" ? "Your custom plan" : "Twój plan"}</p>
+                  <p className="text-sm font-semibold text-zinc-700 mb-1">{tr.yourPlan}</p>
                   <div className="flex items-baseline gap-1 mb-4">
                     <span className="text-4xl font-bold text-brand-500 font-display">{formatPLN(full.monthlyBrutto)}</span>
-                    <span className="text-zinc-400 text-xs">{locale === "en" ? "/mo" : "/mies"}</span>
+                    <span className="text-zinc-400 text-xs">{locale === "pl" ? "/mies" : "/mo"}</span>
                   </div>
-                  <p className="text-xs text-zinc-400 mb-4">{locale === "en" ? `netto: ${formatPLN(full.monthlyNetto)}` : `netto: ${formatPLN(full.monthlyNetto)}`}</p>
+                  <p className="text-xs text-zinc-400 mb-4">{tr.netto}: {formatPLN(full.monthlyNetto)}</p>
 
                   <div className="bg-brand-50 rounded-xl px-3 py-2 mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-500">{locale === "en" ? "Rate" : "Stawka"}</span>
-                      <span className="text-sm font-bold text-brand-600">{formatPLN(elastic.ratePerMin)}/min netto</span>
+                      <span className="text-xs text-zinc-500">{tr.rate}</span>
+                      <span className="text-sm font-bold text-brand-600">{formatPLN(elastic.ratePerMin)}/min {tr.netto}</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-zinc-500">{locale === "en" ? "Overage" : "Nadwyżka"}</span>
-                      <span className="text-sm font-bold text-brand-600">{formatPLN(full.overageNetto)}/min netto</span>
+                      <span className="text-xs text-zinc-500">{tr.overage}</span>
+                      <span className="text-sm font-bold text-brand-600">{formatPLN(full.overageNetto)}/min {tr.netto}</span>
                     </div>
                   </div>
 
                   <Link href={{ pathname: "/register", query: { config: JSON.stringify(cfg) } }}
                     className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20">
-                    {locale === "en" ? "Start free trial" : "Rozpocznij darmowy test"}
+                    {tr.tryFree}
                   </Link>
-                  <p className="text-center text-[10px] text-zinc-400 mt-2">{locale === "en" ? "No card · 7 days free" : "Bez karty · 7 dni za darmo"}</p>
+                  <p className="text-center text-[10px] text-zinc-400 mt-2">{tr.noCard}</p>
                 </div>
               </div>
             </div>
@@ -238,11 +279,11 @@ function EnterpriseSection({ locale, tr }: { locale: Locale; tr: PricingTr }) {
     <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-start">
       <div className="space-y-6">
         <div>
-          <h3 className="text-xl font-bold text-zinc-900 mb-2">{locale === "en" ? "Custom solution for your business" : "Indywidualne rozwiązanie dla Twojej firmy"}</h3>
-          <p className="text-sm text-zinc-500 leading-relaxed">{locale === "en" ? "Dedicated onboarding with our team, custom integrations, SLA guarantee, and pricing tailored to your company size." : "Dedykowany onboarding z naszym zespołem, niestandardowe integracje, gwarancja SLA i wycena dopasowana do Twojej firmy."}</p>
+          <h3 className="text-xl font-bold text-zinc-900 mb-2">{tr.enterpriseTitle}</h3>
+          <p className="text-sm text-zinc-500 leading-relaxed">{tr.enterpriseDesc}</p>
         </div>
         <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-          <label className="text-sm font-semibold text-zinc-800 mb-3 block">{locale === "en" ? "Monthly voice minutes" : "Minuty rozmów miesięcznie"}</label>
+          <label className="text-sm font-semibold text-zinc-800 mb-3 block">{tr.minutes}</label>
           <input type="range" min={500} max={20000} step={100} value={minutes}
             onChange={(e) => setMinutes(parseInt(e.target.value))}
             className="w-full h-2 bg-brand-100 rounded-full appearance-none cursor-pointer accent-brand-400 mb-2" />
@@ -252,18 +293,18 @@ function EnterpriseSection({ locale, tr }: { locale: Locale; tr: PricingTr }) {
       </div>
       <div className="space-y-6">
         <div className="sticky top-24 bg-gradient-to-b from-brand-50 to-white border border-brand-200 rounded-2xl p-6 shadow-lg shadow-brand-500/10">
-          <p className="text-sm font-semibold text-brand-700 mb-1">{locale === "en" ? "Starting from" : "Cena od"}</p>
+          <p className="text-sm font-semibold text-brand-700 mb-1">{tr.startingFrom}</p>
           <div className="flex items-baseline gap-1 mb-2">
             <span className="text-4xl font-bold text-brand-500 font-display">{formatPrice(monthlyBrutto, locale)}</span>
-            <span className="text-zinc-400 text-xs">{locale === "en" ? "/mo" : "/mies"}</span>
+            <span className="text-zinc-400 text-xs">{locale === "pl" ? "/mies" : "/mo"}</span>
           </div>
           <div className="space-y-3 mb-6">
-            <div className="flex justify-between text-sm"><span className="text-zinc-600">{locale === "en" ? "Setup fee" : "Opłata wdrożeniowa"}</span><span className="font-medium">{setupFee} zł</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-600">{locale === "en" ? "Monthly (from)" : "Miesięcznie (od)"}</span><span className="font-medium">{formatPrice(monthlyBrutto, locale)}</span></div>
-            <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{locale === "en" ? "First month" : "Pierwszy miesiąc"}</span><span className="text-brand-500">{formatPrice(monthlyBrutto + setupFee, locale)}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.setupFee}</span><span className="font-medium">{setupFee} zł</span></div>
+            <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.monthly} ({tr.startingFrom})</span><span className="font-medium">{formatPrice(monthlyBrutto, locale)}</span></div>
+            <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{tr.firstMonth}</span><span className="text-brand-500">{formatPrice(monthlyBrutto + setupFee, locale)}</span></div>
           </div>
-          <a href="tel:+48732125752" className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 mb-2">{locale === "en" ? "Call us" : "Zadzwoń — +48 732 125 752"}</a>
-          <a href="/oferta-indywidualna" className="block w-full text-center bg-white text-zinc-700 py-3 rounded-2xl font-semibold border border-zinc-200 hover:bg-brand-50 transition">{locale === "en" ? "See enterprise offer →" : "Zobacz ofertę indywidualną →"}</a>
+          <a href="tel:+48732125752" className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 mb-2">{tr.callUs}</a>
+          <a href="/oferta-indywidualna" className="block w-full text-center bg-white text-zinc-700 py-3 rounded-2xl font-semibold border border-zinc-200 hover:bg-brand-50 transition">{tr.seeOffer}</a>
         </div>
       </div>
     </div>

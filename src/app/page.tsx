@@ -7,6 +7,7 @@ import FloatingWidget from "@/components/FloatingWidget";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PricingSection from "@/components/PricingSection";
 import { t, initLocale, getLocale, translations_raw, type Locale } from "@/lib/i18n";
+import { BuildingIcon, PhoneIcon, BankIcon, LightningIcon, StarIcon, HeartIcon, WriteIcon, LinkIcon, BotIcon, MicIcon, BrainIcon, CloudIcon, HeadphonesIcon, EnvelopeIcon, PinIcon, ShieldIcon } from "@/components/ui/Icons";
 
 function CheckIcon() {
   return (
@@ -33,39 +34,39 @@ const faqItems = [
 
 const caseStudies = [
   {
-    icon: "🏪",
+    icon: "building",
     title: "Agencja nieruchomości",
     domain: "400 rozmów dziennie",
     challenge: "40% połączeń to pytania o dostępność lokali i chęć umówienia oglądania. Po 18:00 agenci nie odbierali, więc ~30% leadów przepadało na poczcie głosowej.",
     solution: "Wirtualna recepcjonistka z profesjonalnie sklonowanym glosem wlasciciela. Integracja z baza nieruchomosci i kalendarzem.",
     results: [
-      "Bot odbiera 95% połączeń",
+      "Asystent odbiera 95% połączeń",
       "40% wizyt rezerwowanych poza godzinami pracy",
-      "Koszt bota: ~390 zł/mies vs 5600 zł etatu",
+      "Koszt: ~390 zł/mies vs 5600 zł etatu",
       "Zwrot inwestycji w 6 tygodni",
     ],
   },
   {
-    icon: "📞",
+    icon: "phone",
     title: "Call center e-commerce",
     domain: "2000 rozmów dziennie",
     challenge: "Prawie połowa zapytań dotyczy statusu zamówienia i reklamacji. Długi czas oczekiwania (>8 min) frustrował klientów, duża rotacja pracowników.",
-    solution: "Bot AI przejmuje pierwszą linię obsługi, integracja z systemem zamówień i CRM. Automatyczne sprawdzanie statusu, generowanie zwrotów, eskalacja do konsultanta.",
+    solution: "Asystent przejmuje pierwszą linię obsługi, integracja z systemem zamówień i CRM. Automatyczne sprawdzanie statusu, generowanie zwrotów, eskalacja do konsultanta.",
     results: [
-      "Bot rozwiązuje 65% spraw od A do Z",
+      "Asystent rozwiązuje 65% spraw od A do Z",
       "Średni czas rozmowy spadł z 8 do 3 min",
       "Koszty operacyjne niższe o 55%",
       "Rotacja konsultantów spadła o 40%",
     ],
   },
   {
-    icon: "🏦",
+    icon: "bank",
     title: "Biuro rachunkowe",
     domain: "150 rozmów dziennie",
     challenge: "Sezonowo (PIT/ VAT) liczba połączeń rośnie 5-krotnie. Klienci dzwonią po godz. 16:00, w weekendy. Każde nieodebrane połączenie to ryzyko utraty klienta.",
-    solution: "Bot rozpoznaje intencje: 'terminy rozliczeń', 'potrzebuję faktury', 'chcę zmienić księgową'. Dla stałych klientów — weryfikacja przez NIP i dostęp do dokumentów.",
+    solution: "Asystent rozpoznaje intencje: 'terminy rozliczeń', 'potrzebuję faktury', 'chcę zmienić księgową'. Dla stałych klientów — weryfikacja przez NIP i dostęp do dokumentów.",
     results: [
-      "Bot odbiera 100% połączeń 24/7",
+      "Asystent odbiera 100% połączeń 24/7",
       "70% rozmów rozwiązanych bez udziału człowieka",
       "W sezonie PIT obsługa bez dodatkowego zatrudnienia",
       "Klienci chwalą dostępność o dowolnej porze",
@@ -167,9 +168,9 @@ function FaqSection({ faqItems: items, locale }: { faqItems: { q: string; a: str
         </div>
 
         <div className="flex items-center justify-center gap-6 text-xs text-zinc-400 bg-white border border-zinc-200 rounded-2xl p-4">
-          <span className="flex items-center gap-1.5">⭐ 5.0</span>
-          <span className="flex items-center gap-1.5">📞 15k+ rozmów</span>
-          <span className="flex items-center gap-1.5">🔒 RODO</span>
+          <span className="flex items-center gap-1.5"><StarIcon className="w-3.5 h-3.5 text-amber-400" /> 5.0</span>
+          <span className="flex items-center gap-1.5"><PhoneIcon className="w-3.5 h-3.5 text-zinc-400" /> 15k+ rozmów</span>
+          <span className="flex items-center gap-1.5"><ShieldIcon className="w-3.5 h-3.5 text-brand-400" /> RODO</span>
         </div>
       </div>
     </div>
@@ -372,14 +373,14 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-zinc-400 stagger">
             <span className="text-zinc-500 font-semibold text-xs uppercase tracking-widest">Zaufany przez</span>
             {[
-              ["🏪", "200+ firm"],
-              ["📞", "15 000+ rozmów/mies"],
-              ["⚡", "<2s odpowiedź"],
-              ["⭐", "5.0 średnia"],
-              ["💚", "Autoryzowany partner"],
+              ["building", "200+ firm"],
+              ["phone", "15 000+ rozmów/mies"],
+              ["lightning", "<2s odpowiedź"],
+              ["star", "5.0 średnia"],
+              ["heart", "Autoryzowany partner"],
             ].map(([icon, text]) => (
               <span key={text} className="flex items-center gap-2 text-zinc-500">
-                <span className="text-lg">{icon}</span>
+                <span className="text-zinc-400">{icon === "building" ? <BuildingIcon className="w-4 h-4" /> : icon === "phone" ? <PhoneIcon className="w-4 h-4" /> : icon === "lightning" ? <LightningIcon className="w-4 h-4" /> : icon === "star" ? <StarIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}</span>
                 <span className="font-medium">{text}</span>
               </span>
             ))}
@@ -397,13 +398,13 @@ export default function Home() {
             <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Ustaw przekierowanie nieodebranych — asystent głosowy robi resztę</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 mb-16 stagger">
-            {[
-              { step: "1", title: "Rejestracja i konfiguracja", desc: "Kliknij \"Start\" i skonfiguruj swój plan w minutę. Darmowy trial 7 dni bez podawania karty.", icon: "📝" },
-              { step: "2", title: "Przekieruj połączenia", desc: "Ustaw przekierowanie nieodebranych na numer WitaLine. Zajmuje 30 sekund u operatora.", icon: "🔗" },
-              { step: "3", title: "Asystent odbiera 24/7", desc: "Asystent rozmawia z klientami, zbiera leady, przyjmuje zamówienia. Raport na email każdego ranka.", icon: "🤖" },
-            ].map((item) => (
-              <div key={item.step} className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-500/5 transition-all">
-                <span className="text-3xl mb-4 block">{item.icon}</span>
+              {[
+                { step: "1", title: "Rejestracja i konfiguracja", desc: "Kliknij \"Start\" i skonfiguruj swój plan w minutę. Darmowy trial 7 dni bez podawania karty.", icon: "write" },
+                { step: "2", title: "Przekieruj połączenia", desc: "Ustaw przekierowanie nieodebranych na numer WitaLine. Zajmuje 30 sekund u operatora.", icon: "link" },
+                { step: "3", title: "Asystent odbiera 24/7", desc: "Asystent rozmawia z klientami, zbiera leady, przyjmuje zamówienia. Raport na email każdego ranka.", icon: "bot" },
+              ].map((item) => (
+                <div key={item.step} className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-500/5 transition-all">
+                  <span className="text-brand-500 mb-4 block">{item.icon === "write" ? <WriteIcon className="w-7 h-7" /> : item.icon === "link" ? <LinkIcon className="w-7 h-7" /> : <BotIcon className="w-7 h-7" />}</span>
                 <div className="w-8 h-8 gradient-brand-soft rounded-xl flex items-center justify-center text-brand-600 font-bold text-sm mb-3">{item.step}</div>
                 <h3 className="font-semibold text-zinc-900 mb-2">{item.title}</h3>
                 <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
@@ -440,7 +441,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6 mb-12 stagger">
             <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-2xl mb-3 block">🎤</span>
+              <span className="text-brand-500 mb-3 block"><MicIcon className="w-7 h-7" /></span>
               <h3 className="font-bold text-zinc-900 mb-3">Synteza mowy nowej generacji</h3>
               <ul className="space-y-2 text-sm text-zinc-600">
                 {[
@@ -460,7 +461,7 @@ export default function Home() {
             </div>
 
             <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-2xl mb-3 block">🧠</span>
+              <span className="text-brand-500 mb-3 block"><BrainIcon className="w-7 h-7" /></span>
               <h3 className="font-bold text-zinc-900 mb-3">Model językowy — inteligencja rozmowy</h3>
               <ul className="space-y-2 text-sm text-zinc-600">
                 {[
@@ -480,7 +481,7 @@ export default function Home() {
             </div>
 
             <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-2xl mb-3 block">📞</span>
+              <span className="text-brand-500 mb-3 block"><PhoneIcon className="w-7 h-7" /></span>
               <h3 className="font-bold text-zinc-900 mb-3">Niezawodna infrastruktura telefoniczna</h3>
               <ul className="space-y-2 text-sm text-zinc-600">
                 {[
@@ -500,7 +501,7 @@ export default function Home() {
             </div>
 
             <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-2xl mb-3 block">☁️</span>
+              <span className="text-brand-500 mb-3 block"><CloudIcon className="w-7 h-7" /></span>
               <h3 className="font-bold text-zinc-900 mb-3">Bezpieczeństwo i skalowanie</h3>
               <ul className="space-y-2 text-sm text-zinc-600">
                 {[
@@ -525,15 +526,15 @@ export default function Home() {
             <p className="text-sm font-semibold text-zinc-700 mb-4 text-center">Jak przebiega rozmowa — krok po kroku</p>
             <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
               {[
-                { label: "📞 Klient dzwoni", sub: "PSTN / VoIP" },
-                { label: "🎤 Zamiana mowy na tekst", sub: "STT w czasie rzeczywistym" },
-                { label: "✅ Analiza konwersacji", sub: "Model językowy + baza wiedzy" },
-                { label: "🎧 Synteza mowy", sub: "TTS < 100ms latencji" },
-                { label: "✅ Klient słyszy", sub: "<2 sekundy" },
+                { icon: <PhoneIcon className="w-4 h-4" />, label: "Klient dzwoni", sub: "PSTN / VoIP" },
+                { icon: <MicIcon className="w-4 h-4" />, label: "Zamiana mowy na tekst", sub: "STT w czasie rzeczywistym" },
+                { icon: <BrainIcon className="w-4 h-4" />, label: "Analiza konwersacji", sub: "Model językowy + baza wiedzy" },
+                { icon: <HeadphonesIcon className="w-4 h-4" />, label: "Synteza mowy", sub: "TTS < 100ms latencji" },
+                { icon: <PhoneIcon className="w-4 h-4" />, label: "Klient słyszy", sub: "<2 sekundy" },
               ].map((step, i) => (
                 <div key={step.label} className="flex items-center gap-2">
                   <div className="bg-white border border-brand-100 rounded-xl px-4 py-2.5 text-center shadow-sm hover:shadow-md transition-shadow">
-                    <p className="text-xs font-semibold text-brand-700 whitespace-nowrap">{step.label}</p>
+                    <p className="text-xs font-semibold text-brand-700 whitespace-nowrap flex items-center gap-1.5 justify-center">{step.icon}{step.label}</p>
                     <p className="text-[10px] text-brand-400/70">{step.sub}</p>
                   </div>
                   {i < 4 && <span className="text-brand-200 text-lg hidden sm:inline">→</span>}
@@ -559,7 +560,7 @@ export default function Home() {
               <div key={cs.title} className="card-lift bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:border-brand-200 hover:shadow-lg transition-all group">
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{cs.icon}</span>
+                    <span className="text-brand-500">{cs.icon === "building" ? <BuildingIcon className="w-6 h-6" /> : cs.icon === "phone" ? <PhoneIcon className="w-6 h-6" /> : <BankIcon className="w-6 h-6" />}</span>
                     <div>
                       <h3 className="font-bold text-zinc-900">{cs.title}</h3>
                       <p className="text-xs text-zinc-400">{cs.domain}</p>
@@ -698,9 +699,9 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold font-display tracking-tight">{tr.contact.title}</h2>
               <p className="text-brand-200/80 text-base md:text-lg leading-relaxed">{tr.contact.subtitle}</p>
               <div className="space-y-4">
-                {[["📞", tr.contact.phone, tr.contact.phoneDesc], ["📧", tr.contact.email, tr.contact.emailDesc], ["📍", tr.contact.location, tr.contact.locationDesc]].map(([icon, text, desc]) => (
+                {[{ icon: <PhoneIcon className="w-5 h-5" />, text: tr.contact.phone, desc: tr.contact.phoneDesc }, { icon: <EnvelopeIcon className="w-5 h-5" />, text: tr.contact.email, desc: tr.contact.emailDesc }, { icon: <PinIcon className="w-5 h-5" />, text: tr.contact.location, desc: tr.contact.locationDesc }].map(({ icon, text, desc }) => (
                   <div key={text} className="flex items-start gap-3">
-                    <span className="text-xl shrink-0">{icon}</span>
+                    <span className="text-brand-300 shrink-0">{icon}</span>
                     <div><p className="text-sm font-medium text-white">{text}</p><p className="text-xs text-brand-300/60">{desc}</p></div>
                   </div>
                 ))}

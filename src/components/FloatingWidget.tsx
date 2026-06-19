@@ -43,6 +43,8 @@ Email: kontakt@witaline.pl
 
 Odpowiadaj po polsku, krotko i naturalnie. Zachecaj do rejestracji i testowania.`;
 
+const WITALINE_BID = "00000000-0000-0000-0000-000000000001";
+const STORAGE_CONV = "fw_conv";
 const RODO_TEXT = "Zgodnie z RODO informujemy, ze rozmowy i korespondencja za posrednictwem tego widgetu sa analizowane przez asystenta AI i moga byc nagrywane w celu doskonalenia jakosci obslugi. Kontynuujac, wyrazasz zgode na przetwarzanie danych osobowych w celach obslugi zapytania.";
 const GREETING = "Czesc! Jestem asystentem WitaLine. Opowiem Ci o naszym Systemie Gwarantowanego Odbierania Klientow 24/7. Plany juz od 0 zl/mies. O co chcialbys zapytac?";
 const SUGGESTIONS = ["Ile kosztuje?", "Jak dziala?", "Jak zaczac?", "Co zyskuje?"];
@@ -51,10 +53,11 @@ export default function FloatingWidget() {
   const [open, setOpen] = useState(false);
   const [consented, setConsented] = useState(false);
   const [tab, setTab] = useState<"chat" | "voice">("voice");
-  const [messages, setMessages] = useState<Message[]>([{ role: "bot", text: GREETING }]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [convId, setConvId] = useState<string | null>(null);
+  const [histLoaded, setHistLoaded] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -65,6 +68,32 @@ export default function FloatingWidget() {
   useEffect(() => {
     if (open && consented) setTimeout(() => inputRef.current?.focus(), 300);
   }, [open, consented]);
+
+  useEffect(() => {
+    if (!consented || histLoaded) return;
+    const stored = localStorage.getItem(STORAGE_CONV);
+    if (!stored) {
+      setMessages([{ role: "bot", text: GREETING }]);
+      setHistLoaded(true);
+      return;
+    }
+    setConvId(stored);
+    fetch(`/api/conversations/${stored}/messages`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const msgs = data?.messages || data || [];
+        if (msgs.length > 1) {
+          setMessages(msgs.map((m: any) => ({ role: m.role === "user" ? "user" : "bot", text: m.content })));
+        } else {
+          setMessages([{ role: "bot", text: GREETING }]);
+        }
+        setHistLoaded(true);
+      })
+      .catch(() => {
+        setMessages([{ role: "bot", text: GREETING }]);
+        setHistLoaded(true);
+      });
+  }, [consented, histLoaded]);
 
   async function send(text: string) {
     if (!text.trim() || typing) return;
@@ -80,11 +109,14 @@ export default function FloatingWidget() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: chatMessages, systemPrompt: WITALINE_KNOWLEDGE, businessName: "WitaLine", businessId: "00000000-0000-0000-0000-000000000001", channel: "widget", conversationId: convId }),
+        body: JSON.stringify({ messages: chatMessages, systemPrompt: WITALINE_KNOWLEDGE, businessName: "WitaLine", businessId: WITALINE_BID, channel: "widget", conversationId: convId }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (data.conversationId && !convId) setConvId(data.conversationId);
+      if (data.conversationId) {
+        setConvId(data.conversationId);
+        localStorage.setItem(STORAGE_CONV, data.conversationId);
+      }
       setMessages(prev => [...prev, { role: "bot", text: data.reply || "Przepraszam, sprobuj ponownie." }]);
     } catch {
       setMessages(prev => [...prev, { role: "bot", text: "Przepraszam, wystapil blad polaczenia. Sprobuj ponownie za chwile." }]);

@@ -21,6 +21,7 @@ import AdminSmsManagement from "@/components/AdminSmsManagement";
 import AdminDtmfLogs from "@/components/AdminDtmfLogs";
 import AdminSecurityDashboard from "@/components/AdminSecurityDashboard";
 import AdminRealCosts from "@/components/AdminRealCosts";
+import AdminDailyCosts from "@/components/AdminDailyCosts";
 import AdminBusinessDetail from "@/components/AdminBusinessDetail";
 import ConsultantListManager from "@/components/ConsultantListManager";
 import AdminPortRequests from "@/components/AdminPortRequests";
