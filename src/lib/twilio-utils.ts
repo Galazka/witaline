@@ -112,11 +112,12 @@ export async function redirectCallWithTransferTwiML(callSid: string, targetNumbe
   const safeCallerId = escapeXml(callerId);
   const cleanUrl = baseUrl.replace(/\/+$/, "");
   const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx}`;
+  const recordingCallbackUrl = `${cleanUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
   const holdUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
   const twimlBody = `
 <Play>${escapeXml(holdUrl)}</Play>
 <Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
-<Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
+<Dial callerId="${safeCallerId}" timeout="25" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
   <Number>${safeTarget}</Number>
 </Dial>
 <Redirect method="POST">${escapeXml(`${cleanUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}</Redirect>

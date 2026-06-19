@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     const consultantPhone = (consultants && consultants.length > 0) ? consultants[0].phone : pending.targetNumber;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&idx=${consultants?.length ? 1 : 0}`;
     const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`;
+    const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
 
     // Hold music + komunikat — Maja mogła nie zdążyć powiedzieć "przekazuję"
     const holdMusicUrl = process.env.HOLD_MUSIC_URL || "";
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     return twiml(`
       ${holdMusicTag}
       <Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
-      <Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
+      <Dial callerId="${safeCallerId}" timeout="25" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
         <Number>${escapeXml(consultantPhone)}</Number>
       </Dial>
       <Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>
