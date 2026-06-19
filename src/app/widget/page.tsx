@@ -21,6 +21,8 @@ interface BusinessData {
   plan: string;
 }
 
+const STORAGE_KEY = (id: string) => `widget_conv_${id}`;
+
 export default function WidgetPage({ searchParams }: { searchParams: Promise<{ business?: string }> }) {
   const params = use(searchParams);
   const businessId = params.business;
@@ -42,15 +44,41 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
       setLoading(false);
       return;
     }
+    const stored = localStorage.getItem(STORAGE_KEY(businessId));
+    const initialConvId = stored || null;
+    if (initialConvId) setConversationId(initialConvId);
+
     fetch(`/api/widget/${businessId}`)
       .then(r => r.json())
       .then(async (data) => {
         setBusiness(data);
-        setMessages([{
-          role: "bot",
-          text: `Dzień dobry! Jestem asystentem AI ${data.name || "firmy"}. W czym mogę pomóc?`,
-          timestamp: Date.now(),
-        }]);
+        const greeting = `Dzień dobry! Jestem asystentem AI ${data.name || "firmy"}. W czym mogę pomóc?`;
+
+        if (initialConvId) {
+          try {
+            const hres = await fetch(`/api/conversations/${initialConvId}/messages`);
+            if (hres.ok) {
+              const history = await hres.json();
+              const restored: Message[] = (history.messages || history || []).map((m: any) => ({
+                role: m.role === "user" ? "user" : "bot",
+                text: m.content,
+                timestamp: new Date(m.created_at).getTime(),
+              }));
+
+              if (restored.length > 1) {
+                setMessages(restored);
+              } else {
+                setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
+              }
+            } else {
+              setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
+            }
+          } catch {
+            setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
+          }
+        } else {
+          setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -102,7 +130,10 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
         }),
       });
       const data = await res.json();
-      if (data.conversationId) setConversationId(data.conversationId);
+      if (data.conversationId) {
+        setConversationId(data.conversationId);
+        if (businessId) localStorage.setItem(STORAGE_KEY(businessId as string), data.conversationId);
+      }
       setMessages(prev => [...prev, { role: "bot", text: data.reply || "Przepraszam, błąd.", timestamp: Date.now() }]);
     } catch {
       setMessages(prev => [...prev, { role: "bot", text: "Błąd połączenia.", timestamp: Date.now() }]);

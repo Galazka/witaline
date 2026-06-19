@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server";
 import * as https from "https";
+import { setActiveCallSid } from "@/lib/active-call-store";
 
 export function escapeXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
@@ -89,7 +90,9 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
 
 export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
-  if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfiguracji. Prosimy spróbować później.</Say><Hangup/>`);
+  if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfigucji. Prosimy spróbować później.</Say><Hangup/>`);
+  // Store callSid for MCP handler to find if agent doesn't pass it
+  setActiveCallSid(businessId, callSid);
   try {
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
@@ -109,8 +112,9 @@ export async function redirectCallWithTransferTwiML(callSid: string, targetNumbe
   const safeCallerId = escapeXml(callerId);
   const cleanUrl = baseUrl.replace(/\/+$/, "");
   const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx}`;
+  const holdUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
   const twimlBody = `
-<Play>${escapeXml("https://cdn.witaline.app/hold-music.mp3")}</Play>
+<Play>${escapeXml(holdUrl)}</Play>
 <Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
 <Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
   <Number>${safeTarget}</Number>

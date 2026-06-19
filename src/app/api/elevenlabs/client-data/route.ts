@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     const callerId = body?.caller_id || "";
     const calledNumber = body?.called_number || "";
     const agentNumber = body?.phone_number?.agent_number || "";
+    const callSid = body?.call_sid || "";
 
     let businessId = WITALINE_BUSINESS_ID;
     let customVoiceId: string | null = null;
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
         called_number: calledNumber,
         agent_number: agentNumber,
         from_number: callerId,
+        call_sid: callSid,
       },
     };
 

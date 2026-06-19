@@ -44,6 +44,7 @@ export async function POST(request: Request) {
 
     const consultantPhone = (consultants && consultants.length > 0) ? consultants[0].phone : pending.targetNumber;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&idx=${consultants?.length ? 1 : 0}`;
+    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`;
 
     // Hold music + komunikat — Maja mogła nie zdążyć powiedzieć "przekazuję"
     const holdMusicUrl = process.env.HOLD_MUSIC_URL || "";
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       <Dial callerId="${safeCallerId}" timeout="25" action="${escapeXml(actionUrl)}" method="POST">
         <Number>${escapeXml(consultantPhone)}</Number>
       </Dial>
+      <Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>
     `);
   }
 
