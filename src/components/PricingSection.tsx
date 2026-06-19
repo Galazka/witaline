@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getPlanConfig, formatPrice, getPlanOverageRate, calculateSelfServicePrice, calculateElasticPrice, ELASTIC_TIERS, INTERNAL_COST_PER_MIN, CONFIG, type SelfServiceConfig, type ElasticPriceBreakdown } from "@/lib/pricing";
+import { formatPrice, calculateSelfServicePrice, calculateElasticPrice, ELASTIC_TIERS, CONFIG, type SelfServiceConfig } from "@/lib/pricing";
 import type { Locale } from "@/lib/i18n";
 
 function CheckIcon() {
@@ -217,59 +217,7 @@ export default function PricingSection({
               </div>
             </div>
 
-            {/* Internal pricing table — visible to all */}
-            <details className="bg-zinc-50 border border-zinc-200 rounded-xl p-5">
-              <summary className="text-sm font-semibold text-zinc-600 cursor-pointer select-none hover:text-zinc-900 transition">
-                {locale === "en" ? "📊 Full pricing table (all tiers)" : "📊 Pełna tabela cenowa (wszystkie progi)"}
-              </summary>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-zinc-400 uppercase tracking-wider border-b border-zinc-200">
-                      <th className="text-left pb-2 pr-3">{locale === "en" ? "Tier" : "Próg"}</th>
-                      <th className="text-right pb-2 pr-3">{locale === "en" ? "Min" : "Minuty"}</th>
-                      <th className="text-right pb-2 pr-3">PLN/min</th>
-                      <th className="text-right pb-2 pr-3">{locale === "en" ? "Monthly" : "Miesięcznie"}</th>
-                      <th className="text-right pb-2 pr-3">{locale === "en" ? "Our cost" : "Nasz koszt"}</th>
-                      <th className="text-right pb-2 pr-3">{locale === "en" ? "Profit" : "Zysk"}</th>
-                      <th className="text-right pb-2">{locale === "en" ? "Margin" : "Marża"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ELASTIC_TIERS.filter(t => t.minMinutes > 0).map(t => {
-                      const p = calculateElasticPrice(t.maxMinutes);
-                      return (
-                        <tr key={t.minMinutes} className={`border-b border-zinc-100 ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-brand-50 font-semibold" : ""}`}>
-                          <td className="py-2 pr-3 text-zinc-700">{t.minMinutes}–{t.maxMinutes}</td>
-                          <td className="py-2 pr-3 text-right text-zinc-700">{t.maxMinutes}</td>
-                          <td className="py-2 pr-3 text-right text-zinc-700">{p.ratePerMin.toFixed(2).replace(".", ",")}</td>
-                          <td className="py-2 pr-3 text-right text-zinc-700">{p.monthlyNetto.toFixed(2).replace(".", ",")} zł</td>
-                          <td className="py-2 pr-3 text-right text-zinc-500">{p.costTotal.toFixed(2).replace(".", ",")} zł</td>
-                          <td className="py-2 pr-3 text-right text-green-600">{p.profitTotal.toFixed(2).replace(".", ",")} zł</td>
-                          <td className="py-2 text-right text-brand-600">{p.marginPercent}%</td>
-                        </tr>
-                      );
-                    })}
-                    {/* 50 min row */}
-                    {(() => {
-                      const p50 = calculateElasticPrice(50);
-                      return (
-                        <tr className={`border-b border-zinc-100 ${minutes >= 0 && minutes <= 50 ? "bg-brand-50 font-semibold" : ""}`}>
-                          <td className="py-2 pr-3 text-zinc-700">0–50</td>
-                          <td className="py-2 pr-3 text-right text-zinc-700">50</td>
-                          <td className="py-2 pr-3 text-right text-zinc-700">{p50.ratePerMin.toFixed(2).replace(".", ",")}</td>
-                          <td className="py-2 pr-3 text-right text-zinc-700">{p50.monthlyNetto.toFixed(2).replace(".", ",")} zł</td>
-                          <td className="py-2 pr-3 text-right text-zinc-500">{p50.costTotal.toFixed(2).replace(".", ",")} zł</td>
-                          <td className="py-2 pr-3 text-right text-green-600">{p50.profitTotal.toFixed(2).replace(".", ",")} zł</td>
-                          <td className="py-2 text-right text-brand-600">{p50.marginPercent}%</td>
-                        </tr>
-                      );
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-[10px] text-zinc-400 mt-3">{locale === "en" ? "Internal cost: 0.65 PLN/min (ElevenLabs + Twilio + LLM). Margins calculated on netto prices." : "Koszt wewnętrzny: 0,65 PLN/min (ElevenLabs + Twilio + LLM). Marża liczona od ceny netto."}</p>
-            </details>
+
           </div>
         )}
 
