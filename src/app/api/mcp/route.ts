@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
 import { escapeXml, twimlDocument, redirectCallWithTransferTwiML } from "@/lib/twilio-utils";
 import { setPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
-import { getActiveCallSid } from "@/lib/active-call-store";
+import { getActiveCallSids } from "@/lib/active-call-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -130,9 +130,10 @@ export async function POST(request: NextRequest) {
         const toNumber = args.to_number || "";
         let callSid = args.call_sid || "";
 
-        // If agent didn't pass callSid, try to look it up from active-call-store
+        // If agent didn't pass callSid, try all stored call SIDs for this business
         if (!callSid) {
-          callSid = getActiveCallSid(bizId) || "";
+          const allSids = getActiveCallSids(bizId);
+          callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
         }
 
         let targetNumber = "";
@@ -175,14 +176,17 @@ export async function POST(request: NextRequest) {
 
           // Try immediate REST API redirect using callSid (most reliable)
           let restApiOk = false;
-          if (callSid) {
+          const allSids = callSid ? [callSid] : getActiveCallSids(bizId);
+          if (allSids.length > 0) {
             const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-            const redirectResult = await redirectCallWithTransferTwiML(callSid, targetNumber, callerId, baseUrl, bizId, consultants?.length ? 1 : 0);
-            if (redirectResult.ok) {
-              restApiOk = true;
-              console.log("[MCP transfer_to_human] REST API redirect ok for", callSid);
-            } else {
-              console.warn("[MCP transfer_to_human] REST API redirect failed:", redirectResult.message);
+            for (const sid of allSids) {
+              const redirectResult = await redirectCallWithTransferTwiML(sid, targetNumber, callerId, baseUrl, bizId, consultants?.length ? 1 : 0);
+              if (redirectResult.ok) {
+                restApiOk = true;
+                console.log("[MCP transfer_to_human] REST API redirect ok for", sid);
+                break;
+              }
+              console.warn("[MCP transfer_to_human] REST API redirect failed for", sid, ":", redirectResult.message);
             }
           }
 
