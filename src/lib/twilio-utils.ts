@@ -107,22 +107,53 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
   return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z połączeniem. Proszę spróbować później.</Say><Hangup/>`);
 }
 
+export async function dialConsultantToQueue(targetNumber: string, callerId: string, queueName: string, baseUrl: string, businessId: string, callSid: string): Promise<{ ok: boolean; sid?: string; message: string }> {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  if (!sid || !token) return { ok: false, message: "Twilio credentials not configured" };
+
+  const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+  const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Queue>${escapeXml(queueName)}</Queue></Dial></Response>`;
+  const statusCallback = `${baseUrl}/api/twilio/transfer-status?queue=${encodeURIComponent(queueName)}&callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+
+  const body = new URLSearchParams({
+    To: targetNumber,
+    From: callerId,
+    Twiml: consulTwiml,
+    Timeout: "25",
+    StatusCallback: statusCallback,
+    StatusCallbackEvent: "initiated+ringing+answered+completed",
+  });
+
+  const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${sid}/Calls.json`, body);
+  if (res.status >= 200 && res.status < 300) {
+    const data = res.data as { sid?: string };
+    return { ok: true, sid: data?.sid, message: "Consultant dialed to queue" };
+  }
+  return { ok: false, message: typeof res.data === "string" ? res.data : res.data?.message || "Dial failed" };
+}
+
 export async function redirectCallWithTransferTwiML(callSid: string, targetNumber: string, callerId: string, baseUrl: string, businessId: string, idx: number): Promise<{ ok: boolean; status?: number; message: string }> {
-  const safeTarget = escapeXml(targetNumber);
-  const safeCallerId = escapeXml(callerId);
   const cleanUrl = baseUrl.replace(/\/+$/, "");
-  const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx}`;
-  const recordingCallbackUrl = `${cleanUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+  const queueName = `handoff_${callSid}`;
   const holdUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+  const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
+
   const twimlBody = `
-<Play>${escapeXml(holdUrl)}</Play>
-<Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
-<Dial callerId="${safeCallerId}" timeout="25" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
-  <Number>${safeTarget}</Number>
-</Dial>
+<Enqueue waitUrl="${escapeXml(holdUrl)}" action="${escapeXml(actionUrl)}" method="POST">
+  ${escapeXml(queueName)}
+</Enqueue>
 <Redirect method="POST">${escapeXml(`${cleanUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}</Redirect>
 <Hangup/>`;
-  return redirectActiveCallToHumanHandoff(callSid, twimlBody);
+
+  const result = await redirectActiveCallToHumanHandoff(callSid, twimlBody);
+
+  if (result.ok) {
+    dialConsultantToQueue(targetNumber, callerId, queueName, cleanUrl, businessId, callSid)
+      .catch(err => console.error("[redirectCallWithTransferTwiML] dial consultant failed:", err));
+  }
+
+  return result;
 }
 
 export async function redirectCallToVoicemail(callSid: string, businessId: string, baseUrl: string): Promise<{ ok: boolean; status?: number; message: string }> {

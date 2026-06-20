@@ -20,43 +20,52 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const dialCallStatus = String(formData.get("DialCallStatus") || "");
+    const queueResult = String(formData.get("QueueResult") || "");
     const from = String(formData.get("From") || "");
     const to = String(formData.get("To") || "");
 
-    console.log("[human-handoff/next] status:", dialCallStatus || "unknown", "from:", from, "to:", to);
+    console.log("[human-handoff/next] dialCallStatus:", dialCallStatus, "queueResult:", queueResult, "from:", from);
 
     const url = new URL(request.url);
     const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
+    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
 
-    // Consultant answered and hung up → reconnect Maja so she can say goodbye
+    // Called from <Enqueue> action — bridge with consultant ended
+    if (queueResult === "bridged") {
+      return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
+    }
+    if (queueResult) {
+      return twiml("<Hangup/>");
+    }
+
+    // Called from <Dial> action (backward compat with old flow)
     if (dialCallStatus === "completed") {
-      const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
       return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
     }
 
-    const idx = parseInt(url.searchParams.get("idx") || "0", 10);
+    if (dialCallStatus && dialCallStatus !== "completed") {
+      const idx = parseInt(url.searchParams.get("idx") || "0", 10);
+      const { data: consultants } = await supabaseAdmin
+        .from("business_consultants")
+        .select("phone")
+        .eq("business_id", businessId)
+        .order("sort_order", { ascending: true });
 
-    const { data: consultants } = await supabaseAdmin
-      .from("business_consultants")
-      .select("phone")
-      .eq("business_id", businessId)
-      .order("sort_order", { ascending: true });
+      if (consultants && idx < consultants.length) {
+        const nextConsultant = consultants[idx];
+        const callerId = to;
+        const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
+        const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=&businessId=${encodeURIComponent(businessId)}`;
 
-    if (consultants && idx < consultants.length) {
-      const nextConsultant = consultants[idx];
-      const callerId = to;
-      const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
-      const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=&businessId=${encodeURIComponent(businessId)}`;
-
-      return twiml(`
-        <Dial callerId="${escapeXml(callerId)}" timeout="20" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
-          <Number>${escapeXml(nextConsultant.phone)}</Number>
-        </Dial>
-      `);
+        return twiml(`
+          <Dial callerId="${escapeXml(callerId)}" timeout="20" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
+            <Number>${escapeXml(nextConsultant.phone)}</Number>
+          </Dial>
+        `);
+      }
     }
 
-    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
     return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

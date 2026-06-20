@@ -1,104 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { twimlDocument, escapeXml } from "@/lib/twilio-utils";
 
-const MAX_ATTEMPTS = 5;
-const RETRY_DELAY_SEC = 15;
+const MAX_ATTEMPTS = 3;
+const RETRY_DELAY_SEC = 10;
+
+function twilioApiRedirect(callSid: string, fallbackUrl: string): Promise<boolean> {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  if (!sid || !token || !callSid) return Promise.resolve(false);
+  const auth = Buffer.from(`${sid}:${token}`).toString("base64");
+  const twiml = `<Response><Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect></Response>`;
+  const body = new URLSearchParams({ Twiml: twimlDocument(twiml) });
+  return fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Calls/${callSid}.json`, {
+    method: "POST",
+    headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  }).then(r => r.ok).catch(() => false);
+}
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const callSid = (formData.get("CallSid") as string) || "";
+    const consulCallSid = (formData.get("CallSid") as string) || "";
     const callStatus = (formData.get("CallStatus") as string) || "";
-    const room = request.nextUrl.searchParams.get("room") || "";
+    const queue = request.nextUrl.searchParams.get("queue") || "";
+    const originalCallSid = request.nextUrl.searchParams.get("callSid") || "";
+    const businessId = request.nextUrl.searchParams.get("businessId") || "";
 
-    console.log("[transfer-status] callback:", { callSid, callStatus, room });
+    console.log("[transfer-status] callback:", { consulCallSid, callStatus, queue, originalCallSid });
 
-    if (!room) {
-      console.log("[transfer-status] no room in query, skipping");
+    if (!queue) {
+      console.log("[transfer-status] no queue in query, skipping");
       return NextResponse.json({ ok: true });
     }
 
-    if (callStatus === "in-progress") {
-      await supabaseAdmin
-        .from("transfer_queue")
-        .update({ status: "connected", updated_at: new Date().toISOString() })
-        .eq("conference_room", room);
-      console.log("[transfer-status] consultant answered, connected:", room);
+    if (callStatus === "in-progress" || callStatus === "completed") {
+      console.log("[transfer-status] consultant answered, queue:", queue);
       return NextResponse.json({ ok: true });
     }
 
     if (callStatus === "busy" || callStatus === "no-answer" || callStatus === "failed") {
-      const { data: queue } = await supabaseAdmin
-        .from("transfer_queue")
-        .select("*")
-        .eq("conference_room", room)
-        .in("status", ["waiting", "ringing"])
-        .maybeSingle();
-
-      if (!queue) {
-        console.log("[transfer-status] no active queue entry for room:", room);
-        return NextResponse.json({ ok: true });
+      if (originalCallSid && businessId) {
+        const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const fallbackUrl = `${baseUrl.replace(/\/+$/, "")}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
+        const redirected = await twilioApiRedirect(originalCallSid, fallbackUrl);
+        console.log("[transfer-status] max attempts, redirected caller to fallback:", redirected, "callSid:", originalCallSid);
       }
-
-      const newAttempts = (queue.attempts || 0) + 1;
-
-      if (newAttempts >= MAX_ATTEMPTS) {
-        await supabaseAdmin
-          .from("transfer_queue")
-          .update({ status: "expired", attempts: newAttempts, updated_at: new Date().toISOString() })
-          .eq("id", queue.id);
-        console.log("[transfer-status] max attempts reached, queue expired:", room);
-        return NextResponse.json({ ok: true });
-      }
-
-      await supabaseAdmin
-        .from("transfer_queue")
-        .update({ status: "waiting", attempts: newAttempts, updated_at: new Date().toISOString() })
-        .eq("id", queue.id);
-
-      // Retry after delay
-      setTimeout(async () => {
-        try {
-          const sid = process.env.TWILIO_ACCOUNT_SID;
-          const token = process.env.TWILIO_AUTH_TOKEN;
-          const twilioNumber = process.env.TWILIO_PHONE_NUMBER;
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-          if (!sid || !token || !twilioNumber || !queue.consultant_phone) return;
-
-          const auth = Buffer.from(`${sid}:${token}`).toString("base64");
-          const roomNameSafe = room.replace(/[^a-zA-Z0-9_-]/g, "");
-          const consulTwiml = `<Response><Dial><Conference endConferenceOnExit="false">${roomNameSafe}</Conference></Dial></Response>`;
-          const callbackUrl = `${appUrl}/api/twilio/transfer-status?room=${room}`;
-
-          const body = new URLSearchParams({
-            To: queue.consultant_phone,
-            From: twilioNumber,
-            Twiml: consulTwiml,
-            Timeout: "30",
-            StatusCallback: callbackUrl,
-            StatusCallbackEvent: "initiated+ringing+answered+completed",
-          });
-
-          const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Calls.json`, {
-            method: "POST",
-            headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
-            body: body.toString(),
-          });
-
-          if (res.ok) {
-            const d = await res.json();
-            console.log("[transfer-status] retry call initiated:", d.sid, "for room:", room);
-            await supabaseAdmin
-              .from("transfer_queue")
-              .update({ status: "ringing", updated_at: new Date().toISOString() })
-              .eq("id", queue.id);
-          }
-        } catch (e) {
-          console.error("[transfer-status] retry error:", e);
-        }
-      }, RETRY_DELAY_SEC * 1000);
-
-      return NextResponse.json({ ok: true, retry_at: `+${RETRY_DELAY_SEC}s` });
+      return NextResponse.json({ ok: true });
     }
 
     return NextResponse.json({ ok: true });

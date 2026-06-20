@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
-import { escapeXml } from "@/lib/twilio-utils";
+import { escapeXml, dialConsultantToQueue } from "@/lib/twilio-utils";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -24,7 +24,6 @@ export async function POST(request: Request) {
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
-  // Szukaj po businessId (MCP handler zapisuje pod bizId), potem po callSid
   let pending = getPendingTransfer(businessId) || getPendingTransfer(callSid);
 
   if (pending) {
@@ -39,25 +38,25 @@ export async function POST(request: Request) {
       .order("sort_order", { ascending: true });
 
     const callerId = pending.callerId || process.env.TWILIO_PHONE_NUMBER || "";
-    const safeCallerId = escapeXml(callerId);
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
-
     const consultantPhone = (consultants && consultants.length > 0) ? consultants[0].phone : pending.targetNumber;
-    const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&idx=${consultants?.length ? 1 : 0}`;
-    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`;
-    const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+    const queueName = `handoff_${callSid || "fallback"}`;
+    const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+    const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
-    // Hold music + komunikat — Maja mogła nie zdążyć powiedzieć "przekazuję"
-    const holdMusicUrl = process.env.HOLD_MUSIC_URL || "";
-    const holdMusicTag = holdMusicUrl ? `<Play>${escapeXml(holdMusicUrl)}</Play>` : "";
-    return twiml(`
-      ${holdMusicTag}
-      <Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say>
-      <Dial callerId="${safeCallerId}" timeout="25" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
-        <Number>${escapeXml(consultantPhone)}</Number>
-      </Dial>
-      <Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>
-    `);
+    // Caller enters queue with hold music — consultant dialed in parallel via REST API
+    const responseTwiml = twiml(`
+<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST">
+  ${escapeXml(queueName)}
+</Enqueue>
+<Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
+`);
+
+    // Fire-and-forget: dial consultant to queue
+    dialConsultantToQueue(consultantPhone, callerId, queueName, baseUrl, pending.businessId, callSid)
+      .catch(err => console.error("[transfer-router] dial consultant failed:", err));
+
+    return responseTwiml;
   }
 
   console.log("[transfer-router] no pending transfer, hanging up");
