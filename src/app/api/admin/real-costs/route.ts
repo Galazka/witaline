@@ -55,7 +55,7 @@ export async function GET(request: Request) {
   // 2. Call logs in period
   let callsQuery = supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, from_number, caller_id, twilio_call_sid, created_at")
+    .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, from_number, caller_id, twilio_call_sid, classification, created_at")
     .is("deleted_at", null)
     .gte("created_at", fromStr)
     .lte("created_at", toStr + "T23:59:59");
@@ -186,7 +186,13 @@ function buildCallMap(logs: typeof callLogs) {
     duration_seconds: log.duration_seconds,
     cost_pln: Number(log.cost_pln) || 0,
     internal_cost_pln: Number(log.internal_cost_pln ?? log.cost_pln) || 0,
+    cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
+    cost_twilio: Number(log.cost_twilio) || 0,
+    cost_openrouter: Number(log.cost_openrouter) || 0,
+    total_cost: Number(log.total_cost) || Number(log.cost_pln) || 0,
+    revenue_pln: Number(log.revenue_pln) || 0,
     from_number: log.from_number || log.caller_id || "",
+    classification: log.classification || "unknown",
     created_at: log.created_at,
     business_name: bizMap.get(log.business_id || "")?.name || "Nieznana",
   }));

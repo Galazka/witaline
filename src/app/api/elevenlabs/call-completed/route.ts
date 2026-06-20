@@ -257,15 +257,16 @@ export async function POST(request: Request) {
   const internalCostPln = Math.round(estimatedTokens * 0.00065 * 100) / 100;
   const classification = classifyCall(summary || "", transcript || "");
 
-  const { data: callLog } = await supabaseAdmin
-    .from("call_logs")
-    .insert({
-      business_id: businessId,
-      elevenlabs_conversation_id: conversationId || "",
-      duration_seconds: durationSeconds,
-      cost_pln: costPln,
-      internal_cost_pln: internalCostPln,
-      caller_id: callerId || "unknown",
+      const { data: callLog } = await supabaseAdmin
+        .from("call_logs")
+        .insert({
+          business_id: businessId,
+          elevenlabs_conversation_id: conversationId || "",
+          duration_seconds: durationSeconds,
+          cost_pln: costPln,
+          internal_cost_pln: internalCostPln,
+          revenue_pln: costPln,
+          caller_id: callerId || "unknown",
       from_number: (metadata.from_number as string) || callerId || "",
       twilio_call_sid: (metadata.twilio_call_sid as string) || "",
       routed_from_main: !!(metadata.routed_from_main),

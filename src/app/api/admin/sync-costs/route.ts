@@ -20,13 +20,11 @@ export async function POST() {
 
   const stats: SyncStats = { total: 0, elevenlabs: 0, twilio: 0, errors: 0, skipped: 0 };
 
-  // Sync ALL records that haven't been synced yet
-  // (cost_elevenlabs = 0 and has conversation_id, OR cost_twilio = 0 and has twilio_call_sid)
-  // Also re-sync records where cost is suspiciously low
+  // Sync records missing real costs or where total_cost isn't set
   const { data: callLogs } = await supabaseAdmin
     .from("call_logs")
-    .select("id, conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, duration_seconds, created_at")
-    .or("cost_elevenlabs.is.null,cost_elevenlabs.eq.0,cost_twilio.is.null,cost_twilio.eq.0")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at")
+    .or("total_cost.is.null,total_cost.eq.0")
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -48,10 +46,10 @@ export async function POST() {
         const updates: Record<string, unknown> = {};
 
         // 1. ElevenLabs cost
-        if (ELEVENLABS_API_KEY && log.conversation_id) {
+        if (ELEVENLABS_API_KEY && log.elevenlabs_conversation_id) {
           try {
             const res = await fetch(
-              `https://api.elevenlabs.io/v1/convai/conversations/${log.conversation_id}`,
+              `https://api.elevenlabs.io/v1/convai/conversations/${log.elevenlabs_conversation_id}`,
               { headers: { "xi-api-key": ELEVENLABS_API_KEY } }
             );
             if (res.ok) {
@@ -71,7 +69,7 @@ export async function POST() {
               }
             }
           } catch (e) {
-            console.warn(`[sync-costs] ElevenLabs fetch error for ${log.conversation_id}:`, e);
+            console.warn(`[sync-costs] ElevenLabs fetch error for ${log.elevenlabs_conversation_id}:`, e);
             stats.errors++;
           }
         }
@@ -98,18 +96,35 @@ export async function POST() {
           }
         }
 
-        if (Object.keys(updates).length > 0) {
-          const { error: updateError } = await supabaseAdmin
-            .from("call_logs")
-            .update(updates)
-            .eq("id", log.id);
+        // 3. Always calculate total_cost and revenue_pln
+        const uEL = updates.cost_elevenlabs;
+        const uTW = updates.cost_twilio;
+        const currentElevenlabs = Number(uEL !== undefined ? uEL : log.cost_elevenlabs) || 0;
+        const currentTwilio = Number(uTW !== undefined ? uTW : log.cost_twilio) || 0;
+        const currentOpenrouter = Number(log.cost_openrouter) || 0;
+        const calcTotalCost = Math.round((currentElevenlabs + currentTwilio + currentOpenrouter) * 100000) / 100000;
 
-          if (updateError) {
-            console.warn(`[sync-costs] DB update error for ${log.id}:`, updateError.message);
-            stats.errors++;
+        updates.total_cost = calcTotalCost;
+        updates.internal_cost_pln = calcTotalCost;
+
+        // Set revenue_pln = cost_pln for non-main-line businesses (what client was charged)
+        const isMainLine = log.business_id === "00000000-0000-0000-0000-000000000001";
+        const currentRevenue = Number(log.revenue_pln) || 0;
+        if (currentRevenue === 0 && !isMainLine) {
+          const chargedPln = Number(log.cost_pln) || 0;
+          if (chargedPln > 0) {
+            updates.revenue_pln = chargedPln;
           }
-        } else {
-          stats.skipped++;
+        }
+
+        const { error: updateError } = await supabaseAdmin
+          .from("call_logs")
+          .update(updates)
+          .eq("id", log.id);
+
+        if (updateError) {
+          console.warn(`[sync-costs] DB update error for ${log.id}:`, updateError.message);
+          stats.errors++;
         }
       })
     );
