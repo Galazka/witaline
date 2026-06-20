@@ -2,6 +2,16 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const WHATSAPP_SANDBOX_NUMBER = "+14155238886";
 
+// Use configured WhatsApp sender from env, or fall back to sandbox / main number
+function getWhatsAppFrom(): string {
+  const configured = process.env.TWILIO_WHATSAPP_FROM;
+  if (configured) return configured;
+  // Fallback: try main Twilio number (must be registered as WhatsApp sender)
+  const mainNumber = process.env.TWILIO_PHONE_NUMBER;
+  if (mainNumber) return mainNumber;
+  return WHATSAPP_SANDBOX_NUMBER;
+}
+
 function getTwilioAuth(): string {
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
@@ -42,7 +52,7 @@ export async function sendWhatsApp(
   const normalized = toNumber.startsWith("+") ? toNumber : `+${toNumber}`;
   // Ensure Polish number has correct format for WhatsApp
   const waTo = `whatsapp:${normalized}`;
-  const waFrom = `whatsapp:${WHATSAPP_SANDBOX_NUMBER}`;
+  const waFrom = `whatsapp:${getWhatsAppFrom()}`;
 
   try {
     const form = new URLSearchParams({ To: waTo, From: waFrom, Body: messageBody });

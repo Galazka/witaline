@@ -8,6 +8,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const businessId = searchParams.get("businessId");
+  const channel = searchParams.get("channel") || "sms"; // "sms" | "whatsapp"
   if (!businessId) return NextResponse.json({ error: "Missing businessId" }, { status: 400 });
 
   const { data: biz } = await supabase
@@ -18,6 +19,16 @@ export async function GET(request: Request) {
     .single();
 
   if (!biz) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (channel === "whatsapp") {
+    const { data: logs } = await supabase
+      .from("wa_logs")
+      .select("*")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    return NextResponse.json(logs || []);
+  }
 
   const { data: logs } = await supabase
     .from("sms_logs")

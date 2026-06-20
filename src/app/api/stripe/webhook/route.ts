@@ -31,6 +31,8 @@ export async function POST(request: Request) {
     const customerId = obj?.customer;
     const subscriptionId = obj?.subscription;
     const paymentType = obj?.metadata?.type;
+    const currency = obj?.metadata?.currency || "pln";
+    const amountPLN = parseFloat(obj?.metadata?.amount_pln || obj?.metadata?.price_pln || "0");
 
     if (!businessId) return NextResponse.json({ received: true });
 
@@ -40,14 +42,16 @@ export async function POST(request: Request) {
       if (minutes > 0) {
         const { data: biz } = await supabaseAdmin
           .from("businesses")
-          .select("prepaid_minutes, lifetime_purchased_minutes")
+          .select("prepaid_minutes, lifetime_purchased_minutes, total_spent")
           .eq("id", businessId)
           .single();
 
         const currentBalance = parseFloat(biz?.prepaid_minutes || "0");
         const currentLifetime = parseFloat(biz?.lifetime_purchased_minutes || "0");
+        const currentSpent = parseFloat(String(biz?.total_spent || "0"));
         const newBalance = Math.round((currentBalance + minutes) * 100) / 100;
         const newLifetime = Math.round((currentLifetime + minutes) * 100) / 100;
+        const newSpent = currentSpent + amountPLN;
 
         await supabaseAdmin
           .from("businesses")
@@ -55,15 +59,60 @@ export async function POST(request: Request) {
             stripe_customer_id: customerId || undefined,
             prepaid_minutes: newBalance,
             lifetime_purchased_minutes: newLifetime,
+            total_spent: newSpent,
           })
           .eq("id", businessId);
 
-        console.log("[stripe] minute package purchased:", { businessId, minutes, newBalance, newLifetime });
+        // Notification about purchase with currency info
+        await supabaseAdmin.from("notifications").insert({
+          business_id: businessId,
+          type: "system",
+          title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
+          message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+          metadata: { currency, amount_pln: amountPLN, minutes },
+        }).catch(() => {});
+
+        console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance });
       }
       return NextResponse.json({ received: true });
     }
 
-    // Subscription flow (existing)
+    // Handle SMS package purchase (one-time payment)
+    if (paymentType === "sms_package") {
+      const smsCount = parseInt(obj?.metadata?.sms_count || "0", 10);
+      if (smsCount > 0) {
+        const { data: biz } = await supabaseAdmin
+          .from("businesses")
+          .select("sms_extra_purchased, sms_used, total_spent")
+          .eq("id", businessId)
+          .single();
+
+        const currentExtra = parseInt(String(biz?.sms_extra_purchased || "0"), 10);
+        const currentSpent = parseFloat(String(biz?.total_spent || "0"));
+
+        await supabaseAdmin
+          .from("businesses")
+          .update({
+            stripe_customer_id: customerId || undefined,
+            sms_extra_purchased: currentExtra + smsCount,
+            total_spent: currentSpent + amountPLN,
+          })
+          .eq("id", businessId);
+
+        await supabaseAdmin.from("notifications").insert({
+          business_id: businessId,
+          type: "system",
+          title: currency === "pln" ? "Zakupiono pakiet SMS" : "SMS package purchased",
+          message: `${smsCount} SMS — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+          metadata: { currency, amount_pln: amountPLN, sms_count: smsCount },
+        }).catch(() => {});
+
+        console.log("[stripe] sms package purchased:", { businessId, smsCount, currency, amountPLN });
+      }
+      return NextResponse.json({ received: true });
+    }
+
+    // Subscription flow (existing + multi-currency)
     if (customerId) {
       const updateData: Record<string, unknown> = {
         stripe_customer_id: customerId,
@@ -83,10 +132,30 @@ export async function POST(request: Request) {
         }
       }
 
+      // Update total_spent with PLN-equivalent amount
+      if (amountPLN > 0) {
+        const { data: biz } = await supabaseAdmin
+          .from("businesses")
+          .select("total_spent")
+          .eq("id", businessId)
+          .single();
+        const currentSpent = parseFloat(String(biz?.total_spent || "0"));
+        updateData.total_spent = currentSpent + amountPLN;
+      }
+
       await supabaseAdmin
         .from("businesses")
         .update(updateData)
         .eq("id", businessId);
+
+      // Notification with currency info
+      await supabaseAdmin.from("notifications").insert({
+        business_id: businessId,
+        type: "system",
+        title: currency === "pln" ? "Subskrypcja aktywowana" : "Subscription activated",
+        message: `${obj?.metadata?.plan || "subscription"}${currency !== "pln" ? ` (${currency.toUpperCase()})` : ""} — ${amountPLN.toFixed(2).replace(".", ",")} PLN`,
+        metadata: { currency, amount_pln: amountPLN, plan: obj?.metadata?.plan },
+      }).catch(() => {});
 
       const { data: biz } = await supabaseAdmin
         .from("businesses")

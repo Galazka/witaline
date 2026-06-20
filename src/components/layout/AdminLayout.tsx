@@ -14,10 +14,11 @@ import type { Session } from "@supabase/supabase-js";
 
 type AdminTab =
   | "dashboard" | "leads" | "businesses" | "witaline" | "messages"
-  | "feedback" | "conversations" | "statystyki" | "kalkulator" | "voice"
-  | "coupons" | "callbacks" | "rodo" | "sms" | "routing" | "blocklist"
-  | "security" | "costs" | "porty" | "numery" | "pricing"
-  | "webhooks";
+  | "feedback" | "conversations" | "voice"
+  | "coupons" | "callbacks" | "sms" | "blocklist"
+  | "security" | "costs" | "porty" | "webhooks"
+  // Deprecated but still handled in admin page (redirect to relevant tabs)
+  | "statystyki" | "kalkulator" | "rodo" | "routing" | "numery" | "pricing";
 
 interface AdminTabContextValue {
   tab: AdminTab;
@@ -50,29 +51,23 @@ const sidebarItems = (leadCount: number) => [
     ],
   },
   {
-    key: "analityka" as AdminTab, label: "Analityka", icon: <IconChart className="w-5 h-5" />,
+    key: "finanse" as AdminTab, label: "Finanse", icon: <IconChart className="w-5 h-5" />,
     children: [
-      { key: "statystyki" as AdminTab, label: "Statystyki", icon: <IconChart className="w-4 h-4" /> },
-      { key: "costs" as AdminTab, label: "Koszty", icon: <IconDollar className="w-4 h-4" /> },
-      { key: "kalkulator" as AdminTab, label: "Kalkulator", icon: <IconDollar className="w-4 h-4" /> },
-      { key: "pricing" as AdminTab, label: "Ceny", icon: <IconDollar className="w-4 h-4" /> },
-      { key: "numery" as AdminTab, label: "Numery", icon: <IconPhone className="w-4 h-4" /> },
+      { key: "costs" as AdminTab, label: "Koszty/Zyski", icon: <IconDollar className="w-4 h-4" /> },
       { key: "witaline" as AdminTab, label: "WitaLine", icon: <IconStar className="w-4 h-4" /> },
+      { key: "coupons" as AdminTab, label: "Kupony", icon: <IconDollar className="w-4 h-4" /> },
     ],
   },
   {
-    key: "zabezpieczenia" as AdminTab, label: "System", icon: <IconShield className="w-5 h-5" />,
+    key: "system" as AdminTab, label: "System", icon: <IconShield className="w-5 h-5" />,
     children: [
-      { key: "routing" as AdminTab, label: "Routing", icon: <IconPhoneForward className="w-4 h-4" /> },
       { key: "security" as AdminTab, label: "Bezpieczeństwo", icon: <IconShield className="w-4 h-4" /> },
-      { key: "rodo" as AdminTab, label: "RODO", icon: <IconLock className="w-4 h-4" /> },
       { key: "blocklist" as AdminTab, label: "Blokady", icon: <IconBan className="w-4 h-4" /> },
-      { key: "callbacks" as AdminTab, label: "Callbacks", icon: <IconPhone className="w-4 h-4" /> },
+      { key: "callbacks" as AdminTab, label: "Callbacki", icon: <IconPhone className="w-4 h-4" /> },
+      { key: "porty" as AdminTab, label: "Porty", icon: <IconPhoneForward className="w-4 h-4" /> },
     ],
   },
   { key: "voice" as AdminTab, label: "Voice", icon: <IconPhone className="w-5 h-5" /> },
-  { key: "coupons" as AdminTab, label: "Kupony", icon: <IconDollar className="w-5 h-5" /> },
-  { key: "porty" as AdminTab, label: "Porty", icon: <IconPhoneForward className="w-5 h-5" /> },
 ];
 
 export default function AdminLayoutShell({ children }: { children: ReactNode }) {

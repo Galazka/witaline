@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 import DashboardHeader from "@/components/DashboardHeader";
-import MinuteBalance from "@/components/MinuteBalance";
+import AccountBalance from "@/components/AccountBalance";
 import ElasticCostCalculator from "@/components/ElasticCostCalculator";
 import CallTable from "@/components/CallTable";
 import PlanUpgrade from "@/components/PlanUpgrade";
@@ -39,6 +39,7 @@ import GoogleCalendarSettings from "@/components/GoogleCalendarSettings";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ConsultantListManager from "@/components/ConsultantListManager";
+import BillingHistory from "@/components/BillingHistory";
 import { t, initLocale } from "@/lib/i18n";
 import { getPlanConfig, formatPLN } from "@/lib/pricing";
 import { useDashboardTab, useDashboardPerms } from "@/components/layout/DashboardLayout";
@@ -204,7 +205,7 @@ export default function DashboardPage() {
             <SmsStatusWidget businessId={business.id} />
           </div>
 
-          <MinuteBalance businessId={business.id} />
+          <AccountBalance businessId={business.id} sessionUserUid={business.owner_uid} />
 
           <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -454,6 +455,10 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+      )}
+
+      {tab === "billing" && business && (
+        <BillingHistory businessId={business.id} />
       )}
       </>)}
     </div>

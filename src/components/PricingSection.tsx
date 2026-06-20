@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatPrice, calculateSelfServicePrice, calculateElasticPrice, ELASTIC_TIERS, CONFIG, type SelfServiceConfig } from "@/lib/pricing";
+import { formatPrice, calculateSelfServicePrice, calculateElasticPrice, ELASTIC_TIERS, CONFIG, convertPrice, CURRENCY_SYMBOLS, formatPriceCurrency, formatPriceMin, type SelfServiceConfig, type Currency } from "@/lib/pricing";
 import type { Locale } from "@/lib/i18n";
 
 function CheckIcon() {
@@ -13,8 +13,12 @@ function CheckIcon() {
   );
 }
 
-function formatPLN(n: number): string {
-  return n.toFixed(2).replace(".", ",") + " zł";
+function formatPriceLocal(pln: number, cur: Currency): string {
+  if (cur === "pln") return pln.toFixed(2).replace(".", ",") + " zł";
+  const converted = convertPrice(pln, cur);
+  const fmt = converted.toFixed(2).replace(".", ",");
+  if (cur === "eur") return fmt + " €";
+  return "$" + fmt;
 }
 
 interface PricingTr {
@@ -72,6 +76,8 @@ interface PricingTr {
   [key: string]: string;
 }
 
+const CURRENCIES: Currency[] = ["pln", "eur", "usd"];
+
 export default function PricingSection({
   tr,
   locale = "pl",
@@ -81,6 +87,7 @@ export default function PricingSection({
 }) {
   const [tab, setTab] = useState<"configurator" | "enterprise">("configurator");
   const [minutes, setMinutes] = useState(300);
+  const [currency, setCurrency] = useState<Currency>("pln");
   const [addons, setAddons] = useState({
     ownNumber: false, googleCalendar: false, crm: false,
     voiceClone: false, unlimitedConsultants: false, prioritySupport: false, sla247: false,
@@ -113,7 +120,7 @@ export default function PricingSection({
           {tr.subtitle && <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed">{tr.subtitle}</p>}
         </div>
 
-        <div className="flex items-center justify-center gap-3 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-2">
           <button onClick={() => setTab("configurator")}
             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "configurator" ? "bg-brand-400 text-white shadow-lg shadow-brand-500/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
             {tr.configurator}
@@ -122,6 +129,17 @@ export default function PricingSection({
             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "enterprise" ? "bg-brand-400 text-white shadow-lg shadow-brand-500/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
             {tr.enterprise}
           </button>
+        </div>
+
+        {/* Currency toggle */}
+        <div className="flex items-center justify-center gap-1.5 mb-10">
+          <span className="text-xs text-zinc-400 mr-1">{locale === "pl" ? "Waluta:" : "Currency:"}</span>
+          {CURRENCIES.map(c => (
+            <button key={c} onClick={() => setCurrency(c)}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all uppercase ${currency === c ? "bg-zinc-800 text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}>
+              {c}
+            </button>
+          ))}
         </div>
 
         {tab === "configurator" && (
@@ -151,7 +169,7 @@ export default function PricingSection({
               <div className="flex flex-wrap gap-1.5 mb-6">
                 {ELASTIC_TIERS.filter(t => t.minMinutes > 0).map(t => (
                   <span key={t.minMinutes} className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-brand-400 text-white" : "bg-zinc-100 text-zinc-400"}`}>
-                    {t.minMinutes}–{t.maxMinutes}: {t.ratePerMin.toFixed(2).replace(".",",")} PLN/min
+                    {t.minMinutes}–{t.maxMinutes}: {formatPriceMin(t.ratePerMin, currency)}
                   </span>
                 ))}
               </div>
@@ -160,17 +178,17 @@ export default function PricingSection({
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
                     <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.perMin}</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatPLN(elastic.ratePerMin)}</p>
+                  <p className="text-2xl font-bold text-brand-600">{formatPriceLocal(elastic.ratePerMin, currency)}</p>
                     <p className="text-[10px] text-zinc-400">{tr.netto}</p>
                 </div>
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.monthly} ({tr.netto})</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatPLN(elastic.monthlyNetto)}</p>
+                  <p className="text-2xl font-bold text-brand-600">{formatPriceLocal(elastic.monthlyNetto, currency)}</p>
                   <p className="text-[10px] text-zinc-400">{tr.exclVat}</p>
                 </div>
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.monthly} ({tr.brutto})</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatPLN(elastic.monthlyBrutto)}</p>
+                  <p className="text-2xl font-bold text-brand-600">{formatPriceLocal(elastic.monthlyBrutto, currency)}</p>
                   <p className="text-[10px] text-zinc-400">{tr.inclVat}</p>
                 </div>
               </div>
@@ -189,7 +207,7 @@ export default function PricingSection({
                       </div>
                       <span className="text-sm text-zinc-700">{a.label}</span>
                     </div>
-                    <span className="text-xs font-semibold text-zinc-500">{a.price} {tr.perMonth}</span>
+                    <span className="text-xs font-semibold text-zinc-500">{formatPriceLocal(a.price, currency)}/{locale === "pl" ? "mies" : "mo"}</span>
                   </button>
                 ))}
               </div>
@@ -204,16 +222,16 @@ export default function PricingSection({
                     {full.details.map(d => (
                       <div key={d.label} className="flex justify-between text-sm">
                         <span className="text-zinc-500">{d.label}</span>
-                        <span className="font-medium text-zinc-800">{formatPLN(d.netto)}</span>
+                        <span className="font-medium text-zinc-800">{formatPriceLocal(d.netto, currency)}</span>
                       </div>
                     ))}
                     <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold">
                       <span className="text-zinc-700">{tr.totalNetto}</span>
-                      <span className="text-brand-500">{formatPLN(full.monthlyNetto)}</span>
+                      <span className="text-brand-500">{formatPriceLocal(full.monthlyNetto, currency)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-zinc-500">{tr.totalBrutto}</span>
-                      <span className="font-semibold text-zinc-800">{formatPLN(full.monthlyBrutto)}</span>
+                      <span className="font-semibold text-zinc-800">{formatPriceLocal(full.monthlyBrutto, currency)}</span>
                     </div>
                   </div>
                 </div>
@@ -233,19 +251,19 @@ export default function PricingSection({
                 <div className="sticky top-24 bg-white border-2 border-brand-400 rounded-2xl p-6 shadow-lg shadow-brand-500/10">
                   <p className="text-sm font-semibold text-zinc-700 mb-1">{tr.yourPlan}</p>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-4xl font-bold text-brand-500 font-display">{formatPLN(full.monthlyBrutto)}</span>
+                    <span className="text-4xl font-bold text-brand-500 font-display">{formatPriceLocal(full.monthlyBrutto, currency)}</span>
                     <span className="text-zinc-400 text-xs">{locale === "pl" ? "/mies" : "/mo"}</span>
                   </div>
-                  <p className="text-xs text-zinc-400 mb-4">{tr.netto}: {formatPLN(full.monthlyNetto)}</p>
+                  <p className="text-xs text-zinc-400 mb-4">{tr.netto}: {formatPriceLocal(full.monthlyNetto, currency)}</p>
 
                   <div className="bg-brand-50 rounded-xl px-3 py-2 mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-zinc-500">{tr.rate}</span>
-                      <span className="text-sm font-bold text-brand-600">{formatPLN(elastic.ratePerMin)}/min {tr.netto}</span>
+                      <span className="text-sm font-bold text-brand-600">{formatPriceLocal(elastic.ratePerMin, currency)}/min {tr.netto}</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-xs text-zinc-500">{tr.overage}</span>
-                      <span className="text-sm font-bold text-brand-600">{formatPLN(full.overageNetto)}/min {tr.netto}</span>
+                      <span className="text-sm font-bold text-brand-600">{formatPriceLocal(full.overageNetto, currency)}/min {tr.netto}</span>
                     </div>
                   </div>
 
@@ -262,13 +280,106 @@ export default function PricingSection({
           </div>
         )}
 
-        {tab === "enterprise" && <EnterpriseSection locale={locale} tr={tr} />}
+        {/* ── SMS Pricing Info Section ─────────────────────────────── */}
+        <div className="max-w-4xl mx-auto mt-12 pt-12 border-t border-zinc-200">
+          <div className="text-center mb-8">
+            <span className="inline-block bg-brand-100 text-brand-700 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-3">
+              {locale === "pl" ? "Wiadomości SMS" : "SMS Messaging"}
+            </span>
+            <h3 className="text-2xl font-bold text-zinc-900 font-display">
+              {locale === "pl" ? "Cennik wiadomości SMS" : "SMS Pricing"}
+            </h3>
+            <p className="text-sm text-zinc-500 mt-2 max-w-xl mx-auto">
+              {locale === "pl"
+                ? "Automatyczne powiadomienia SMS po rozmowie — oferty, potwierdzenia, przypomnienia."
+                : "Automated SMS notifications after calls — offers, confirmations, reminders."}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 items-start">
+            {/* SMS Per-Message */}
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6">
+              <h4 className="text-sm font-semibold text-zinc-900 mb-4">
+                {locale === "pl" ? "Cena za wiadomość" : "Per message"}
+              </h4>
+              <div className="flex items-baseline gap-2 mb-4">
+                <span className="text-3xl font-bold text-brand-500 font-display">
+                  {formatPriceLocal(0.50, currency)}
+                </span>
+                <span className="text-sm text-zinc-400">
+                  /{locale === "pl" ? "SMS" : "msg"} {tr.netto}
+                </span>
+              </div>
+              <ul className="space-y-2 text-sm text-zinc-600">
+                <li className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  {locale === "pl" ? "Automatyczne wysyłanie ofert i podsumowań" : "Auto-send offers and summaries"}
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  {locale === "pl" ? "Potwierdzenia rezerwacji i przypomnienia" : "Booking confirmations & reminders"}
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  {locale === "pl" ? "Własny limit SMS w panelu" : "Dedicated SMS limit in dashboard"}
+                </li>
+              </ul>
+            </div>
+
+            {/* SMS Packages */}
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6">
+              <h4 className="text-sm font-semibold text-zinc-900 mb-4">
+                {locale === "pl" ? "Pakiety SMS" : "SMS Packages"}
+              </h4>
+              <div className="space-y-3">
+                {[50, 100, 200, 500, 1000].map((count) => {
+                  const pkgPrice = count <= 1000
+                    ? [25, 45, 80, 175, 300][[50, 100, 200, 500, 1000].indexOf(count)]
+                    : count * 0.50;
+                  const perSms = pkgPrice / count;
+                  return (
+                    <div key={count} className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 rounded-xl">
+                      <div>
+                        <span className="text-sm font-semibold text-zinc-800">{count}</span>
+                        <span className="text-xs text-zinc-400 ml-1">
+                          {locale === "pl" ? "SMS" : "msgs"}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-brand-500">{formatPriceLocal(pkgPrice, currency)}</span>
+                        <span className="text-[10px] text-zinc-400 ml-1">
+                          ({formatPriceLocal(perSms, currency)}/{locale === "pl" ? "sms" : "msg"})
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-zinc-400 mt-4 text-center">
+                {locale === "pl"
+                  ? "Im większy pakiet, tym niższa cena za SMS. Niewykorzystane SMS-y przechodzą na następny miesiąc."
+                  : "Bigger packs, lower per-SMS price. Unused SMS roll over."}
+              </p>
+            </div>
+          </div>
+
+          {/* WhatsApp note */}
+          <div className="mt-6 bg-gradient-to-r from-brand-50 to-brand-100/50 rounded-2xl p-5 text-center">
+            <p className="text-sm text-zinc-600">
+              {locale === "pl" ? "📱 WhatsApp Business — cena od " : "📱 WhatsApp Business — from "}
+              <span className="font-bold text-brand-500">{formatPriceLocal(0.54, currency)}</span>
+              /{locale === "pl" ? "wiadomość" : "message"}
+            </p>
+          </div>
+        </div>
+
+        {tab === "enterprise" && <EnterpriseSection locale={locale} tr={tr} currency={currency} />}
       </div>
     </section>
   );
 }
 
-function EnterpriseSection({ locale, tr }: { locale: Locale; tr: PricingTr }) {
+function EnterpriseSection({ locale, tr, currency }: { locale: Locale; tr: PricingTr; currency: Currency }) {
   const [minutes, setMinutes] = useState(2000);
   const base = Math.max(1500, minutes * 0.85);
   const monthlyNetto = Math.round(base * 100) / 100;
@@ -295,13 +406,13 @@ function EnterpriseSection({ locale, tr }: { locale: Locale; tr: PricingTr }) {
         <div className="sticky top-24 bg-gradient-to-b from-brand-50 to-white border border-brand-200 rounded-2xl p-6 shadow-lg shadow-brand-500/10">
           <p className="text-sm font-semibold text-brand-700 mb-1">{tr.startingFrom}</p>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-4xl font-bold text-brand-500 font-display">{formatPrice(monthlyBrutto, locale)}</span>
+            <span className="text-4xl font-bold text-brand-500 font-display">{formatPriceLocal(monthlyBrutto, currency)}</span>
             <span className="text-zinc-400 text-xs">{locale === "pl" ? "/mies" : "/mo"}</span>
           </div>
           <div className="space-y-3 mb-6">
-            <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.setupFee}</span><span className="font-medium">{setupFee} zł</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.monthly} ({tr.startingFrom})</span><span className="font-medium">{formatPrice(monthlyBrutto, locale)}</span></div>
-            <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{tr.firstMonth}</span><span className="text-brand-500">{formatPrice(monthlyBrutto + setupFee, locale)}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.setupFee}</span><span className="font-medium">{formatPriceLocal(setupFee, currency)}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.monthly} ({tr.startingFrom})</span><span className="font-medium">{formatPriceLocal(monthlyBrutto, currency)}</span></div>
+            <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{tr.firstMonth}</span><span className="text-brand-500">{formatPriceLocal(monthlyBrutto + setupFee, currency)}</span></div>
           </div>
           <a href="tel:+48732125752" className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 mb-2">{tr.callUs}</a>
           <a href="/oferta-indywidualna" className="block w-full text-center bg-white text-zinc-700 py-3 rounded-2xl font-semibold border border-zinc-200 hover:bg-brand-50 transition">{tr.seeOffer}</a>

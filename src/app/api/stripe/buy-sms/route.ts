@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { getStripe } from "@/lib/stripe";
-import { getElasticRate, convertPrice, CURRENCY_RATES, type Currency } from "@/lib/pricing";
+import { convertPrice, type Currency } from "@/lib/pricing";
+import { SMS_PACKAGES, getSmsPackagePrice } from "@/lib/sms-pricing";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").trim();
 
@@ -16,11 +17,11 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { businessId, minutes, currency = "pln" } = await request.json();
+  const { businessId, smsCount, currency = "pln" } = await request.json();
   const cur: Currency = SUPPORTED_CURRENCIES.includes(currency) ? currency : "pln";
-  const mins = parseInt(minutes, 10);
-  if (!businessId || !mins || mins < 50 || mins > 5000) {
-    return NextResponse.json({ error: "Invalid minutes (50-5000)" }, { status: 400 });
+  const count = parseInt(smsCount, 10);
+  if (!businessId || !count || count < 1) {
+    return NextResponse.json({ error: "Invalid SMS count" }, { status: 400 });
   }
 
   const { data: business } = await supabase
@@ -31,11 +32,9 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const ratePLN = getElasticRate(mins);
-  const amountPLN = mins * ratePLN;
-  const amountInCurrency = convertPrice(amountPLN, cur);
-  const amountCents = Math.round(amountInCurrency * 100);
-  const rateDisplay = convertPrice(ratePLN, cur).toFixed(2).replace(".", ",");
+  const pricePLN = getSmsPackagePrice(count);
+  const priceInCurrency = convertPrice(pricePLN, cur);
+  const amountCents = Math.round(priceInCurrency * 100);
 
   const stripe = getStripe();
 
@@ -50,8 +49,10 @@ export async function POST(request: Request) {
       price_data: {
         currency: cur,
         product_data: {
-          name: `Pakiet ${mins} minut`,
-          description: `Pakiet rozmów AI — ${mins} min × ${rateDisplay} ${cur.toUpperCase()}/min`,
+          name: cur === "pln" ? `Pakiet ${count} SMS` : `SMS Pack ${count}`,
+          description: cur === "pln"
+            ? `${count} wiadomości SMS – ${pricePLN.toFixed(2).replace(".", ",")} PLN`
+            : `${count} SMS messages – ${priceInCurrency.toFixed(2).replace(".", ",")} ${cur.toUpperCase()}`,
         },
         unit_amount: amountCents,
       },
@@ -63,11 +64,10 @@ export async function POST(request: Request) {
     metadata: {
       businessId,
       userId: user.id,
-      type: "minute_package",
-      minutes: String(mins),
-      rate: String(ratePLN),
+      type: "sms_package",
+      sms_count: String(count),
       currency: cur,
-      amount_pln: String(Math.round(amountPLN * 100) / 100),
+      amount_pln: String(pricePLN),
     },
     success_url: `${BASE_URL}/dashboard?payment=success`,
     cancel_url: `${BASE_URL}/dashboard?payment=cancel`,
@@ -75,11 +75,10 @@ export async function POST(request: Request) {
   });
 
   if (session.url) {
-    const { error: updateErr } = await supabase
+    await supabase
       .from("businesses")
       .update({ stripe_customer_id: session.customer as string || business.stripe_customer_id })
       .eq("id", businessId);
-    if (updateErr) console.error("[buy-minutes] save customer id error:", updateErr);
   }
 
   return NextResponse.json({ url: session.url });

@@ -47,6 +47,28 @@ export const plans: Record<string, PlanConfig> = {
 
 export const INTERNAL_COST_PER_MIN = 0.65;
 
+export type Currency = "pln" | "eur" | "usd";
+
+export const CURRENCY_RATES: Record<Currency, number> = {
+  pln: 1,
+  eur: 0.23,
+  usd: 0.26,
+};
+
+export const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  pln: "zł",
+  eur: "€",
+  usd: "$",
+};
+
+export function convertPrice(plnAmount: number, to: Currency): number {
+  return Math.round(plnAmount * CURRENCY_RATES[to] * 100) / 100;
+}
+
+export function currencyCode(currency: Currency): string {
+  return currency.toUpperCase();
+}
+
 export interface PlanConfig {
   label: string;
   value: string;
@@ -163,6 +185,22 @@ export type SelfServiceConfig = {
 export function formatPrice(amount: number, locale: string): string {
   const formatted = amount.toFixed(2).replace(".", ",");
   return `${formatted} PLN`;
+}
+
+export function formatPriceCurrency(amountPLN: number, currency: Currency, locale: string): string {
+  const converted = convertPrice(amountPLN, currency);
+  const fmt = converted.toFixed(2).replace(".", ",");
+  if (currency === "pln") return `${fmt} zł`;
+  if (currency === "eur") return `${fmt} €`;
+  return `$${fmt}`;
+}
+
+export function formatPriceMin(ratePLN: number, currency: Currency): string {
+  const converted = convertPrice(ratePLN, currency);
+  const fmt = converted.toFixed(2).replace(".", ",");
+  if (currency === "pln") return `${fmt} zł/min`;
+  if (currency === "eur") return `${fmt} €/min`;
+  return `$${fmt}/min`;
 }
 
 export function getPlanOverageRate(planKey: string): number {
