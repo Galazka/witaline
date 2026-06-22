@@ -2,13 +2,14 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const WHATSAPP_SANDBOX_NUMBER = "+14155238886";
 
-// Use configured WhatsApp sender from env, or fall back to sandbox / main number
+// Use configured WhatsApp sender from env, or fall back to sandbox
+// TWILIO_PHONE_NUMBER is intentionally NOT used here — it's for voice/SMS,
+// and most numbers are not WhatsApp-registered (error 63007).
+// Set TWILIO_WHATSAPP_FROM explicitly for production WhatsApp.
 function getWhatsAppFrom(): string {
   const configured = process.env.TWILIO_WHATSAPP_FROM;
   if (configured) return configured;
-  // Fallback: try main Twilio number (must be registered as WhatsApp sender)
-  const mainNumber = process.env.TWILIO_PHONE_NUMBER;
-  if (mainNumber) return mainNumber;
+  console.warn("[twilio-whatsapp] TWILIO_WHATSAPP_FROM not set, using sandbox. Set TWILIO_WHATSAPP_FROM for production WhatsApp.");
   return WHATSAPP_SANDBOX_NUMBER;
 }
 

@@ -274,6 +274,9 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 });
   if (business.suspended) return NextResponse.json({ error: "Account suspended" }, { status: 403 });
+  if (business.subscription_status === "trialing" && business.trial_ends_at && new Date(business.trial_ends_at) < new Date()) {
+    return NextResponse.json({ error: "Trial expired" }, { status: 402 });
+  }
 
   const planConfig = getPlanConfig(business.current_plan);
   if (business.minutes_used_this_week >= planConfig.monthlyVoiceMinutes && business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { connectToAgent } from "@/lib/twilio-utils";
+import { connectToAgent, twiml } from "@/lib/twilio-utils";
 
 const CALL_LIMIT_PER_NUMBER = 5;
 const WINDOW_SECONDS = 60;
@@ -75,13 +75,22 @@ export async function POST(request: Request) {
   if (toClean) {
     const { data: biz } = await supabaseAdmin
       .from("businesses")
-      .select("id, name, voice_id")
+      .select("id, name, voice_id, trial_ends_at, subscription_status")
       .eq("twilio_number", toClean)
       .maybeSingle();
 
     if (biz) {
       businessId = biz.id;
       businessName = biz.name || "WitaLine";
+
+      // Block calls for expired trials
+      if (
+        biz.subscription_status === "trialing" &&
+        biz.trial_ends_at &&
+        new Date(biz.trial_ends_at) < new Date()
+      ) {
+        return twiml(`<Say language="pl-PL">Numer jest obecnie nieaktywny. Aby odnowić usługę, odwiedź witaline.pl. Dziękujemy.</Say><Hangup/>`);
+      }
 
       if (biz.voice_id) {
         const { data: voice } = await supabaseAdmin

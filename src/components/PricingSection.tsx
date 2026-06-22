@@ -363,13 +363,64 @@ export default function PricingSection({
             </div>
           </div>
 
-          {/* WhatsApp note */}
-          <div className="mt-6 bg-gradient-to-r from-brand-50 to-brand-100/50 rounded-2xl p-5 text-center">
-            <p className="text-sm text-zinc-600">
-              {locale === "pl" ? "📱 WhatsApp Business — cena od " : "📱 WhatsApp Business — from "}
-              <span className="font-bold text-brand-500">{formatPriceLocal(0.54, currency)}</span>
-              /{locale === "pl" ? "wiadomość" : "message"}
-            </p>
+          {/* ── WhatsApp Pricing Section ─────────────────────────────── */}
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            {/* WhatsApp Per-Message */}
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <svg className="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                <h4 className="text-sm font-semibold text-zinc-900">
+                  {locale === "pl" ? "WhatsApp Business" : "WhatsApp Business"}
+                </h4>
+              </div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-3xl font-bold text-brand-500 font-display">
+                  {formatPriceLocal(0.54, currency)}
+                </span>
+                <span className="text-sm text-zinc-400">
+                  /{locale === "pl" ? "wiad." : "msg"} {tr.netto}
+                </span>
+              </div>
+              <p className="text-[10px] text-zinc-400">
+                {locale === "pl"
+                  ? "Cena może się różnić w zależności od kraju docelowego (stawki Meta)."
+                  : "Price may vary by destination country (Meta rates)."}
+              </p>
+            </div>
+
+            {/* WhatsApp Packages */}
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6">
+              <h4 className="text-sm font-semibold text-zinc-900 mb-4">
+                {locale === "pl" ? "Pakiety WhatsApp" : "WhatsApp Packages"}
+              </h4>
+              <div className="space-y-3">
+                {[50, 100, 200, 500].map((count) => {
+                  const pkgPrice = [30, 55, 100, 220][[50, 100, 200, 500].indexOf(count)];
+                  const perMsg = pkgPrice / count;
+                  return (
+                    <div key={count} className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 rounded-xl">
+                      <div>
+                        <span className="text-sm font-semibold text-zinc-800">{count}</span>
+                        <span className="text-xs text-zinc-400 ml-1">
+                          {locale === "pl" ? "wiad." : "msgs"}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-brand-500">{formatPriceLocal(pkgPrice, currency)}</span>
+                        <span className="text-[10px] text-zinc-400 ml-1">
+                          ({formatPriceLocal(perMsg, currency)}/{locale === "pl" ? "wiad." : "msg"})
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-zinc-400 mt-4 text-center">
+                {locale === "pl"
+                  ? "WhatsApp Continuity — automatyczne wiadomości po rozmowie (za zgodą rozmówcy)."
+                  : "WhatsApp Continuity — auto-messages after calls (with caller consent)."}
+              </p>
+            </div>
           </div>
         </div>
 

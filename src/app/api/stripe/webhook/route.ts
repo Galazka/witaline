@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { sendPaymentConfirmationEmail, sendPaymentFailedEmail } from "@/lib/email";
+import { sendPaymentConfirmationEmail, sendPaymentFailedEmail, sendInvoiceEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -163,12 +163,22 @@ export async function POST(request: Request) {
         .eq("id", businessId)
         .single();
       if (biz) {
-        sendPaymentConfirmationEmail(
-          obj?.customer_details?.email || obj?.receipt_email || "",
-          biz.name,
-          biz.current_plan,
-          obj?.amount_total || 0
-        ).catch(err => console.error("[stripe] confirmation email error:", err));
+        const customerEmail = obj?.customer_details?.email || obj?.receipt_email || "";
+        sendPaymentConfirmationEmail(customerEmail, biz.name, biz.current_plan, obj?.amount_total || 0)
+          .catch(err => console.error("[stripe] confirmation email error:", err));
+
+        // Send invoice with PDF if available
+        if (customerEmail && obj?.amount_total > 0) {
+          let invoiceUrl: string | undefined;
+          if (obj.invoice) {
+            try {
+              const invoice: any = await stripe.invoices.retrieve(obj.invoice as string);
+              invoiceUrl = invoice?.invoice_pdf || undefined;
+            } catch {}
+          }
+          sendInvoiceEmail(customerEmail, biz.name, obj?.amount_total || 0, invoiceUrl)
+            .catch(err => console.error("[stripe] invoice email error:", err));
+        }
       }
     }
   }

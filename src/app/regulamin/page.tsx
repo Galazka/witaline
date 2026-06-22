@@ -3,8 +3,16 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Regulamin — WitaLine",
-  description: "Regulamin świadczenia usług WitaLine — System Gwarantowanego Odbierania Klientów 24/7.",
+  description: "Regulamin świadczenia usług WitaLine — asystent AI, SMS, WhatsApp, pakiety minut.",
 };
+
+const ELASTIC_TIERS: { from: number; to: string; rate: string }[] = [
+  { from: 0, to: "50", rate: "1,49" },
+  { from: 51, to: "200", rate: "1,29" },
+  { from: 201, to: "500", rate: "1,15" },
+  { from: 501, to: "2 000", rate: "1,05" },
+  { from: 2_001, to: "∞", rate: "0,99" },
+];
 
 export default function RegulaminPage() {
   return (
@@ -16,190 +24,209 @@ export default function RegulaminPage() {
         <div className="space-y-6 text-sm text-zinc-600 leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">1. Postanowienia ogólne</h2>
-            <p>1.1. Niniejszy regulamin określa zasady świadczenia usługi "System Gwarantowanego Odbierania Klientów 24/7" przez WitaLine (zwaną dalej "Usługodawcą").</p>
-            <p>1.2. Usługodawcą jest firma WitaLine. Kontakt: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a>, telefon: +48 732 125 752.</p>
-            <p>1.3. Usługa polega na udostępnieniu Klientowi automatycznej recepcji (asystenta głosowego), który odbiera połączenia telefoniczne, prowadzi rozmowy z klientami, umawia wizyty, przyjmuje zamówienia oraz udostępnia transkrypcje, nagrania i statystyki w panelu zarządzania.</p>
-            <p>1.4. Przed rozpoczęciem korzystania z usługi Klient zobowiązany jest zapoznać się z treścią Regulaminu oraz Polityką prywatności.</p>
+            <p>1.1. Niniejszy regulamin określa zasady świadczenia usług asystenta AI, komunikacji SMS, WhatsApp oraz powiązanych usług przez WitaLine (zwaną dalej &bdquo;Usługodawc&abreve;").</p>
+            <p>1.2. Usługodawc&abreve; jest firma WitaLine. Kontakt: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a>, telefon: +48 732 125 752.</p>
+            <p>1.3. Usługa polega na udostępnieniu Klientowi automatycznej recepcji (asystenta głosowego AI), który odbiera połączenia telefoniczne, prowadzi rozmowy, umawia wizyty, przyjmuje zamówienia, wysyła wiadomości SMS i WhatsApp oraz udostępnia transkrypcje, nagrania i statystyki w panelu zarządzania.</p>
+            <p>1.4. Przed rozpoczęciem korzystania z usługi Klient zobowi&abreve;zany jest zapoznać się z treścią Regulaminu oraz Polityk&abreve; prywatności.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">2. Definicje</h2>
-            <p>2.1. <strong>Klient</strong> — osoba fizyczna prowadząca działalność gospodarczą, osoba prawna lub jednostka organizacyjna nieposiadająca osobowości prawnej, która zawarła umowę z Usługodawcą.</p>
-            <p>2.2. <strong>Okres rozliczeniowy</strong> — jeden miesiąc kalendarzowy, za który naliczana jest opłata abonamentowa.</p>
-            <p>2.3. <strong>Abonament</strong> — miesięczna opłata stała za wybrany plan taryfowy, płatna z góry.</p>
-            <p>2.4. <strong>Saldo prepaid</strong> — środki pieniężne na koncie Klienta, z których potrącane są koszty zakupu numeru telefonu oraz minut rozmów powyżej limitu abonamentowego.</p>
-            <p>2.5. <strong>Numer dedykowany</strong> — polski numer telefonu (+48) przypisany do konta Klienta, zakupiony przez Usługodawcę w Twilio.</p>
-            <p>2.6. <strong>Limit minut</strong> — maksymalna liczba minut rozmów bota w ramach wybranego planu w okresie rozliczeniowym.</p>
+            <p>2.1. <strong>Klient</strong> &mdash; osoba fizyczna prowadz&abreve;ca działalność gospodarcz&abreve;, osoba prawna lub jednostka organizacyjna nieposiadaj&abreve;ca osobowości prawnej, kt&oacute;ra zawarła umowę z Usługodawc&abreve;.</p>
+            <p>2.2. <strong>Okres rozliczeniowy</strong> &mdash; jeden miesi&abreve;c kalendarzowy, za kt&oacute;ry naliczana jest opłata abonamentowa.</p>
+            <p>2.3. <strong>Abonament</strong> &mdash; miesięczna opłata stała za wybrany plan taryfowy, płatna z g&oacute;ry.</p>
+            <p>2.4. <strong>Pakiet minut</strong> &mdash; jednorazowy zakup minut rozmowy przez Stripe, doliczany do salda prepaid Klienta. Minuty ważne bezterminowo.</p>
+            <p>2.5. <strong>Pakiet SMS</strong> &mdash; jednorazowy zakup SMS/wiadomości WhatsApp przez Stripe, doliczany do salda SMS Klienta.</p>
+            <p>2.6. <strong>Numer dedykowany</strong> &mdash; polski numer telefonu (+48) przypisany do konta Klienta.</p>
+            <p>2.7. <strong>Wiadomość SMS</strong> &mdash; wiadomość tekstowa wysłana za pośrednictwem Twilio API na numer telefonu kom&oacute;rkowego.</p>
+            <p>2.8. <strong>WhatsApp Business API</strong> &mdash; kanał komunikacji wykorzystuj&abreve;cy platformę WhatsApp (Meta), dostępny po wyrażeniu zgody przez rozm&oacute;wcę.</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">3. Rodzaje planów i cennik</h2>
-            <p>3.1. WitaLine oferuje dwa modele rozliczeń:</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">3. Rodzaje plan&oacute;w i cennik</h2>
+            <p>3.1. WitaLine oferuje dwa modele rozliczeń za minutę rozmowy asystenta AI:</p>
 
-            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">A. Suwak minut — cena progresywna</h3>
-            <p>Klient wybiera liczbę minut od 50 do 5000 za pomocą suwaka. Cena za minutę spada z każdym progiem 500 minut:</p>
+            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">A. Model elastyczny (pay-as-you-go)</h3>
+            <p>Brak opłaty stałej. Klient płaci tylko za wykorzystane minuty według progresji cenowej:</p>
             <div className="overflow-x-auto mt-3">
               <table className="w-full text-xs">
                 <thead><tr className="text-zinc-400 uppercase tracking-wider border-b border-zinc-200">
-                  <th className="text-left pb-2 pr-3">Próg minut</th>
+                  <th className="text-left pb-2 pr-3">Zakres minut/mies</th>
                   <th className="text-right pb-2 pr-3">Cena/min netto</th>
                   <th className="text-right pb-2 pr-3">Cena/min brutto</th>
-                  <th className="text-right pb-2 pr-3">Np. miesięcznie netto</th>
                 </tr></thead>
                 <tbody>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">0–50</td><td className="text-right py-1.5 pr-3">2,00 PLN</td><td className="text-right py-1.5 pr-3">2,46 PLN</td><td className="text-right py-1.5">100,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">51–500</td><td className="text-right py-1.5 pr-3">1,90 PLN</td><td className="text-right py-1.5 pr-3">2,34 PLN</td><td className="text-right py-1.5">950,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">501–1000</td><td className="text-right py-1.5 pr-3">1,80 PLN</td><td className="text-right py-1.5 pr-3">2,21 PLN</td><td className="text-right py-1.5">1 800,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">1001–1500</td><td className="text-right py-1.5 pr-3">1,70 PLN</td><td className="text-right py-1.5 pr-3">2,09 PLN</td><td className="text-right py-1.5">2 550,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">1501–2000</td><td className="text-right py-1.5 pr-3">1,60 PLN</td><td className="text-right py-1.5 pr-3">1,97 PLN</td><td className="text-right py-1.5">3 200,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">2001–2500</td><td className="text-right py-1.5 pr-3">1,50 PLN</td><td className="text-right py-1.5 pr-3">1,85 PLN</td><td className="text-right py-1.5">3 750,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">2501–3000</td><td className="text-right py-1.5 pr-3">1,40 PLN</td><td className="text-right py-1.5 pr-3">1,72 PLN</td><td className="text-right py-1.5">4 200,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">3001–3500</td><td className="text-right py-1.5 pr-3">1,30 PLN</td><td className="text-right py-1.5 pr-3">1,60 PLN</td><td className="text-right py-1.5">4 550,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">3501–4000</td><td className="text-right py-1.5 pr-3">1,20 PLN</td><td className="text-right py-1.5 pr-3">1,48 PLN</td><td className="text-right py-1.5">4 800,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">4001–4500</td><td className="text-right py-1.5 pr-3">1,10 PLN</td><td className="text-right py-1.5 pr-3">1,35 PLN</td><td className="text-right py-1.5">4 950,00 PLN</td></tr>
-                  <tr className="border-b border-zinc-100"><td className="py-1.5 pr-3">4501–5000</td><td className="text-right py-1.5 pr-3">1,00 PLN</td><td className="text-right py-1.5 pr-3">1,23 PLN</td><td className="text-right py-1.5">5 000,00 PLN</td></tr>
+                  {ELASTIC_TIERS.map((tier, i) => (
+                    <tr key={i} className="border-b border-zinc-100">
+                      <td className="py-1.5 pr-3">{tier.from}–{tier.to}</td>
+                      <td className="text-right py-1.5 pr-3">{tier.rate} PLN</td>
+                      <td className="text-right py-1.5">{i === 4 ? "1,22" : (parseFloat(tier.rate.replace(",", ".")) * 1.23).toFixed(2).replace(".", ",")} PLN</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            <p className="mt-2">Dodatkowa minuta ponad wybrany limit liczona jest wg stawki kolejnego progu (np. dla 500 min nadwyżka po 1,80 PLN/min).</p>
-            <p className="mt-2">Dodatki opcjonalne (doliczane do ceny miesięcznej):</p>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>Własny numer +48:</strong> +49 PLN netto/mies</li>
-              <li><strong>Google Calendar:</strong> +39 PLN netto/mies</li>
-              <li><strong>Integracja CRM:</strong> +79 PLN netto/mies (HubSpot, Livespace, Pipedrive)</li>
-              <li><strong>Klon głosu:</strong> +99 PLN netto/mies</li>
-              <li><strong>Nielimitowani konsultanci:</strong> +149 PLN netto/mies</li>
-              <li><strong>Priorytetowe wsparcie:</strong> +59 PLN netto/mies</li>
-              <li><strong>SLA 24/7:</strong> +199 PLN netto/mies</li>
-            </ul>
-            <p className="mt-2">Wszystkie konfiguracje obejmują: asystenta 24/7, widget na stronie, czat tekstowy, transkrypcje i nagrania, panel zarządzania.</p>
+            <p className="mt-2">Klient może w każdej chwili dokupić pakiety minut przez Stripe (płatność jednorazowa). Minuty nie przepadaj&abreve;. Model elastyczny nie obejmuje rolloveru.</p>
 
             <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">B. Plany abonamentowe (ceny netto)</h3>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>START:</strong> 299 PLN/mies — 250 min, 1 konsultant</li>
-              <li><strong>GROWTH:</strong> 600 PLN/mies — 600 min, 5 konsultantów (najpopularniejszy)</li>
-              <li><strong>PRO:</strong> 300 PLN/mies — 300 min, 3 konsultantów</li>
-              <li><strong>LUX:</strong> 800 PLN/mies — 800 min, 10 konsultantów</li>
-              <li><strong>ENTERPRISE:</strong> 1500 PLN/mies — 1500 min, nieograniczeni konsultanci</li>
-              <li><strong>ELASTYCZNY:</strong> 0 PLN/mies + stawka wg suwaka (A) — pay-as-you-go</li>
+              <li><strong>Start:</strong> 199 PLN/mies &mdash; 250 min, do 3 konsultant&oacute;w</li>
+              <li><strong>Pro:</strong> 249 PLN/mies &mdash; 300 min, do 3 konsultant&oacute;w</li>
+              <li><strong>Growth:</strong> 399 PLN/mies &mdash; 600 min, do 5 konsultant&oacute;w (najpopularniejszy)</li>
+              <li><strong>Lux:</strong> 599 PLN/mies &mdash; 800 min, do 10 konsultant&oacute;w</li>
+              <li><strong>Enterprise:</strong> 999 PLN/mies &mdash; 1 500 min, nieograniczeni konsultanci. Dla większych wolumen&oacute;w &mdash; indywidualna wycena (jednorazowa opłata wdrożeniowa: 299 PLN netto).</li>
             </ul>
-            <p className="mt-2">Stawki za dodatkowe minuty po wykorzystaniu limitu abonamentowego: START 1,80 PLN/min, GROWTH 1,50 PLN/min, PRO 1,48 PLN/min, LUX 1,23 PLN/min, ENTERPRISE 1,20 PLN/min.</p>
+            <p className="mt-2">Nadwyżka ponad limit abonamentowy rozliczana według stawki modelu elastycznego (A). Niewykorzystane minuty przechodz&abreve; na kolejny miesi&abreve;c (rollover). Maksymalny stan rollover: 2× miesięcznego limitu.</p>
 
-            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">C. Plan Enterprise (indywidualny)</h3>
-            <p>Dla firm wymagających dedykowanego podejścia. Cena ustalana indywidualnie na podstawie:</p>
+            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">C. Dodatki opcjonalne (ceny netto/mies)</h3>
             <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li>Szacowanej liczby minut rozmów (od 1500 PLN netto/mies)</li>
-              <li>Zakresu integracji (CRM, ERP, API)</li>
-              <li>Profesjonalnego klonu głosu</li>
-              <li>Dedykowanego onboardingu i szkolenia zespołu</li>
-              <li>SLA 24/7 z gwarantowanym czasem reakcji</li>
+              <li><strong>Własny numer +48:</strong> 29 PLN</li>
+              <li><strong>Google Calendar:</strong> 19 PLN</li>
+              <li><strong>Integracja CRM:</strong> 49 PLN (HubSpot, Livespace, Pipedrive)</li>
+              <li><strong>Klon głosu:</strong> 49 PLN</li>
+              <li><strong>Nielimitowani konsultanci:</strong> 49 PLN</li>
+              <li><strong>Priorytetowe wsparcie:</strong> 29 PLN</li>
+              <li><strong>SLA 24/7:</strong> 99 PLN</li>
             </ul>
-            <p className="mt-2">Opłata wdrożeniowa (one-time): od 299 PLN netto. Wycena na podstawie formularza kontaktowego lub rozmowy.</p>
 
-            <p className="mt-4 text-xs text-zinc-400">Wszystkie ceny podane są w PLN. Do cen doliczany jest podatek VAT zgodnie z obowiązującymi przepisami: 23% dla firm polskich, 0% (odwrotne obciążenie) dla firm z UE z ważnym VAT-UE, 23% dla konsumentów.</p>
-            <p className="mt-2">3.2. Klient może zmienić konfigurację w dowolnym momencie z poziomu panelu zarządzania. Zmiana naliczana jest proporcjonalnie.</p>
-            <p>3.3. Dla konfiguratora Self-Service: płatność z góry za dany miesiąc. Niewykorzystane minuty przechodzą na kolejny miesiąc i kumulują się (rollover). Maksymalny stan rollover wynosi 2× miesięcznego limitu minut — nadwyżka przepada. Rollover jest naliczany automatycznie na koniec każdego okresu rozliczeniowego. Stan rollover widoczny w panelu zarządzania.</p>
-            <p>3.4. Dla planu Enterprise: płatność z góry za dany miesiąc + opłata wdrożeniowa jednorazowo. Rollover minut ustalany indywidualnie w umowie. Warunki SLA określone w umowie indywidualnej.</p>
-            <p>3.5. Połączenie na numer WitaLine (+48 732 125 752) jest standardowym połączeniem na numer komórkowy w Polsce. Koszt połączenia zależy wyłącznie od taryfy operatora dzwoniącego — WitaLine nie pobiera żadnych dodatkowych opłat za samo połączenie. Opłaty abonamentowe dotyczą wyłącznie korzystania z usługi asystenta głosowego.</p>
+            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">D. Usługa SMS</h3>
+            <p>WitaLine umożliwia wysyłkę wiadomości SMS za pośrednictwem Twilio API. Cennik:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Cena za pojedyncz&abreve; wiadomość SMS: <strong>0,50 PLN netto</strong></li>
+              <li>Pakiety SMS (jednorazowy zakup przez Stripe):
+                <ul className="list-disc pl-6 mt-1 space-y-0.5">
+                  <li>50 SMS &mdash; 25 PLN</li>
+                  <li>100 SMS &mdash; 45 PLN</li>
+                  <li>200 SMS &mdash; 80 PLN</li>
+                  <li>500 SMS &mdash; 175 PLN</li>
+                  <li>1 000 SMS &mdash; 300 PLN</li>
+                </ul>
+              </li>
+            </ul>
+            <p className="mt-2">Ceny SMS dotycz&abreve; wyłącznie wiadomości wysłanych przez asystenta AI (automatycznie po rozmowie lub przez narzędzie send_sms). Niewykorzystane SMS-y z pakietu nie przepadaj&abreve;.</p>
+
+            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">E. Usługa WhatsApp</h3>
+            <p>WitaLine umożliwia wysyłkę wiadomości przez WhatsApp Business API po wyrażeniu zgody przez rozm&oacute;wcę. Cennik:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1">
+              <li>Cena za pojedyncz&abreve; wiadomość WhatsApp: <strong>~0,54 PLN netto</strong></li>
+              <li>Pakiety WhatsApp (jednorazowy zakup przez Stripe):
+                <ul className="list-disc pl-6 mt-1 space-y-0.5">
+                  <li>50 wiadomości &mdash; 30 PLN</li>
+                  <li>100 wiadomości &mdash; 55 PLN</li>
+                  <li>200 wiadomości &mdash; 100 PLN</li>
+                  <li>500 wiadomości &mdash; 220 PLN</li>
+                </ul>
+              </li>
+            </ul>
+            <p className="mt-2">WhatsApp Continuity &mdash; automatyczne wysłanie wiadomości po rozmowie (jeśli Klient skonfigurował zgodę rozm&oacute;wcy). Wiadomości wysyłane s&abreve; tylko za zgod&abreve; rozm&oacute;wcy, wyrażon&abreve; podczas rozmowy z asystentem.</p>
+
+            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">F. Płatności wielowalutowe</h3>
+            <p>WitaLine akceptuje płatności w walutach PLN, EUR i USD. Ceny w EUR i USD s&abreve; przeliczane według kursu: 1 EUR = 4,35 PLN, 1 USD = 3,85 PLN. Kursy mog&abreve; ulegać zmianie &mdash; aktualny kurs widoczny w panelu płatności Stripe.</p>
+
+            <p className="mt-4 text-xs text-zinc-400">Wszystkie ceny podane s&abreve; w PLN netto, chyba że wskazano inaczej. Do cen doliczany jest podatek VAT: 23% dla firm polskich, 0% (odwrotne obci&abreve;żenie) dla firm z UE z ważnym VAT-UE, 23% dla konsument&oacute;w.</p>
+            <p className="mt-2">3.2. Klient może zmienić plan lub dokupić pakiet w dowolnym momencie z poziomu panelu zarządzania.</p>
+            <p>3.3. Połączenie na numer WitaLine (+48 732 125 752) jest standardowym połączeniem na numer kom&oacute;rkowy. Koszt połączenia zależy od taryfy operatora dzwoni&abreve;cego &mdash; WitaLine nie pobiera opłat za samo połączenie.</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">4. System prepaid i numer telefonu</h2>
-            <p>4.1. Każde nowe konto otrzymuje 50 PLN bonusu powitalnego na saldo prepaid.</p>
-            <p>4.2. Zakup dedykowanego polskiego numeru telefonu (+48) kosztuje 30 PLN i jest potrącany z salda prepaid Klienta.</p>
-            <p>4.3. Koszt 30 PLN obejmuje opłatę za aktywację numeru w Twilio (~4 USD) oraz bufor na wahania kursu walutowego. Kwota ta jest ostateczna i nie podlega zwrotowi po aktywacji numeru.</p>
-            <p>4.4. Klient może doładować saldo prepaid w panelu zarządzania przez Stripe (karta kredytowa/debetowa, Blik) — minimalna kwota doładowania: 50 PLN.</p>
-            <p>4.5. W przypadku braku środków na saldzie, rozmowy są blokowane do czasu doładowania konta.</p>
-            <p>4.6. Po rozwiązaniu umowy, niewykorzystane środki z salda prepaid podlegają zwrotowi na wniosek Klienta, pomniejszone o koszty już zrealizowanych usług.</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">4. System prepaid i pakiety</h2>
+            <p>4.1. Klient może dokupić pakiety minut oraz pakiety SMS/WhatsApp przez Stripe (karta kredytowa/debetowa, Blik). Minimalna kwota jednorazowej transakcji: 25 PLN.</p>
+            <p>4.2. Pakiety minut s&abreve; doliczane do salda prepaid Klienta. Minuty s&abreve; potrącane z salda przy każdym połączeniu (jeśli Klient nie ma aktywnego abonamentu z wliczonymi minutami).</p>
+            <p>4.3. Pakiety SMS/WhatsApp s&abreve; doliczane do odpowiednich sald. Wiadomości s&abreve; potrącane z salda przy każdej wysyłce.</p>
+            <p>4.4. Niewykorzystane minuty, SMS-y i wiadomości WhatsApp z pakiet&oacute;w nie przepadaj&abreve; i s&abreve; ważne bezterminowo.</p>
+            <p>4.5. W przypadku braku środk&oacute;w na saldzie, rozmowy s&abreve; blokowane. Wiadomości SMS/WhatsApp nie s&abreve; wysyłane.</p>
+            <p>4.6. Po rozwiązaniu umowy, niewykorzystane środki z pakiet&oacute;w podlegaj&abreve; zwrotowi na wniosek Klienta, pomniejszone o koszty już zrealizowanych usług.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">5. Rejestracja i konto</h2>
             <p>5.1. Rejestracja odbywa się przez formularz na stronie witaline.pl. Klient podaje adres e-mail i ustanawia hasło.</p>
-            <p>5.2. Klient zobowiązuje się do podania prawdziwych danych oraz aktualizowania ich w przypadku zmian.</p>
+            <p>5.2. Klient zobowi&abreve;zuje się do podania prawdziwych danych oraz aktualizowania ich w przypadku zmian.</p>
             <p>5.3. Klient może posiadać tylko jedno konto. Każde konto może zarządzać wieloma firmami (oddziałami).</p>
-            <p>5.4. Klient zobowiązuje się do zachowania poufności hasła i nieudostępniania konta osobom trzecim.</p>
+            <p>5.4. Klient zobowi&abreve;zuje się do zachowania poufności hasła i nieudostępniania konta osobom trzecim.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">6. Płatności</h2>
-            <p>6.1. Opłaty abonamentowe pobierane są z góry za każdy okres rozliczeniowy. Płatność realizowana jest przez Stripe — kartą kredytową/debetową lub Blik.</p>
-            <p>6.2. W przypadku braku płatności Usługodawca zawiesza świadczenie usług po 7 dniach od terminu płatności. Po 30 dniach od terminu konto zostaje usunięte wraz z danymi.</p>
-            <p>6.3. Po przekroczeniu limitu minut w planie abonamentowym obowiązują stawki za dodatkowe minuty (zgodnie z pkt 3.2), potrącane z salda prepaid. W planie Enterprise stawka dodatkowa: 1,20 PLN/min.</p>
-            <p>6.4. Wszystkie ceny są cenami netto. Do cen doliczany jest podatek VAT zgodnie z obowiązującymi przepisami.</p>
+            <p>6.1. Opłaty abonamentowe pobierane s&abreve; z g&oacute;ry za każdy okres rozliczeniowy. Płatność realizowana przez Stripe &mdash; kart&abreve; kredytow&abreve;/debetow&abreve; lub Blik.</p>
+            <p>6.2. Pakiety minut i SMS/WhatsApp s&abreve; płatne jednorazowo przy zakupie.</p>
+            <p>6.3. W przypadku braku płatności abonamentu Usługodawca zawiesza świadczenie usług po 7 dniach od terminu płatności. Po 30 dniach konto zostaje usunięte wraz z danymi.</p>
+            <p>6.4. Wszystkie ceny s&abreve; cenami netto. Do cen doliczany jest podatek VAT zgodnie z obowiązuj&abreve;cymi przepisami.</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">7. Prawo odstąpienia od umowy</h2>
-            <p>7.1. Klient będący konsumentem ma prawo odstąpić od niniejszej umowy w terminie 14 dni od daty jej zawarcia bez podawania przyczyny.</p>
-            <p>7.2. Aby skorzystać z prawa odstąpienia, Klient powinien wysłać jednoznaczne oświadczenie na adres e-mail: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a> lub za pośrednictwem panelu zarządzania (zakładka Ustawienia konta → Usuń konto).</p>
-            <p>7.3. W przypadku odstąpienia od umowy, Usługodawca zwraca wszystkie otrzymane od Klienta płatności niezwłocznie, nie później niż 14 dni od dnia otrzymania oświadczenia o odstąpieniu.</p>
-            <p>7.4. Klient ponosi koszt za usługi faktycznie wykonane do momentu odstąpienia. Koszt ten wynosi tyle, ile wynosi opłata abonamentowa proporcjonalnie do liczby dni korzystania z usługi.</p>
-            <p>7.5. Prawo odstąpienia nie przysługuje Klientowi będącemu przedsiębiorcą.</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">7. Prawo odst&abreve;pienia od umowy</h2>
+            <p>7.1. Klient będ&abreve;cy konsumentem ma prawo odst&abreve;pić od niniejszej umowy w terminie 14 dni od daty jej zawarcia bez podawania przyczyny.</p>
+            <p>7.2. Aby skorzystać z prawa odst&abreve;pienia, Klient powinien wysłać jednoznaczne oświadczenie na adres e-mail: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a> lub za pośrednictwem panelu zarządzania.</p>
+            <p>7.3. W przypadku odst&abreve;pienia, Usługodawca zwraca wszystkie otrzymane płatności niezwłocznie, nie p&oacute;źniej niż 14 dni od dnia otrzymania oświadczenia.</p>
+            <p>7.4. Klient ponosi koszt za usługi faktycznie wykonane do momentu odst&abreve;pienia, proporcjonalnie do liczby dni korzystania.</p>
+            <p>7.5. Prawo odst&abreve;pienia nie przysługuje Klientowi będ&abreve;cemu przedsiębiorc&abreve;.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">8. 30-dniowa gwarancja satysfakcji</h2>
-            <p>8.1. Usługodawca udziela 30-dniowej gwarancji satysfakcji: jeśli w ciągu pierwszych 30 dni korzystania z usługi bot nie zapisze ani jednego poprawnego kontaktu do klienta, Usługodawca zwraca 100% kwoty abonamentu.</p>
-            <p>8.2. Aby skorzystać z gwarancji, Klient zgłasza to za pośrednictwem panelu lub e-mail: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a>.</p>
-            <p>8.3. Gwarancja nie obejmuje przypadków, w których Klient nie skonfigurował poprawnie promptu lub bazy wiedzy zgodnie z instrukcją.</p>
+            <p>8.1. Usługodawca udziela 30-dniowej gwarancji satysfakcji: jeśli w ciągu pierwszych 30 dni korzystania z usługi asystent nie zapisze ani jednego poprawnego kontaktu (leada) &mdash; Usługodawca zwraca 100% kwoty pierwszego abonamentu.</p>
+            <p>8.2. Aby skorzystać z gwarancji, Klient zgłasza to przez panel lub e-mail: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a>.</p>
+            <p>8.3. Gwarancja nie obejmuje przypadk&oacute;w, w kt&oacute;rych Klient nie skonfigurował poprawnie promptu lub bazy wiedzy.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">9. Zasady korzystania z usługi</h2>
-            <p>9.1. Klient zobowiązuje się do niestosowania usługi w sposób sprzeczny z prawem, w tym do niedokonywania celowych prób obciążenia systemu (asymetria tokenów ElevenLabs vs minut Twilio).</p>
-            <p>9.2. W przypadku stwierdzenia nadużycia, Usługodawca ma prawo natychmiastowo zablokować konto Klienta bez zwrotu środków.</p>
-            <p>9.3. Klient ponosi odpowiedzialność za treść promptu systemowego oraz bazy wiedzy skonfigurowanej dla bota.</p>
+            <p>9.1. Klient zobowi&abreve;zuje się do niestosowania usługi w spos&oacute;b sprzeczny z prawem.</p>
+            <p>9.2. W przypadku stwierdzenia nadużycia Usługodawca ma prawo natychmiastowo zablokować konto bez zwrotu środk&oacute;w.</p>
+            <p>9.3. Klient ponosi odpowiedzialność za treść promptu systemowego oraz bazy wiedzy.</p>
+            <p>9.4. Wiadomości SMS i WhatsApp wysyłane s&abreve; wyłącznie za zgod&abreve; odbiorcy. Klient zobowi&abreve;zuje się do przestrzegania przepis&oacute;w RODO oraz ustawy o świadczeniu usług drogą elektroniczn&abreve;.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">10. Odpowiedzialność</h2>
-            <p>10.1. Usługodawca dołoży wszelkich starań, aby usługa działała bez przerw, jednak nie gwarantuje 100% dostępności ze względu na planowane przerwy techniczne i czynniki zewnętrzne.</p>
-            <p>10.2. Łączna odpowiedzialność Usługodawcy wobec Klienta z tytułu niewykonania lub nienależytego wykonania usługi ograniczona jest do wysokości opłaty abonamentowej za bieżący okres rozliczeniowy.</p>
-            <p>10.3. Usługodawca nie ponosi odpowiedzialności za treść rozmów prowadzonych przez asystenta głosowego, która wynika z błędnie skonfigurowanego promptu lub bazy wiedzy przez Klienta.</p>
-            <p>10.4. Usługodawca nie ponosi odpowiedzialności za utratę danych spowodowaną działaniem siły wyższej, błędem Klienta lub awarią infrastruktury zewnętrznych dostawców (Twilio, ElevenLabs, Stripe).</p>
+            <p>10.1. Usługodawca dołoży wszelkich starań, aby usługa działała bez przerw, jednak nie gwarantuje 100% dostępności.</p>
+            <p>10.2. Ł&abreve;czna odpowiedzialność Usługodawcy ograniczona jest do wysokości opłaty za bieżący okres rozliczeniowy.</p>
+            <p>10.3. Usługodawca nie ponosi odpowiedzialności za treść rozm&oacute;w wynikaj&abreve;c&abreve; z błędnie skonfigurowanego promptu lub bazy wiedzy.</p>
+            <p>10.4. Usługodawca nie ponosi odpowiedzialności za utratę danych spowodowan&abreve; działaniem siły wyższej, błędem Klienta lub awari&abreve; dostawc&oacute;w zewnętrznych (Twilio, ElevenLabs, Stripe, Meta/WhatsApp).</p>
+            <p>10.5. Usługodawca nie ponosi odpowiedzialności za niedostarczenie wiadomości SMS/WhatsApp spowodowane blokad&abreve; operatora, brakiem zasięgu lub polityk&abreve; Meta/WhatsApp.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">11. Ochrona danych i okres przechowywania</h2>
-            <p>11.1. Administratorem danych osobowych jest WitaLine. Szczegółowe informacje znajdują się w <Link href="/polityka-prywatnosci" className="text-brand-400 hover:underline">Polityce prywatności</Link>.</p>
-            <p>11.2. Nagrania rozmów i transkrypcje są przechowywane przez okres maksymalnie 30 dni, po czym są automatycznie i trwale usuwane.</p>
-            <p>11.3. Klient ma prawo w każdej chwili zażądać usunięcia wszystkich danych powiązanych z danym numerem telefonu za pośrednictwem panelu administracyjnego (zakładka RODO).</p>
-            <p>11.4. W przypadku usunięcia konta, wszystkie dane Klienta są trwale usuwane w ciągu 30 dni od momentu zamknięcia konta.</p>
+            <p>11.1. Administratorem danych osobowych jest WitaLine. Szczeg&oacute;łowe informacje w <Link href="/polityka-prywatnosci" className="text-brand-400 hover:underline">Polityce prywatności</Link>.</p>
+            <p>11.2. Nagrania rozm&oacute;w i transkrypcje przechowywane maksymalnie 30 dni, po czym s&abreve; automatycznie usuwane.</p>
+            <p>11.3. Historia wysłanych wiadomości SMS i WhatsApp przechowywana przez okres 12 miesięcy.</p>
+            <p>11.4. Klient ma prawo w każdej chwili zażądać usunięcia danych przez panel (zakładka RODO).</p>
+            <p>11.5. W przypadku usunięcia konta wszystkie dane s&abreve; trwale usuwane w ciągu 30 dni.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">12. Narzędzia systemowe (MCP) i automatyzacja</h2>
-            <p>12.1. Asystent głosowy WitaLine może korzystać z narzędzi systemowych (MCP — Model Context Protocol) w celu realizacji zadań takich jak: wyszukiwanie firm, zapis danych kontaktowych, sprawdzanie terminów, tworzenie rezerwacji, wysyłka wiadomości WhatsApp oraz przekazywanie rozmów do konsultantów.</p>
-            <p>12.2. Każde użycie narzędzia jest logowane i widoczne w panelu zarządzania. Klient ma wgląd w historię wywołań narzędzi wraz z przekazanymi parametrami.</p>
-            <p>12.3. Narzędzia są uruchamiane wyłącznie w kontekście bieżącej rozmowy i wyłącznie na wyraźne żądanie Klienta lub rozmówcy. Asystent nie używa narzędzi bez potrzeby.</p>
+            <p>12.1. Asystent może korzystać z narzędzi MCP: wyszukiwanie firm, zapis danych kontaktowych, sprawdzanie termin&oacute;w, tworzenie rezerwacji, wysyłka wiadomości WhatsApp/SMS oraz przekazywanie rozm&oacute;w do konsultant&oacute;w.</p>
+            <p>12.2. Każde użycie narzędzia jest logowane i widoczne w panelu zarządzania.</p>
+            <p>12.3. WhatsApp oraz SMS s&abreve; wysyłane wyłącznie na wyraźne żądanie Klienta lub rozm&oacute;wcy.</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">13. Rollover minut — szczegóły</h2>
-            <p>13.1. Niewykorzystane minuty z miesięcznego limitu przechodzą na kolejny miesiąc (rollover). Stan rollover jest widoczny w panelu zarządzania.</p>
-            <p>13.2. Maksymalny stan rollover wynosi 2× miesięcznego limitu minut (np. przy limicie 300 min można zgromadzić max 600 min rollover). Nadwyżka ponad cap przepada z końcem okresu rozliczeniowego.</p>
-            <p>13.3. Rollover naliczany jest automatycznie na koniec każdego okresu rozliczeniowego. Historia rollover dostępna w panelu (zakładka Historia).</p>
-            <p>13.4. W przypadku zmiany konfiguracji w trakcie okresu, rollover jest przeliczany proporcjonalnie. W przypadku przejścia na niższy limit, nadmiarowe minuty rollover (powyżej nowego capu) przepadają.</p>
-            <p>13.5. Rollover nie dotyczy modelu Enterprise, chyba że umowa indywidualna stanowi inaczej.</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">13. Rollover minut &mdash; szczeg&oacute;ły</h2>
+            <p>13.1. Niewykorzystane minuty z abonamentu przechodz&abreve; na kolejny miesi&abreve;c (rollover). Stan widoczny w panelu.</p>
+            <p>13.2. Maksymalny stan rollover: 2× miesięcznego limitu. Nadwyżka przepada.</p>
+            <p>13.3. Rollover naliczany automatycznie na koniec każdego okresu rozliczeniowego.</p>
+            <p>13.4. Rollover nie dotyczy modelu elastycznego (pay-as-you-go).</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">14. Rozwiązanie umowy i usunięcie konta</h2>
-            <p>14.1. Umowa zawierana jest na czas nieokreślony. Klient może wypowiedzieć umowę w dowolnym momencie z poziomu panelu zarządzania (zakładka Ustawienia konta → Usuń konto).</p>
-            <p>14.2. Usunięcie konta skutkuje natychmiastowym anulowaniem subskrypcji Stripe, usunięciem numeru telefonu z Twilio oraz trwałym usunięciem wszystkich danych Klienta (call logs, transkrypcje, nagrania, ustawienia).</p>
-            <p>14.3. Niewykorzystane środki z salda prepaid podlegają zwrotowi na wskazany rachunek bankowy w terminie 14 dni od zamknięcia konta, pomniejszone o koszty już zrealizowanych usług.</p>
-            <p>14.4. Usługodawca może rozwiązać umowę z 30-dniowym okresem wypowiedzenia w przypadku naruszenia przez Klienta postanowień Regulaminu.</p>
-            <p>14.5. W przypadku braku płatności przez okres 30 dni, konto Klienta zostaje automatycznie usunięte wraz ze wszystkimi danymi.</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">14. Rozwi&abreve;zanie umowy i usunięcie konta</h2>
+            <p>14.1. Umowa na czas nieokreślony. Klient może wypowiedzieć w dowolnym momencie z poziomu panelu.</p>
+            <p>14.2. Usunięcie konta skutkuje anulowaniem subskrypcji Stripe, usunięciem numeru telefonu oraz trwałym usunięciem danych.</p>
+            <p>14.3. Niewykorzystane środki z pakiet&oacute;w podlegaj&abreve; zwrotowi w 14 dni od zamknięcia konta.</p>
+            <p>14.4. Usługodawca może rozwiązać umowę z 30-dniowym okresem wypowiedzenia w przypadku naruszenia Regulaminu.</p>
+            <p>14.5. Po 30 dniach braku płatności konto zostaje automatycznie usunięte wraz z danymi.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">15. Postanowienia końcowe</h2>
-            <p>15.1. Usługodawca zastrzega sobie prawo do zmiany Regulaminu. Klient zostanie powiadomiony o zmianach e-mailem na 14 dni przed ich wejściem w życie.</p>
-            <p>15.2. W przypadku braku akceptacji zmian, Klient ma prawo wypowiedzieć umowę przed dniem wejścia w życie zmian.</p>
-            <p>15.3. Wszelkie spory rozstrzygane będą przez sąd właściwy dla siedziby Usługodawcy.</p>
-            <p>15.4. Regulamin wchodzi w życie z dniem 15 czerwca 2026 roku.</p>
-            <p className="mt-6 text-zinc-400 text-xs">Data ostatniej aktualizacji: 15 czerwca 2026</p>
+            <p>15.1. Usługodawca zastrzega sobie prawo do zmiany Regulaminu. Klient powiadomiony e-mailem na 14 dni przed zmian&abreve;.</p>
+            <p>15.2. W przypadku braku akceptacji zmian Klient ma prawo wypowiedzieć umowę przed dniem wejścia w życie zmian.</p>
+            <p>15.3. Spory rozstrzygane przez sąd właściwy dla siedziby Usługodawcy.</p>
+            <p>15.4. Regulamin wchodzi w życie z dniem 1 lipca 2026 roku.</p>
+            <p className="mt-6 text-zinc-400 text-xs">Data ostatniej aktualizacji: 1 lipca 2026</p>
           </section>
         </div>
       </div>

@@ -10,11 +10,24 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { PlanKey } from "@/types/database";
 
+function StepsIconPlan() {
+  return <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>;
+}
+function StepsIconAccount() {
+  return <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>;
+}
+function StepsIconCompany() {
+  return <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>;
+}
+function StepsIconTarget() {
+  return <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" /></svg>;
+}
+
 const STEPS = [
-  { label: "Plan", icon: "📋" },
-  { label: "Konto", icon: "🔑" },
-  { label: "Firma", icon: "🏢" },
-  { label: "Branża", icon: "🎯" },
+  { label: "Plan", icon: StepsIconPlan },
+  { label: "Konto", icon: StepsIconAccount },
+  { label: "Firma", icon: StepsIconCompany },
+  { label: "Branża", icon: StepsIconTarget },
 ];
 
 function PlanSelector({
@@ -166,15 +179,18 @@ if (done) return (
 
         {/* Progress steps */}
         <div className="flex items-center justify-center mb-8">
-          {STEPS.map((s, i) => (
+          {STEPS.map((s, i) => {
+            const Icon = s.icon;
+            return (
             <div key={i} className="flex items-center">
               <div className={`flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-full text-xs font-semibold transition-all ${i === step ? "bg-brand-400 text-white shadow-md" : i < step ? "bg-brand-100 text-brand-600" : "bg-white/10 text-white/40"}`}>
-                <span className="text-sm">{s.icon}</span>
+                <span className="text-sm"><Icon /></span>
                 <span className="hidden sm:inline">{s.label}</span>
               </div>
               {i < 3 && <div className={`w-8 h-0.5 rounded-full mx-1 transition-colors ${i < step ? "bg-brand-400" : "bg-white/15"}`} />}
             </div>
-          ))}
+            );
+          })}
         </div>
 
 <div className="glass-card-dark p-6 md:p-8">
@@ -184,7 +200,7 @@ if (done) return (
           {step === 0 && (
             <div>
 <div className="bg-brand-400/10 border border-brand-400/20 rounded-2xl p-4 mb-6 flex items-start gap-3">
-  <span className="text-xl shrink-0">🎁</span>
+  <svg className="w-5 h-5 text-brand-400 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg>
   <div><p className="text-sm font-semibold text-brand-300">7 dni za darmo</p><p className="text-xs text-white/50 mt-0.5">Bez karty kredytowej. Anuluj w każdej chwili.</p></div>
 </div>
 <h2 className="text-lg font-semibold text-white mb-4">Wybierz model współpracy</h2>

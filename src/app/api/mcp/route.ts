@@ -12,6 +12,18 @@ export const dynamic = "force-dynamic";
 
 const WITALINE_MAIN_BUSINESS = "00000000-0000-0000-0000-000000000001";
 
+async function checkTrial(businessId: string): Promise<boolean> {
+  if (businessId === WITALINE_MAIN_BUSINESS) return true;
+  const { data } = await supabaseAdmin
+    .from("businesses")
+    .select("subscription_status, trial_ends_at")
+    .eq("id", businessId)
+    .maybeSingle();
+  if (!data) return false;
+  if (data.subscription_status === "trialing" && data.trial_ends_at && new Date(data.trial_ends_at) < new Date()) return false;
+  return true;
+}
+
 const TOOLS = [
   { name: "business_lookup", description: "Wyszukaj firme po nazwie lub numerze wewnetrznym", inputSchema: { type: "object", properties: { query: { type: "string", description: "Nazwa firmy lub numer wewnetrzny (DTMF)" } }, required: ["query"] } },
   { name: "save_lead", description: "Zapisz lead/wiadomosc od klienta", inputSchema: { type: "object", properties: { name: { type: "string", description: "Imie i nazwisko klienta" }, phone: { type: "string", description: "Numer telefonu klienta" }, message: { type: "string", description: "Tresc wiadomosci" }, business_id: { type: "string", description: "ID firmy (z dynamic_variables)" } }, required: ["name", "phone"] } },
@@ -59,6 +71,14 @@ export async function POST(request: NextRequest) {
       console.log("[MCP tools/call] raw:", rawName, "stripped:", toolName, "args:", JSON.stringify(args));
 
       let result = "";
+
+      let bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+      if (toolName !== "business_lookup" && toolName !== "send_whatsapp") {
+        if (!(await checkTrial(bizId))) {
+          result = JSON.stringify({ ok: false, error: "Trial expired" });
+          return NextResponse.json({ jsonrpc: "2.0", id, result: { content: [{ type: "text", text: result }] } });
+        }
+      }
 
       if (toolName === "business_lookup") {
         const trimmed = args.query?.trim() || "";
