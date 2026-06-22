@@ -1,6 +1,8 @@
 ﻿import { NextResponse } from "next/server";
 import * as https from "https";
 import { setActiveCallSid } from "@/lib/active-call-store";
+import { getTwilioCredentials, getTwilioAuthFromCreds } from "@/lib/twilio-credentials";
+import type { TwilioCredentials } from "@/lib/twilio-credentials";
 
 export function escapeXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
@@ -16,17 +18,13 @@ export function twimlDocument(content: string): string {
   return `<Response>${content}</Response>`;
 }
 
-function twilioBasicAuth(): string | null {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) return null;
-  return Buffer.from(`${sid}:${token}`).toString("base64");
+async function resolveCreds(businessId?: string): Promise<TwilioCredentials> {
+  return getTwilioCredentials(businessId);
 }
 
-function twilioApiRequest(method: "GET" | "POST", path: string, body?: URLSearchParams): Promise<{ status: number; data: any }> {
+function twilioApiRequest(method: "GET" | "POST", path: string, creds: TwilioCredentials, body?: URLSearchParams): Promise<{ status: number; data: any }> {
   return new Promise((resolve, reject) => {
-    const auth = twilioBasicAuth();
-    if (!auth) { resolve({ status: 500, data: { message: "Twilio credentials not configured" } }); return; }
+    const auth = getTwilioAuthFromCreds(creds);
     const hasBody = !!body;
     const payload = hasBody ? body.toString() : null;
     const headers: Record<string, string> = { Authorization: `Basic ${auth}` };
@@ -108,9 +106,8 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
 }
 
 export async function dialConsultantToQueue(targetNumber: string, callerId: string, queueName: string, baseUrl: string, businessId: string, callSid: string): Promise<{ ok: boolean; sid?: string; message: string }> {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) return { ok: false, message: "Twilio credentials not configured" };
+  let creds: TwilioCredentials;
+  try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
 
   const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
   const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Queue>${escapeXml(queueName)}</Queue></Dial></Response>`;
@@ -125,7 +122,7 @@ export async function dialConsultantToQueue(targetNumber: string, callerId: stri
     StatusCallbackEvent: "initiated+ringing+answered+completed",
   });
 
-  const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${sid}/Calls.json`, body);
+  const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${creds.accountSid}/Calls.json`, creds, body);
   if (res.status >= 200 && res.status < 300) {
     const data = res.data as { sid?: string };
     return { ok: true, sid: data?.sid, message: "Consultant dialed to queue" };
@@ -146,7 +143,7 @@ export async function redirectCallWithTransferTwiML(callSid: string, targetNumbe
 <Redirect method="POST">${escapeXml(`${cleanUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}</Redirect>
 <Hangup/>`;
 
-  const result = await redirectActiveCallToHumanHandoff(callSid, twimlBody);
+  const result = await redirectActiveCallToHumanHandoff(callSid, twimlBody, businessId);
 
   if (result.ok) {
     dialConsultantToQueue(targetNumber, callerId, queueName, cleanUrl, businessId, callSid)
@@ -162,14 +159,14 @@ export async function redirectCallToVoicemail(callSid: string, businessId: strin
   const twimlBody = `
 <Say language="pl-PL">Przepraszamy, konsultant jest obecnie niedostępny. Może Pan/Pani zostawić wiadomość po sygnale.</Say>
 <Redirect method="POST">${escapeXml(voicemailUrl)}</Redirect>`;
-  return redirectActiveCallToHumanHandoff(callSid, twimlBody);
+  return redirectActiveCallToHumanHandoff(callSid, twimlBody, businessId);
 }
 
-export async function redirectActiveCallToHumanHandoff(callSid: string, twimlBody: string): Promise<{ ok: boolean; status?: number; message: string }> {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  if (!sid) return { ok: false, message: "Twilio account SID is not configured" };
+export async function redirectActiveCallToHumanHandoff(callSid: string, twimlBody: string, businessId?: string): Promise<{ ok: boolean; status?: number; message: string }> {
+  let creds: TwilioCredentials;
+  try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
   const body = new URLSearchParams({ Twiml: twimlDocument(twimlBody) });
-  const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${sid}/Calls/${callSid}.json`, body);
+  const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${creds.accountSid}/Calls/${callSid}.json`, creds, body);
   if (res.status >= 200 && res.status < 300) return { ok: true, status: res.status, message: "Call redirected to human handoff" };
   return { ok: false, status: res.status, message: typeof res.data === "string" ? res.data : res.data?.message || "Twilio redirect failed" };
 }

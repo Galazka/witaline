@@ -55,6 +55,8 @@ export interface Business {
   verification_status?: "pending" | "verified" | "rejected";
   verified_at?: string | null;
   verified_by?: string | null;
+  twilio_account_sid?: string;
+  twilio_auth_token?: string;
 }
 
 export interface BusinessConsultant {

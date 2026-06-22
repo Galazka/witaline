@@ -1,11 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
-
-function getTwilioAuth(): string {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) throw new Error("Twilio credentials not configured");
-  return Buffer.from(`${sid}:${token}`).toString("base64");
-}
+import { getTwilioCredentials, getTwilioAuthFromCreds } from "@/lib/twilio-credentials";
 
 export async function sendSms(
   toNumber: string,
@@ -15,6 +9,9 @@ export async function sendSms(
 ): Promise<{ success: boolean; twilioSid?: string; error?: string }> {
   const fromNumber = process.env.TWILIO_PHONE_NUMBER;
   if (!fromNumber) return { success: false, error: "TWILIO_PHONE_NUMBER not set" };
+
+  let creds;
+  try { creds = await getTwilioCredentials(businessId); } catch { return { success: false, error: "Twilio credentials not configured" }; }
 
   let smsUsed = 0;
 
@@ -44,11 +41,11 @@ export async function sendSms(
     });
 
     const res = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+      `https://api.twilio.com/2010-04-01/Accounts/${creds.accountSid}/Messages.json`,
       {
         method: "POST",
         headers: {
-          Authorization: `Basic ${getTwilioAuth()}`,
+          Authorization: `Basic ${getTwilioAuthFromCreds(creds)}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: form.toString(),
@@ -68,7 +65,6 @@ export async function sendSms(
     if (businessId) {
       const { error: rpcErr } = await supabaseAdmin.rpc("increment_sms_used", { biz_id: businessId });
       if (rpcErr) {
-        // Fallback: direct update if RPC doesn't exist yet
         await supabaseAdmin
           .from("businesses")
           .update({ sms_used: smsUsed + 1 })

@@ -57,7 +57,7 @@ export async function PATCH(request: Request) {
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { id, name, system_prompt, menu_catalog, current_plan, suspended, industry, website_url, phone, custom_monthly_revenue } = body;
+  const { id, name, system_prompt, menu_catalog, current_plan, suspended, industry, website_url, phone, custom_monthly_revenue, twilio_account_sid, twilio_auth_token } = body;
 
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
@@ -71,6 +71,8 @@ export async function PATCH(request: Request) {
   if (website_url !== undefined) updateData.website_url = website_url;
   if (phone !== undefined) updateData.phone = phone;
   if (custom_monthly_revenue !== undefined) updateData.custom_monthly_revenue = custom_monthly_revenue;
+  if (twilio_account_sid !== undefined) updateData.twilio_account_sid = twilio_account_sid;
+  if (twilio_auth_token !== undefined) updateData.twilio_auth_token = twilio_auth_token;
 
   const { error } = await supabaseAdmin.from("businesses").update(updateData).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,23 +1,13 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getTwilioCredentials, getTwilioAuthFromCreds } from "@/lib/twilio-credentials";
 
 const WHATSAPP_SANDBOX_NUMBER = "+14155238886";
 
-// Use configured WhatsApp sender from env, or fall back to sandbox
-// TWILIO_PHONE_NUMBER is intentionally NOT used here — it's for voice/SMS,
-// and most numbers are not WhatsApp-registered (error 63007).
-// Set TWILIO_WHATSAPP_FROM explicitly for production WhatsApp.
 function getWhatsAppFrom(): string {
   const configured = process.env.TWILIO_WHATSAPP_FROM;
   if (configured) return configured;
   console.warn("[twilio-whatsapp] TWILIO_WHATSAPP_FROM not set, using sandbox. Set TWILIO_WHATSAPP_FROM for production WhatsApp.");
   return WHATSAPP_SANDBOX_NUMBER;
-}
-
-function getTwilioAuth(): string {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) throw new Error("Twilio credentials not configured");
-  return Buffer.from(`${sid}:${token}`).toString("base64");
 }
 
 export async function sendWhatsApp(
@@ -29,6 +19,9 @@ export async function sendWhatsApp(
 ): Promise<{ success: boolean; twilioSid?: string; error?: string }> {
   const fromNumber = process.env.TWILIO_PHONE_NUMBER;
   if (!fromNumber) return { success: false, error: "TWILIO_PHONE_NUMBER not set" };
+
+  let creds;
+  try { creds = await getTwilioCredentials(businessId); } catch { return { success: false, error: "Twilio credentials not configured" }; }
 
   let waUsed = 0;
 
@@ -51,7 +44,6 @@ export async function sendWhatsApp(
   }
 
   const normalized = toNumber.startsWith("+") ? toNumber : `+${toNumber}`;
-  // Ensure Polish number has correct format for WhatsApp
   const waTo = `whatsapp:${normalized}`;
   const waFrom = `whatsapp:${getWhatsAppFrom()}`;
 
@@ -60,11 +52,11 @@ export async function sendWhatsApp(
     if (mediaUrl) form.append("MediaUrl", mediaUrl);
 
     const res = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+      `https://api.twilio.com/2010-04-01/Accounts/${creds.accountSid}/Messages.json`,
       {
         method: "POST",
         headers: {
-          Authorization: `Basic ${getTwilioAuth()}`,
+          Authorization: `Basic ${getTwilioAuthFromCreds(creds)}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: form.toString(),

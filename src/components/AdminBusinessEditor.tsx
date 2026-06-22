@@ -48,6 +48,10 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
   const [phone, setPhone] = useState("");
   const [smsLimit, setSmsLimit] = useState(0);
   const [smsExtra, setSmsExtra] = useState(0);
+  const [twilioAccountSid, setTwilioAccountSid] = useState("");
+  const [twilioAuthToken, setTwilioAuthToken] = useState("");
+  const [creatingSubaccount, setCreatingSubaccount] = useState(false);
+  const [twilioMsg, setTwilioMsg] = useState("");
 
   useEffect(() => { fetchData(); }, [businessId]);
 
@@ -71,6 +75,8 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
         setBizName(biz.name || "");
         setSmsLimit(biz.sms_limit || 0);
         setSmsExtra(biz.sms_extra_purchased || 0);
+        setTwilioAccountSid(biz.twilio_account_sid || "");
+        setTwilioAuthToken(biz.twilio_auth_token || "");
       }
 
       if (data.knowledge) setKnowledge(data.knowledge as BusinessKnowledge[]);
@@ -363,6 +369,81 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                     className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm"
                   />
                 </div>
+              </div>
+              <div className="border-t border-zinc-200 pt-6 mt-6">
+                <h4 className="text-sm font-bold text-zinc-900 mb-3">🔐 Twilio Subkonto</h4>
+                {twilioAccountSid ? (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-2">
+                    <p className="text-sm font-medium text-green-800">✓ Subkonto aktywne</p>
+                    <p className="text-xs text-green-700 font-mono break-all">SID: {twilioAccountSid}</p>
+                  </div>
+                ) : (
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 space-y-3">
+                    <p className="text-sm text-zinc-600">Brak subkonta Twilio. Możesz utworzyć nowe lub wprowadzić ręcznie.</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-700 mb-1">Account SID</label>
+                        <input
+                          value={twilioAccountSid}
+                          onChange={(e) => setTwilioAccountSid(e.target.value)}
+                          placeholder="AC..."
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-700 mb-1">Auth Token</label>
+                        <input
+                          value={twilioAuthToken}
+                          onChange={(e) => setTwilioAuthToken(e.target.value)}
+                          placeholder="sk/ auth token..."
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!twilioAccountSid || !twilioAuthToken) return;
+                        setSaving(true);
+                        const res = await fetch("/api/admin/businesses", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: businessId, twilio_account_sid: twilioAccountSid, twilio_auth_token: twilioAuthToken }),
+                        });
+                        setTwilioMsg(res.ok ? "✅ Zapisano subkonto" : "❌ Błąd zapisu");
+                        setSaving(false);
+                      }}
+                      disabled={!twilioAccountSid || !twilioAuthToken || saving}
+                      className="px-3 py-1.5 bg-zinc-200 text-zinc-700 text-xs font-medium rounded-lg hover:bg-zinc-300 transition disabled:opacity-50"
+                    >
+                      Zapisz subkonto
+                    </button>
+                    <span className="text-xs text-zinc-400 mx-2">lub</span>
+                    <button
+                      onClick={async () => {
+                        setCreatingSubaccount(true);
+                        setTwilioMsg("");
+                        try {
+                          const res = await fetch(`/api/admin/business/${businessId}/create-subaccount`, { method: "POST" });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setTwilioAccountSid(data.account_sid);
+                            setTwilioMsg("✅ Subkonto utworzone");
+                          } else {
+                            setTwilioMsg(`❌ ${data.error || "Błąd"}`);
+                          }
+                        } catch {
+                          setTwilioMsg("❌ Błąd sieci");
+                        }
+                        setCreatingSubaccount(false);
+                      }}
+                      disabled={creatingSubaccount}
+                      className="px-4 py-1.5 bg-brand-400 text-white text-xs font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50"
+                    >
+                      {creatingSubaccount ? "Tworzenie..." : "⚡ Utwórz subkonto automatycznie"}
+                    </button>
+                    {twilioMsg && <p className="text-xs text-zinc-500">{twilioMsg}</p>}
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <label className="text-sm font-medium text-zinc-700">Status:</label>
