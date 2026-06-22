@@ -1,91 +1,72 @@
-// Simple in-memory rate limiter for API routes
-// For production, consider Redis-based (e.g., @upstash/ratelimit)
+const hits = new Map<string, number[]>();
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
+const WINDOW_MS = 60_000;
+const MAX_REQUESTS = 60;
 
-const store = new Map<string, RateLimitEntry>();
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
+export function checkRateLimit(key: string, maxRequests = MAX_REQUESTS, windowMs = WINDOW_MS): { allowed: boolean; remaining: number; resetIn: number } {
   const now = Date.now();
-  for (const [key, entry] of store) {
-    if (now > entry.resetAt) store.delete(key);
-  }
-}, 5 * 60 * 1000);
+  const timestamps = hits.get(key) || [];
+  const valid = timestamps.filter((t) => now - t < windowMs);
+  const remaining = Math.max(0, maxRequests - valid.length);
+  const resetIn = valid.length > 0 ? windowMs - (now - valid[0]) : 0;
 
-export interface RateLimitConfig {
-  windowMs: number;   // time window in milliseconds
-  maxRequests: number; // max requests per window
-}
-
-export interface RateLimitResult {
-  allowed: boolean;
-  remaining: number;
-  resetAt: number;
-}
-
-const DEFAULT_CONFIG: RateLimitConfig = {
-  windowMs: 60 * 1000, // 1 minute
-  maxRequests: 30,
-};
-
-export function checkRateLimit(
-  identifier: string,
-  config: Partial<RateLimitConfig> = {}
-): RateLimitResult {
-  const { windowMs, maxRequests } = { ...DEFAULT_CONFIG, ...config };
-  const now = Date.now();
-  const key = identifier;
-  const entry = store.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
-    return { allowed: true, remaining: maxRequests - 1, resetAt: now + windowMs };
+  if (valid.length >= maxRequests) {
+    return { allowed: false, remaining: 0, resetIn };
   }
 
-  entry.count++;
+  valid.push(now);
+  hits.set(key, valid);
 
-  if (entry.count > maxRequests) {
-    return { allowed: false, remaining: 0, resetAt: entry.resetAt };
+  if (hits.size > 10000) {
+    for (const [k, v] of hits) {
+      const fresh = v.filter((t) => now - t < windowMs);
+      if (fresh.length === 0) hits.delete(k);
+      else hits.set(k, fresh);
+    }
   }
 
-  return { allowed: true, remaining: maxRequests - entry.count, resetAt: entry.resetAt };
+  return { allowed: true, remaining, resetIn };
 }
 
-// Helper: get client IP from request
-export function getClientIp(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
-
-// Helper: apply rate limit and return 429 Response if exceeded
-export function rateLimitResponse(
-  request: Request,
-  routeName: string,
-  config?: Partial<RateLimitConfig>
-): Response | null {
-  const ip = getClientIp(request);
-  const result = checkRateLimit(`${routeName}:${ip}`, config);
+export function rateLimitMiddleware(key: string, maxRequests = 60): { allowed: boolean; status: number; headers: Record<string, string> } {
+  const result = checkRateLimit(key, maxRequests);
+  const headers: Record<string, string> = {
+    "X-RateLimit-Limit": String(maxRequests),
+    "X-RateLimit-Remaining": String(result.remaining),
+    "X-RateLimit-Reset": String(Math.ceil(result.resetIn / 1000)),
+  };
 
   if (!result.allowed) {
-    return new Response(
-      JSON.stringify({ error: "Za dużo zapytań. Spróbuj ponownie za chwilę." }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          "Retry-After": String(Math.ceil((result.resetAt - Date.now()) / 1000)),
-          "X-RateLimit-Remaining": "0",
-        },
-      }
-    );
+    return { allowed: false, status: 429, headers };
   }
 
-  return null; // allowed
+  return { allowed: true, status: 200, headers };
+}
+
+export function getClientIp(request: Request): string {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+}
+
+export function rateLimitResponse(
+  request: Request,
+  key: string,
+  options?: { windowMs?: number; maxRequests?: number }
+): Response | undefined {
+  const ip = getClientIp(request);
+  const rl = checkRateLimit(`${key}:${ip}`, options?.maxRequests || 10, options?.windowMs || 60_000);
+
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": String(options?.maxRequests || 10),
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": String(Math.ceil(rl.resetIn / 1000)),
+        "Retry-After": String(Math.ceil(rl.resetIn / 1000)),
+      },
+    });
+  }
+
+  return undefined;
 }

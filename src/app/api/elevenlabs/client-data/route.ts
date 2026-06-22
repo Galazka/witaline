@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     // Try callSid from webhook body first, fall back to active-call-store by businessId
     let callSid = body?.call_sid || "";
     if (!callSid) {
-      const sids = getActiveCallSids(businessId);
+      const sids = await getActiveCallSids(businessId);
       callSid = sids.length > 0 ? sids[sids.length - 1] : "";
     }
 

@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     // Custom tool: zapisz zamiar transferu w shared store
     // Stream zakończy się naturalnie → Twilio wykona <Redirect> → transfer-router sprawdzi store
     const storeKey = callSid || businessId;
-    setPendingTransfer(storeKey, {
+    await setPendingTransfer(storeKey, {
       businessId,
       targetNumber: target.number,
       callerId: target.callerId,

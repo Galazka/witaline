@@ -24,12 +24,12 @@ export async function POST(request: Request) {
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
-  let pending = getPendingTransfer(businessId) || getPendingTransfer(callSid);
+  let pending = await getPendingTransfer(businessId) || await getPendingTransfer(callSid);
 
   if (pending) {
     console.log("[transfer-router] pending transfer found →", pending.targetNumber);
-    deletePendingTransfer(businessId);
-    deletePendingTransfer(callSid);
+    await deletePendingTransfer(businessId);
+    await deletePendingTransfer(callSid);
 
     const { data: consultants } = await supabaseAdmin
       .from("business_consultants")

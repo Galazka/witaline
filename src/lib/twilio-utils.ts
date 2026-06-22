@@ -92,7 +92,7 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfigucji. Prosimy spróbować później.</Say><Hangup/>`);
   // Store callSid for MCP handler to find if agent doesn't pass it
-  setActiveCallSid(businessId, callSid);
+  await setActiveCallSid(businessId, callSid);
   try {
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);

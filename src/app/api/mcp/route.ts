@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
-import { escapeXml, twimlDocument, redirectCallWithTransferTwiML } from "@/lib/twilio-utils";
-import { setPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
+import { sendWhatsApp } from "@/lib/twilio-whatsapp";
+import { redirectCallWithTransferTwiML } from "@/lib/twilio-utils";
+import { setPendingTransfer } from "@/lib/transfer-store";
 import { getActiveCallSids } from "@/lib/active-call-store";
+import { withCache } from "@/lib/cache";
+import { rateLimitMiddleware } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,6 +29,16 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 120 requests per minute per IP
+  const ip = request.headers.get("x-forwarded-for") || "mcp-unknown";
+  const rl = rateLimitMiddleware(`mcp:${ip}`, 120);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { jsonrpc: "2.0", id: null, error: { code: -32000, message: "Rate limited" } },
+      { status: 429, headers: rl.headers }
+    );
+  }
+
   try {
     const body = await request.json();
     const { id, method, params } = body;
@@ -51,7 +63,11 @@ export async function POST(request: NextRequest) {
       if (toolName === "business_lookup") {
         const trimmed = args.query?.trim() || "";
         const isDtmf = /^\d{1,6}$/.test(trimmed);
-        let { data } = await supabaseAdmin.from("businesses").select("id, name, phone, extension, current_plan, industry").or(isDtmf ? `extension.eq.${trimmed}` : `name.ilike.%${trimmed}%`).limit(1).maybeSingle();
+        const cacheKey = `business_lookup:${isDtmf ? "ext" : "name"}:${trimmed}`;
+        const data = await withCache(cacheKey, async () => {
+          const { data } = await supabaseAdmin.from("businesses").select("id, name, phone, extension, current_plan, industry").or(isDtmf ? `extension.eq.${trimmed}` : `name.ilike.%${trimmed}%`).limit(1).maybeSingle();
+          return data;
+        }, 30_000);
         result = JSON.stringify({ ok: !!data, business: data || null });
       }
       else if (toolName === "save_lead") {
@@ -69,7 +85,6 @@ export async function POST(request: NextRequest) {
           business_id: args.business_id || WITALINE_MAIN_BUSINESS,
           created_at: new Date().toISOString()
         }).select().single();
-        console.log("[MCP save_lead] result:", error ? error.message : "ok id=" + data?.id);
         result = JSON.stringify({ ok: !error, lead: error ? null : data, error: error?.message });
       }
       else if (toolName === "send_whatsapp") {
@@ -84,30 +99,39 @@ export async function POST(request: NextRequest) {
       }
       else if (toolName === "get_services") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
-        const { data } = await supabaseAdmin.from("businesses").select("services").eq("id", bizId).maybeSingle();
-        let svc = [];
-        if (data?.services) {
-          try { svc = typeof data.services === "string" ? JSON.parse(data.services) : data.services; } catch {}
-        }
+        const cacheKey = `services:${bizId}`;
+        const svc = await withCache(cacheKey, async () => {
+          const { data } = await supabaseAdmin.from("businesses").select("services").eq("id", bizId).maybeSingle();
+          if (data?.services) {
+            try { return typeof data.services === "string" ? JSON.parse(data.services) : data.services; } catch {}
+          }
+          return [];
+        }, 30_000);
         result = JSON.stringify({ ok: true, services: svc });
       }
       else if (toolName === "get_business_hours") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
-        const { data } = await supabaseAdmin.from("businesses").select("calendar_settings").eq("id", bizId).maybeSingle();
-        let hours = {};
-        if (data?.calendar_settings) {
-          try { hours = typeof data.calendar_settings === "string" ? JSON.parse(data.calendar_settings) : data.calendar_settings; } catch {}
-        }
+        const cacheKey = `hours:${bizId}`;
+        const hours = await withCache(cacheKey, async () => {
+          const { data } = await supabaseAdmin.from("businesses").select("calendar_settings").eq("id", bizId).maybeSingle();
+          if (data?.calendar_settings) {
+            try { return typeof data.calendar_settings === "string" ? JSON.parse(data.calendar_settings) : data.calendar_settings; } catch {}
+          }
+          return {};
+        }, 30_000);
         result = JSON.stringify({ ok: true, hours });
       }
       else if (toolName === "check_availability") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
         const date = args.date || "";
-        const { data } = await supabaseAdmin.from("businesses").select("calendar_settings").eq("id", bizId).maybeSingle();
-        let hours: Record<string, unknown> = {};
-        if (data?.calendar_settings) {
-          try { hours = typeof data.calendar_settings === "string" ? JSON.parse(data.calendar_settings) : data.calendar_settings; } catch {}
-        }
+        const cacheKey = `hours:${bizId}`;
+        const hours = await withCache(cacheKey, async () => {
+          const { data } = await supabaseAdmin.from("businesses").select("calendar_settings").eq("id", bizId).maybeSingle();
+          if (data?.calendar_settings) {
+            try { return typeof data.calendar_settings === "string" ? JSON.parse(data.calendar_settings) : data.calendar_settings; } catch {}
+          }
+          return {};
+        }, 30_000) as Record<string, unknown>;
         const dayName = ["niedziela","poniedzialek","wtorek","sroda","czwartek","piatek","sobota"][new Date(date).getDay()];
         const daySlots = dayName ? (hours[dayName] as unknown[]) || [] : [];
         result = JSON.stringify({ ok: true, date, day: dayName, slots: daySlots, calendar_settings: hours });
@@ -132,7 +156,7 @@ export async function POST(request: NextRequest) {
 
         // If agent didn't pass a valid callSid, try all stored call SIDs for this business
         if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
-          const allSids = getActiveCallSids(bizId);
+          const allSids = await getActiveCallSids(bizId);
           callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
         }
 
@@ -164,7 +188,7 @@ export async function POST(request: NextRequest) {
           const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
 
           // Always store as fallback (in case REST API fails)
-          setPendingTransfer(bizId, {
+          await setPendingTransfer(bizId, {
             businessId: bizId,
             targetNumber,
             callerId,
@@ -176,7 +200,7 @@ export async function POST(request: NextRequest) {
 
           // Try immediate REST API redirect using callSid (most reliable)
           let restApiOk = false;
-          const allSids = callSid ? [callSid] : getActiveCallSids(bizId);
+          const allSids = callSid ? [callSid] : await getActiveCallSids(bizId);
           if (allSids.length > 0) {
             const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
             for (const sid of allSids) {

@@ -5,6 +5,8 @@ import { sendSms } from "@/lib/twilio-sms";
 import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
 import { addNotification } from "@/lib/notifications";
 import { sendWebhook } from "@/lib/webhook-outbound";
+import { enqueueJob } from "@/lib/job-queue";
+import { rateLimitMiddleware } from "@/lib/rate-limit";
 
 function verifyWebhook(request: Request): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
@@ -102,6 +104,13 @@ function parseBody(body: Record<string, unknown>) {
 }
 
 export async function POST(request: Request) {
+  // Rate limit: 60 requests per minute
+  const ip = request.headers.get("x-forwarded-for") || "call-completed";
+  const rl = rateLimitMiddleware(`elevenlabs-call-completed:${ip}`, 60);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: rl.headers });
+  }
+
   if (!verifyWebhook(request)) {
     return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
   }
@@ -140,6 +149,24 @@ export async function POST(request: Request) {
   const estimatedTokens = Math.ceil((durationSeconds / 60) * 1000);
   const ADMIN_COST_PER_TOKEN = 0.00065;
   const mainLineCostPln = Math.round(estimatedTokens * ADMIN_COST_PER_TOKEN * 100) / 100;
+
+  // Enqueue async job for non-critical processing
+  enqueueJob(isMainLine ? "call_completed_main" : "call_completed_client", {
+    businessId,
+    callerId,
+    durationSeconds,
+    transcript,
+    summary,
+    classification: classifyCall(summary || "", transcript || ""),
+    conversationId,
+    recordingUrl,
+    wasHelpful,
+    estimatedTokens,
+    customData: customData as Record<string, unknown>,
+    metadata: metadata as Record<string, unknown>,
+    currentPlan: isMainLine ? "main" : (await supabaseAdmin.from("businesses").select("current_plan, minutes_used_this_week").eq("id", businessId).maybeSingle())?.data?.current_plan || "start_100",
+    minutesUsed: isMainLine ? 0 : (await supabaseAdmin.from("businesses").select("current_plan, minutes_used_this_week").eq("id", businessId).maybeSingle())?.data?.minutes_used_this_week || 0,
+  }).catch(() => {});
 
   if (isMainLine) {
     const classification = classifyCall(summary || "", transcript || "");
@@ -257,16 +284,16 @@ export async function POST(request: Request) {
   const internalCostPln = Math.round(estimatedTokens * 0.00065 * 100) / 100;
   const classification = classifyCall(summary || "", transcript || "");
 
-      const { data: callLog } = await supabaseAdmin
-        .from("call_logs")
-        .insert({
-          business_id: businessId,
-          elevenlabs_conversation_id: conversationId || "",
-          duration_seconds: durationSeconds,
-          cost_pln: costPln,
-          internal_cost_pln: internalCostPln,
-          revenue_pln: costPln,
-          caller_id: callerId || "unknown",
+  const { data: callLog } = await supabaseAdmin
+    .from("call_logs")
+    .insert({
+      business_id: businessId,
+      elevenlabs_conversation_id: conversationId || "",
+      duration_seconds: durationSeconds,
+      cost_pln: costPln,
+      internal_cost_pln: internalCostPln,
+      revenue_pln: costPln,
+      caller_id: callerId || "unknown",
       from_number: (metadata.from_number as string) || callerId || "",
       twilio_call_sid: (metadata.twilio_call_sid as string) || "",
       routed_from_main: !!(metadata.routed_from_main),
