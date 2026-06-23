@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 
-const AUDIO_URL = "https://files.catbox.moe/qrwfmp.mp3";
-const DURATION = 45;
+const AUDIO_URL = "/audio/conv.mp3";
+const DURATION = 117.68;
 const BAR_COUNT = 36;
 
 function PlayIcon() {
