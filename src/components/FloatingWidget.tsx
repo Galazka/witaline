@@ -131,22 +131,22 @@ export default function FloatingWidget() {
       {/* FLOATING BUTTON */}
       <button
         onClick={() => setOpen(prev => !prev)}
-        className={`fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[99999] w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer ${pulseRingClass}`}
+        className={`fixed bottom-24 right-5 sm:bottom-28 sm:right-6 z-[99999] w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer ${pulseRingClass}`}
         style={{
           backgroundColor: open ? "#27272a" : "#3CBF4A",
           boxShadow: open
             ? "0 4px 24px rgba(0,0,0,0.25)"
-            : "0 0 0 4px rgba(60,191,74,0.15), 0 8px 32px rgba(60,191,74,0.2)",
+            : "0 0 0 6px rgba(60,191,74,0.2), 0 12px 40px rgba(60,191,74,0.35)",
         }}
         aria-label={open ? "Zamknij widget" : "Otworz widget WitaLine"}
       >
         <span className="relative z-10 text-white">
           {open ? (
-            <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           )}
@@ -155,7 +155,7 @@ export default function FloatingWidget() {
 
       {/* PANEL - always rendered for pointer events to work */}
       <div
-        className={`fixed bottom-20 sm:bottom-24 right-3 sm:right-4 md:right-6 w-[calc(100vw-1.5rem)] sm:w-[380px] max-w-[380px] bg-white rounded-2xl border border-zinc-200 shadow-2xl flex-col overflow-hidden transition-all duration-300 pointer-events-auto`}
+        className={`fixed bottom-40 sm:bottom-44 right-3 sm:right-4 md:right-6 w-[calc(100vw-1.5rem)] sm:w-[380px] max-w-[380px] bg-white rounded-2xl border border-zinc-200 shadow-2xl flex-col overflow-hidden transition-all duration-300 pointer-events-auto`}
         style={{
           zIndex: 99998,
           opacity: open ? 1 : 0,
