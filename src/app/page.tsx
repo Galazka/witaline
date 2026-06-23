@@ -620,6 +620,92 @@ export default function Home() {
         </div>
       </AnimatedSection>
 
+      {/* === BEZPIECZEŃSTWO I RODO === */}
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-zinc-100 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-brand-50/30 rounded-full blur-3xl" />
+        <div className="max-w-5xl mx-auto relative">
+          <div className="text-center mb-12 md:mb-16">
+            <span className="inline-block bg-brand-100 text-brand-700 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Bezpieczeństwo</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Twoje dane są <span className="gradient-text">bezpieczne</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Pełna zgodność z RODO, europejskie serwery i szyfrowanie na każdym etapie</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 stagger">
+            {[
+              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: "Serwery w UE", desc: "Wszystkie dane przechowywane w regionie Frankfurt (Google Cloud). Żadnych danych poza Europą." },
+              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1010 10V4h-8.5"/></svg>, title: "Zgodność z RODO", desc: "Pełna zgodność z europejskim rozporządzeniem o ochronie danych. Umowa powierzenia dla klientów Enterprise." },
+              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>, title: "Szyfrowanie E2E", desc: "Nagrania i transkrypcje szyfrowane端到端. Klucze szyfrowania rotowane regularnie." },
+              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><circle cx="12" cy="12" r="3"/></svg>, title: "Regularne audyty", desc: "Niezależne audyty bezpieczeństwa co kwartał. Raporty dostępne dla klientów Enterprise na żądanie." },
+              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, title: "Backup i DR", desc: "Automatyczne kopie zapasowe co 6 godzin. Plan disaster recovery z RTO poniżej 15 minut." },
+              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>, title: "Kontrola dostępu", desc: "Dostęp na zasadzie least privilege. Logowanie dwuskładnikowe (2FA) dla wszystkich kont administracyjnych." },
+            ].map((item) => (
+              <div key={item.title} className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg transition-all">
+                <div className="w-12 h-12 gradient-brand-soft rounded-2xl flex items-center justify-center text-brand-600 mb-4">{item.icon}</div>
+                <h3 className="font-semibold text-zinc-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* === INTEGRACJE === */}
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 border-t border-zinc-100 relative overflow-hidden">
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-brand-100/20 rounded-full blur-3xl" />
+        <div className="max-w-5xl mx-auto relative">
+          <div className="text-center mb-12 md:mb-16">
+            <span className="inline-block bg-brand-100 text-brand-700 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Integracje</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Łączy się z Twoimi <span className="gradient-text">narzędziami</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">WitaLine integruje się z popularnymi CRM, kalendarzami i systemami, których używasz na co dzień</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 stagger">
+            {[
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, title: "Google Calendar", desc: "Sprawdzaj dostępność i twórz wydarzenia bezpośrednio z rozmowy" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>, title: "HubSpot", desc: "Zapisuj kontakty, loguj rozmowy i aktualizuj deal w czasie rzeczywistym" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>, title: "Pipedrive", desc: "Twórz deal, dodawaj notatki i aktualizuj etapy sprzedaży głosem" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>, title: "Livespace", desc: "Synchronizuj rozmowy z systemem CRM — kontakty, deal i aktywności" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>, title: "Slack", desc: "Powiadomienia o nowych leadach i połączeniach w czasie rzeczywistym" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title: "API & Webhooki", desc: "Własne integracje przez REST API i webhooki zdarzeń w czasie rzeczywistym" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>, title: "Zapier / Make", desc: "Konfiguruj automatyzacje bez kodowania — setki gotowych integracji" },
+              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>, title: "Własny CRM", desc: "Integracja z dowolnym CRM przez API — dedykowane wdrożenie dla Enterprise" },
+            ].map((item) => (
+              <div key={item.title} className="card-lift bg-white border border-zinc-200 rounded-2xl p-5 md:p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
+                <div className="w-14 h-14 gradient-brand-soft rounded-2xl flex items-center justify-center text-brand-600 mx-auto mb-3">{item.icon}</div>
+                <h3 className="font-semibold text-zinc-900 text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* === STATYSTYKI / SOCIAL PROOF === */}
+      <AnimatedSection className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-brand-950 via-brand-900 to-brand-950 border-t border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-400/5 via-transparent to-transparent" />
+        <div className="max-w-5xl mx-auto relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {[
+              { value: "200+", label: "aktywnych firm", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> },
+              { value: "15 000+", label: "rozmów miesięcznie", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> },
+              { value: "5.0", label: "średnia ocen", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
+              { value: "99.9%", label: "dostępności SLA", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="w-14 h-14 bg-white/[0.06] border border-white/10 rounded-2xl flex items-center justify-center text-brand-300 mx-auto mb-3">{stat.icon}</div>
+                <p className="text-3xl md:text-4xl font-bold text-white font-display tracking-tight">{stat.value}</p>
+                <p className="text-sm text-brand-200/70 mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 pt-8 border-t border-white/10 text-center">
+            <p className="text-sm text-brand-200/60 max-w-2xl mx-auto leading-relaxed">
+              "Od kiedy uruchomiliśmy WitaLine, nie przegapiliśmy ani jednego połączenia. 
+              Klienci są zaskoczeni, że rozmawiają z AI — myśla, że to nasza recepcjonistka."
+            </p>
+            <p className="text-xs text-brand-300/50 mt-3">— Właściciel agencji nieruchomości, klient WitaLine od 6 miesięcy</p>
+          </div>
+        </div>
+      </AnimatedSection>
+
       {/* === CTA PHONE === */}
       <AnimatedSection className="bg-gradient-to-r from-brand-950 via-brand-900 to-brand-950 border-t border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-400/5 via-transparent to-transparent" />
