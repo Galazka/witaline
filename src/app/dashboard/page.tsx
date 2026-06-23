@@ -33,6 +33,7 @@ import WidgetSettings from "@/components/WidgetSettings";
 import ServicesEditor from "@/components/ServicesEditor";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import WeeklyReport from "@/components/WeeklyReport";
+import IntegrationsDashboard from "@/components/IntegrationsDashboard";
 import IntegrationsSettings from "@/components/IntegrationsSettings";
 import WebhookApiSettings from "@/components/WebhookApiSettings";
 import GoogleCalendarSettings from "@/components/GoogleCalendarSettings";
@@ -337,6 +338,10 @@ export default function DashboardPage() {
           />
           <CrmPipeline businessId={business.id} callLogs={callLogs} onNavigate={(key) => { if (key === "chats" || key === "calls" || key === "overview") setTab(key); }} />
         </div>
+      )}
+
+      {tab === "integrations" && business && (
+        <IntegrationsDashboard businessId={business.id} />
       )}
 
       {tab === "costs" && business && (

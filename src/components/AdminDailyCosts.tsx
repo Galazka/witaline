@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getPlanConfig } from "@/lib/pricing";
 
 function fmtPLN(v: number): string {
   const s = Math.abs(v).toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -49,10 +50,11 @@ function dayOfMonth(d: string): number {
   return parseInt(d.slice(8, 10), 10);
 }
 
-const PLAN_REVENUE: Record<string, number> = {
-  start_100: 299, pro_500: 599, enterprise_2000: 1199,
-  elastic_0: 0, pro_249: 243.9, lux_599: 487.8,
-};
+function getPlanRevenue(planKey: string): number {
+  if (planKey === "elastic_0" || planKey === "self_service") return 0;
+  const cfg = getPlanConfig(planKey);
+  return cfg?.price ?? 199;
+}
 
 interface CallLog {
   id: string;
@@ -64,6 +66,7 @@ interface CallLog {
   cost_openrouter: number;
   total_cost: number;
   revenue_pln: number;
+  plan_revenue_pln: number;
   internal_cost_pln: number;
   from_number: string;
   created_at: string;
@@ -105,6 +108,7 @@ export default function AdminDailyCosts() {
           cost_openrouter: Number(l.cost_openrouter) || 0,
           total_cost: Number(l.total_cost) || Number(l.cost_pln) || 0,
           revenue_pln: Number(l.revenue_pln) || 0,
+          plan_revenue_pln: Number(l.plan_revenue_pln) || 0,
           internal_cost_pln: Number(l.internal_cost_pln) || 0.65 * ((Number(l.duration_seconds) || 0) / 60),
         }));
         setCallLogs(logs);
@@ -151,7 +155,7 @@ export default function AdminDailyCosts() {
       const totalElevenlabs = calls.reduce((s, c) => s + c.cost_elevenlabs, 0);
       const totalTwilio = calls.reduce((s, c) => s + c.cost_twilio, 0);
       const totalOpenrouter = calls.reduce((s, c) => s + c.cost_openrouter, 0);
-      const totalRevenue = calls.reduce((s, c) => s + (c.revenue_pln || 0), 0);
+      const totalRevenue = calls.reduce((s, c) => s + (c.plan_revenue_pln || 0), 0);
       const profit = totalRevenue - totalCost;
       return { date, calls, totalMinutes, totalCost, totalElevenlabs, totalTwilio, totalOpenrouter, totalRevenue, profit };
     });

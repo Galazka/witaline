@@ -4,14 +4,12 @@ import { checkAdminAuth } from "@/lib/admin-auth";
 
 const WITALINE_MAIN_ID = "00000000-0000-0000-0000-000000000001";
 
-const PLAN_REVENUE: Record<string, number> = {
-  start_100: 299,
-  pro_500: 600,
-  enterprise_2000: 1500,
-  elastic_0: 0,
-  pro_249: 300,
-  lux_599: 800,
-};
+import { getPlanConfig } from "@/lib/pricing";
+function getPlanRevenue(planKey: string): number {
+  if (planKey === "elastic_0" || planKey === "self_service") return 0;
+  const cfg = getPlanConfig(planKey);
+  return cfg?.price ?? 199;
+}
 
 import { INTERNAL_COST_PER_MIN } from "@/lib/pricing";
 
@@ -149,7 +147,7 @@ function buildCallMap(logs: typeof callLogs) {
     const prevTotalCost = prevCostFromLogs > 0 ? prevCostFromLogs : Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
 
     const isWitaLine = bid === WITALINE_MAIN_ID;
-    const monthlyRevenue = isWitaLine ? 0 : (bizInfo.customRevenue ?? (PLAN_REVENUE[bizInfo.plan] ?? 0));
+    const monthlyRevenue = isWitaLine ? 0 : (bizInfo.customRevenue ?? getPlanRevenue(bizInfo.plan));
     const revenue = Math.round((monthlyRevenue / 30) * daysInRange * 100) / 100;
 
     const prevRev = includePrev ? (isWitaLine ? 0 : Math.round((monthlyRevenue / 30) * Math.max(1, Math.round(prevPeriodLen / 86400000)) * 100) / 100) : 0;
@@ -180,22 +178,30 @@ function buildCallMap(logs: typeof callLogs) {
   const ownCostsSummary = buildOwnCostsSummary(costItems || []);
 
   // Build call log details for the period (exclude prev period)
-  const callLogDetails = (callLogs || []).map((log) => ({
-    id: log.id,
-    business_id: log.business_id,
-    duration_seconds: log.duration_seconds,
-    cost_pln: Number(log.cost_pln) || 0,
-    internal_cost_pln: Number(log.internal_cost_pln ?? log.cost_pln) || 0,
-    cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
-    cost_twilio: Number(log.cost_twilio) || 0,
-    cost_openrouter: Number(log.cost_openrouter) || 0,
-    total_cost: Number(log.total_cost) || Number(log.cost_pln) || 0,
-    revenue_pln: Number(log.revenue_pln) || 0,
-    from_number: log.from_number || log.caller_id || "",
-    classification: log.classification || "unknown",
-    created_at: log.created_at,
-    business_name: bizMap.get(log.business_id || "")?.name || "Nieznana",
-  }));
+  const callLogDetails = (callLogs || []).map((log) => {
+    const bizId = log.business_id || "";
+    const planInfo = bizMap.get(bizId) || { name: "Nieznana", plan: "start", status: "", customRevenue: null };
+    const monthlyRevenue = bizId === WITALINE_MAIN_ID ? 0 : (planInfo.customRevenue ?? getPlanRevenue(planInfo.plan));
+    const daysInRange = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
+    const dailyRevenue = monthlyRevenue > 0 ? monthlyRevenue / 30 : 0;
+    return {
+      id: log.id,
+      business_id: bizId,
+      duration_seconds: log.duration_seconds,
+      cost_pln: Number(log.cost_pln) || 0,
+      internal_cost_pln: Number(log.internal_cost_pln ?? log.cost_pln) || 0,
+      cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
+      cost_twilio: Number(log.cost_twilio) || 0,
+      cost_openrouter: Number(log.cost_openrouter) || 0,
+      total_cost: Number(log.total_cost) || Number(log.cost_pln) || 0,
+      revenue_pln: Number(log.revenue_pln) || 0,
+      plan_revenue_pln: Math.round(dailyRevenue * 100) / 100,
+      from_number: log.from_number || log.caller_id || "",
+      classification: log.classification || "unknown",
+      created_at: log.created_at,
+      business_name: planInfo.name,
+    };
+  });
 
   return NextResponse.json({
     businesses: result,

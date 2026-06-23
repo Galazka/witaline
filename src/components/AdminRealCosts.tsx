@@ -73,23 +73,21 @@ function csvEscape(val: string | number): string {
   return s;
 }
 
-const planLabels: Record<string, string> = {
-  start_100: "Start 299",
-  pro_500: "Growth 599",
-  enterprise_2000: "Enterprise 1199",
-  elastic_0: "Elastyczny",
-  pro_249: "Pro 300 brutto",
-  lux_599: "Lux 600 brutto",
-};
+import { plans as pricingPlans, getPlanConfig } from "@/lib/pricing";
 
-const PLAN_REVENUE: Record<string, number> = {
-  start_100: 299,
-  pro_500: 599,
-  enterprise_2000: 1199,
-  elastic_0: 0,
-  pro_249: 243.9,
-  lux_599: 487.8,
-};
+function getPlanLabel(planKey: string): string {
+  if (planKey === "elastic_0") return "Elastyczny";
+  if (planKey === "self_service") return "Self-Service";
+  const cfg = getPlanConfig(planKey);
+  const price = cfg?.price ?? 199;
+  return `${cfg?.label || planKey} ${price} PLN`;
+}
+
+function getPlanRevenue(planKey: string): number {
+  if (planKey === "elastic_0" || planKey === "self_service") return 0;
+  const cfg = getPlanConfig(planKey);
+  return cfg?.price ?? 199;
+}
 
 function freqLabel(f: string): string {
   const m: Record<string, string> = { monthly: "mies.", quarterly: "kwart.", yearly: "rocznie", "one-time": "jednor.", irregular: "niereg." };
@@ -207,13 +205,13 @@ export default function AdminRealCosts() {
       ["Firma", "Plan", "Rozmowy", "Minuty", "ElevenLabs", "Twilio", "OpenRouter", "SMS",
        "Koszt", "Przychod", "Rabat %", "Przychod efektywny", "Marza", "Marza %"],
       ...filtered.map((b) => {
-        const stdRevenue = PLAN_REVENUE[b.plan] || 299;
+        const stdRevenue = getPlanRevenue(b.plan);
         const effectiveRevenue = b.customRevenue ?? b.revenue;
         const discountPct = b.customRevenue !== null ? ((1 - b.customRevenue / stdRevenue) * 100).toFixed(1) : "0.0";
         const margin = effectiveRevenue - b.totalCost;
         const marginPctVal = effectiveRevenue > 0 ? ((margin / effectiveRevenue) * 100).toFixed(1) : "0.0";
         return [
-          b.name, planLabels[b.plan] || b.plan, String(b.calls), b.minutes.toFixed(2),
+          b.name, getPlanLabel(b.plan), String(b.calls), b.minutes.toFixed(2),
           b.costElevenlabs.toFixed(2), b.costTwilio.toFixed(2), b.costOpenrouter.toFixed(2),
           b.costSms.toFixed(2), b.totalCost.toFixed(2), stdRevenue.toFixed(2),
           discountPct, effectiveRevenue.toFixed(2), margin.toFixed(2), marginPctVal,
@@ -622,7 +620,7 @@ export default function AdminRealCosts() {
                 <tr><td colSpan={14} className="text-center py-8 text-zinc-400 text-xs">Brak danych</td></tr>
               ) : (
                 filtered.map((b) => {
-                  const stdRevenue = b.is_centrala ? 0 : (PLAN_REVENUE[b.plan] ?? 0);
+                  const stdRevenue = b.is_centrala ? 0 : getPlanRevenue(b.plan);
                   const effectiveRevenue = b.customRevenue ?? b.revenue;
                   const discountPct = stdRevenue > 0 && b.customRevenue !== null ? Math.round((1 - b.customRevenue / stdRevenue) * 100) : 0;
                   const margin = effectiveRevenue - b.totalCost;
@@ -640,7 +638,7 @@ export default function AdminRealCosts() {
                         </div>
                         {b.calls === 0 && !b.is_centrala && b.plan !== "elastic_0" && <span className="text-[10px] text-zinc-400">(brak polaczen)</span>}
                       </td>
-                      <td className="p-3 text-zinc-500 text-xs">{planLabels[b.plan] || b.plan}</td>
+                      <td className="p-3 text-zinc-500 text-xs">{getPlanLabel(b.plan)}</td>
                       <td className="p-3 text-zinc-700">{b.calls}</td>
                       <td className="p-3 text-zinc-700">{b.minutes.toFixed(1)}</td>
                       <td className="p-3 text-zinc-600">{fmtPLN(b.costElevenlabs)}</td>
