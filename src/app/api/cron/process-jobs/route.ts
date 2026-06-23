@@ -5,6 +5,7 @@ import { sendSms } from "@/lib/twilio-sms";
 import { sendWhatsApp } from "@/lib/twilio-whatsapp";
 import { sendWebhook } from "@/lib/webhook-outbound";
 import { calculateCost } from "@/lib/pricing";
+import { analyzeCall } from "@/lib/analyze-call";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -47,6 +48,7 @@ async function handleJobMain(p: Record<string, unknown>): Promise<void> {
     .single();
 
   if (callLog) {
+    analyzeCall(transcript, summary, callLog.id).catch(() => {});
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
       channel: "voice",
@@ -142,6 +144,7 @@ async function handleJobClient(p: Record<string, unknown>): Promise<void> {
   const minutesToAdd = Math.ceil(durationSeconds / 60);
 
   if (callLog) {
+    analyzeCall(transcript, summary, callLog.id).catch(() => {});
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
       channel: "voice",

@@ -147,6 +147,8 @@ export interface CallLog {
   tokens_input?: number;
   tokens_output?: number;
   tokens_total?: number;
+  quality_score?: number | null;
+  quick_summary?: string;
 }
 
 export interface SmsLog {

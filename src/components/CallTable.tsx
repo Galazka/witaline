@@ -13,7 +13,7 @@ interface Props {
 
 const WITALINE_MAIN_ID = "00000000-0000-0000-0000-000000000001";
 
-type SortKey = "classification" | "caller_id" | "created_at" | "duration_seconds" | "cost_pln";
+type SortKey = "classification" | "caller_id" | "created_at" | "duration_seconds" | "cost_pln" | "quality_score";
 type SortDir = "asc" | "desc";
 type DateFilter = "all" | "today" | "7d" | "30d";
 
@@ -99,6 +99,9 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
           break;
         case "cost_pln":
           cmp = a.cost_pln - b.cost_pln;
+          break;
+        case "quality_score":
+          cmp = (a.quality_score || 0) - (b.quality_score || 0);
           break;
       }
       return sortDir === "desc" ? -cmp : cmp;
@@ -221,13 +224,14 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
         </div>
         <div className="flex items-center gap-2 text-xs text-zinc-400">
           <span>Sortuj:</span>
-          {(["classification", "caller_id", "created_at", "duration_seconds", "cost_pln"] as SortKey[]).map((key) => {
+          {(["classification", "caller_id", "created_at", "duration_seconds", "cost_pln", "quality_score"] as SortKey[]).map((key) => {
             const labels: Record<SortKey, string> = {
               classification: "Flaga",
               caller_id: "Numer",
               created_at: "Data",
               duration_seconds: "Czas",
               cost_pln: "Koszt",
+              quality_score: "Ocena",
             };
             return (
               <button
@@ -382,6 +386,20 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
                         ? "Spam"
                         : "Inne"}
                     </span>
+                    {log.quality_score != null && (
+                      <span
+                        title={log.quick_summary || `Ocena: ${log.quality_score}/10`}
+                        className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold shrink-0 ${
+                          log.quality_score >= 8
+                            ? "bg-green-100 text-green-700"
+                            : log.quality_score >= 5
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {log.quality_score}
+                      </span>
+                    )}
                   </div>
                   {log.recording_url && (
                     <span title="Nagranie dostępne" className="text-brand-600 text-sm shrink-0">
@@ -430,6 +448,25 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
                       <div>
                         <p className="text-xs font-medium text-zinc-400 mb-1 uppercase tracking-wider">Transkrypcja</p>
                         <p className="text-sm text-zinc-700 bg-white/55 rounded-lg p-3">{log.transcript}</p>
+                      </div>
+                    )}
+                    {log.quick_summary && (
+                      <div>
+                        <p className="text-xs font-medium text-zinc-400 mb-1 uppercase tracking-wider">Jakość rozmowy</p>
+                        <p className="text-sm text-zinc-700 bg-green-50 rounded-lg p-3">
+                          {log.quality_score != null && (
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold mr-2 ${
+                              log.quality_score >= 8
+                                ? "bg-green-200 text-green-800"
+                                : log.quality_score >= 5
+                                ? "bg-amber-200 text-amber-800"
+                                : "bg-red-200 text-red-800"
+                            }`}>
+                              {log.quality_score}
+                            </span>
+                          )}
+                          {log.quick_summary}
+                        </p>
                       </div>
                     )}
                     {log.ai_summary && (

@@ -7,6 +7,7 @@ import { addNotification } from "@/lib/notifications";
 import { sendWebhook } from "@/lib/webhook-outbound";
 import { enqueueJob } from "@/lib/job-queue";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
+import { analyzeCall } from "@/lib/analyze-call";
 
 function verifyWebhook(request: Request): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
@@ -196,6 +197,8 @@ export async function POST(request: Request) {
       .single();
 
     if (callLog) {
+      analyzeCall(transcript || "", summary || "", callLog.id).catch(() => {});
+
       await supabaseAdmin.from("conversations").insert({
         business_id: WITALINE_MAIN_BUSINESS_ID,
         channel: "voice",
@@ -318,6 +321,8 @@ export async function POST(request: Request) {
   const minutesToAdd = Math.ceil(durationSeconds / 60);
 
   if (callLog) {
+    analyzeCall(transcript || "", summary || "", callLog.id).catch(() => {});
+
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
       channel: "voice",
