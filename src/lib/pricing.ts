@@ -24,11 +24,12 @@ export interface ElasticTier {
 }
 
 export const ELASTIC_TIERS: ElasticTier[] = [
-  { minMinutes: 0, maxMinutes: 50, from: 0, to: 50, rate: 1.49, ratePerMin: 1.49 },
-  { minMinutes: 51, maxMinutes: 200, from: 51, to: 200, rate: 1.29, ratePerMin: 1.29 },
-  { minMinutes: 201, maxMinutes: 500, from: 201, to: 500, rate: 1.15, ratePerMin: 1.15 },
-  { minMinutes: 501, maxMinutes: 2000, from: 501, to: 2000, rate: 1.05, ratePerMin: 1.05 },
-  { minMinutes: 2001, maxMinutes: Infinity, from: 2001, to: Infinity, rate: 0.99, ratePerMin: 0.99 }
+  { minMinutes: 0, maxMinutes: 500, from: 0, to: 500, rate: 1.20, ratePerMin: 1.20 },
+  { minMinutes: 501, maxMinutes: 1000, from: 501, to: 1000, rate: 1.10, ratePerMin: 1.10 },
+  { minMinutes: 1001, maxMinutes: 2000, from: 1001, to: 2000, rate: 1.00, ratePerMin: 1.00 },
+  { minMinutes: 2001, maxMinutes: 3000, from: 2001, to: 3000, rate: 0.95, ratePerMin: 0.95 },
+  { minMinutes: 3001, maxMinutes: 5000, from: 3001, to: 5000, rate: 0.90, ratePerMin: 0.90 },
+  { minMinutes: 5001, maxMinutes: Infinity, from: 5001, to: Infinity, rate: 0.85, ratePerMin: 0.85 }
 ];
 
 export const billingModels = [

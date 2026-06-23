@@ -167,9 +167,9 @@ export default function PricingSection({
 
               {/* Tier badges */}
               <div className="flex flex-wrap gap-1.5 mb-6">
-                {ELASTIC_TIERS.filter(t => t.minMinutes > 0).map(t => (
+                {ELASTIC_TIERS.map(t => (
                   <span key={t.minMinutes} className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-brand-400 text-white" : "bg-zinc-100 text-zinc-400"}`}>
-                    {t.minMinutes}–{t.maxMinutes}: {formatPriceMin(t.ratePerMin, currency)}
+                    {t.maxMinutes === Infinity ? `${t.minMinutes}+` : `${t.minMinutes}–${t.maxMinutes}`}: {formatPriceMin(t.ratePerMin, currency)}
                   </span>
                 ))}
               </div>
