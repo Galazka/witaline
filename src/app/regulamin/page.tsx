@@ -1,18 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ELASTIC_TIERS } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Regulamin — WitaLine",
   description: "Regulamin świadczenia usług WitaLine — asystent AI, SMS, WhatsApp, pakiety minut.",
 };
-
-const ELASTIC_TIERS: { from: number; to: string; rate: string }[] = [
-  { from: 0, to: "50", rate: "1,49" },
-  { from: 51, to: "200", rate: "1,29" },
-  { from: 201, to: "500", rate: "1,15" },
-  { from: 501, to: "2 000", rate: "1,05" },
-  { from: 2_001, to: "∞", rate: "0,99" },
-];
 
 export default function RegulaminPage() {
   return (
@@ -56,13 +49,18 @@ export default function RegulaminPage() {
                   <th className="text-right pb-2 pr-3">Cena/min brutto</th>
                 </tr></thead>
                 <tbody>
-                  {ELASTIC_TIERS.map((tier, i) => (
-                    <tr key={i} className="border-b border-zinc-100">
-                      <td className="py-1.5 pr-3">{tier.from}–{tier.to}</td>
-                      <td className="text-right py-1.5 pr-3">{tier.rate} PLN</td>
-                      <td className="text-right py-1.5">{i === 4 ? "1,22" : (parseFloat(tier.rate.replace(",", ".")) * 1.23).toFixed(2).replace(".", ",")} PLN</td>
-                    </tr>
-                  ))}
+                  {ELASTIC_TIERS.map((tier, i) => {
+                    const range = tier.to === Infinity ? `${tier.from}+` : `${tier.from}–${tier.to}`;
+                    const netto = tier.ratePerMin.toFixed(2).replace(".", ",");
+                    const brutto = (tier.ratePerMin * 1.23).toFixed(2).replace(".", ",");
+                    return (
+                      <tr key={i} className="border-b border-zinc-100">
+                        <td className="py-1.5 pr-3">{range}</td>
+                        <td className="text-right py-1.5 pr-3">{netto} PLN</td>
+                        <td className="text-right py-1.5">{brutto} PLN</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
