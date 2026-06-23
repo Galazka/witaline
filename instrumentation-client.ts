@@ -14,7 +14,11 @@ Sentry.init({
 
   integrations: [
     Sentry.replayIntegration(),
-    Sentry.feedbackIntegration({ colorScheme: "system" }),
+    Sentry.feedbackIntegration({
+      colorScheme: "system",
+      isNameRequired: true,
+      isEmailRequired: true,
+    }),
   ],
 });
 

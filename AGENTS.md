@@ -34,7 +34,8 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - `src/components/VoiceAgent.tsx` — widget audio
 - `src/components/PricingSection.tsx` — sekcja cennika
 - `src/components/ConsultantListManager.tsx` — lista konsultantów
-- `src/components/CallTable.tsx` — tabela połączeń z badge handoff
+- `src/components/CallTable.tsx` — tabela połączeń z badge handoff + quality_score badge
+- `src/lib/analyze-call.ts` — OpenRouter call quality scorer (GPT-4o-mini, 1-10 score + one-line PL summary)
 - `src/components/AdminPortRequests.tsx` — zarządzanie port requestami
 - `src/components/layout/Sidebar.tsx` — sidebar z submenu
 - `src/components/layout/TopNav.tsx` — top bar z notyfikacjami + user
@@ -60,6 +61,7 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Agent tools**: MCP server `witaline-tools` (ID: h36suSdSvQaylNdUh2Uy) — 9 narzędzi: business_lookup, save_lead, check_availability, create_reservation, get_services, get_business_hours, send_whatsapp, transfer_to_human, create_checkout
 - **MCP transport**: JSON-RPC direct handler (no SDK), auto_approve_all
 - **allowedDevOrigins**: `["*"]` w next.config.ts (dev tunnel HMR)
+- **Healthcheck**: ✅ success (port 3000 hardcoded, Railway proxy configured accordingly)
 
 ## Call Flow
 1. Twilio → `/api/twilio/spam-filter` → spam check → `connectToAgent()` → `registerCall()` z `dynamic_vars.business_id`
@@ -91,6 +93,7 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Client-data webhook**: nieustawiony po update-tunnel-url — ustawić ręcznie w dashboardzie ElevenLabs
 - **HMR WebSocket**: może nie działać przez Cloudflare tunnel → Ctrl+Shift+R lub restart dev servera
 - **Twilio Subaccounts**: obsługa wielodzierżawców, SID podaje się w `TWILIO_ACCOUNT_SID` dla każdego biznesu (konfiguracja w panelu admina)
+- **Railway healthcheck**: ✅ resolved — port hardcoded to 3000 in start script, Railway proxy port set to 3000
 
 ## To Do
 - [x] **Run `RUN-MIGRATION.sql`** w Supabase SQL Editor ✅
@@ -103,6 +106,46 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - [x] **Redesign dashboard layout** — Sidebar + TopNav + context + layout.tsx ✅
 - [x] **Redesign landing page** — nowy hero, trust bar, problem→solution, cleaner sections ✅
 - [x] **Przywrócić pełne sekcje dashboardu** (reservations, sms, leads, voice) ✅
+- [x] **Call quality scoring** — OpenRouter GPT-4o-mini, quality_score + quick_summary w call_logs, badge w CallTable ✅
+- [x] **Twilio Subaccounts** — DB migration, helper, create-subaccount API, admin UI, per-business creds w twilio-utils/sms/whatsapp ✅
+- [x] **SEO — sitemap, robots, JSON-LD, metadata** ✅
+- [x] **Server-side auth proxy** (Next.js 16 proxy.ts) ✅
+- [x] **Error/loading/not-found boundaries** ✅
+- [x] **Webhook secret fix — prawdziwa walidacja** ✅
+- [x] **Design system redesign** — agency-grade globals.css ✅
+- [x] **Admin/Dashboard layout redesign** — sidebar, topnav, layout ✅
+- [x] **Landing page redesign** — nav, hero, footer premium look ✅
+- [x] **CI/CD GitHub Actions** — build + typecheck ✅
+- [x] **Sentry User Feedback widget** ✅
+- [x] **README** — pełna dokumentacja build/deploy ✅
 - [ ] **Test end-to-end**: zadzwoń na +48 732 125 752, sprawdź DB
 - [ ] **Włączyć Language Detection** w agent "Rob" → system tools
-- [ ] Add Twilio Subaccounts for multi-tenancy
+
+## OpenClaw / Hermes Integration
+
+### OpenClaw (https://openclaw.ai)
+Open-source personal AI assistant. Local-first gateway, multi-channel (WhatsApp, Telegram, Discord, Signal, etc.), voice I/O via ElevenLabs, skills/plugins.
+
+**Integration with WitaLine:**
+1. **Webhook bridge** — OpenClaw can POST to WitaLine webhook endpoints (e.g., `/api/external/incoming`) to trigger calls or send WhatsApp/SMS via WitaLine's Twilio infrastructure.
+2. **MCP client** — OpenClaw can consume WitaLine's MCP JSON-RPC endpoint (`/api/mcp`) as an external tool provider, giving its agents access to `business_lookup`, `save_lead`, `create_reservation`, etc.
+3. **Voice handoff** — WitaLine's ElevenLabs agent can transfer complex conversations to an OpenClaw instance via webhook for specialized handling.
+
+### Hermes Agent (https://github.com/NousResearch/hermes-agent)
+CLI-first AI agent by Nous Research with voice mode, messaging gateways (Telegram, Discord, WhatsApp, Signal), skills, memory, cron.
+
+**Integration with WitaLine:**
+1. **Gateway plugin** — Hermes can register WitaLine as a messaging channel via Hermes' plugin system, allowing voice calls handled by WitaLine to appear in Hermes conversations.
+2. **Tool provider** — WitaLine MCP tools exposed as Hermes-compatible skills.
+3. **Voice mode** — Hermes' ElevenLabs TTS provider can use WitaLine's voice configuration.
+
+### Quick Start
+```bash
+# OpenClaw
+openclaw skills install voiceclaw          # Local voice I/O
+openclaw channel add webhook               # Add WitaLine webhook
+
+# Hermes
+hermes skills install witaline-tools       # Install WitaLine MCP tools (when published)
+hermes config set channels.witaline.enabled true
+```

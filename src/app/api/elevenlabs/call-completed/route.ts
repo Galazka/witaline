@@ -13,7 +13,10 @@ function verifyWebhook(request: Request): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
   if (!secret) return true;
   const sig = request.headers.get("elevenlabs-webhook-secret") || request.headers.get("x-elevenlabs-webhook-secret") || request.headers.get("webhook-secret");
-  if (sig !== secret) console.warn("[call-completed] webhook secret mismatch — accepting anyway");
+  if (sig !== secret) {
+    console.warn("[call-completed] webhook secret mismatch — rejecting");
+    return false;
+  }
   return true;
 }
 

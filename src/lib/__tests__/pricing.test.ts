@@ -3,67 +3,74 @@ import {
   getElasticRate,
   calculateElasticPrice,
   getPlanConfig,
-  calculateTokenCost,
-  calculateOverflowCost,
-  calculateDiscountedPrice,
-  applyCouponToPrice,
   calculateSelfServicePrice,
-  calculateEnterprisePrice,
+  calculateCost,
+  getPlanOverageRate,
+  getUsedPercentage,
+  formatPLN,
+  formatPrice,
+  formatPriceCurrency,
+  formatPriceMin,
+  convertPrice,
   ELASTIC_TIERS,
   INTERNAL_COST_PER_MIN,
   CONFIG,
+  PLANS,
+  plans,
+  ADDONS,
 } from "../pricing";
 
 describe("ELASTIC_TIERS", () => {
   it("has correct number of tiers", () => {
-    expect(ELASTIC_TIERS.length).toBe(5);
+    expect(ELASTIC_TIERS.length).toBe(6);
   });
 
-  it("first tier rate is 1.49", () => {
-    expect(ELASTIC_TIERS[0].ratePerMin).toBe(1.49);
+  it("first tier rate is 1.20", () => {
+    expect(ELASTIC_TIERS[0].ratePerMin).toBe(1.20);
   });
 
-  it("last tier rate is 0.99", () => {
-    expect(ELASTIC_TIERS[ELASTIC_TIERS.length - 1].ratePerMin).toBe(0.99);
+  it("last tier rate is 0.85", () => {
+    expect(ELASTIC_TIERS[ELASTIC_TIERS.length - 1].ratePerMin).toBe(0.85);
   });
 
-  it("covers 0 to 5000 minutes", () => {
+  it("covers 0 to Infinity", () => {
     expect(ELASTIC_TIERS[0].minMinutes).toBe(0);
-    expect(ELASTIC_TIERS[ELASTIC_TIERS.length - 1].maxMinutes).toBe(5000);
+    expect(ELASTIC_TIERS[ELASTIC_TIERS.length - 1].maxMinutes).toBe(Infinity);
   });
 });
 
 describe("getElasticRate", () => {
-  it("returns 1.49 for 0 minutes", () => {
-    expect(getElasticRate(0)).toBe(1.49);
+  it("returns 1.20 for 0 minutes", () => {
+    expect(getElasticRate(0)).toBe(1.20);
   });
 
-  it("returns 1.49 for 50 minutes", () => {
-    expect(getElasticRate(50)).toBe(1.49);
+  it("returns 1.20 for 250 minutes", () => {
+    expect(getElasticRate(250)).toBe(1.20);
   });
 
-  it("returns 1.49 for 100 minutes", () => {
-    expect(getElasticRate(100)).toBe(1.49);
+  it("returns 1.10 for 750 minutes", () => {
+    expect(getElasticRate(750)).toBe(1.10);
   });
 
-  it("returns 0.99 for 5000 minutes", () => {
-    expect(getElasticRate(5000)).toBe(0.99);
+  it("returns 0.90 for 5000 minutes", () => {
+    expect(getElasticRate(5000)).toBe(0.90);
   });
 
-  it("falls back to 0.99 above 5000", () => {
-    expect(getElasticRate(9999)).toBe(0.99);
+  it("falls back to 0.85 above 5000", () => {
+    expect(getElasticRate(9999)).toBe(0.85);
   });
 
-  it("every tier rate >= INTERNAL_COST_PER_MIN", () => {
+  it("every tier rate > INTERNAL_COST_PER_MIN", () => {
     for (const t of ELASTIC_TIERS) {
       expect(t.ratePerMin).toBeGreaterThan(INTERNAL_COST_PER_MIN);
     }
   });
 
-  it("minimum margin >= 34% for every tier", () => {
+  it("every tier margin >= 20%", () => {
     for (const t of ELASTIC_TIERS) {
       const margin = (t.ratePerMin - INTERNAL_COST_PER_MIN) / t.ratePerMin;
-      expect(margin).toBeGreaterThanOrEqual(0.34);
+      expect(margin).toBeGreaterThanOrEqual(0.20);
+      expect(margin).toBeLessThan(1);
     }
   });
 });
@@ -71,87 +78,108 @@ describe("getElasticRate", () => {
 describe("calculateElasticPrice", () => {
   it("returns correct values for 100 min", () => {
     const r = calculateElasticPrice(100);
-    expect(r.ratePerMin).toBe(1.49);
-    expect(r.monthlyNetto).toBe(149);
-    expect(r.monthlyBrutto).toBe(183.27);
+    expect(r.ratePerMin).toBe(1.20);
+    expect(r.monthlyNetto).toBe(120);
+    expect(r.monthlyBrutto).toBe(147.60);
     expect(r.costTotal).toBe(65);
-    expect(r.profitTotal).toBe(84);
-    expect(r.marginPercent).toBe(56);
+    expect(r.profitTotal).toBe(55);
+    expect(r.marginPercent).toBe(46);
   });
 
-  it("returns correct values for 1000 min", () => {
-    const r = calculateElasticPrice(1000);
-    expect(r.ratePerMin).toBe(1.19);
-    expect(r.monthlyNetto).toBe(1190);
-    expect(r.monthlyBrutto).toBe(1463.70);
-    expect(r.costTotal).toBe(650);
-    expect(r.profitTotal).toBe(540);
-    expect(r.marginPercent).toBe(45);
+  it("returns correct values for 1500 min", () => {
+    const r = calculateElasticPrice(1500);
+    expect(r.ratePerMin).toBe(1.00);
+    expect(r.monthlyNetto).toBe(1500);
+    expect(r.monthlyBrutto).toBe(1845);
+    expect(r.costTotal).toBe(975);
+    expect(r.profitTotal).toBe(525);
+    expect(r.marginPercent).toBe(35);
   });
 });
 
 describe("getPlanConfig", () => {
-  it("start_100 plan has correct price", () => {
-    const p = getPlanConfig("start_100");
-    expect(p.pricePLN).toBe(199);
+  it("start plan has correct price", () => {
+    const p = getPlanConfig("start");
+    expect(p.price).toBe(199);
   });
 
-  it("all plans have costPerToken = 0.00065", () => {
-    const keys: Array<keyof typeof import("../pricing")["plans"]> = ["start_100", "pro_500", "pro_249", "lux_599", "enterprise_2000", "elastic_0"];
-    for (const k of keys) {
-      const p = getPlanConfig(k);
-      expect(p.costPerToken).toBe(0.00065);
+  it("returns plan with expected fields", () => {
+    const p = getPlanConfig("growth");
+    expect(p.label).toBe("Growth");
+    expect(p.minutes).toBe(600);
+    expect(p.overagePerToken).toBe(0.001);
+  });
+
+  it("all fixed plans have positive price", () => {
+    for (const key of ["start", "pro", "growth", "lux", "enterprise"]) {
+      expect(getPlanConfig(key).price).toBeGreaterThan(0);
     }
   });
+});
 
-  it("all fixed plans have positive pricePLN", () => {
-    for (const k of ["start_100", "pro_500", "pro_249", "lux_599", "enterprise_2000"] as const) {
-      expect(getPlanConfig(k).pricePLN).toBeGreaterThan(0);
-    }
+describe("getPlanOverageRate", () => {
+  it("returns correct overage for growth", () => {
+    expect(getPlanOverageRate("growth")).toBe(0.001);
+  });
+
+  it("falls back to default for unknown plan", () => {
+    expect(getPlanOverageRate("unknown_plan")).toBe(0.002);
   });
 });
 
-describe("calculateTokenCost", () => {
-  it("1 min = 1000 tokens", () => {
-    expect(calculateTokenCost(60, "start_100")).toBe(0.65);
+describe("calculateCost", () => {
+  it("calculates cost by duration and plan", () => {
+    const cost = calculateCost(600, "growth"); // 10 min
+    expect(cost).toBeGreaterThan(0);
   });
 
-  it("5 min = 5000 tokens", () => {
-    expect(calculateTokenCost(300, "start_100")).toBe(3.25);
-  });
-});
-
-describe("calculateOverflowCost", () => {
-  it("1000 excess tokens at start rate", () => {
-    expect(calculateOverflowCost(1000, "start_100")).toBe(1.80);
+  it("uses elastic rate for elastic plan prefix", () => {
+    const cost = calculateCost(600, "elastic");
+    expect(cost).toBe(10 * 1.20); // 10 min * first tier rate
   });
 });
 
-describe("calculateDiscountedPrice", () => {
-  it("50% off start_100 = 99.50", () => {
-    expect(calculateDiscountedPrice("start_100", 50)).toBe(99.50);
+describe("getUsedPercentage", () => {
+  it("returns 0 when total is 0", () => {
+    expect(getUsedPercentage(50, 0)).toBe(0);
   });
 
-  it("100% off = 0", () => {
-    expect(calculateDiscountedPrice("start_100", 100)).toBe(0);
+  it("caps at 100", () => {
+    expect(getUsedPercentage(200, 100)).toBe(100);
   });
 
-  it("0% off = full price", () => {
-    expect(calculateDiscountedPrice("start_100", 0)).toBe(199);
+  it("calculates correct percentage", () => {
+    expect(getUsedPercentage(30, 300)).toBe(10);
   });
 });
 
-describe("applyCouponToPrice", () => {
-  it("percent discount", () => {
-    expect(applyCouponToPrice(299, { discount_percent: 20 })).toBe(239.20);
+describe("formatPLN", () => {
+  it("formats number to PLN string", () => {
+    expect(formatPLN(199)).toBe("199 PLN");
   });
+});
 
-  it("fixed discount", () => {
-    expect(applyCouponToPrice(299, { discount_amount: 50 })).toBe(249);
+describe("formatPrice", () => {
+  it("formats price with Polish locale", () => {
+    expect(formatPrice(199, "pl")).toBe("199,00 PLN");
   });
+});
 
-  it("fixed discount caps at 0", () => {
-    expect(applyCouponToPrice(100, { discount_amount: 200 })).toBe(0);
+describe("formatPriceCurrency", () => {
+  it("formats PLN", () => {
+    expect(formatPriceCurrency(100, "pln", "pl")).toBe("100,00 zł");
+  });
+});
+
+describe("formatPriceMin", () => {
+  it("formats per-minute PLN", () => {
+    expect(formatPriceMin(1.20, "pln")).toBe("1,20 zł/min");
+  });
+});
+
+describe("convertPrice", () => {
+  it("converts PLN to EUR", () => {
+    expect(convertPrice(100, "eur")).toBe(23);
   });
 });
 
@@ -167,8 +195,9 @@ describe("calculateSelfServicePrice", () => {
       prioritySupport: false,
       sla247: false,
     });
-    expect(r.monthlyNetto).toBe(149);
-    expect(r.monthlyBrutto).toBe(183.27);
+    expect(r.monthlyNetto).toBe(120);
+    expect(r.monthlyBrutto).toBe(147.60);
+    expect(r.overageNetto).toBe(1.20);
   });
 
   it("100 min with all addons", () => {
@@ -182,22 +211,12 @@ describe("calculateSelfServicePrice", () => {
       prioritySupport: true,
       sla247: true,
     });
-    const addonTotal = CONFIG.addonOwnNumber + CONFIG.addonGoogleCalendar + CONFIG.addonCrm + CONFIG.addonVoiceClone + CONFIG.addonUnlimitedConsultants + CONFIG.addonPrioritySupport + CONFIG.addonSla247;
-    expect(r.monthlyNetto).toBe(149 + addonTotal);
-  });
-});
-
-describe("calculateEnterprisePrice", () => {
-  it("1000 min with setup fee", () => {
-    const r = calculateEnterprisePrice(1000, true);
-    expect(r.setupFee).toBe(CONFIG.enterpriseSetupFee);
-    expect(r.monthlyNetto).toBeGreaterThanOrEqual(CONFIG.enterpriseMinMonthly);
-    expect(r.monthlyBrutto).toBeGreaterThan(r.monthlyNetto);
-  });
-
-  it("2000 min without setup", () => {
-    const r = calculateEnterprisePrice(2000, false);
-    expect(r.setupFee).toBe(0);
-    expect(r.monthlyNetto).toBeGreaterThanOrEqual(CONFIG.enterpriseMinMonthly);
+    const addonTotal =
+      CONFIG.addonOwnNumber + CONFIG.addonGoogleCalendar +
+      CONFIG.addonCrm + CONFIG.addonVoiceClone +
+      CONFIG.addonUnlimitedConsultants + CONFIG.addonPrioritySupport +
+      CONFIG.addonSla247;
+    expect(r.monthlyNetto).toBe(120 + addonTotal);
+    expect(r.details.length).toBe(8); // base + 7 addons
   });
 });

@@ -106,14 +106,24 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
     setTab("overview");
   }
 
-  if (session === "loading") return <div className="flex-1 flex items-center justify-center"><p className="text-zinc-400">Sprawdzanie uprawnień...</p></div>;
+  if (session === "loading") return (
+    <div className="flex-1 flex items-center justify-center bg-[#FAFAF9]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-zinc-400">Sprawdzanie uprawnień...</p>
+      </div>
+    </div>
+  );
+
   if (!session) return (
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="max-w-sm text-center space-y-4">
-        <div className="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center mx-auto"><svg className="w-8 h-8 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></div>
-        <h1 className="text-2xl font-bold text-zinc-900">Wymagane logowanie</h1>
-        <p className="text-sm text-zinc-500">Zaloguj się aby uzyskać dostęp do panelu</p>
-        <a href="/login" className="inline-block bg-brand-400 text-white px-6 py-3 rounded-lg font-medium hover:bg-brand-500 transition">Przejdź do logowania</a>
+    <div className="flex-1 flex items-center justify-center bg-[#FAFAF9] p-4">
+      <div className="text-center max-w-sm">
+        <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-50 flex items-center justify-center">
+          <svg className="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+        </div>
+        <h2 className="text-lg font-semibold text-zinc-800 mb-1">Wymagane logowanie</h2>
+        <p className="text-sm text-zinc-400 mb-4">Zaloguj się, aby uzyskać dostęp do panelu.</p>
+        <a href="/login" className="btn-primary text-sm px-5 py-2.5">Zaloguj się</a>
       </div>
     </div>
   );

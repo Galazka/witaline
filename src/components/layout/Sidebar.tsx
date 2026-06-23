@@ -37,115 +37,105 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
   const isActive = (item: SidebarItem) =>
     activeKey === item.key || (item.children?.some(c => c.key === activeKey));
 
+  const NavItem = ({ item, depth = 0 }: { item: SidebarItem; depth?: number }) => {
+    const active = isActive(item);
+    const hasChildren = item.children && item.children.length > 0;
+    const open = expandedMenus.has(item.key);
+
+    if (hasChildren) {
+      return (
+        <div>
+          <button
+            onClick={() => toggleSubmenu(item.key)}
+            className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              active
+                ? "bg-brand-50/80 text-brand-700"
+                : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800"
+            }`}
+          >
+            {active && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-400 rounded-full" />
+            )}
+            <span className="w-5 h-5 shrink-0 text-current">{item.icon}</span>
+            {!collapsed && (
+              <>
+                <span className="flex-1 text-left truncate">{item.label}</span>
+                <IconChevronDown className={`w-4 h-4 shrink-0 text-zinc-300 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+              </>
+            )}
+          </button>
+          {!collapsed && open && item.children && (
+            <div className="ml-3 mt-0.5 pl-4 border-l border-zinc-100 space-y-0.5">
+              {item.children.map((child) => (
+                <NavItem key={child.key} item={child} depth={depth + 1} />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <button
+        onClick={() => onNavigate(item.key)}
+        className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+          active
+            ? "bg-brand-50/80 text-brand-700 shadow-sm"
+            : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800"
+        }`}
+        title={collapsed ? item.label : undefined}
+      >
+        {active && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-400 rounded-full" />
+        )}
+        <span className="w-5 h-5 shrink-0 text-current">{item.icon}</span>
+        {!collapsed && (
+          <>
+            <span className="flex-1 text-left truncate">{item.label}</span>
+            {item.badge && (
+              <span className="text-[10px] font-semibold bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-full shrink-0">
+                {item.badge}
+              </span>
+            )}
+          </>
+        )}
+      </button>
+    );
+  };
+
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-white border-r border-zinc-200 z-50 flex flex-col transition-all duration-300 ${
+      className={`fixed left-0 top-0 h-screen bg-white/90 backdrop-blur-lg border-r border-zinc-200/60 z-50 flex flex-col transition-all duration-300 ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
-      {/* Logo */}
-      <div className="h-16 flex items-center px-4 border-b border-zinc-100">
+      <div className="h-16 flex items-center px-4 border-b border-zinc-100/60">
         {logo || (
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-400 rounded-xl flex items-center justify-center shadow-sm shrink-0">
+            <div className="w-8 h-8 bg-gradient-to-br from-brand-400 to-brand-600 rounded-xl flex items-center justify-center shadow-sm shadow-brand-200/40 shrink-0">
               <span className="text-white text-xs font-bold">W</span>
             </div>
             {!collapsed && (
-              <span className="text-lg font-bold text-zinc-900 font-display tracking-tight">WitaLine</span>
+              <span className="text-base font-bold text-zinc-800 font-display tracking-tight">WitaLine</span>
             )}
           </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hidden lg:block"
+          className="ml-auto p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-300 hidden lg:block transition-colors"
         >
           {collapsed ? <IconChevronLeft className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4 rotate-90" />}
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin">
-        {items.map((item) => {
-          const active = isActive(item);
-          const hasChildren = item.children && item.children.length > 0;
-          const open = expandedMenus.has(item.key);
-
-          if (hasChildren) {
-            return (
-              <div key={item.key}>
-                <button
-                  onClick={() => toggleSubmenu(item.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    active
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                  }`}
-                >
-                  <span className="w-5 h-5 shrink-0">{item.icon}</span>
-                  {!collapsed && (
-                    <>
-                      <span className="flex-1 text-left truncate">{item.label}</span>
-                      <IconChevronDown className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`} />
-                    </>
-                  )}
-                </button>
-                {!collapsed && open && item.children && (
-                  <div className="ml-8 mt-1 space-y-1">
-                    {item.children.map((child) => (
-                      <button
-                        key={child.key}
-                        onClick={() => onNavigate(child.key)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-                          activeKey === child.key
-                            ? "bg-brand-50 text-brand-700 font-medium"
-                            : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
-                        }`}
-                      >
-                        <span className="w-4 h-4 shrink-0">{child.icon}</span>
-                        <span className="truncate">{child.label}</span>
-                        {child.badge && (
-                          <span className="ml-auto text-[10px] font-bold bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-full">
-                            {child.badge}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          }
-
-          return (
-            <button
-              key={item.key}
-              onClick={() => onNavigate(item.key)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                active
-                  ? "bg-brand-50 text-brand-700 shadow-sm"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-              }`}
-              title={collapsed ? item.label : undefined}
-            >
-              <span className="w-5 h-5 shrink-0">{item.icon}</span>
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left truncate">{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[10px] font-bold bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </>
-              )}
-            </button>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5 scrollbar-thin">
+        {items.map((item) => (
+          <NavItem key={item.key} item={item} />
+        ))}
       </nav>
 
-      {/* Bottom content (user avatar, etc.) */}
       {bottomContent && (
-        <div className="border-t border-zinc-100 p-3">
+        <div className="border-t border-zinc-100/60 p-3">
           {bottomContent}
         </div>
       )}

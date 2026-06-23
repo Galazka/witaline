@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
+async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -13,36 +13,48 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
+  return { supabaseResponse, user };
+}
 
-  if (
-    !user &&
-    (path.startsWith("/dashboard") || path.startsWith("/admin"))
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
+const protectedRoutes = ["/admin", "/dashboard", "/onboarding"];
+const guestRoutes = ["/login", "/register"];
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const { supabaseResponse, user } = await updateSession(request);
+
+  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+  const isGuest = guestRoutes.some((route) => pathname.startsWith(route));
+
+  if (!user && isProtected) {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
+  }
+
+  if (user && isGuest) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/elevenlabs|api/twilio|api/stripe/webhook|api/mcp|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
