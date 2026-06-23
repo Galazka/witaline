@@ -90,6 +90,7 @@ export default function AdminDailyCosts() {
   const [to, setTo] = useState(todayStr);
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -97,10 +98,13 @@ export default function AdminDailyCosts() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setFetchError("");
     try {
       const res = await fetch(`/api/admin/real-costs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
-      if (res.ok) {
-        const json = await res.json();
+      const json = res.ok ? await res.json() : { call_logs: [] };
+      if (!res.ok) {
+        setFetchError(`Błąd ${res.status} — ${json.error || "brak dostępu"}`);
+      } else {
         const logs: CallLog[] = (json.call_logs || []).map((l: Record<string, unknown>) => ({
           ...l,
           cost_elevenlabs: Number(l.cost_elevenlabs) || 0,
@@ -113,31 +117,32 @@ export default function AdminDailyCosts() {
         }));
         setCallLogs(logs);
       }
-    } catch { /* ignore */ }
+    } catch (e) {
+      setFetchError("Nie udało się połączyć z API");
+    }
     setLoading(false);
   }, [from, to]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Auto-sync on mount: first pull calls from ElevenLabs, then sync costs
-  useEffect(() => {
-    if (!syncing) {
-      setSyncing(true);
-      setSyncMsg("Pobieranie rozmów z ElevenLabs...");
-      fetch("/api/admin/sync-calls", { method: "POST" })
-        .then(r => r.json())
-        .then(d1 => {
-          setSyncMsg("Synchronizowanie kosztów...");
-          return fetch("/api/admin/sync-costs", { method: "POST" }).then(r => r.json());
-        })
-        .then(d2 => {
-          setSyncMsg(d2.message || "OK");
-          fetchData();
-        })
-        .catch(() => setSyncMsg("Błąd synchronizacji"))
-        .finally(() => { setSyncing(false); setTimeout(() => setSyncMsg(""), 8000); });
+  async function handleSync() {
+    setSyncing(true);
+    setSyncMsg("Pobieranie rozmów z ElevenLabs...");
+    setFetchError("");
+    try {
+      const r1 = await fetch("/api/admin/sync-calls", { method: "POST" });
+      const d1 = await r1.json();
+      setSyncMsg("Synchronizowanie kosztów...");
+      const r2 = await fetch("/api/admin/sync-costs", { method: "POST" });
+      const d2 = await r2.json();
+      setSyncMsg((d2 as any).message || "OK");
+      await fetchData();
+    } catch {
+      setSyncMsg("Błąd synchronizacji");
     }
-  }, []);
+    setSyncing(false);
+    setTimeout(() => setSyncMsg(""), 8000);
+  }
 
   // Group by day
   const days = new Map<string, CallLog[]>();
@@ -198,6 +203,10 @@ export default function AdminDailyCosts() {
             className="px-3 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
             Odśwież
           </button>
+          <button onClick={handleSync} disabled={syncing}
+            className="px-3 py-1.5 text-xs font-medium bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:opacity-50">
+            {syncing ? "Sync..." : "Sync koszty"}
+          </button>
           {syncMsg && (
             <span className={`text-xs ${syncing ? "text-amber-500" : "text-green-600"}`}>
               {syncing ? "⏳ " : "✓ "}{syncMsg}
@@ -205,6 +214,13 @@ export default function AdminDailyCosts() {
           )}
         </div>
       </div>
+
+      {fetchError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-700 flex items-center justify-between">
+          <span>{fetchError}</span>
+          <button onClick={fetchData} className="text-red-600 font-medium hover:text-red-800 underline ml-2">Spróbuj ponownie</button>
+        </div>
+      )}
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
@@ -273,7 +289,13 @@ export default function AdminDailyCosts() {
               {loading ? (
                 <tr><td colSpan={10} className="text-center py-8 text-zinc-400">Ładowanie...</td></tr>
               ) : dailyGroups.length === 0 ? (
-                <tr><td colSpan={10} className="text-center py-8 text-zinc-400">Brak danych w wybranym zakresie</td></tr>
+                <tr><td colSpan={10} className="text-center py-8">
+                  <p className="text-zinc-400 mb-2">Brak danych w wybranym zakresie</p>
+                  <button onClick={handleSync} disabled={syncing}
+                    className="px-4 py-2 text-xs font-medium bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:opacity-50">
+                    {syncing ? "Synchronizowanie..." : "Synchronizuj rozmowy z ElevenLabs"}
+                  </button>
+                </td></tr>
               ) : (
                 dailyGroups.map((day) => {
                   const marginPct = day.totalRevenue > 0 ? (day.profit / day.totalRevenue) * 100 : 0;
