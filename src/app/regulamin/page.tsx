@@ -26,18 +26,17 @@ export default function RegulaminPage() {
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">2. Definicje</h2>
             <p>2.1. <strong>Klient</strong> &mdash; osoba fizyczna prowadz&abreve;ca działalność gospodarcz&abreve;, osoba prawna lub jednostka organizacyjna nieposiadaj&abreve;ca osobowości prawnej, kt&oacute;ra zawarła umowę z Usługodawc&abreve;.</p>
-            <p>2.2. <strong>Okres rozliczeniowy</strong> &mdash; jeden miesi&abreve;c kalendarzowy, za kt&oacute;ry naliczana jest opłata abonamentowa.</p>
-            <p>2.3. <strong>Abonament</strong> &mdash; miesięczna opłata stała za wybrany plan taryfowy, płatna z g&oacute;ry.</p>
-            <p>2.4. <strong>Pakiet minut</strong> &mdash; jednorazowy zakup minut rozmowy przez Stripe, doliczany do salda prepaid Klienta. Minuty ważne bezterminowo.</p>
-            <p>2.5. <strong>Pakiet SMS</strong> &mdash; jednorazowy zakup SMS/wiadomości WhatsApp przez Stripe, doliczany do salda SMS Klienta.</p>
-            <p>2.6. <strong>Numer dedykowany</strong> &mdash; polski numer telefonu (+48) przypisany do konta Klienta.</p>
-            <p>2.7. <strong>Wiadomość SMS</strong> &mdash; wiadomość tekstowa wysłana za pośrednictwem Twilio API na numer telefonu kom&oacute;rkowego.</p>
-            <p>2.8. <strong>WhatsApp Business API</strong> &mdash; kanał komunikacji wykorzystuj&abreve;cy platformę WhatsApp (Meta), dostępny po wyrażeniu zgody przez rozm&oacute;wcę.</p>
+            <p>2.2. <strong>Okres rozliczeniowy</strong> &mdash; jeden miesi&abreve;c kalendarzowy.</p>
+            <p>2.3. <strong>Pakiet minut</strong> &mdash; jednorazowy zakup minut rozmowy przez Stripe, doliczany do salda prepaid Klienta. Minuty ważne bezterminowo.</p>
+            <p>2.4. <strong>Pakiet SMS</strong> &mdash; jednorazowy zakup SMS/wiadomości WhatsApp przez Stripe, doliczany do salda SMS Klienta.</p>
+            <p>2.5. <strong>Numer dedykowany</strong> &mdash; polski numer telefonu (+48) przypisany do konta Klienta.</p>
+            <p>2.6. <strong>Wiadomość SMS</strong> &mdash; wiadomość tekstowa wysłana za pośrednictwem Twilio API na numer telefonu kom&oacute;rkowego.</p>
+            <p>2.7. <strong>WhatsApp Business API</strong> &mdash; kanał komunikacji wykorzystuj&abreve;cy platformę WhatsApp (Meta), dostępny po wyrażeniu zgody przez rozm&oacute;wcę.</p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">3. Rodzaje plan&oacute;w i cennik</h2>
-            <p>3.1. WitaLine oferuje dwa modele rozliczeń za minutę rozmowy asystenta AI:</p>
+            <p>3.1. WitaLine oferuje model elastyczny (pay-as-you-go) rozliczeń za minutę rozmowy asystenta AI:</p>
 
             <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">A. Model elastyczny (pay-as-you-go)</h3>
             <p>Brak opłaty stałej. Klient płaci tylko za wykorzystane minuty według progresji cenowej:</p>
@@ -64,19 +63,9 @@ export default function RegulaminPage() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-2">Klient może w każdej chwili dokupić pakiety minut przez Stripe (płatność jednorazowa). Minuty nie przepadaj&abreve;. Model elastyczny nie obejmuje rolloveru.</p>
+            <p className="mt-2">Klient może w każdej chwili dokupić pakiety minut przez Stripe (płatność jednorazowa). Minuty nie przepadaj&abreve; i s&abreve; ważne bezterminowo.</p>
 
-            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">B. Plany abonamentowe (ceny netto)</h3>
-            <ul className="list-disc pl-6 mt-2 space-y-1">
-              <li><strong>Start:</strong> 199 PLN/mies &mdash; 250 min, do 3 konsultant&oacute;w</li>
-              <li><strong>Pro:</strong> 249 PLN/mies &mdash; 300 min, do 3 konsultant&oacute;w</li>
-              <li><strong>Growth:</strong> 399 PLN/mies &mdash; 600 min, do 5 konsultant&oacute;w (najpopularniejszy)</li>
-              <li><strong>Lux:</strong> 599 PLN/mies &mdash; 800 min, do 10 konsultant&oacute;w</li>
-              <li><strong>Enterprise:</strong> 999 PLN/mies &mdash; 1 500 min, nieograniczeni konsultanci. Dla większych wolumen&oacute;w &mdash; indywidualna wycena (jednorazowa opłata wdrożeniowa: 299 PLN netto).</li>
-            </ul>
-            <p className="mt-2">Nadwyżka ponad limit abonamentowy rozliczana według stawki modelu elastycznego (A). Niewykorzystane minuty przechodz&abreve; na kolejny miesi&abreve;c (rollover). Maksymalny stan rollover: 2× miesięcznego limitu.</p>
-
-            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">C. Dodatki opcjonalne (ceny netto/mies)</h3>
+            <h3 className="text-base font-semibold text-zinc-800 mt-4 mb-2">B. Dodatki opcjonalne (ceny netto/mies)</h3>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li><strong>Własny numer +48:</strong> 29 PLN</li>
               <li><strong>Google Calendar:</strong> 19 PLN</li>
@@ -129,7 +118,7 @@ export default function RegulaminPage() {
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">4. System prepaid i pakiety</h2>
             <p>4.1. Klient może dokupić pakiety minut oraz pakiety SMS/WhatsApp przez Stripe (karta kredytowa/debetowa, Blik). Minimalna kwota jednorazowej transakcji: 25 PLN.</p>
-            <p>4.2. Pakiety minut s&abreve; doliczane do salda prepaid Klienta. Minuty s&abreve; potrącane z salda przy każdym połączeniu (jeśli Klient nie ma aktywnego abonamentu z wliczonymi minutami).</p>
+            <p>4.2. Pakiety minut s&abreve; doliczane do salda prepaid Klienta. Minuty s&abreve; potrącane z salda przy każdym połączeniu.</p>
             <p>4.3. Pakiety SMS/WhatsApp s&abreve; doliczane do odpowiednich sald. Wiadomości s&abreve; potrącane z salda przy każdej wysyłce.</p>
             <p>4.4. Niewykorzystane minuty, SMS-y i wiadomości WhatsApp z pakiet&oacute;w nie przepadaj&abreve; i s&abreve; ważne bezterminowo.</p>
             <p>4.5. W przypadku braku środk&oacute;w na saldzie, rozmowy s&abreve; blokowane. Wiadomości SMS/WhatsApp nie s&abreve; wysyłane.</p>
@@ -146,9 +135,9 @@ export default function RegulaminPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">6. Płatności</h2>
-            <p>6.1. Opłaty abonamentowe pobierane s&abreve; z g&oacute;ry za każdy okres rozliczeniowy. Płatność realizowana przez Stripe &mdash; kart&abreve; kredytow&abreve;/debetow&abreve; lub Blik.</p>
+            <p>6.1. Płatność za pakiety minut oraz SMS/WhatsApp realizowana jest przez Stripe &mdash; kart&abreve; kredytow&abreve;/debetow&abreve; lub Blik. Płatność jednorazowa przy zakupie pakietu.</p>
             <p>6.2. Pakiety minut i SMS/WhatsApp s&abreve; płatne jednorazowo przy zakupie.</p>
-            <p>6.3. W przypadku braku płatności abonamentu Usługodawca zawiesza świadczenie usług po 7 dniach od terminu płatności. Po 30 dniach konto zostaje usunięte wraz z danymi.</p>
+            <p>6.3. W przypadku braku środk&oacute;w na saldzie prepaid rozmowy s&abreve; blokowane. Po 30 dniach braku aktywności konto zostaje usunięte wraz z danymi.</p>
             <p>6.4. Wszystkie ceny s&abreve; cenami netto. Do cen doliczany jest podatek VAT zgodnie z obowiązuj&abreve;cymi przepisami.</p>
           </section>
 
@@ -163,7 +152,7 @@ export default function RegulaminPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-zinc-900 mb-2">8. 30-dniowa gwarancja satysfakcji</h2>
-            <p>8.1. Usługodawca udziela 30-dniowej gwarancji satysfakcji: jeśli w ciągu pierwszych 30 dni korzystania z usługi asystent nie zapisze ani jednego poprawnego kontaktu (leada) &mdash; Usługodawca zwraca 100% kwoty pierwszego abonamentu.</p>
+            <p>8.1. Usługodawca udziela 30-dniowej gwarancji satysfakcji: jeśli w ciągu pierwszych 30 dni korzystania z usługi asystent nie zapisze ani jednego poprawnego kontaktu (leada) &mdash; Usługodawca zwraca 100% pierwszej wpłaty.</p>
             <p>8.2. Aby skorzystać z gwarancji, Klient zgłasza to przez panel lub e-mail: <a href="mailto:kontakt@witaline.pl" className="text-brand-400 hover:underline">kontakt@witaline.pl</a>.</p>
             <p>8.3. Gwarancja nie obejmuje przypadk&oacute;w, w kt&oacute;rych Klient nie skonfigurował poprawnie promptu lub bazy wiedzy.</p>
           </section>
@@ -202,28 +191,20 @@ export default function RegulaminPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">13. Rollover minut &mdash; szczeg&oacute;ły</h2>
-            <p>13.1. Niewykorzystane minuty z abonamentu przechodz&abreve; na kolejny miesi&abreve;c (rollover). Stan widoczny w panelu.</p>
-            <p>13.2. Maksymalny stan rollover: 2× miesięcznego limitu. Nadwyżka przepada.</p>
-            <p>13.3. Rollover naliczany automatycznie na koniec każdego okresu rozliczeniowego.</p>
-            <p>13.4. Rollover nie dotyczy modelu elastycznego (pay-as-you-go).</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">13. Rozwi&abreve;zanie umowy i usunięcie konta</h2>
+            <p>13.1. Umowa na czas nieokreślony. Klient może wypowiedzieć w dowolnym momencie z poziomu panelu.</p>
+            <p>13.2. Usunięcie konta skutkuje anulowaniem integracji Stripe, usunięciem numeru telefonu oraz trwałym usunięciem danych.</p>
+            <p>13.3. Niewykorzystane środki z pakiet&oacute;w podlegaj&abreve; zwrotowi w 14 dni od zamknięcia konta.</p>
+            <p>13.4. Usługodawca może rozwiązać umowę z 30-dniowym okresem wypowiedzenia w przypadku naruszenia Regulaminu.</p>
+            <p>13.5. Po 30 dniach braku aktywności konto zostaje automatycznie usunięte wraz z danymi.</p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">14. Rozwi&abreve;zanie umowy i usunięcie konta</h2>
-            <p>14.1. Umowa na czas nieokreślony. Klient może wypowiedzieć w dowolnym momencie z poziomu panelu.</p>
-            <p>14.2. Usunięcie konta skutkuje anulowaniem subskrypcji Stripe, usunięciem numeru telefonu oraz trwałym usunięciem danych.</p>
-            <p>14.3. Niewykorzystane środki z pakiet&oacute;w podlegaj&abreve; zwrotowi w 14 dni od zamknięcia konta.</p>
-            <p>14.4. Usługodawca może rozwiązać umowę z 30-dniowym okresem wypowiedzenia w przypadku naruszenia Regulaminu.</p>
-            <p>14.5. Po 30 dniach braku płatności konto zostaje automatycznie usunięte wraz z danymi.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-zinc-900 mb-2">15. Postanowienia końcowe</h2>
-            <p>15.1. Usługodawca zastrzega sobie prawo do zmiany Regulaminu. Klient powiadomiony e-mailem na 14 dni przed zmian&abreve;.</p>
-            <p>15.2. W przypadku braku akceptacji zmian Klient ma prawo wypowiedzieć umowę przed dniem wejścia w życie zmian.</p>
-            <p>15.3. Spory rozstrzygane przez sąd właściwy dla siedziby Usługodawcy.</p>
-            <p>15.4. Regulamin wchodzi w życie z dniem 1 lipca 2026 roku.</p>
+            <h2 className="text-lg font-semibold text-zinc-900 mb-2">14. Postanowienia końcowe</h2>
+            <p>14.1. Usługodawca zastrzega sobie prawo do zmiany Regulaminu. Klient powiadomiony e-mailem na 14 dni przed zmian&abreve;.</p>
+            <p>14.2. W przypadku braku akceptacji zmian Klient ma prawo wypowiedzieć umowę przed dniem wejścia w życie zmian.</p>
+            <p>14.3. Spory rozstrzygane przez sąd właściwy dla siedziby Usługodawcy.</p>
+            <p>14.4. Regulamin wchodzi w życie z dniem 1 lipca 2026 roku.</p>
             <p className="mt-6 text-zinc-400 text-xs">Data ostatniej aktualizacji: 1 lipca 2026</p>
           </section>
         </div>

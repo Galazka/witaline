@@ -92,7 +92,7 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Twilio Subaccounts**: obsługa wielodzierżawców, SID podaje się w `TWILIO_ACCOUNT_SID` dla każdego biznesu (konfiguracja w panelu admina)
 - **Railway healthcheck**: ✅ resolved — port hardcoded to 3000 in start script, Railway proxy port set to 3000
 
-## Recent Changes (June 24, 2026)
+## Recent Changes (June 24-25, 2026)
 - **Registration fix**: text colors on dark background (changed `text-zinc-900`/`text-zinc-700` → `text-white`/`text-white/80`) w `src/app/(marketing)/register/page.tsx`
 - **Business categories**: added 15 new kategorii (Adwokat, Kancelaria, Restauracja, Hotel, etc.) w `src/lib/templates.ts`
 - **Dashboard crash fix**: added `elastic_0` and `enterprise_2000` to `plans` object w `src/lib/pricing.ts` + `getPlanConfig()` checks direct plan key match first
@@ -123,6 +123,9 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - [x] **Sentry User Feedback widget** ✅
 - [x] **README** — pełna dokumentacja build/deploy ✅
 - [x] **Registration text colors + categories** ✅
+- [x] **Regulamin cleanup**: removed subscription plans, rollover section, stale pricing ✅
+- [x] **Maja system prompt**: elastic-only pricing, transfer only on request, WitaLine knowledge ✅
+- [x] **Tomek consultant**: +48790824762 added to DB + .env ✅
 - [ ] **Test end-to-end**: zadzwoń na +48 732 125 752, sprawdź DB
 - [ ] **Włączyć Language Detection** w agent "Rob" → system tools
 - [ ] **Dashboard**: verify plan key fix (`elastic_0`/`enterprise_2000`)
