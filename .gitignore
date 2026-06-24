@@ -9,3 +9,8 @@ witaline/
 tsconfig.tsbuildinfo
 # local assets
 wlbig.png
+
+# Local scripts and media
+conv.mp3
+scripts/*.js
+
