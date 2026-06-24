@@ -127,10 +127,11 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - [x] **Maja system prompt**: elastic-only pricing, transfer only on request, WitaLine knowledge ✅
 - [x] **Tomek consultant**: +48790824762 added to DB + .env ✅
 - [ ] **Test end-to-end**: zadzwoń na +48 732 125 752, sprawdź DB
-- [ ] **Włączyć Language Detection** w agent "Rob" → system tools
-- [ ] **Dashboard**: verify plan key fix (`elastic_0`/`enterprise_2000`)
-- [ ] **Maja system prompt**: zaktualizować w ElevenLabs dashboard (profesjonalny ton + szczegóły MCP)
-- [ ] **Admin sync-costs**: upewnić się że działa z nowymi rozmowami
+- [x] **Language Detection** — already enabled in agent Rob (built_in_tools.language_detection) ✅
+- [x] **Dashboard**: plan key fix verified (`elastic_0`/`enterprise_2000` w `plans` + `getPlanConfig()`) ✅
+- [x] **Maja system prompt** — zaktualizowany przez ElevenLabs API (2124 znaki, wielojęzyczny, WitaLine-first, NIGDY nie pytaj o numer) ✅
+- [x] **Admin sync-costs**: dodany `deleted_at` filter, wypchnięte na main ✅
+- [x] **AccountBalance**: try/catch dla brakujących kolumn wa_* + migracja 047 ✅
 
 ## OpenClaw / Hermes Integration
 
