@@ -5,21 +5,16 @@ import {
   getSmsPricingConfig,
   DEFAULT_SMS_MARKUP_PERCENT,
   TWILIO_SMS_COST_PLN,
-  TWILIO_WHATSAPP_COST_PLN,
-  DEFAULT_WHATSAPP_MARKUP_PERCENT,
   SMS_PACKAGES,
-  WA_PACKAGES,
   formatSmsCost,
 } from "@/lib/sms-pricing";
 
-/** GET /api/admin/sms/pricing-config — admin SMS pricing overview */
 export async function GET() {
   const { error } = await checkAdminAuth();
   if (error) return error;
 
   const config = getSmsPricingConfig();
 
-  // Also fetch all businesses with their SMS stats for the table
   const { data: businesses } = await supabaseAdmin
     .from("businesses")
     .select("id, name, sms_limit, sms_used, sms_extra_purchased, sms_enabled, suspended");
@@ -47,25 +42,20 @@ export async function GET() {
       clientPricePerSms: config.clientPricePerSms,
       marginPerSms: config.marginPerSms,
       markupPercent: config.markupPercent,
-      waClientPrice: config.waClientPrice,
     },
     packages: {
       sms: SMS_PACKAGES,
-      wa: WA_PACKAGES,
     },
     twilioCosts: {
       smsPerSegment: TWILIO_SMS_COST_PLN,
-      waPerMessage: TWILIO_WHATSAPP_COST_PLN,
     },
     defaults: {
       smsMarkupPercent: DEFAULT_SMS_MARKUP_PERCENT,
-      waMarkupPercent: DEFAULT_WHATSAPP_MARKUP_PERCENT,
     },
     businesses: businessList,
   });
 }
 
-/** PATCH — update global SMS markup or per-business settings */
 export async function PATCH(request: Request) {
   const { error } = await checkAdminAuth();
   if (error) return error;
@@ -87,7 +77,6 @@ export async function PATCH(request: Request) {
 
   if (action === "toggle_all") {
     const { enabled } = body;
-    // Toggle SMS for all non-WitaLine businesses
     const { error: dbError } = await supabaseAdmin
       .from("businesses")
       .update({ sms_enabled: enabled })

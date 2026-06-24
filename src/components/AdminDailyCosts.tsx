@@ -182,11 +182,9 @@ export default function AdminDailyCosts() {
   const totalProfit = dailyGroups.reduce((s, d) => s + d.profit, 0);
   const totalCalls = callLogs.length;
 
-  // SMS & WhatsApp summary from API
+  // SMS summary from API
   const [smsTotal, setSmsTotal] = useState(0);
-  const [waTotal, setWaTotal] = useState(0);
   const [costSmsTotal, setCostSmsTotal] = useState(0);
-  const [costWaTotal, setCostWaTotal] = useState(0);
 
   // Projections
   const avgProfitPerDay = daysElapsed > 0 ? totalProfit / daysElapsed : 0;
@@ -277,18 +275,11 @@ export default function AdminDailyCosts() {
         </div>
       </div>
 
-      {/* SMS & WhatsApp KPI */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">SMS wysłane</p>
-          <p className="text-lg font-bold text-zinc-900">{smsTotal}</p>
-          <p className="text-[10px] text-zinc-400">koszt: {fmtPLN(costSmsTotal)}</p>
-        </div>
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">WhatsApp wysłane</p>
-          <p className="text-lg font-bold text-zinc-900">{waTotal}</p>
-          <p className="text-[10px] text-zinc-400">koszt: {fmtPLN(costWaTotal)}</p>
-        </div>
+      {/* SMS KPI */}
+      <div className="bg-white rounded-lg border border-zinc-200 p-3 w-fit">
+        <p className="text-[10px] text-zinc-400 uppercase tracking-wider">SMS wysłane</p>
+        <p className="text-lg font-bold text-zinc-900">{smsTotal}</p>
+        <p className="text-[10px] text-zinc-400">koszt: {fmtPLN(costSmsTotal)}</p>
       </div>
 
       {/* Daily breakdown table */}

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { calculateCost, getPlanConfig } from "@/lib/pricing";
 import { sendSms } from "@/lib/twilio-sms";
-import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
 import { addNotification } from "@/lib/notifications";
 import { sendWebhook } from "@/lib/webhook-outbound";
 import { enqueueJob } from "@/lib/job-queue";
@@ -232,26 +231,6 @@ export async function POST(request: Request) {
       await sendSms(customData.sms_phone as string, finalText, callLog?.id, WITALINE_MAIN_BUSINESS_ID);
     }
 
-    if (customData.wa_consent && customData.wa_phone) {
-      const callerName = (customData.caller_name as string) || (customData.sms_contact_name as string) || "";
-      const name = callerName || "!";
-      let text: string;
-      const paymentLink = customData.payment_link as string | undefined;
-      const reservation = extractReservation(customData);
-      if (classification === "booking" && reservation) {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.booking(name, new Date(reservation.reserved_at).toLocaleDateString("pl-PL"), new Date(reservation.reserved_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }), reservation.service_type);
-      } else if (classification === "order") {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.order(name, summary.slice(0, 200), paymentLink);
-      } else if (classification === "offer") {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.offer(name, (customData.offer_plan as string) || "START", (customData.offer_price as string) || "299 zł", paymentLink);
-      } else if (paymentLink) {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.payment_reminder(name, paymentLink, (customData.payment_amount as string) || "");
-      } else {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.default(name);
-      }
-      await sendWhatsApp(customData.wa_phone as string, text, undefined, callLog?.id, WITALINE_MAIN_BUSINESS_ID);
-    }
-
     if (callLog) {
       sendWebhook(WITALINE_MAIN_BUSINESS_ID, {
         event: "call.completed",
@@ -378,11 +357,6 @@ export async function POST(request: Request) {
     });
   }
 
-  if (customData.wa_consent && customData.wa_phone) {
-    const callerName = (customData.caller_name as string) || "";
-    await sendWhatsApp(customData.wa_phone as string, WHATSAPP_CONTINUITY_TEMPLATES.default(callerName || "!"), undefined, callLog?.id, businessId);
-  }
-
   if (callLog) {
     sendWebhook(businessId, {
       event: "call.completed",
@@ -398,6 +372,32 @@ export async function POST(request: Request) {
       started_at: new Date(Date.now() - (durationSeconds || 0) * 1000).toISOString(),
       ended_at: new Date().toISOString(),
     }).catch(e => console.warn("[call-completed] webhook error:", e));
+  }
+
+  const { data: updatedBiz } = await supabaseAdmin
+    .from("businesses")
+    .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, owner_uid")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  if (updatedBiz) {
+    const remainingMins = parseFloat(updatedBiz.prepaid_minutes || "0");
+    const smsRemaining = Math.max(0, (updatedBiz.sms_limit || 0) + (updatedBiz.sms_extra_purchased || 0) - (updatedBiz.sms_used || 0));
+
+    if (remainingMins < 50 || smsRemaining < 20) {
+      const parts: string[] = [];
+      if (remainingMins < 20) parts.push("Krytycznie niskie saldo minut!");
+      else if (remainingMins < 50) parts.push("Pozostało mało minut.");
+      if (smsRemaining < 10) parts.push("Krytycznie niskie saldo SMS!");
+      else if (smsRemaining < 20) parts.push("Pozostało mało SMS.");
+
+      addNotification({
+        businessId,
+        type: "system",
+        title: "Niskie saldo",
+        message: parts.join(" ") + " Doładuj konto aby uniknąć przerwy w obsłudze.",
+      }).catch(e => console.warn("[call-completed] notify error:", e));
+    }
   }
 
   return NextResponse.json({ ok: true, callLogId: callLog?.id });

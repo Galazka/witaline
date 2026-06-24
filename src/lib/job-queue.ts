@@ -6,7 +6,6 @@ export type JobType =
   | "call_completed_client"
   | "transcribe_handoff"
   | "send_sms"
-  | "send_whatsapp"
   | "send_email"
   | "send_webhook";
 

@@ -75,13 +75,25 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Stripe**: `/api/stripe/buy-minutes` tworzy sesję `mode:payment` z dynamiczną ceną. Webhook dodaje minuty do salda.
 - **Stripe**: `/api/stripe/buy-minutes` tworzy sesję `mode:payment` z dynamiczną ceną. Webhook dodaje minuty do salda.
 
-## WhatsApp Continuity
-- **sendWhatsApp()** w `twilio-whatsapp.ts` — wysyła przez Twilio WhatsApp API (sandbox +14155238886)
-- **Szablony**: booking, order, offer, payment_reminder, default
-- **Webhook incoming**: `/api/twilio/whatsapp` — zapisuje do wa_logs + auto-reply + powiadomienie
-- **call-completed**: wysyła WhatsApp continuity po rozmowie (jeśli wa_consent + wa_phone)
-- **send_whatsapp tool**: ElevenLabs agent może wysłać WhatsApp w trakcie rozmowy
-- **Tabela**: `wa_logs` + kolumny `wa_limit/wa_used/wa_extra_purchased/whatsapp_number` w `businesses`
+## SMS Pricing (tied to minute rate)
+- **Cena SMS zależy od stawki minut:** niższa stawka za minutę = niższy koszt SMS i więcej darmowych wiadomości.
+- Formuła: `cena_SMS_netto = stawka_minut * 0.42`
+- Skala (netto → brutto): 1.20→0.50/0.62  |  1.10→0.46/0.57  |  1.00→0.42/0.52  |  0.95→0.40/0.49  |  0.90→0.38/0.47  |  0.85→0.36/0.44
+- Darmowe SMS w pakiecie: 20→50→100→200→500→1000 (przyrostowe z każdą stawką)
+- Klient kupuje pakiety SMS przez Stripe (`/api/stripe/buy-sms`) — dodawane do `sms_extra_purchased`, sumują się z limitem.
+- **Alerty:** przy <50 min lub <20 SMS wyświetlane są żółte/czerwone alerty w `AccountBalance.tsx`; przy ≪20 automatycznie dodawane powiadomienie w systemie.
+- `SMS_PACKAGES` w `src/lib/sms-pricing.ts` zawiera aktualne pakiety brutto.
+- **WAŻNE:** wszędzie wyświetlanie cen SMS jako BRUTTO (z VAT). W `AccountBalance` nie ma już osobno netto/brutto — pokazywana jest tylko cena końcowa.
+
+## Usunięto WhatsApp (2026-06-24)
+- Usunięto `send_whatsapp` z MCP tools
+- Usunięto WhatsApp continuity z `call-completed` i `process-jobs`
+- Usunięto zakładkę WhatsApp z `AccountBalance`, `SmsHistory`, `SmsStatusWidget`
+- Usunięto kolumnę WhatsApp z `AdminBusinessesTable`
+- Usunięto sekcję WhatsApp z `AdminSmsManagement`, `AdminDailyCosts`, `PricingSection`, `home-page`
+- Usunięto importy `sendWhatsApp`/`WHATSAPP_CONTINUITY_TEMPLATES` w całym kodzie
+- Plany Start/Pro/Growth/Lux usunięte — działa tylko elastyczny model minut
+- `sms-pricing.ts`: usunięto `WA_PACKAGES`, `getWaRemaining`, wszystkie stałe `WHATSAPP_*`
 
 ## Known Issues
 - Cloudflare tunnel zmienia URL przy każdym restarcie → uruchom `node scripts/start.js` (automatycznie restartuje wszystko). Możesz też ręcznie: `node scripts/setup-tunnel.js https://nowy-tunel.trycloudflare.com` — skrypt aktualizuje .env, MCP server URL, webhooki agenta i Twilio.

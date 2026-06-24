@@ -27,7 +27,6 @@ interface BizRecord {
   industry: string | null;
   website_url: string | null;
   phone: string | null;
-  whatsapp_number: string | null;
   consultant_count: number;
   ported_phone: string | null;
   port_status: string | null;
@@ -271,7 +270,6 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Okres próbny</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Subskrypcja</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Kontakt</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">WhatsApp</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Numer</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Konsult.</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Założono</th>
@@ -374,15 +372,6 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                           {b.twilio_number && <span className="text-xs text-zinc-400 font-mono">{b.twilio_number}</span>}
                           {b.website_url && <a href={b.website_url} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline truncate max-w-[120px]">{b.website_url.replace(/^https?:\/\//, "")}</a>}
                         </div>
-                      </td>
-
-                      {/* WhatsApp */}
-                      <td className="px-3 py-2.5">
-                        {b.whatsapp_number ? (
-                          <span className="text-xs font-mono text-emerald-600">{b.whatsapp_number}</span>
-                        ) : (
-                          <span className="text-xs text-zinc-300">—</span>
-                        )}
                       </td>
 
                       {/* Numer (WitaLine centrala / portowany) */}

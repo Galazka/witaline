@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  SMS_PACKAGES, WA_PACKAGES, DEFAULT_SMS_MARKUP_PERCENT,
-  TWILIO_SMS_COST_PLN, TWILIO_WHATSAPP_COST_PLN, formatSmsCost
+  SMS_PACKAGES, DEFAULT_SMS_MARKUP_PERCENT,
+  TWILIO_SMS_COST_PLN, formatSmsCost
 } from "@/lib/sms-pricing";
 
 interface BizSmsUsage {
@@ -259,11 +259,6 @@ export default function AdminSmsManagement() {
                 <p className="text-2xl font-bold text-zinc-900">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
                 <p className="text-[10px] text-zinc-400">za segment (Polska)</p>
               </div>
-              <div className="bg-zinc-50 rounded-xl p-4">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">WhatsApp — koszt Twilio</p>
-                <p className="text-2xl font-bold text-zinc-900">{TWILIO_WHATSAPP_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
-                <p className="text-[10px] text-zinc-400">za wiadomość</p>
-              </div>
             </div>
           </div>
 
@@ -280,11 +275,6 @@ export default function AdminSmsManagement() {
                 <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Cena klienta/SMS</p>
                 <p className="text-2xl font-bold text-brand-500">0,50 zł</p>
                 <p className="text-[10px] text-zinc-400">zysk: 0,25 zł/SMS</p>
-              </div>
-              <div className="bg-brand-50 rounded-xl p-4 text-center">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Cena klienta/WhatsApp</p>
-                <p className="text-2xl font-bold text-brand-500">0,54 zł</p>
-                <p className="text-[10px] text-zinc-400">zysk: 0,24 zł/msg</p>
               </div>
             </div>
           </div>
@@ -318,40 +308,12 @@ export default function AdminSmsManagement() {
             </div>
           </div>
 
-          {/* WA Pakiety */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Pakiety WhatsApp</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200">
-                    <th className="pb-3 pr-4 font-medium">Pakiet</th>
-                    <th className="pb-3 pr-4 font-medium">Cena klienta</th>
-                    <th className="pb-3 pr-4 font-medium">Koszt WitaLine</th>
-                    <th className="pb-3 pr-4 font-medium">Marża</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {WA_PACKAGES.map(p => (
-                    <tr key={p.waCount} className="border-b border-zinc-100">
-                      <td className="py-2 pr-4 font-medium">{p.waCount} WA</td>
-                      <td className="py-2 pr-4">{p.clientPricePLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-zinc-500">{p.witalineCostPLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-brand-500">{(p.clientPricePLN - p.witalineCostPLN).toFixed(2).replace(".", ",")} zł</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           {/* Info */}
           <div className="bg-zinc-50 rounded-xl p-4 text-xs text-zinc-500 space-y-1">
             <p><strong>Jak działa cennik SMS:</strong></p>
             <p>• Koszt Twilio do Polski: <strong>{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł/SMS</strong> ($0.0457 × kurs ~4.15)</p>
             <p>• Domyślna marża WitaLine: <strong>{DEFAULT_SMS_MARKUP_PERCENT}%</strong> (klient płaci 0,50 zł/SMS)</p>
             <p>• Pakiety SMS są kupowane jednorazowo przez Stripe i dodawane do salda firmy (sms_extra_purchased)</p>
-            <p>• W planach Start/Pro/Growth/Lux klient ma wliczony limit SMS (sms_limit) — patrz SMS_PLAN_LIMITS</p>
             <p>• Administrator może wyłączyć SMS dla konkretnej firmy lub wszystkich firm naraz</p>
           </div>
         </div>

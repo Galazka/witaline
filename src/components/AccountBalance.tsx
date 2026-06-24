@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { getElasticRate, ELASTIC_TIERS } from "@/lib/pricing";
-import { SMS_PACKAGES, getSmsPricingConfig, getSmsRemaining, getWaRemaining, formatSmsCost, type SmsPricingConfig } from "@/lib/sms-pricing";
+import { SMS_PACKAGES, getSmsPricingConfig, getSmsRemaining, formatSmsCost, type SmsPricingConfig } from "@/lib/sms-pricing";
 
-type Tab = "minutes" | "sms" | "whatsapp";
+type Tab = "minutes" | "sms";
 
 export default function AccountBalance({
   businessId,
@@ -16,7 +16,7 @@ export default function AccountBalance({
 }) {
   const [tab, setTab] = useState<Tab>("minutes");
   const [balance, setBalance] = useState(0);
-  const [smsData, setSmsData] = useState({ used: 0, limit: 0, extra: 0, remaining: 0, waUsed: 0, waLimit: 0, waExtra: 0, waRemaining: 0 });
+  const [smsData, setSmsData] = useState({ used: 0, limit: 0, extra: 0, remaining: 0 });
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState(false);
   const [minutes, setMinutes] = useState(100);
@@ -27,7 +27,7 @@ export default function AccountBalance({
     try {
       const { data, error } = await supabase
         .from("businesses")
-        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, wa_limit, wa_used, wa_extra_purchased")
+        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased")
         .eq("id", businessId)
         .maybeSingle();
       if (data && !error) {
@@ -37,10 +37,6 @@ export default function AccountBalance({
           limit: (data as any).sms_limit || 0,
           extra: (data as any).sms_extra_purchased || 0,
           remaining: getSmsRemaining(data as any),
-          waUsed: (data as any).wa_used || 0,
-          waLimit: (data as any).wa_limit || 0,
-          waExtra: (data as any).wa_extra_purchased || 0,
-          waRemaining: getWaRemaining(data as any),
         });
       }
     } catch (e) {
@@ -101,7 +97,6 @@ export default function AccountBalance({
   const tabs: { key: Tab; label: string }[] = [
     { key: "minutes", label: "Minuty rozmów" },
     { key: "sms", label: "SMS" },
-    { key: "whatsapp", label: "WhatsApp" },
   ];
 
   return (
@@ -133,6 +128,25 @@ export default function AccountBalance({
           </button>
         ))}
       </div>
+
+      {(balance < 50 || smsData.remaining < 20) && (
+        <div className={`rounded-xl px-4 py-3 text-sm flex items-center gap-2 ${(balance < 20 || smsData.remaining < 10) ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+          <span>
+            {balance < 20
+              ? "Krytycznie niskie saldo minut! Doładuj konto aby nie przerwać obsługi połączeń."
+              : balance < 50
+              ? "Pozostało mało minut. Rozważ doładowanie aby uniknąć przerwy."
+              : ""}
+            {smsData.remaining < 10 && balance >= 20 && " "}
+            {smsData.remaining < 10
+              ? "Krytycznie niskie saldo SMS!"
+              : smsData.remaining < 20
+              ? "Pozostało mało SMS."
+              : ""}
+          </span>
+        </div>
+      )}
 
       {/* ── Tab: Minutes ────────────────────────────────────────── */}
       {tab === "minutes" && (
@@ -283,12 +297,8 @@ export default function AccountBalance({
                   <span className="font-medium">{smsPricePerSms.toFixed(2).replace(".", ",")} zł/SMS</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Netto</span>
-                  <span>{smsPricePLN.toFixed(2).replace(".", ",")} zł</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Brutto (23% VAT)</span>
-                  <span>{(smsPricePLN * 1.23).toFixed(2).replace(".", ",")} zł</span>
+                  <span className="text-zinc-500">Całość (brutto)</span>
+                  <span className="font-medium">{smsPricePLN.toFixed(2).replace(".", ",")} zł</span>
                 </div>
               </div>
 
@@ -304,46 +314,6 @@ export default function AccountBalance({
         </div>
       )}
 
-      {/* ── Tab: WhatsApp ────────────────────────────────────────── */}
-      {tab === "whatsapp" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
-            <div>
-              <span className="text-sm text-zinc-600">Dostępne WhatsApp</span>
-              <p className="text-[10px] text-zinc-400 mt-0.5">
-                Limit: {smsData.waLimit} + dodatkowe: {smsData.waExtra}
-              </p>
-            </div>
-            <div className="text-right">
-              <span className="text-xl font-bold text-brand-500">
-                {loading ? "..." : smsData.waRemaining}
-              </span>
-              <span className="text-xs text-zinc-400 ml-1">/ {smsData.waLimit + smsData.waExtra}</span>
-              <p className="text-[10px] text-zinc-400">użyto: {smsData.waUsed}</p>
-            </div>
-          </div>
-
-          {smsData.waLimit + smsData.waExtra > 0 && (
-            <div className="bg-zinc-50 rounded-full h-2.5 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  smsData.waRemaining < 10 ? "bg-red-500" : "bg-brand-400"
-                }`}
-                style={{ width: `${smsData.waRemaining > 0 ? ((smsData.waUsed / (smsData.waLimit + smsData.waExtra)) * 100) : 0}%` }}
-              />
-            </div>
-          )}
-
-          <hr className="border-zinc-100" />
-
-          <p className="text-sm text-zinc-500 text-center py-4">
-            WhatsApp Business pozwala wysyłać wiadomości klientom po rozmowie.
-            <br />
-            <span className="text-[10px] text-zinc-400">Kontakt z supportem w sprawie pakietów WhatsApp.</span>
-          </p>
-        </div>
-      )}
-
       {/* Summary footer */}
       <div className="bg-zinc-50 rounded-xl px-4 py-3 text-xs text-zinc-500 space-y-1">
         <div className="flex justify-between">
@@ -354,12 +324,6 @@ export default function AccountBalance({
           <span>SMS</span>
           <span className="font-medium text-zinc-700">
             {smsData.remaining} / {smsData.limit + smsData.extra}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span>WhatsApp</span>
-          <span className="font-medium text-zinc-700">
-            {smsData.waRemaining} / {smsData.waLimit + smsData.waExtra}
           </span>
         </div>
       </div>

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { processJobQueue } from "@/lib/job-queue";
 import { sendSms } from "@/lib/twilio-sms";
-import { sendWhatsApp } from "@/lib/twilio-whatsapp";
 import { sendWebhook } from "@/lib/webhook-outbound";
 import { calculateCost } from "@/lib/pricing";
 import { analyzeCall } from "@/lib/analyze-call";
@@ -70,16 +69,6 @@ async function handleJobMain(p: Record<string, unknown>): Promise<void> {
     message: `Połączenie od ${callerId}${classification !== "unknown" ? ` (${classification})` : ""}${durationSeconds ? ` - ${Math.round(durationSeconds / 60)} min` : ""}`,
     metadata: { caller_id: callerId, classification, duration_seconds: durationSeconds, has_transcript: !!transcript, recording_url: recordingUrl },
   });
-
-  if (customData.wa_consent && customData.wa_phone) {
-    await sendWhatsApp(
-      String(customData.wa_phone),
-      "Dziękujemy za rozmowę z WitaLine! W razie pytań jesteśmy do dyspozycji.",
-      undefined,
-      callLog?.id,
-      businessId
-    );
-  }
 
   if (callLog) {
     sendWebhook(businessId, {
@@ -175,16 +164,6 @@ async function handleJobClient(p: Record<string, unknown>): Promise<void> {
     metadata: { caller_id: callerId, classification, duration_seconds: durationSeconds, recording_url: recordingUrl },
   });
 
-  if (customData.wa_consent && customData.wa_phone) {
-    await sendWhatsApp(
-      String(customData.wa_phone),
-      "Dziękujemy za rozmowę!",
-      undefined,
-      callLog?.id,
-      businessId
-    );
-  }
-
   if (callLog) {
     sendWebhook(businessId, {
       event: "call.completed",
@@ -212,11 +191,6 @@ async function handleJob(type: string, payload: Record<string, unknown>): Promis
     case "send_sms": {
       const { to, text, callLogId, businessId } = payload;
       await sendSms(String(to), String(text), String(callLogId || ""), String(businessId));
-      break;
-    }
-    case "send_whatsapp": {
-      const { to, text, callLogId, businessId } = payload;
-      await sendWhatsApp(String(to), String(text), undefined, String(callLogId || ""), String(businessId));
       break;
     }
     case "send_webhook": {

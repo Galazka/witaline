@@ -513,7 +513,7 @@ export default function HomePage() {
                   "Numery stacjonarne i komórkowe (+48)",
                   "Przekierowanie sekwencyjne do konsultantów",
                   "DTMF — klient może wybrać opcję na klawiaturze",
-                  "Komunikacja w kanałach tekstowych (WhatsApp, SMS)",
+                  "Komunikacja SMS po rozmowie",
                   "Nagrywanie, transkrypcje, webhooki w czasie rzeczywistym",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
@@ -637,7 +637,7 @@ export default function HomePage() {
                   ["Integracje", "Google, HubSpot, Pipedrive, Livespace, API", "Brak", "Zależne od osoby", "100+ integracji"],
                   ["Przeniesienie numeru", "Tak (do 5 dni)", "Tak", "Nie dotyczy", "Tak"],
                   ["RODO / UE", "Tak (serwery Frankfurt)", "Zależne", "Tak", "Tak"],
-                  ["SMS/WhatsApp", "Tak", "Nie", "Nie", "Tak (dodatkowo)"],
+                  ["SMS", "Tak", "Nie", "Nie", "Tak (dodatkowo)"],
                   ["Własny prompt AI", "Tak", "Nie", "Nie", "Nie"],
                 ].map(([feature, witaline, ivr, rec, ct]) => (
                   <tr key={feature} className="border-b border-zinc-100 hover:bg-zinc-50/50 transition">

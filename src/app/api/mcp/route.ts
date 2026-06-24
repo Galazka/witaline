@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { sendWhatsApp } from "@/lib/twilio-whatsapp";
 
 import { setPendingTransfer } from "@/lib/transfer-store";
 import { getActiveCallSids } from "@/lib/active-call-store";
@@ -27,7 +26,6 @@ async function checkTrial(businessId: string): Promise<boolean> {
 const TOOLS = [
   { name: "business_lookup", description: "Wyszukaj firme po nazwie lub numerze wewnetrznym", inputSchema: { type: "object", properties: { query: { type: "string", description: "Nazwa firmy lub numer wewnetrzny (DTMF)" } }, required: ["query"] } },
   { name: "save_lead", description: "Zapisz lead/wiadomosc od klienta", inputSchema: { type: "object", properties: { name: { type: "string", description: "Imie i nazwisko klienta" }, phone: { type: "string", description: "Numer telefonu klienta" }, message: { type: "string", description: "Tresc wiadomosci" }, business_id: { type: "string", description: "ID firmy (z dynamic_variables)" } }, required: ["name", "phone"] } },
-  { name: "send_whatsapp", description: "Wyslij wiadomosc WhatsApp", inputSchema: { type: "object", properties: { phone: { type: "string", description: "Numer telefonu" }, message: { type: "string", description: "Tresc wiadomosci" } }, required: ["phone"] } },
   { name: "check_availability", description: "Sprawdz dostepnosc terminow", inputSchema: { type: "object", properties: { business_id: { type: "string", description: "ID firmy" }, date: { type: "string", description: "Data w formacie YYYY-MM-DD" } }, required: ["business_id", "date"] } },
   { name: "create_reservation", description: "Utworz rezerwacje/spotkanie", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
   { name: "get_services", description: "Pobierz liste uslug firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
@@ -106,16 +104,6 @@ export async function POST(request: NextRequest) {
           created_at: new Date().toISOString()
         }).select().single();
         result = JSON.stringify({ ok: !error, lead: error ? null : data, error: error?.message });
-      }
-      else if (toolName === "send_whatsapp") {
-        const phone = args.phone || "";
-        const message = args.message || "Wiadomosc z WitaLine";
-        try {
-          const waResult = await sendWhatsApp(phone, message, undefined, undefined, undefined);
-          result = JSON.stringify({ ok: waResult.success, sid: waResult.twilioSid || null, error: waResult.error || null });
-        } catch (e) {
-          result = JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) });
-        }
       }
       else if (toolName === "get_services") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;

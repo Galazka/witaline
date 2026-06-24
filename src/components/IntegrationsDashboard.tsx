@@ -44,7 +44,6 @@ const API_ENDPOINTS = [
   { method: "POST", path: "/api/v1/leads", desc: "Utwórz lead" },
   { method: "GET", path: "/api/v1/business", desc: "Profil firmy i statystyki" },
   { method: "POST", path: "/api/v1/sms", desc: "Wyślij SMS" },
-  { method: "POST", path: "/api/v1/whatsapp", desc: "Wyślij WhatsApp" },
   { method: "POST", path: "/api/v1/trigger-call", desc: "Zainicjuj rozmowę AI" },
 ];
 
@@ -53,11 +52,10 @@ const BOT_CAPABILITIES = [
   { icon: "📅", title: "Rezerwacje i kalendarz", desc: "Sprawdza dostępność w Google Calendar i umawia wizyty bez angażowania człowieka." },
   { icon: "📋", title: "Zbieranie leadów", desc: "Zapisuje dane kontaktowe, kwalifikuje leady i wysyła powiadomienie na Slack/email." },
   { icon: "🏷️", title: "Kategoryzacja rozmów", desc: "Klasyfikuje każdą rozmowę: zamówienie, oferta, pytanie, rezerwacja, spam." },
-  { icon: "📊", title: "Generowanie ofert", desc: "Może wysłać ofertę cenową SMS-em lub WhatsApp na podstawie rozmowy." },
+  { icon: "📊", title: "Generowanie ofert", desc: "Może wysłać ofertę cenową SMS-em na podstawie rozmowy." },
   { icon: "🔀", title: "Transfer do człowieka", desc: "Jeśli sobie nie radzi lub klient o to poprosi — przekazuje do konsultanta." },
   { icon: "⭐", title: "Ocena jakości", desc: "Każda rozmowa jest oceniana (1-10) przez AI pod kątem profesjonalizmu i skuteczności." },
   { icon: "📝", title: "Transkrypcja i podsumowanie", desc: "Zapisuje pełną transkrypcję + AI-generowane podsumowanie po każdej rozmowie." },
-  { icon: "💬", title: "WhatsApp Continuity", desc: "Po rozmowie wysyła podsumowanie, link do ankiety lub ofertę przez WhatsApp." },
   { icon: "🔗", title: "Integracja z CRM", desc: "HubSpot, Pipedrive, Livespace — automatyczne logowanie rozmów i aktualizacja kontaktów." },
 ];
 
@@ -66,7 +64,6 @@ const WEBHOOK_EVENTS = [
   { event: "lead.created", desc: "Nowy lead zapisany przez AI podczas rozmowy" },
   { event: "reservation.created", desc: "Nowa rezerwacja w kalendarzu" },
   { event: "sms.sent", desc: "SMS wysłany przez AI lub automat" },
-  { event: "whatsapp.sent", desc: "Wiadomość WhatsApp wysłana" },
 ];
 
 export default function IntegrationsDashboard({ businessId }: Props) {
@@ -142,7 +139,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-                <span>Jeśli potrzebne — sprawdza kalendarz, zapisuje lead, wysyła ofertę SMS/WhatsApp</span>
+                <span>Jeśli potrzebne — sprawdza kalendarz, zapisuje lead, wysyła ofertę SMS</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
@@ -150,7 +147,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">5</span>
-                <span>Po rozmowie: transkrypcja, podsumowanie AI, ocena jakości, WhatsApp continuity</span>
+                <span>Po rozmowie: transkrypcja, podsumowanie AI, ocena jakości, podsumowanie SMS</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">6</span>

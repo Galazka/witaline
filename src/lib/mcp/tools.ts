@@ -67,29 +67,6 @@ export const TOOL_DEFINITIONS: ToolDef[] = [
     },
   },
   {
-    name: "send_whatsapp",
-    description:
-      "Wysyla wiadomosc WhatsApp do klienta. Uzyj gdy klient wyrazil zgode na kontakt przez WhatsApp.",
-    inputSchema: {
-      phone: z.string().describe("Numer telefonu klienta z kierunkowym"),
-      message: z.string().optional().describe("Tresc wiadomosci"),
-      template: z
-        .enum(["booking", "order", "offer", "payment_reminder", "default"])
-        .optional()
-        .describe("Szablon wiadomosci"),
-      name: z.string().optional().describe("Imie klienta"),
-      date: z.string().optional(),
-      time: z.string().optional(),
-      service: z.string().optional(),
-      summary: z.string().optional(),
-      plan_name: z.string().optional(),
-      price: z.string().optional(),
-      payment_link: z.string().optional(),
-      amount: z.string().optional(),
-      business_id: z.string().optional(),
-    },
-  },
-  {
     name: "transfer_to_human",
     description:
       "Przekazuje polaczenie do czlowieka/konsultanta firmy. PO UDANYM PRZEKAZANIU KONIECZNIE zakoncz rozmowe (end_call) - konsultant przejmie polaczenie automatycznie.",

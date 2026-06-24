@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatPrice, calculateSelfServicePrice, calculateElasticPrice, ELASTIC_TIERS, CONFIG, convertPrice, CURRENCY_SYMBOLS, formatPriceCurrency, formatPriceMin, type SelfServiceConfig, type Currency } from "@/lib/pricing";
+import { SMS_PACKAGES, getSmsPriceNettoForRate, getFreeSmsForRate } from "@/lib/sms-pricing";
 import type { Locale } from "@/lib/i18n";
 
 function CheckIcon() {
@@ -302,14 +303,19 @@ export default function PricingSection({
               <h4 className="text-sm font-semibold text-zinc-900 mb-4">
                 {locale === "pl" ? "Cena za wiadomość" : "Per message"}
               </h4>
-              <div className="flex items-baseline gap-2 mb-4">
+              <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-3xl font-bold text-brand-500 font-display">
-                  {formatPriceLocal(0.50, currency)}
+                  {formatPriceLocal(SMS_PACKAGES[0].pricePerSmsPLN, currency)}
                 </span>
                 <span className="text-sm text-zinc-400">
-                  /{locale === "pl" ? "SMS" : "msg"} {tr.netto}
+                  /{locale === "pl" ? "SMS" : "msg"} {tr.brutto}
                 </span>
               </div>
+              <p className="text-[10px] text-zinc-400 mb-4">
+                {locale === "pl"
+                  ? "Cena zależy od Twojej stawki za minutę. Niższa stawka = niższa cena SMS i więcej darmowych wiadomości."
+                  : "Price depends on your per-minute rate. Lower rate = cheaper SMS and more free messages."}
+              </p>
               <ul className="space-y-2 text-sm text-zinc-600">
                 <li className="flex items-start gap-2">
                   <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
@@ -332,28 +338,22 @@ export default function PricingSection({
                 {locale === "pl" ? "Pakiety SMS" : "SMS Packages"}
               </h4>
               <div className="space-y-3">
-                {[50, 100, 200, 500, 1000].map((count) => {
-                  const pkgPrice = count <= 1000
-                    ? [25, 45, 80, 175, 300][[50, 100, 200, 500, 1000].indexOf(count)]
-                    : count * 0.50;
-                  const perSms = pkgPrice / count;
-                  return (
-                    <div key={count} className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 rounded-xl">
-                      <div>
-                        <span className="text-sm font-semibold text-zinc-800">{count}</span>
-                        <span className="text-xs text-zinc-400 ml-1">
-                          {locale === "pl" ? "SMS" : "msgs"}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-bold text-brand-500">{formatPriceLocal(pkgPrice, currency)}</span>
-                        <span className="text-[10px] text-zinc-400 ml-1">
-                          ({formatPriceLocal(perSms, currency)}/{locale === "pl" ? "sms" : "msg"})
-                        </span>
-                      </div>
+                {SMS_PACKAGES.map((pkg) => (
+                  <div key={pkg.smsCount} className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 rounded-xl">
+                    <div>
+                      <span className="text-sm font-semibold text-zinc-800">{pkg.smsCount}</span>
+                      <span className="text-xs text-zinc-400 ml-1">
+                        {locale === "pl" ? "SMS" : "msgs"}
+                      </span>
                     </div>
-                  );
-                })}
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-brand-500">{formatPriceLocal(pkg.clientPricePLN, currency)}</span>
+                      <span className="text-[10px] text-zinc-400 ml-1">
+                        ({formatPriceLocal(pkg.pricePerSmsPLN, currency)}/{locale === "pl" ? "sms" : "msg"})
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
               <p className="text-[10px] text-zinc-400 mt-4 text-center">
                 {locale === "pl"
@@ -363,65 +363,6 @@ export default function PricingSection({
             </div>
           </div>
 
-          {/* ── WhatsApp Pricing Section ─────────────────────────────── */}
-          <div className="grid md:grid-cols-2 gap-6 mt-6">
-            {/* WhatsApp Per-Message */}
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                <h4 className="text-sm font-semibold text-zinc-900">
-                  {locale === "pl" ? "WhatsApp Business" : "WhatsApp Business"}
-                </h4>
-              </div>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-brand-500 font-display">
-                  {formatPriceLocal(0.54, currency)}
-                </span>
-                <span className="text-sm text-zinc-400">
-                  /{locale === "pl" ? "wiad." : "msg"} {tr.netto}
-                </span>
-              </div>
-              <p className="text-[10px] text-zinc-400">
-                {locale === "pl"
-                  ? "Cena może się różnić w zależności od kraju docelowego (stawki Meta)."
-                  : "Price may vary by destination country (Meta rates)."}
-              </p>
-            </div>
-
-            {/* WhatsApp Packages */}
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-              <h4 className="text-sm font-semibold text-zinc-900 mb-4">
-                {locale === "pl" ? "Pakiety WhatsApp" : "WhatsApp Packages"}
-              </h4>
-              <div className="space-y-3">
-                {[50, 100, 200, 500].map((count) => {
-                  const pkgPrice = [30, 55, 100, 220][[50, 100, 200, 500].indexOf(count)];
-                  const perMsg = pkgPrice / count;
-                  return (
-                    <div key={count} className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 rounded-xl">
-                      <div>
-                        <span className="text-sm font-semibold text-zinc-800">{count}</span>
-                        <span className="text-xs text-zinc-400 ml-1">
-                          {locale === "pl" ? "wiad." : "msgs"}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-bold text-brand-500">{formatPriceLocal(pkgPrice, currency)}</span>
-                        <span className="text-[10px] text-zinc-400 ml-1">
-                          ({formatPriceLocal(perMsg, currency)}/{locale === "pl" ? "wiad." : "msg"})
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-[10px] text-zinc-400 mt-4 text-center">
-                {locale === "pl"
-                  ? "WhatsApp Continuity — automatyczne wiadomości po rozmowie (za zgodą rozmówcy)."
-                  : "WhatsApp Continuity — auto-messages after calls (with caller consent)."}
-              </p>
-            </div>
-          </div>
         </div>
 
         {tab === "enterprise" && <EnterpriseSection locale={locale} tr={tr} currency={currency} />}
