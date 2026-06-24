@@ -44,6 +44,8 @@ export const plans: Record<string, PlanConfig> = {
   lux: { label: "Lux", value: "lux", price: 599, pricePLN: "599 PLN", minutes: 800, overagePerToken: 0.0008, monthlyTokens: 800000, monthlyVoiceMinutes: 800, maxConsultants: 3, features: [] },
   enterprise: { label: "Enterprise", value: "enterprise", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 3, features: [] },
   self_service: { label: "Self-Service", value: "self_service", price: 0, pricePLN: "0 PLN", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 1, features: [] },
+  elastic_0: { label: "Elastyczny", value: "elastic_0", price: 0, pricePLN: "od 0,85 PLN/min", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 99, features: [] },
+  enterprise_2000: { label: "Enterprise", value: "enterprise_2000", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 99, features: [] },
 };
 
 export const INTERNAL_COST_PER_MIN = 0.65;
@@ -112,6 +114,24 @@ export function calculateCost(durationSeconds: number, planKey: string): number 
 }
 
 export function getPlanConfig(planKey: string) {
+  // First check if planKey exists directly in plans (for elastic_0, enterprise_2000, etc.)
+  const directPlan = plans[planKey];
+  if (directPlan) {
+    return {
+      ...directPlan,
+      name: directPlan.label,
+      planId: planKey,
+      price: directPlan.price,
+      pricePLN: directPlan.pricePLN,
+      pricePerMonth: directPlan.price,
+      minutes: directPlan.minutes,
+      monthlyVoiceMinutes: directPlan.monthlyVoiceMinutes,
+      monthlyTokens: directPlan.monthlyTokens,
+      maxConsultants: directPlan.maxConsultants,
+      overagePerToken: directPlan.overagePerToken,
+      features: directPlan.features,
+    };
+  }
   const normalized = planKey.toUpperCase().replace(/_?(\d+).*/, "").trim();
   const plan = Object.keys(PLANS).find(k => k === normalized);
   if (!plan || !PLANS[plan as keyof typeof PLANS]) {

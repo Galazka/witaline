@@ -76,11 +76,27 @@ export async function GET(request: Request) {
   // 4. SMS logs
   let smsQuery = supabaseAdmin
     .from("sms_logs")
-    .select("business_id, id")
+    .select("business_id, id, created_at")
     .gte("created_at", fromStr)
     .lte("created_at", toStr + "T23:59:59");
   if (businessId) smsQuery = smsQuery.eq("business_id", businessId);
   const { data: smsLogs } = await smsQuery;
+
+  // 4b. WhatsApp logs
+  let waQuery = supabaseAdmin
+    .from("wa_logs")
+    .select("business_id, id, created_at")
+    .gte("created_at", fromStr)
+    .lte("created_at", toStr + "T23:59:59");
+  if (businessId) waQuery = waQuery.eq("business_id", businessId);
+  const { data: waLogs } = await waQuery;
+
+  // WhatsApp count map (aggregate, not per-call)
+  const waCountMap = new Map<string, number>();
+  for (const log of waLogs || []) {
+    const bid = log.business_id || "unknown";
+    waCountMap.set(bid, (waCountMap.get(bid) || 0) + 1);
+  }
 
   // 5. Cost items (own costs)
   const { data: costItems } = await supabaseAdmin
@@ -124,10 +140,10 @@ function buildCallMap(logs: typeof callLogs) {
     smsCountMap.set(bid, (smsCountMap.get(bid) || 0) + 1);
   }
 
-  // Include ALL businesses + any that have calls
+  // Include ALL businesses + any that have calls/sms/wa
   const allBizIds = new Set<string>();
   for (const b of businesses || []) allBizIds.add(b.id);
-  for (const bid of [...callMap.keys(), ...smsCountMap.keys()]) allBizIds.add(bid);
+  for (const bid of [...callMap.keys(), ...smsCountMap.keys(), ...waCountMap.keys()]) allBizIds.add(bid);
   if (businessId) allBizIds.add(businessId);
 
   const daysInRange = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
@@ -140,9 +156,11 @@ function buildCallMap(logs: typeof callLogs) {
     const callData = callMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 };
     const prevCallData = prevCallMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 };
     const smsCount = smsCountMap.get(bid) || 0;
+    const waCount = waCountMap.get(bid) || 0;
     const costSms = smsCount * COST_SMS_PER_UNIT;
+    const costWa = waCount * COST_SMS_PER_UNIT; // WhatsApp uses same pricing as SMS
     const costFromLogs = callData.costPln;
-    const totalCost = costFromLogs > 0 ? costFromLogs : Math.round((callData.costElevenlabs + callData.costTwilio + callData.costOpenrouter + costSms) * 100) / 100;
+    const totalCost = costFromLogs > 0 ? costFromLogs : Math.round((callData.costElevenlabs + callData.costTwilio + callData.costOpenrouter + costSms + costWa) * 100) / 100;
     const prevCostFromLogs = prevCallData.costPln;
     const prevTotalCost = prevCostFromLogs > 0 ? prevCostFromLogs : Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
 
@@ -163,6 +181,8 @@ function buildCallMap(logs: typeof callLogs) {
       costTwilio: Math.round(callData.costTwilio * 100) / 100,
       costOpenrouter: Math.round(callData.costOpenrouter * 100) / 100,
       costSms: Math.round(costSms * 100) / 100,
+      waCount,
+      costWa: Math.round(costWa * 100) / 100,
       totalCost,
       revenue: Math.round(revenue * 100) / 100,
       customRevenue: bizInfo.customRevenue,
@@ -203,11 +223,18 @@ function buildCallMap(logs: typeof callLogs) {
     };
   });
 
+  const smsTotal = smsLogs?.length || 0;
+  const waTotal = waLogs?.length || 0;
+
   return NextResponse.json({
     businesses: result,
     own_costs: ownCostsSummary,
     cost_items: costItems || [],
     call_logs: callLogDetails,
+    sms_total: smsTotal,
+    wa_total: waTotal,
+    cost_sms_total: Math.round(smsTotal * COST_SMS_PER_UNIT * 100) / 100,
+    cost_wa_total: Math.round(waTotal * COST_SMS_PER_UNIT * 100) / 100,
   });
 }
 

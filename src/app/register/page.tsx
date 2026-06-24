@@ -237,12 +237,12 @@ if (done) return (
           {/* STEP 1: Konto */}
           {step === 1 && (
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 mb-5">Dane do logowania</h2>
+              <h2 className="text-lg font-semibold text-white mb-5">Dane do logowania</h2>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="twoj@email.pl" className={inputClass} /></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="twoj@email.pl" className={inputClass} /></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Haslo</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 znakow" className={inputClass} /></div>
-                  <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Powtorz haslo</label><input type="password" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} placeholder="Wpisz ponownie" className={inputClass} />{password && passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500 mt-1">Hasla nie sa identyczne</p>}</div>
+                  <div><label className="block text-sm font-medium text-white/80 mb-1.5">Haslo</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 znakow" className={inputClass} /></div>
+                  <div><label className="block text-sm font-medium text-white/80 mb-1.5">Powtorz haslo</label><input type="password" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} placeholder="Wpisz ponownie" className={inputClass} />{password && passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-400 mt-1">Hasla nie sa identyczne</p>}</div>
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
@@ -255,11 +255,11 @@ if (done) return (
           {/* STEP 2: Firma */}
           {step === 2 && (
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 mb-5">Dane firmy</h2>
+              <h2 className="text-lg font-semibold text-white mb-5">Dane firmy</h2>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Nazwa firmy <span className="text-red-400">*</span></label><input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="np. Pizzeria Napoli" className={inputClass} /></div>
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Strona www</label><input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://twojafirma.pl" className={inputClass} /><p className="text-xs text-zinc-400 mt-1">AI zeskanuje ja, by poznac Twoja oferte</p></div>
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Telefon firmowy</label><input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+48 123 456 789" className={inputClass} /></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Nazwa firmy <span className="text-red-400">*</span></label><input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="np. Pizzeria Napoli" className={inputClass} /></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Strona www</label><input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://twojafirma.pl" className={inputClass} /><p className="text-xs text-white/50 mt-1">AI zeskanuje ja, by poznac Twoja oferte</p></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Telefon firmowy</label><input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+48 123 456 789" className={inputClass} /></div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button onClick={() => setStep(1)} className={`flex-1 ${btnSecondary}`}>← Wstecz</button>
@@ -271,21 +271,21 @@ if (done) return (
           {/* STEP 3: Branza */}
           {step === 3 && (
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 mb-2">Wybierz branze</h2>
-              <p className="text-sm text-zinc-500 mb-5">Dzieki temu skonfigurujemy asystenta pod Twoje potrzeby</p>
+              <h2 className="text-lg font-semibold text-white mb-2">Wybierz branze</h2>
+              <p className="text-sm text-white/60 mb-5">Dzieki temu skonfigurujemy asystenta pod Twoje potrzeby</p>
               <div className="grid grid-cols-3 gap-2.5 mb-5">
                 {Object.entries(templates).map(([key, tpl]) => (
-                  <button key={key} onClick={() => setIndustry(key)} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === key ? "border-brand-500 bg-brand-50" : "border-zinc-200 hover:border-brand-200"}`}>
+                  <button key={key} onClick={() => setIndustry(key)} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === key ? "border-brand-500 bg-brand-500/20" : "border-white/15 hover:border-brand-300 bg-white/5"}`}>
                     <span className="text-2xl">{tpl.icon}</span>
-                    <p className="text-xs font-medium text-zinc-900 mt-1 leading-tight">{tpl.name}</p>
+                    <p className="text-xs font-medium text-white mt-1 leading-tight">{tpl.name}</p>
                   </button>
                 ))}
-                <button onClick={() => setIndustry("custom")} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === "custom" ? "border-brand-500 bg-brand-50" : "border-zinc-200 hover:border-brand-200"}`}>
+                <button onClick={() => setIndustry("custom")} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === "custom" ? "border-brand-500 bg-brand-500/20" : "border-white/15 hover:border-brand-300 bg-white/5"}`}>
                   <span className="text-2xl">✏️</span>
-                  <p className="text-xs font-medium text-zinc-900 mt-1">Inna</p>
+                  <p className="text-xs font-medium text-white mt-1">Inna</p>
                 </button>
               </div>
-              <label className="flex items-start gap-2 text-sm text-zinc-600 mb-6 cursor-pointer">
+              <label className="flex items-start gap-2 text-sm text-white/70 mb-6 cursor-pointer">
                 <input type="checkbox" checked={policy} onChange={e => setPolicy(e.target.checked)} className="mt-0.5 accent-brand-400" />
                 <span>Akceptuje <Link href="/regulamin" className="text-brand-400 underline">regulamin</Link> i <Link href="/polityka-prywatnosci" className="text-brand-400 underline">polityke prywatnosci</Link></span>
               </label>

@@ -20,7 +20,7 @@ export interface Business {
   owner_uid: string;
   name: string;
   twilio_number: string;
-  current_plan: "start_100" | "pro_500" | "enterprise_2000";
+  current_plan: "start_100" | "pro_500" | "enterprise" | "enterprise_2000" | "elastic_0" | "start" | "pro" | "growth" | "lux" | "self_service";
   minutes_used_this_week: number;
   system_prompt: string;
   menu_catalog: Record<string, unknown>;

@@ -95,8 +95,8 @@ export const TOOL_DEFINITIONS: ToolDef[] = [
       "Przekazuje polaczenie do czlowieka/konsultanta firmy, gdy klient wyraznie poprosi o rozmowe z osoba. Uzyj tylko wtedy, gdy klient powiedzial np. poprosze czlowieka, konsultant, nie bot, polacz z wlascicielem.",
     inputSchema: {
       business_id: z.string().describe("ID firmy z dynamic_vars.business_id"),
-      caller_phone: z.string().describe("Numer telefonu klienta z kierunkowym"),
-      to_number: z.string().describe("Numer Twilio na ktory klient dzwonil"),
+      caller_phone: z.string().optional().describe("Numer telefonu klienta z kierunkowym (opcjonalny)"),
+      to_number: z.string().optional().describe("Numer Twilio na ktory klient dzwonil (opcjonalny)"),
       reason: z.string().optional().describe("Powod przekazania"),
     },
   },

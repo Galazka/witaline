@@ -116,6 +116,10 @@ export default function AdminDailyCosts() {
           internal_cost_pln: Number(l.internal_cost_pln) || 0.65 * ((Number(l.duration_seconds) || 0) / 60),
         }));
         setCallLogs(logs);
+        setSmsTotal(json.sms_total || 0);
+        setWaTotal(json.wa_total || 0);
+        setCostSmsTotal(json.cost_sms_total || 0);
+        setCostWaTotal(json.cost_wa_total || 0);
       }
     } catch (e) {
       setFetchError("Nie udało się połączyć z API");
@@ -177,6 +181,12 @@ export default function AdminDailyCosts() {
   const totalRevenue = dailyGroups.reduce((s, d) => s + d.totalRevenue, 0);
   const totalProfit = dailyGroups.reduce((s, d) => s + d.profit, 0);
   const totalCalls = callLogs.length;
+
+  // SMS & WhatsApp summary from API
+  const [smsTotal, setSmsTotal] = useState(0);
+  const [waTotal, setWaTotal] = useState(0);
+  const [costSmsTotal, setCostSmsTotal] = useState(0);
+  const [costWaTotal, setCostWaTotal] = useState(0);
 
   // Projections
   const avgProfitPerDay = daysElapsed > 0 ? totalProfit / daysElapsed : 0;
@@ -264,6 +274,20 @@ export default function AdminDailyCosts() {
             {projectedProfit >= 0 ? "+" : ""}{fmtPLN(projectedProfit)}
           </p>
           <p className="text-[10px] text-zinc-400">{projectedRevenue > 0 ? fmtPct((projectedProfit / projectedRevenue) * 100) : "—"}</p>
+        </div>
+      </div>
+
+      {/* SMS & WhatsApp KPI */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">SMS wysłane</p>
+          <p className="text-lg font-bold text-zinc-900">{smsTotal}</p>
+          <p className="text-[10px] text-zinc-400">koszt: {fmtPLN(costSmsTotal)}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wider">WhatsApp wysłane</p>
+          <p className="text-lg font-bold text-zinc-900">{waTotal}</p>
+          <p className="text-[10px] text-zinc-400">koszt: {fmtPLN(costWaTotal)}</p>
         </div>
       </div>
 

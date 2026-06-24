@@ -95,6 +95,13 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Twilio Subaccounts**: obsługa wielodzierżawców, SID podaje się w `TWILIO_ACCOUNT_SID` dla każdego biznesu (konfiguracja w panelu admina)
 - **Railway healthcheck**: ✅ resolved — port hardcoded to 3000 in start script, Railway proxy port set to 3000
 
+## Recent Changes (June 24, 2026)
+- **Registration fix**: text colors on dark background (changed `text-zinc-900`/`text-zinc-700` → `text-white`/`text-white/80`) w `src/app/(marketing)/register/page.tsx`
+- **Business categories**: added 15 new kategorii (Adwokat, Kancelaria, Restauracja, Hotel, etc.) w `src/lib/templates.ts`
+- **Dashboard crash fix**: added `elastic_0` and `enterprise_2000` to `plans` object w `src/lib/pricing.ts` + `getPlanConfig()` checks direct plan key match first
+- **Dashboard error.tsx**: improved UX — detail toggle, refresh link, error message display
+- **MCP tools via ElevenLabs UI**: agent ma już przypisane narzędzia MCP (widoczne w dashboardzie ElevenLabs) — `transfer_to_human` z `caller_phone: optional`
+
 ## To Do
 - [x] **Run `RUN-MIGRATION.sql`** w Supabase SQL Editor ✅
 - [x] **Przypisz webhook do agenta** w ElevenLabs dashboard ✅
@@ -118,8 +125,12 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - [x] **CI/CD GitHub Actions** — build + typecheck ✅
 - [x] **Sentry User Feedback widget** ✅
 - [x] **README** — pełna dokumentacja build/deploy ✅
+- [x] **Registration text colors + categories** ✅
 - [ ] **Test end-to-end**: zadzwoń na +48 732 125 752, sprawdź DB
 - [ ] **Włączyć Language Detection** w agent "Rob" → system tools
+- [ ] **Dashboard**: verify plan key fix (`elastic_0`/`enterprise_2000`)
+- [ ] **Maja system prompt**: zaktualizować w ElevenLabs dashboard (profesjonalny ton + szczegóły MCP)
+- [ ] **Admin sync-costs**: upewnić się że działa z nowymi rozmowami
 
 ## OpenClaw / Hermes Integration
 
