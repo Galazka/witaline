@@ -132,6 +132,10 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - [x] **Maja system prompt** — zaktualizowany przez ElevenLabs API (2124 znaki, wielojęzyczny, WitaLine-first, NIGDY nie pytaj o numer) ✅
 - [x] **Admin sync-costs**: dodany `deleted_at` filter, wypchnięte na main ✅
 - [x] **AccountBalance**: try/catch dla brakujących kolumn wa_* + migracja 047 ✅
+- [x] **Dashboard blank fix**: IntersectionObserver useEffect dodana zależność `business` — ref był nullem na mount ✅
+- [x] **Transfer fix**: usunięty broken Twilio REST redirect (nie działał na aktywnej rozmowie ElevenLabs). Agent po `transfer_to_human` KONIECZNIE kończy rozmowę → Twilio Redirect → transfer-router łączy z konsultantem przez `<Enqueue>` + `<Dial>` ✅
+- [x] **Maja prompt aktualizacja**: dodana instrukcja "PO UDANYM PRZEKAZANIU KONIECZNIE zakoncz rozmowe" + sekcja JAK DZIALA TRANSFER (2485 znaków) ✅
+- [x] **conversation-store.ts**: in-memory store (callSid → convId) dla potencjalnego ElevenLabs transfer API ✅
 
 ## OpenClaw / Hermes Integration
 
