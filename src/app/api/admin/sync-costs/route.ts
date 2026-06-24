@@ -25,6 +25,7 @@ export async function POST() {
     .from("call_logs")
     .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at")
     .or("total_cost.is.null,total_cost.eq.0")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(500);
 
