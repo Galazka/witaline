@@ -24,23 +24,27 @@ export default function AccountBalance({
   const supabase = createClient();
 
   const fetchData = async () => {
-    const { data } = await supabase
-      .from("businesses")
-      .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, wa_limit, wa_used, wa_extra_purchased, total_spent")
-      .eq("id", businessId)
-      .single();
-    if (data) {
-      setBalance(parseFloat(data.prepaid_minutes || "0"));
-      setSmsData({
-        used: data.sms_used || 0,
-        limit: data.sms_limit || 0,
-        extra: data.sms_extra_purchased || 0,
-        remaining: getSmsRemaining(data),
-        waUsed: data.wa_used || 0,
-        waLimit: data.wa_limit || 0,
-        waExtra: data.wa_extra_purchased || 0,
-        waRemaining: getWaRemaining(data),
-      });
+    try {
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, total_spent, wa_limit, wa_used, wa_extra_purchased")
+        .eq("id", businessId)
+        .maybeSingle();
+      if (data && !error) {
+        setBalance(parseFloat(data.prepaid_minutes || "0"));
+        setSmsData({
+          used: (data as any).sms_used || 0,
+          limit: (data as any).sms_limit || 0,
+          extra: (data as any).sms_extra_purchased || 0,
+          remaining: getSmsRemaining(data as any),
+          waUsed: (data as any).wa_used || 0,
+          waLimit: (data as any).wa_limit || 0,
+          waExtra: (data as any).wa_extra_purchased || 0,
+          waRemaining: getWaRemaining(data as any),
+        });
+      }
+    } catch (e) {
+      console.warn("[AccountBalance] fetch error:", e);
     }
     setLoading(false);
   };
