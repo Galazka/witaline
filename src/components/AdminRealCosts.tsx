@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getExchangeRates, convertPln, type Rates } from "@/lib/exchange-rates";
 
 /* ── Types ── */
 
@@ -43,9 +44,11 @@ interface OwnCostsSummary {
   by_category: Record<string, { count: number; total: number; monthly: number }>;
 }
 
+type ViewCurrency = "PLN" | "EUR" | "USD";
+
 /* ── Helpers ── */
 
-function fmtPLN(v: number): string {
+function fmt(v: number): string {
   const abs = Math.abs(v);
   const s = abs.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return v < 0 ? `-${s} zl` : `${s} zl`;
@@ -112,9 +115,31 @@ export default function AdminRealCosts() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
   const [editItem, setEditItem] = useState<CostItem | null>(null);
+  const [currency, setCurrency] = useState<ViewCurrency>("PLN");
+  const [rates, setRates] = useState<Rates | null>(null);
+  const [ratesDate, setRatesDate] = useState<string>("");
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItem, setNewItem] = useState({ name: "", amount: 0, frequency: "monthly", category: "other", due_date: "", is_paid: false, notes: "" });
   const [callLogs, setCallLogs] = useState<Array<{ id: string; business_id: string; duration_seconds: number; cost_pln: number; internal_cost_pln: number; from_number: string; created_at: string; business_name: string }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getExchangeRates().then((r) => {
+      if (cancelled) return;
+      setRates(r);
+      const d = new Date(r.fetchedAt);
+      setRatesDate(d.toLocaleDateString("pl-PL"));
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const fmt = (plnValue: number): string => {
+    if (currency === "PLN") return fmtPLN(plnValue);
+    const converted = convertPln(plnValue, currency, rates || undefined);
+    const symbols: Record<string, string> = { PLN: "zł", EUR: "€", USD: "$" };
+    const fmt2 = converted.toFixed(2).replace(".", ",");
+    return `${fmt2} ${symbols[currency]}`;
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -256,6 +281,20 @@ export default function AdminRealCosts() {
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
               className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
           </div>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as ViewCurrency)}
+            className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-brand-400"
+            title="Wyświetl w">
+            <option value="PLN">PLN (zł)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="USD">USD ($)</option>
+          </select>
+          {rates && (
+            <span className="text-[10px] text-zinc-400" title={`Kurs NBP z ${ratesDate}`}>
+              1€ = {rates.eurPln.toFixed(2)} zł | 1$ = {rates.usdPln.toFixed(2)} zł
+            </span>
+          )}
           <button onClick={fetchData}
             className="px-3 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
             Odswiez
@@ -292,8 +331,8 @@ export default function AdminRealCosts() {
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug</p>
-          <p className="text-xl font-bold text-red-500 mt-1">{fmtPLN(totalCost)}</p>
-          <p className="text-[10px] text-zinc-400">w tym centrala: {fmtPLN(centralaCost)}</p>
+          <p className="text-xl font-bold text-red-500 mt-1">{fmt(totalCost)}</p>
+          <p className="text-[10px] text-zinc-400">w tym centrala: {fmt(centralaCost)}</p>
           {comparePrev && prevTotalCost_ > 0 && (
             <p className={`text-[10px] mt-0.5 ${totalCost >= prevTotalCost_ ? "text-red-400" : "text-green-500"}`}>
               {totalCost >= prevTotalCost_ ? "+" : ""}{((totalCost - prevTotalCost_) / prevTotalCost_ * 100).toFixed(0)}% vs poprz.
@@ -302,21 +341,21 @@ export default function AdminRealCosts() {
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszty wlasne</p>
-          <p className="text-xl font-bold text-amber-500 mt-1">{fmtPLN(totalOwnCosts)}</p>
+          <p className="text-xl font-bold text-amber-500 mt-1">{fmt(totalOwnCosts)}</p>
           <p className="text-[10px] text-zinc-400 mt-0.5">{ownCostsSummary?.total_items || 0} pozycji</p>
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Lacznie koszty</p>
-          <p className="text-xl font-bold text-red-600 mt-1">{fmtPLN(totalAllCosts)}</p>
+          <p className="text-xl font-bold text-red-600 mt-1">{fmt(totalAllCosts)}</p>
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod</p>
-          <p className="text-xl font-bold text-brand-500 mt-1">{fmtPLN(totalRevenue)}</p>
+          <p className="text-xl font-bold text-brand-500 mt-1">{fmt(totalRevenue)}</p>
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Marza</p>
           <p className={`text-xl font-bold mt-1 ${totalMargin >= 0 ? "text-green-600" : "text-red-500"}`}>
-            {totalMargin >= 0 ? "+" : ""}{fmtPLN(totalMargin)}
+            {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}
           </p>
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
@@ -387,11 +426,11 @@ export default function AdminRealCosts() {
                     </div>
                     <div className="bg-zinc-50 rounded-lg p-3">
                       <p className="text-xs text-zinc-400">Łączny koszt</p>
-                      <p className="text-lg font-bold text-red-500">{fmtPLN(totalCost)}</p>
+                      <p className="text-lg font-bold text-red-500">{fmt(totalCost)}</p>
                     </div>
                     <div className="bg-zinc-50 rounded-lg p-3">
                       <p className="text-xs text-zinc-400">Średnio/min</p>
-                      <p className="text-lg font-bold text-zinc-800">{totalMin > 0 ? fmtPLN(totalCost / totalMin) : "—"}</p>
+                      <p className="text-lg font-bold text-zinc-800">{totalMin > 0 ? fmt(totalCost / totalMin) : "—"}</p>
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -402,7 +441,7 @@ export default function AdminRealCosts() {
                           <span className="text-zinc-400">{group.calls} rozmów</span>
                           <span className="text-zinc-400">{Math.round(group.minutes)} min</span>
                         </div>
-                        <span className="font-medium text-red-500">{fmtPLN(group.cost)}</span>
+                        <span className="font-medium text-red-500">{fmt(group.cost)}</span>
                       </div>
                     ))}
                   </div>
@@ -435,11 +474,11 @@ export default function AdminRealCosts() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-zinc-50 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Miesiecznie</p>
-                <p className="text-lg font-bold text-zinc-800">{fmtPLN(ownCostsSummary?.monthly_total || 0)}</p>
+                <p className="text-lg font-bold text-zinc-800">{fmt(ownCostsSummary?.monthly_total || 0)}</p>
               </div>
               <div className="bg-zinc-50 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Niezaplacone</p>
-                <p className="text-lg font-bold text-red-500">{fmtPLN(ownCostsSummary?.unpaid_total || 0)}</p>
+                <p className="text-lg font-bold text-red-500">{fmt(ownCostsSummary?.unpaid_total || 0)}</p>
               </div>
               <div className="bg-zinc-50 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Pozycji</p>
@@ -457,7 +496,7 @@ export default function AdminRealCosts() {
                 {Object.entries(ownCostsSummary.by_category).map(([cat, info]) => (
                   <div key={cat} className="bg-brand-50 rounded-lg px-3 py-1.5 text-xs">
                     <span className="font-medium text-zinc-700 capitalize">{cat}</span>
-                    <span className="text-zinc-400 ml-2">{fmtPLN((info as any).monthly)}/mies</span>
+                    <span className="text-zinc-400 ml-2">{fmt((info as any).monthly)}/mies</span>
                     <span className="text-zinc-300 ml-1">· {(info as any).count} szt.</span>
                   </div>
                 ))}
@@ -475,7 +514,7 @@ export default function AdminRealCosts() {
                     <div key={item.id} className="flex items-center justify-between text-xs px-3 py-2 bg-amber-50 rounded-lg">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-zinc-700">{item.name}</span>
-                        <span className="text-zinc-400">{fmtPLN(item.amount)}</span>
+                        <span className="text-zinc-400">{fmt(item.amount)}</span>
                         <span className="text-zinc-400">· {freqLabel(item.frequency)}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -524,7 +563,7 @@ export default function AdminRealCosts() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`font-medium ${item.is_paid ? "text-green-500" : "text-zinc-700"}`}>{fmtPLN(item.amount)}</span>
+                      <span className={`font-medium ${item.is_paid ? "text-green-500" : "text-zinc-700"}`}>{fmt(item.amount)}</span>
                       {item.due_date && (
                         <span className="text-zinc-400">{new Date(item.due_date + "T12:00:00").toLocaleDateString("pl-PL", { day: "numeric", month: "short" })}</span>
                       )}
@@ -641,12 +680,12 @@ export default function AdminRealCosts() {
                       <td className="p-3 text-zinc-500 text-xs">{getPlanLabel(b.plan)}</td>
                       <td className="p-3 text-zinc-700">{b.calls}</td>
                       <td className="p-3 text-zinc-700">{b.minutes.toFixed(1)}</td>
-                      <td className="p-3 text-zinc-600">{fmtPLN(b.costElevenlabs)}</td>
-                      <td className="p-3 text-zinc-600">{fmtPLN(b.costTwilio)}</td>
-                      <td className="p-3 text-zinc-600">{fmtPLN(b.costOpenrouter)}</td>
-                      <td className="p-3 text-zinc-600">{fmtPLN(b.costSms)}</td>
-                      <td className="p-3 text-red-600 font-medium">{fmtPLN(b.totalCost)}</td>
-                      <td className="p-3 text-zinc-500">{fmtPLN(stdRevenue)}</td>
+                      <td className="p-3 text-zinc-600">{fmt(b.costElevenlabs)}</td>
+                      <td className="p-3 text-zinc-600">{fmt(b.costTwilio)}</td>
+                      <td className="p-3 text-zinc-600">{fmt(b.costOpenrouter)}</td>
+                      <td className="p-3 text-zinc-600">{fmt(b.costSms)}</td>
+                      <td className="p-3 text-red-600 font-medium">{fmt(b.totalCost)}</td>
+                      <td className="p-3 text-zinc-500">{fmt(stdRevenue)}</td>
                       <td className="p-3">
                         <div className="flex items-center gap-1.5">
                           <input type="number" min={0} max={100} defaultValue={String(discountPct)}
@@ -659,8 +698,8 @@ export default function AdminRealCosts() {
                           <span className="text-[10px] text-zinc-400">%</span>
                         </div>
                       </td>
-                      <td className={`p-3 font-medium ${b.customRevenue !== null ? "text-amber-600" : "text-brand-600"}`}>{fmtPLN(effectiveRevenue)}</td>
-                      <td className={`p-3 font-medium ${marginColor}`}>{margin >= 0 ? "+" : ""}{fmtPLN(margin)}</td>
+                      <td className={`p-3 font-medium ${b.customRevenue !== null ? "text-amber-600" : "text-brand-600"}`}>{fmt(effectiveRevenue)}</td>
+                      <td className={`p-3 font-medium ${marginColor}`}>{margin >= 0 ? "+" : ""}{fmt(margin)}</td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-2 bg-brand-50 rounded-full overflow-hidden">
@@ -684,30 +723,30 @@ export default function AdminRealCosts() {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod (klienci)</p>
-            <p className="text-lg font-bold text-brand-600">{fmtPLN(totalRevenue)}</p>
+            <p className="text-lg font-bold text-brand-600">{fmt(totalRevenue)}</p>
           </div>
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug (klienci)</p>
-            <p className="text-lg font-bold text-red-500">{fmtPLN(clientCost)}</p>
+            <p className="text-lg font-bold text-red-500">{fmt(clientCost)}</p>
           </div>
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt centrali</p>
-            <p className="text-lg font-bold text-amber-600">{fmtPLN(centralaCost)}</p>
+            <p className="text-lg font-bold text-amber-600">{fmt(centralaCost)}</p>
           </div>
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszty wlasne</p>
-            <p className="text-lg font-bold text-amber-500">{fmtPLN(totalOwnCosts)}</p>
+            <p className="text-lg font-bold text-amber-500">{fmt(totalOwnCosts)}</p>
           </div>
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Wynik (klienci)</p>
             <p className={`text-lg font-bold ${totalRevenue - clientCost >= 0 ? "text-green-600" : "text-red-500"}`}>
-              {totalRevenue - clientCost >= 0 ? "+" : ""}{fmtPLN(totalRevenue - clientCost)}
+              {totalRevenue - clientCost >= 0 ? "+" : ""}{fmt(totalRevenue - clientCost)}
             </p>
           </div>
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Wynik calkowity</p>
             <p className={`text-lg font-bold ${totalMargin >= 0 ? "text-green-600" : "text-red-500"}`}>
-              {totalMargin >= 0 ? "+" : ""}{fmtPLN(totalMargin)}
+              {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}
             </p>
           </div>
         </div>
@@ -718,19 +757,19 @@ export default function AdminRealCosts() {
         <div className="flex items-center gap-4">
           <span className="text-zinc-400">Wybrano: <strong className="text-zinc-700">{filtered.length}</strong> firm</span>
           <span className="text-zinc-200">|</span>
-          <span className="text-zinc-400">Uslugi: <strong className="text-red-600">{fmtPLN(totalCost)}</strong></span>
+          <span className="text-zinc-400">Uslugi: <strong className="text-red-600">{fmt(totalCost)}</strong></span>
           <span className="text-zinc-200">|</span>
-      <span className="text-zinc-400">Centrala: <strong className="text-amber-600">{fmtPLN(centralaCost)}</strong></span>
+      <span className="text-zinc-400">Centrala: <strong className="text-amber-600">{fmt(centralaCost)}</strong></span>
       <span className="text-zinc-200">|</span>
-      <span className="text-zinc-400">Klienci: <strong className="text-red-500">{fmtPLN(clientCost)}</strong></span>
+      <span className="text-zinc-400">Klienci: <strong className="text-red-500">{fmt(clientCost)}</strong></span>
       <span className="text-zinc-200">|</span>
-      <span className="text-zinc-400">Wlasne: <strong className="text-amber-600">{fmtPLN(totalOwnCosts)}</strong></span>
+      <span className="text-zinc-400">Wlasne: <strong className="text-amber-600">{fmt(totalOwnCosts)}</strong></span>
           <span className="text-zinc-200">|</span>
-          <span className="text-zinc-400">Lacznie: <strong className="text-red-700">{fmtPLN(totalAllCosts)}</strong></span>
+          <span className="text-zinc-400">Lacznie: <strong className="text-red-700">{fmt(totalAllCosts)}</strong></span>
           <span className="text-zinc-200">|</span>
-          <span className="text-zinc-400">Przychod: <strong className="text-brand-600">{fmtPLN(totalRevenue)}</strong></span>
+          <span className="text-zinc-400">Przychod: <strong className="text-brand-600">{fmt(totalRevenue)}</strong></span>
           <span className="text-zinc-200">|</span>
-          <span className="text-zinc-400">Marza: <strong className={totalMargin >= 0 ? "text-green-600" : "text-red-500"}>{fmtPLN(totalMargin)}</strong></span>
+          <span className="text-zinc-400">Marza: <strong className={totalMargin >= 0 ? "text-green-600" : "text-red-500"}>{fmt(totalMargin)}</strong></span>
         </div>
         <div className="flex items-center gap-2">
           <button

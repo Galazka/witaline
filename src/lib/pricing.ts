@@ -48,7 +48,7 @@ export const plans: Record<string, PlanConfig> = {
   enterprise_2000: { label: "Enterprise", value: "enterprise_2000", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 99, features: [] },
 };
 
-export const INTERNAL_COST_PER_MIN = 0.65;
+export const INTERNAL_COST_PER_MIN = 0.51;
 
 export type Currency = "pln" | "eur" | "usd";
 
