@@ -68,14 +68,11 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 2. ElevenLabs agent rozmawia → może wywołać tool-e przez MCP (business_lookup, save_lead, kalendarz, send_whatsapp, transfer_to_human)
 3. Call ends → ElevenLabs POSTs to /api/elevenlabs/call-completed → saves call_logs, SMS/WhatsApp continuity, notifications
 
-## Pricing (2026-06 — konkurencyjne stawki)
-- Elastic (pakietowy): 1.49 → 0.99 PLN/min (50-5000 min, 5 progów)
-- Start: 199 PLN/mies (250 min)
-- Pro: 249 PLN/mies (300 min)
-- Growth: 399 PLN/mies (600 min) — najpopularniejszy
-- Lux: 599 PLN/mies (800 min)
-- Enterprise: 999 PLN/mies (1500 min)
-- **Model pakietowy**: klient kupuje pakiety minut przez Stripe (one-time), doładowuje w każdej chwili. Minuty potrącane z `prepaid_minutes` w `call-completed`.
+## Pricing (2026-06)
+- **Model elastyczny (pay-as-you-go)**: brak opłat stałych, progresja cenowa:
+  - 0–500 min: 1,20 PLN/min | 501–1000: 1,10 | 1001–2000: 1,00 | 2001–3000: 0,95 | 3001–5000: 0,90 | 5001+: 0,85 PLN/min
+- Klient kupuje pakiety minut przez Stripe (one-time), doładowuje w każdej chwili. Minuty ważne bezterminowo, potrącane z `prepaid_minutes` w `call-completed`.
+- **Stripe**: `/api/stripe/buy-minutes` tworzy sesję `mode:payment` z dynamiczną ceną. Webhook dodaje minuty do salda.
 - **Stripe**: `/api/stripe/buy-minutes` tworzy sesję `mode:payment` z dynamiczną ceną. Webhook dodaje minuty do salda.
 
 ## WhatsApp Continuity
