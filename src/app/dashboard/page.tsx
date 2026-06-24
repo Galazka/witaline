@@ -141,7 +141,7 @@ export default function DashboardPage() {
     <div className="flex-1 flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-zinc-400">{t().dashboard.common.loading}</p>
+        <p className="text-sm text-zinc-400">Ładowanie...</p>
       </div>
     </div>
   );
@@ -195,14 +195,14 @@ export default function DashboardPage() {
       {tab === "overview" && business && (
         <div className="space-y-6 stagger">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <TrendKpiCard title={t().dashboard.overview.today} value={todayCalls.length} icon={<span>📞</span>} color="brand"
+            <TrendKpiCard title="Dzisiaj" value={todayCalls.length} icon={<span>📞</span>} color="brand"
               trend={(() => { const y = new Date(); y.setDate(y.getDate() - 1); const ys = y.toISOString().slice(0, 10); const yCalls = callLogs.filter(l => l.created_at.startsWith(ys)).length; return yCalls > 0 ? Math.round(((todayCalls.length - yCalls) / yCalls) * 100) : 0; })()}
-              trendLabel={t().dashboard.overview.vsYesterday} />
-            <TrendKpiCard title={t().dashboard.overview.pendingReservations} value={pendingReservations} icon={<span>📅</span>} color="amber" />
-            <TrendKpiCard title={t().dashboard.overview.avgRating} value={averageRating} icon={<span>⭐</span>} color="purple" />
-            <TrendKpiCard title={t().dashboard.overview.saved} value={`${Math.floor(totalSeconds / 3600)}h ${Math.floor((totalSeconds % 3600) / 60)}m`} icon={<span>💰</span>} color="brand"
+              trendLabel="vs wczoraj" />
+            <TrendKpiCard title="Oczekujące rezerwacje" value={pendingReservations} icon={<span>📅</span>} color="amber" />
+            <TrendKpiCard title="Średnia ocena" value={averageRating} icon={<span>⭐</span>} color="purple" />
+            <TrendKpiCard title="Zaoszczędzony czas" value={`${Math.floor(totalSeconds / 3600)}h ${Math.floor((totalSeconds % 3600) / 60)}m`} icon={<span>💰</span>} color="brand"
               trend={Math.round((totalCost > 0 ? (totalSeconds / 3600 * 35 - totalCost) / totalCost * 100 : 0))}
-              trendLabel={t().dashboard.overview.roiLabel} />
+              trendLabel="zwrot z inwestycji" />
             <SmsStatusWidget businessId={business.id} />
           </div>
 
@@ -210,8 +210,8 @@ export default function DashboardPage() {
 
           <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900">{t().dashboard.overview.calculatorTitle}</h3>
-              <span className="text-xs text-zinc-400">{t().dashboard.overview.calculatorAsOf}</span>
+              <h3 className="text-sm font-semibold text-zinc-900">Kalkulator kosztów</h3>
+              <span className="text-xs text-zinc-400">koszty od początku okresu</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Wszystkie rozmowy</p><p className="text-xl font-bold text-zinc-900">{callLogs.length}</p></div>
