@@ -122,9 +122,7 @@ function buildCallMap(logs: typeof callLogs) {
       entry.calls += 1;
       entry.costPln += Number(log.internal_cost_pln ?? log.cost_pln) || 0;
 
-      // ElevenLabs — stored in PLN by sync-costs (USD converted)
-      const rawEleven = Number(log.cost_elevenlabs);
-      // ElevenLabs — synced as PLN (USD converted at sync time)
+      // ElevenLabs — stored in PLN by sync-costs (USD converted at sync time)
       const rawEleven = Number(log.cost_elevenlabs);
       entry.costElevenlabs += rawEleven > 0 ? rawEleven : minutes * ELEVENLABS_COST_PER_MIN_PLN;
 

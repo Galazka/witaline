@@ -3,7 +3,6 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import {
   getSmsPricingConfig,
-  DEFAULT_SMS_MARKUP_PERCENT,
   TWILIO_SMS_COST_PLN,
   SMS_PACKAGES,
   formatSmsCost,
@@ -50,7 +49,7 @@ export async function GET() {
       smsPerSegment: TWILIO_SMS_COST_PLN,
     },
     defaults: {
-      smsMarkupPercent: DEFAULT_SMS_MARKUP_PERCENT,
+      smsMarkupPercent: 100,
     },
     businesses: businessList,
   });

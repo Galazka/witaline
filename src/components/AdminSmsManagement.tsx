@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-  SMS_PACKAGES, DEFAULT_SMS_MARKUP_PERCENT,
+  SMS_PACKAGES,
   TWILIO_SMS_COST_PLN, formatSmsCost
 } from "@/lib/sms-pricing";
 
@@ -268,7 +268,7 @@ export default function AdminSmsManagement() {
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-brand-50 rounded-xl p-4 text-center">
                 <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Marża</p>
-                <p className="text-2xl font-bold text-brand-500">{DEFAULT_SMS_MARKUP_PERCENT}%</p>
+                <p className="text-2xl font-bold text-brand-500">{100}%</p>
                 <p className="text-[10px] text-zinc-400">(100% = 2× kosztu Twilio)</p>
               </div>
               <div className="bg-brand-50 rounded-xl p-4 text-center">
@@ -312,7 +312,7 @@ export default function AdminSmsManagement() {
           <div className="bg-zinc-50 rounded-xl p-4 text-xs text-zinc-500 space-y-1">
             <p><strong>Jak działa cennik SMS:</strong></p>
             <p>• Koszt Twilio do Polski: <strong>{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł/SMS</strong> ($0.0457 × kurs ~4.15)</p>
-            <p>• Domyślna marża WitaLine: <strong>{DEFAULT_SMS_MARKUP_PERCENT}%</strong> (klient płaci 0,50 zł/SMS)</p>
+            <p>• Domyślna marża WitaLine: <strong>{100}%</strong> (klient płaci 0,50 zł/SMS)</p>
             <p>• Pakiety SMS są kupowane jednorazowo przez Stripe i dodawane do salda firmy (sms_extra_purchased)</p>
             <p>• Administrator może wyłączyć SMS dla konkretnej firmy lub wszystkich firm naraz</p>
           </div>
