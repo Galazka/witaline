@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import DashboardHeader from "@/components/DashboardHeader";
 import AccountBalance from "@/components/AccountBalance";
@@ -55,11 +55,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(true);
   const [subStatus, setSubStatus] = useState<string>("");
   const [trialEndsAt, setTrialEndsAt] = useState<string>("");
   const [subLoading, setSubLoading] = useState(true);
-  const mainRef = useRef<HTMLDivElement>(null);
   const { setPerms, hasPerm } = useDashboardPerms();
 
   const supabase = createClient();
@@ -79,14 +78,6 @@ export default function DashboardPage() {
         .then(d => { setSubStatus(d.status || ""); setTrialEndsAt(d.trialEndsAt || ""); setSubLoading(false); })
         .catch(() => setSubLoading(false));
     }
-  }, [business]);
-
-  useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold: 0.05 });
-    obs.observe(el);
-    return () => obs.disconnect();
   }, [business]);
 
   async function fetchAll() {
@@ -158,7 +149,7 @@ export default function DashboardPage() {
       </div>
     </div>
   ) : (
-    <div ref={mainRef} className={`space-y-6 transition-all duration-500 ease-out ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+    <div className="space-y-6">
       {/* Decorative bg */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-brand-50/20 rounded-full blur-3xl" />
