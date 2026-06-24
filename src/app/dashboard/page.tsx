@@ -87,7 +87,7 @@ export default function DashboardPage() {
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold: 0.05 });
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [business]);
 
   async function fetchAll() {
     const { data: { session: s } } = await supabase.auth.getSession();
