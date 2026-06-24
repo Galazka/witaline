@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { sendWhatsApp } from "@/lib/twilio-whatsapp";
-import { redirectCallWithTransferTwiML } from "@/lib/twilio-utils";
+import { redirectCallWithTransferTwiML, escapeXml } from "@/lib/twilio-utils";
 import { setPendingTransfer } from "@/lib/transfer-store";
 import { getActiveCallSids } from "@/lib/active-call-store";
 import { withCache } from "@/lib/cache";
@@ -207,8 +207,8 @@ export async function POST(request: NextRequest) {
             .maybeSingle();
           const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
 
-          // Always store as fallback (in case REST API fails)
-          await setPendingTransfer(bizId, {
+          // Store pending transfer for fallback (use callSid as key)
+          await setPendingTransfer(callSid || bizId, {
             businessId: bizId,
             targetNumber,
             callerId,
@@ -218,31 +218,35 @@ export async function POST(request: NextRequest) {
             createdAt: Date.now(),
           });
 
-          // Try immediate REST API redirect using callSid (most reliable)
+          // Try immediate REST API redirect - use simple <Dial> TwiML (no queue)
           let restApiOk = false;
           const allSids = callSid ? [callSid] : await getActiveCallSids(bizId);
           if (allSids.length > 0) {
-            const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://witaline-production.up.railway.app";
+            const cleanUrl = baseUrl.replace(/\/+$/, "");
             for (const sid of allSids) {
-              const redirectResult = await redirectCallWithTransferTwiML(sid, targetNumber, callerId, baseUrl, bizId, consultants?.length ? 1 : 0);
-              if (redirectResult.ok) {
-                restApiOk = true;
-                console.log("[MCP transfer_to_human] REST API redirect ok for", sid);
-                break;
+              try {
+                const twimlBody = `<Response><Say language="pl-PL">Proszę czekać, łączę z konsultantem.</Say><Dial callerId="${escapeXml(callerId)}" timeout="30" record="record-from-answer"><Number>${escapeXml(targetNumber)}</Number></Dial><Say language="pl-PL">Konsultant nie odpowiada. Oddzwonimy.</Say><Hangup/></Response>`;
+                const redirectResult = await redirectCallWithTransferTwiML(sid, targetNumber, callerId, cleanUrl, bizId, 0);
+                if (redirectResult.ok) {
+                  restApiOk = true;
+                  console.log("[MCP] REST API redirect ok for", sid);
+                  break;
+                }
+                console.warn("[MCP] REST API redirect failed for", sid, ":", redirectResult.message);
+              } catch (e) {
+                console.warn("[MCP] REST API redirect error for", sid, ":", e);
               }
-              console.warn("[MCP transfer_to_human] REST API redirect failed for", sid, ":", redirectResult.message);
             }
           }
 
-          console.log("[MCP transfer_to_human] stored for", bizId, "→", targetNumber, "restApi:", restApiOk);
+          console.log("[MCP transfer_to_human] for", bizId, "->", targetNumber, "restApi:", restApiOk);
           result = JSON.stringify({
             ok: true,
             target: targetNumber,
             business: biz?.name || "WitaLine",
             rest_api_redirect: restApiOk,
-            message: restApiOk
-              ? "Transfer initiated. Call redirected to consultant."
-              : "Transfer initiated. Caller will be connected when the conversation ends.",
+            message: "Przekazano do konsultanta.",
           });
         }
       }
