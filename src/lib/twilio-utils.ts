@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from "next/server";
 import * as https from "https";
 import { setActiveCallSid } from "@/lib/active-call-store";
+import { setConversationForCall } from "@/lib/conversation-store";
 import { getTwilioCredentials, getTwilioAuthFromCreds } from "@/lib/twilio-credentials";
 import type { TwilioCredentials } from "@/lib/twilio-credentials";
 
@@ -95,6 +96,9 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
     if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
+    // Store conversation_id in memory for in-flight transfer
+    const conversationId = convIdMatch[1];
+    setConversationForCall(callSid, conversationId, businessId);
     // Add fallback redirect — fires ONLY if REST API redirect doesn't happen (timout protection)
     const baseUrl = baseUrlOverride || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const cleanUrl = baseUrl.replace(/\/+$/, "");

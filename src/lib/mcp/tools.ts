@@ -92,7 +92,7 @@ export const TOOL_DEFINITIONS: ToolDef[] = [
   {
     name: "transfer_to_human",
     description:
-      "Przekazuje polaczenie do czlowieka/konsultanta firmy, gdy klient wyraznie poprosi o rozmowe z osoba. Uzyj tylko wtedy, gdy klient powiedzial np. poprosze czlowieka, konsultant, nie bot, polacz z wlascicielem.",
+      "Przekazuje polaczenie do czlowieka/konsultanta firmy. PO UDANYM PRZEKAZANIU KONIECZNIE zakoncz rozmowe (end_call) - konsultant przejmie polaczenie automatycznie.",
     inputSchema: {
       business_id: z.string().describe("ID firmy z dynamic_vars.business_id"),
       caller_phone: z.string().optional().describe("Automatycznie pobrany z polaczenia - NIE pytaj klienta"),
