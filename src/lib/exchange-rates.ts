@@ -36,7 +36,11 @@ export async function getExchangeRates(): Promise<Rates> {
 
   try {
     const res = await fetch("https://api.nbp.pl/api/exchangerates/tables/A?format=json", {
-      signal: AbortSignal.timeout(5000),
+      signal: (() => {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 5000);
+        return controller.signal;
+      })(),
     });
 
     if (!res.ok) throw new Error(`NBP responded ${res.status}`);
