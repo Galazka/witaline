@@ -142,9 +142,7 @@ export default function AdminDailyCosts() {
         }));
         setCallLogs(logs);
         setSmsTotal(json.sms_total || 0);
-        setWaTotal(json.wa_total || 0);
         setCostSmsTotal(json.cost_sms_total || 0);
-        setCostWaTotal(json.cost_wa_total || 0);
       }
     } catch (e) {
       setFetchError("Nie udało się połączyć z API");

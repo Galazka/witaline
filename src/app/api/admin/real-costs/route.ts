@@ -165,8 +165,8 @@ function buildCallMap(logs: typeof callLogs) {
   for (const bid of allBizIds) {
     if (bid === "unknown") continue;
     const bizInfo = bizMap.get(bid) || { name: "Nieznana", plan: "start_100", status: "", customRevenue: null };
-    const callData = callMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 };
-    const prevCallData = prevCallMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 };
+    const callData = callMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0, consultantTransferCost: 0 };
+    const prevCallData = prevCallMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0, consultantTransferCost: 0 };
     const smsCount = smsCountMap.get(bid) || 0;
     const costSms = smsCount * TWILIO_SMS_COST_PER_SEGMENT_PLN;
     const costConsultant = callData.consultantTransferCost || 0;

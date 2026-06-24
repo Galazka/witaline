@@ -4,7 +4,7 @@
  * Fallback: hardcoded rates if NBP is unreachable.
  */
 
-type Rates = {
+export type Rates = {
   usdPln: number;
   eurPln: number;
   plnUsd: number;

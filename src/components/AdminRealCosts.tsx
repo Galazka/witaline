@@ -48,7 +48,7 @@ type ViewCurrency = "PLN" | "EUR" | "USD";
 
 /* ── Helpers ── */
 
-function fmt(v: number): string {
+function fmtPLN(v: number): string {
   const abs = Math.abs(v);
   const s = abs.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return v < 0 ? `-${s} zl` : `${s} zl`;

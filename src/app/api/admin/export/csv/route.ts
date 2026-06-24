@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
-import { USD_TO_PLN, ELEVENLABS_COST_PER_MIN_PLN, TWILIO_AVG_COST_PER_MIN_PLN, OPENROUTER_COST_PER_MIN_PLN, TWILIO_SMS_COST_PER_SEGMENT_PNL } from "@/lib/cost-rates";
+import { USD_TO_PLN, ELEVENLABS_COST_PER_MIN_PLN, TWILIO_AVG_COST_PER_MIN_PLN, OPENROUTER_COST_PER_MIN_PLN, TWILIO_SMS_COST_PER_SEGMENT_PLN } from "@/lib/cost-rates";
 
 export const dynamic = "force-dynamic";
 
