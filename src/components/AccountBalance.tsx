@@ -27,7 +27,7 @@ export default function AccountBalance({
     try {
       const { data, error } = await supabase
         .from("businesses")
-        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, total_spent, wa_limit, wa_used, wa_extra_purchased")
+        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, wa_limit, wa_used, wa_extra_purchased")
         .eq("id", businessId)
         .maybeSingle();
       if (data && !error) {
