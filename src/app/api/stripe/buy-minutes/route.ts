@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase-server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getStripe } from "@/lib/stripe";
 import { getElasticRate, convertPrice, type Currency } from "@/lib/pricing";
 
@@ -14,6 +15,7 @@ const buyMinutesSchema = z.object({
   businessId: z.string().uuid(),
   minutes: z.number().int().min(50).max(5000),
   currency: z.enum(["pln", "eur", "usd"]).optional().default("pln"),
+  couponCode: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
   }
 
-  const { businessId, minutes, currency } = parsed.data;
+  const { businessId, minutes, currency, couponCode } = parsed.data;
 
   const { data: business } = await supabase
     .from("businesses")
@@ -39,7 +41,28 @@ export async function POST(request: Request) {
 
   const ratePLN = getElasticRate(minutes);
   const amountNettoPLN = minutes * ratePLN;
-  const amountBruttoPLN = Math.round(amountNettoPLN * 1.23 * 100) / 100;
+  let amountBruttoPLN = Math.round(amountNettoPLN * 1.23 * 100) / 100;
+
+  // Apply coupon discount if provided
+  let appliedCouponId: string | null = null;
+  let appliedDiscount = 0;
+  if (couponCode && typeof couponCode === "string") {
+    const { data: coupon } = await supabaseAdmin
+      .from("referral_coupons")
+      .select("*")
+      .eq("code", couponCode.trim().toUpperCase())
+      .eq("used", false)
+      .eq("business_id", businessId)
+      .gt("expires_at", new Date().toISOString())
+      .maybeSingle();
+
+    if (coupon) {
+      appliedDiscount = coupon.discount_percent;
+      amountBruttoPLN = Math.round(amountBruttoPLN * (100 - coupon.discount_percent) * 100) / 100;
+      appliedCouponId = coupon.id;
+    }
+  }
+
   const amountInCurrency = convertPrice(amountBruttoPLN, currency);
   const amountCents = Math.round(amountInCurrency * 100);
   const rateDisplay = convertPrice(ratePLN, currency).toFixed(2).replace(".", ",");
@@ -76,6 +99,9 @@ export async function POST(request: Request) {
       currency,
       amount_netto_pln: String(amountNettoPLN),
       amount_brutto_pln: String(amountBruttoPLN),
+      applied_coupon_id: appliedCouponId || "",
+      applied_discount_percent: String(appliedDiscount),
+      original_amount_brutto_pln: String(Math.round(amountNettoPLN * 1.23 * 100) / 100),
     },
     success_url: `${BASE_URL}/dashboard?payment=success`,
     cancel_url: `${BASE_URL}/dashboard?payment=cancel`,

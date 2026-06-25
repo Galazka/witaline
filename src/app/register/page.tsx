@@ -71,6 +71,7 @@ export default function RegisterPage() {
   const [industry, setIndustry] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [phone, setPhone] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [policy, setPolicy] = useState(false);
   const [scanning, setScanning] = useState(false);
 
@@ -95,6 +96,12 @@ export default function RegisterPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, sess) => setSession(!!sess));
     return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
+
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setReferralCode(ref);
+  }, [searchParams]);
 
   async function validateCouponCode() {
     if (!couponCode.trim()) { setCouponError(""); setCouponDiscount(null); setFinalPrice(null); return; }
@@ -133,7 +140,7 @@ export default function RegisterPage() {
     const scanData = await scanRes.json();
     const prompt = scanData.systemPrompt || templatePrompt;
     setScanning(false);
-    const res = await fetch("/api/onboarding/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: businessName, plan: modelToPlan[selectedPlan] || "elastic_0", systemPrompt: prompt, menuCatalog: {}, websiteUrl, phone, industry, templateId: industry !== "custom" ? industry : undefined, services: tpl?.services, calendarSettings: tpl?.calendar }) });
+    const res = await fetch("/api/onboarding/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: businessName, plan: modelToPlan[selectedPlan] || "elastic_0", systemPrompt: prompt, menuCatalog: {}, websiteUrl, phone, industry, templateId: industry !== "custom" ? industry : undefined, services: tpl?.services, calendarSettings: tpl?.calendar, referralCode: referralCode || null }) });
     if (!res.ok) { const d = await res.json(); setError(d.error || "Blad"); setSaving(false); return; }
     const result = await res.json(); setExtension(result.extension); setDone(true); setSaving(false);
   }

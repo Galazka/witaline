@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   const extension = await assignExtension(supabaseAdmin, business.id);
 
-  // Handle referral if code provided
+  // Handle referral if code provided — create discount coupons for both parties
   let referrerId: string | null = null;
   if (referralCode && typeof referralCode === "string") {
     const { data: referrer } = await supabaseAdmin
@@ -86,31 +86,23 @@ export async function POST(request: Request) {
     if (referrer && referrer.id !== business.id) {
       referrerId = referrer.id;
       await supabaseAdmin.from("businesses")
-        .update({ referred_by: referrerId, referral_code: business.referral_code })
+        .update({ referred_by: referrerId })
         .eq("id", business.id);
-    }
-  }
 
-  // Grant referral bonus
-  if (referrerId) {
-    const BONUS_MINUTES = 100;
-    await supabaseAdmin.from("businesses")
-      .update({ prepaid_minutes: (business.prepaid_minutes || 0) + BONUS_MINUTES })
-      .eq("id", business.id);
-
-    const { data: referrerBiz } = await supabaseAdmin.from("businesses").select("prepaid_minutes, id").eq("id", referrerId).maybeSingle();
-    if (referrerBiz) {
-      await supabaseAdmin.from("businesses")
-        .update({ prepaid_minutes: (referrerBiz.prepaid_minutes || 0) + BONUS_MINUTES })
-        .eq("id", referrerId);
+      const referrerCouponCode = `REF-${business.referral_code?.toUpperCase() || "X"}-A`;
+      const referredCouponCode = `REF-${business.referral_code?.toUpperCase() || "X"}-B`;
+      const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
 
       await supabaseAdmin.from("referrals").upsert({
         referrer_business_id: referrerId,
         referred_business_id: business.id,
         status: "completed",
-        referrer_minutes_granted: BONUS_MINUTES,
-        referred_minutes_granted: BONUS_MINUTES,
       }, { onConflict: "referrer_business_id,referred_business_id" });
+
+      await supabaseAdmin.from("referral_coupons").insert([
+        { code: referrerCouponCode, business_id: referrerId, discount_percent: 20, expires_at: expiresAt },
+        { code: referredCouponCode, business_id: business.id, discount_percent: 20, expires_at: expiresAt },
+      ]).catch(e => console.error("[onboarding] referral coupon error:", e));
     }
   }
 

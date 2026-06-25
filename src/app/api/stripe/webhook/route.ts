@@ -39,6 +39,8 @@ export async function POST(request: Request) {
     // Handle minute package purchase (one-time payment)
     if (paymentType === "minute_package") {
       const minutes = parseFloat(obj?.metadata?.minutes || "0");
+      const appliedCouponId = obj?.metadata?.applied_coupon_id || null;
+
       if (minutes > 0) {
         const { data: biz } = await supabaseAdmin
           .from("businesses")
@@ -63,16 +65,25 @@ export async function POST(request: Request) {
           })
           .eq("id", businessId);
 
+        // Mark coupon as used
+        if (appliedCouponId) {
+          await supabaseAdmin
+            .from("referral_coupons")
+            .update({ used: true, used_at: new Date().toISOString() })
+            .eq("id", appliedCouponId);
+        }
+
         // Notification about purchase with currency info
+        const discountMsg = appliedCouponId ? ` (z kuponem rabatowym)` : "";
         await supabaseAdmin.from("notifications").insert({
           business_id: businessId,
           type: "system",
           title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
-          message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
-          metadata: { currency, amount_pln: amountPLN, minutes },
+          message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${discountMsg}${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+          metadata: { currency, amount_pln: amountPLN, minutes, applied_coupon_id: appliedCouponId },
         }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
 
-        console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance });
+        console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance, appliedCouponId });
       }
       return NextResponse.json({ received: true });
     }
