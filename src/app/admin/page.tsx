@@ -28,6 +28,7 @@ import AdminPortRequests from "@/components/AdminPortRequests";
 import AdminPhoneStats from "@/components/AdminPhoneStats";
 import AdminPricingSimulator from "@/components/AdminPricingSimulator";
 import AdminWebhookLogs from "@/components/AdminWebhookLogs";
+import AdminEmailConfigurator from "@/components/AdminEmailConfigurator";
 import { useAdminTab } from "@/components/layout/AdminLayout";
 
 export default function AdminPage() {
@@ -232,6 +233,7 @@ export default function AdminPage() {
       {tab === "porty" && <AdminPortRequests />}
       {tab === "numery" && <AdminPhoneStats />}
       {tab === "pricing" && <AdminPricingSimulator />}
+      {tab === "email" && <AdminEmailConfigurator />}
       </div>
     </div>
   );

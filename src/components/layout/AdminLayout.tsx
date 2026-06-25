@@ -16,7 +16,7 @@ type AdminTab =
   | "dashboard" | "leads" | "businesses" | "witaline" | "messages"
   | "feedback" | "conversations" | "voice"
   | "coupons" | "callbacks" | "sms" | "blocklist"
-  | "security" | "costs" | "porty" | "webhooks"
+  | "security" | "costs" | "porty" | "webhooks" | "email"
   // Deprecated but still handled in admin page (redirect to relevant tabs)
   | "statystyki" | "kalkulator" | "rodo" | "routing" | "numery" | "pricing";
 
@@ -65,6 +65,7 @@ const sidebarItems = (leadCount: number) => [
       { key: "blocklist" as AdminTab, label: "Blokady", icon: <IconBan className="w-4 h-4" /> },
       { key: "callbacks" as AdminTab, label: "Callbacki", icon: <IconPhone className="w-4 h-4" /> },
       { key: "porty" as AdminTab, label: "Porty", icon: <IconPhoneForward className="w-4 h-4" /> },
+      { key: "email" as AdminTab, label: "Emails", icon: <IconMail className="w-4 h-4" /> },
     ],
   },
   { key: "voice" as AdminTab, label: "Voice", icon: <IconPhone className="w-5 h-5" /> },
