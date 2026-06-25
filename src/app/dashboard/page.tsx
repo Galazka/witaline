@@ -7,6 +7,7 @@ import AccountBalance from "@/components/AccountBalance";
 import ElasticCostCalculator from "@/components/ElasticCostCalculator";
 import CallTable from "@/components/CallTable";
 import PlanUpgrade from "@/components/PlanUpgrade";
+import ReferralCard from "@/components/ReferralCard";
 import PhoneSettings from "@/components/PhoneSettings";
 import ChatHistory from "@/components/ChatHistory";
 import AccountSettings from "@/components/AccountSettings";
@@ -60,6 +61,7 @@ export default function DashboardPage() {
   const [subStatus, setSubStatus] = useState<string>("");
   const [trialEndsAt, setTrialEndsAt] = useState<string>("");
   const [subLoading, setSubLoading] = useState(true);
+  const [buyingMinutes, setBuyingMinutes] = useState(false);
   const { setPerms, hasPerm } = useDashboardPerms();
 
   const supabase = createClient();
@@ -179,10 +181,27 @@ export default function DashboardPage() {
           </div>
           <div className="flex-1">
             <p className="font-semibold text-red-800 text-sm">Okres próbny wygasł</p>
-            <p className="text-sm text-red-600 mt-1">Wybierz plan i opłać subskrypcję, aby odblokować pełną funkcjonalność. Dane pozostają bezpieczne — po wznowieniu wszystko wróci.</p>
+            <p className="text-sm text-red-600 mt-1">Twój asystent AI przestał odbierać telefony. Doładuj konto, aby wznowić działanie — płacisz tylko za użyte minuty, od 1,00 PLN/min brutto.</p>
           </div>
-          <button onClick={() => setTab("upgrade")} className="shrink-0 bg-brand-400 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-500 transition shadow-sm">
-            Wybierz plan
+          <button
+            onClick={async () => {
+              if (!business) return;
+              setBuyingMinutes(true);
+              try {
+                const res = await fetch("/api/stripe/buy-minutes", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ businessId: business.id, minutes: 50 }),
+                });
+                const data = await res.json();
+                if (data.url) window.location.href = data.url;
+              } catch (e) { console.error("[dashboard] buy-minutes error:", e); }
+              finally { setBuyingMinutes(false); }
+            }}
+            disabled={buyingMinutes}
+            className="shrink-0 bg-brand-400 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-500 transition shadow-sm disabled:opacity-50"
+          >
+            {buyingMinutes ? "Przekierowywanie..." : "Doładuj konto"}
           </button>
         </div>
       )}
@@ -321,6 +340,9 @@ export default function DashboardPage() {
             minutesUsed={Math.floor(totalSeconds / 60)}
             onUpdate={fetchAll}
           />
+          <div className="lg:col-span-2">
+            <ReferralCard businessId={business.id} />
+          </div>
         </div>
       )}
 

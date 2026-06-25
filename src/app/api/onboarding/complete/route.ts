@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { name, plan, systemPrompt, menuCatalog, websiteUrl, phone, industry, templateId, services, calendarSettings } = body;
+  const { name, plan, systemPrompt, menuCatalog, websiteUrl, phone, industry, templateId, services, calendarSettings, referralCode } = body;
 
   if (!name || !plan) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -73,6 +73,46 @@ export async function POST(request: Request) {
   }
 
   const extension = await assignExtension(supabaseAdmin, business.id);
+
+  // Handle referral if code provided
+  let referrerId: string | null = null;
+  if (referralCode && typeof referralCode === "string") {
+    const { data: referrer } = await supabaseAdmin
+      .from("businesses")
+      .select("id, referral_code")
+      .eq("referral_code", referralCode.trim().toLowerCase())
+      .maybeSingle();
+
+    if (referrer && referrer.id !== business.id) {
+      referrerId = referrer.id;
+      await supabaseAdmin.from("businesses")
+        .update({ referred_by: referrerId, referral_code: business.referral_code })
+        .eq("id", business.id);
+    }
+  }
+
+  // Grant referral bonus
+  if (referrerId) {
+    const BONUS_MINUTES = 100;
+    await supabaseAdmin.from("businesses")
+      .update({ prepaid_minutes: (business.prepaid_minutes || 0) + BONUS_MINUTES })
+      .eq("id", business.id);
+
+    const { data: referrerBiz } = await supabaseAdmin.from("businesses").select("prepaid_minutes, id").eq("id", referrerId).maybeSingle();
+    if (referrerBiz) {
+      await supabaseAdmin.from("businesses")
+        .update({ prepaid_minutes: (referrerBiz.prepaid_minutes || 0) + BONUS_MINUTES })
+        .eq("id", referrerId);
+
+      await supabaseAdmin.from("referrals").upsert({
+        referrer_business_id: referrerId,
+        referred_business_id: business.id,
+        status: "completed",
+        referrer_minutes_granted: BONUS_MINUTES,
+        referred_minutes_granted: BONUS_MINUTES,
+      }, { onConflict: "referrer_business_id,referred_business_id" });
+    }
+  }
 
   // Send welcome + trial activation emails (non-blocking)
   if (user.email) {
