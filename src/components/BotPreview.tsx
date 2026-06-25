@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { templates } from "@/lib/templates";
+import { WITALINE_CONTACT_EMAIL } from "@/lib/constants";
 
 interface Message {
   role: "bot" | "user";
@@ -38,7 +39,7 @@ WitaLine to polska platforma automatycznej recepcji AI dla firm.
 4. Bot od razu odbiera telefony, widget gotowy
 
 ## Kontakt
-Strona: witaline.pl | Email: kontakt@witaline.pl`;
+Strona: witaline.pl | Email: ${WITALINE_CONTACT_EMAIL}`;
 
 function getIndustryLabel(industry: string): string {
   const labels: Record<string, string> = {

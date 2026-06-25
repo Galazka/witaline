@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
+  const { error: authErr } = await checkAdminAuth();
+  if (authErr) return authErr;
   const { searchParams } = new URL(request.url);
   const businessId = searchParams.get("businessId");
 
@@ -11,7 +14,6 @@ export async function GET(request: Request) {
     .order("created_at", { ascending: false });
 
   if (businessId) query = query.eq("business_id", businessId);
-  // No businessId filter = all numbers (admin)
 
   const { data: calls, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

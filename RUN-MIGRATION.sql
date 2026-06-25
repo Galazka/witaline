@@ -171,6 +171,10 @@ CREATE INDEX IF NOT EXISTS idx_call_logs_human_handoff ON call_logs(has_human_ha
 CREATE INDEX IF NOT EXISTS idx_call_logs_handoff_status ON call_logs(handoff_status);
 CREATE INDEX IF NOT EXISTS idx_call_logs_handoff_target ON call_logs(handoff_target_number);
 
+-- 17. Trial usage tracking (15 min / 10 SMS caps)
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS trial_minutes_used DECIMAL(10,2) DEFAULT 0;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS trial_sms_used INTEGER DEFAULT 0;
+
 -- ================================================================
 -- Verify migrations
 -- ================================================================

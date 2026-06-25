@@ -1,33 +1,31 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { sendNewLeadEmail } from "@/lib/email";
 import { addNotification } from "@/lib/notifications";
 import { sendSlackNotification, leadSlackBlocks } from "@/lib/slack-notify";
 
-interface SaveLeadParams {
-  name?: string;
-  phone?: string;
-  email?: string;
-  interest?: string;
-  notes?: string;
-  business_id?: string;
-}
+const saveLeadSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().min(1, "Phone is required"),
+  email: z.string().max(255).optional().default(""),
+  interest: z.string().max(255).optional().default(""),
+  notes: z.string().max(5000).optional().default(""),
+  business_id: z.string().uuid().optional(),
+});
 
 export async function POST(request: Request) {
   try {
     const body = await request.json() as Record<string, unknown>;
-    const params = body.parameters as SaveLeadParams | undefined;
-
-    const name = params?.name || (body.name as string) || "";
-    const phone = params?.phone || (body.phone as string) || "";
-    const email = params?.email || (body.email as string) || "";
-    const interest = params?.interest || (body.interest as string) || "";
-    const notes = params?.notes || (body.notes as string) || "";
-    const businessId = params?.business_id || (body.business_id as string) || "";
-
-    if (!name || !phone) {
-      return NextResponse.json({ ok: false, error: "Missing required fields: name and phone" }, { status: 400 });
+    const raw = body.parameters
+      ? (body.parameters as Record<string, unknown>)
+      : body;
+    const parsed = saveLeadSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ ok: false, error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
     }
+
+    const { name, phone, email, interest, notes, business_id: businessId } = parsed.data;
 
     const { data, error } = await supabaseAdmin
       .from("leads")

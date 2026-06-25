@@ -18,10 +18,14 @@ export default function LoginPage() {
   const router = useRouter();
 
   async function redirectAfterLogin(uid: string, userEmail?: string) {
-    if (userEmail === "admin@witaline.pl") {
-      router.replace("/admin");
-      return;
-    }
+    try {
+      const res = await fetch("/api/admin/check");
+      const data = await res.json();
+      if (data.isAdmin) {
+        router.replace("/admin");
+        return;
+      }
+    } catch {}
     router.replace("/dashboard");
   }
 

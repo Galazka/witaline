@@ -3,12 +3,37 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   const { url, businessName, industry, templatePrompt } = await request.json();
 
-  if (!url) {
+  if (!url || typeof url !== "string") {
     return NextResponse.json({ error: "Missing url" }, { status: 400 });
   }
 
+  // SSRF protection — block private/internal IPs and non-HTTP protocols
+  let parsedUrl: URL;
   try {
-    const res = await fetch(url, {
+    parsedUrl = new URL(url);
+  } catch {
+    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+  }
+  if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+    return NextResponse.json({ error: "Only HTTP(S) URLs allowed" }, { status: 400 });
+  }
+  const hostname = parsedUrl.hostname.toLowerCase();
+  if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0" ||
+    hostname === "[::1]" ||
+    hostname.startsWith("10.") ||
+    hostname.startsWith("172.16.") ||
+    hostname.startsWith("192.168.") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".internal")
+  ) {
+    return NextResponse.json({ error: "URL not allowed" }, { status: 400 });
+  }
+
+  try {
+    const res = await fetch(parsedUrl.toString(), {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; WitaLineBot/1.0; +https://witaline.pl)",
         "Accept": "text/html,application/xhtml+xml",

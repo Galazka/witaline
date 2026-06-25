@@ -10,16 +10,10 @@ interface Props {
   extension?: string | null;
   businessName?: string | null;
   tokensUsed?: number;
+  subscriptionStatus?: string;
+  trialEndsAt?: string;
+  createdAt?: string;
 }
-
-const PREMIUM_FEATURES: Record<PlanKey, string[]> = {
-  start_100: [],
-  pro_500: ["Podsumowania AI rozmów", "Baza wiedzy", "Rezerwacje online", "Priorytetowe wsparcie"],
-  enterprise_2000: ["Podsumowania AI rozmów", "Baza wiedzy", "Rezerwacje online", "Priorytetowe wsparcie 24/7", "Google Calendar", "Własny prompt"],
-  elastic_0: [],
-  pro_249: ["Podsumowania AI rozmów", "Baza wiedzy", "Rezerwacje online", "Priorytetowe wsparcie"],
-  lux_599: ["Podsumowania AI rozmów", "Baza wiedzy", "Rezerwacje online", "Priorytetowe wsparcie 24/7", "Google Calendar", "Własny prompt", "CRM", "Klon głosu"],
-};
 
 function formatNumber(n: number): string {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
@@ -34,6 +28,9 @@ export default function DashboardHeader({
   extension,
   businessName,
   tokensUsed: tokensUsedProp,
+  subscriptionStatus,
+  trialEndsAt,
+  createdAt,
 }: Props) {
   const config = getPlanConfig(plan);
   const minsPct = getUsedPercentage(minutesUsed, config.monthlyVoiceMinutes);
@@ -41,14 +38,32 @@ export default function DashboardHeader({
   const tokensPct = Math.min(100, Math.round((tokensUsed / config.monthlyTokens) * 100));
   const remainingMinutes = Math.max(0, config.monthlyVoiceMinutes - minutesUsed);
   const remainingTokens = Math.max(0, config.monthlyTokens - tokensUsed);
-  const planLabels: Record<PlanKey, string> = {
+  const planLabels: Record<string, string> = {
     start_100: "Start",
     pro_500: "Growth",
     enterprise_2000: "Enterprise",
     elastic_0: "Elastyczny",
     pro_249: "Pro",
     lux_599: "Lux",
+    start: "Start",
+    pro: "Pro",
+    growth: "Growth",
+    lux: "Lux",
+    enterprise: "Enterprise",
+    self_service: "Self-Service",
   };
+
+  // Trial info
+  const isTrialing = subscriptionStatus === "trialing";
+  const createdDate = createdAt ? new Date(createdAt) : null;
+  const trialEndDate = trialEndsAt ? new Date(trialEndsAt) : (createdDate ? new Date(createdDate.getTime() + 7 * 86400000) : null);
+  const now = new Date();
+  const trialDaysLeft = trialEndDate ? Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / 86400000)) : 0;
+  const trialExpired = isTrialing && trialDaysLeft <= 0;
+  const FREE_TRIAL_MINUTES = 15;
+  const FREE_TRIAL_SMS = 10;
+  const trialMinutesLeft = Math.max(0, FREE_TRIAL_MINUTES - minutesUsed);
+  const trialMinutesExceeded = isTrialing && minutesUsed >= FREE_TRIAL_MINUTES;
 
   function barColor(pct: number): string {
     if (pct > 90) return "bg-red-500";
@@ -150,20 +165,40 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      {(plan === "start_100" || plan === "elastic_0") && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <span className="text-lg">⬆️</span>
-            <div>
-              <p className="text-sm font-semibold text-amber-800">
-                Odblokuj więcej dzięki planom Pro i Lux
-              </p>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {PREMIUM_FEATURES.pro_500.map((f) => (
-                  <span key={f} className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">{f}</span>
-                ))}
+      {isTrialing && (
+        <div className={`border rounded-xl p-4 ${trialExpired ? "bg-red-50 border-red-200" : "bg-brand-50 border-brand-200"}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="text-lg shrink-0">{trialExpired ? "⛔" : "🎯"}</span>
+              <div>
+                <p className={`text-sm font-semibold ${trialExpired ? "text-red-800" : "text-brand-800"}`}>
+                  {trialExpired
+                    ? "Okres próbny wygasł"
+                    : `Darmowy okres próbny — zostało ${trialDaysLeft} dni`}
+                </p>
+                <p className={`text-xs mt-1 ${trialExpired ? "text-red-600" : "text-brand-600"}`}>
+                  {trialExpired
+                    ? "Dodaj środki, aby kontynuować korzystanie z WitaLine."
+                    : `Bezpłatnie: ${FREE_TRIAL_MINUTES} min połączeń · ${FREE_TRIAL_SMS} SMS`}
+                </p>
+                <div className="flex gap-4 mt-2">
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${trialMinutesExceeded ? "bg-red-100 text-red-700" : "bg-white text-brand-700"}`}>
+                    🎙️ {Math.min(minutesUsed, FREE_TRIAL_MINUTES)}/{FREE_TRIAL_MINUTES} min
+                  </span>
+                  <span className="text-xs px-2 py-0.5 bg-white text-brand-700 rounded-full">
+                    ✉️ 0/{FREE_TRIAL_SMS} SMS
+                  </span>
+                </div>
               </div>
             </div>
+            {!trialExpired && (
+              <a
+                href="/dashboard?tab=upgrade"
+                className="shrink-0 bg-brand-500 text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-brand-600 transition text-center"
+              >
+                Dodaj środki
+              </a>
+            )}
           </div>
         </div>
       )}

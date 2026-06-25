@@ -1,3 +1,5 @@
+import { WITALINE_PHONE_NUMBER } from "@/lib/constants";
+
 export default function JsonLd() {
   const schema = {
     "@context": "https://schema.org",
@@ -11,7 +13,7 @@ export default function JsonLd() {
         description: "Automatyczna recepcja AI 24/7 dla firm. Asystent głosowy odbiera połączenia, przyjmuje zamówienia i umawia wizyty.",
         contactPoint: {
           "@type": "ContactPoint",
-          telephone: "+48-732-125-752",
+          telephone: WITALINE_PHONE_NUMBER,
           contactType: "sales",
           availableLanguage: ["Polish", "English"],
         },

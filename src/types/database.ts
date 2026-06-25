@@ -20,7 +20,7 @@ export interface Business {
   owner_uid: string;
   name: string;
   twilio_number: string;
-  current_plan: "start_100" | "pro_500" | "enterprise" | "enterprise_2000" | "elastic_0" | "start" | "pro" | "growth" | "lux" | "self_service";
+  current_plan: string;
   minutes_used_this_week: number;
   system_prompt: string;
   menu_catalog: Record<string, unknown>;
@@ -57,6 +57,12 @@ export interface Business {
   verified_by?: string | null;
   twilio_account_sid?: string;
   twilio_auth_token?: string;
+  trial_minutes_used?: number;
+  trial_sms_used?: number;
+  webhook_url?: string | null;
+  webhook_secret?: string | null;
+  api_key?: string | null;
+  sms_enabled?: boolean;
 }
 
 export interface BusinessConsultant {
@@ -113,6 +119,14 @@ export interface CallLog {
   business_name?: string;
   duration_seconds: number;
   cost_pln: number;
+  cost_elevenlabs?: number;
+  cost_twilio?: number;
+  cost_openrouter?: number;
+  total_cost?: number;
+  revenue_pln?: number;
+  internal_cost_pln?: number;
+  plan_revenue_pln?: number;
+  elevenlabs_conversation_id?: string;
   caller_id: string;
   from_number: string;
   to_number: string;
@@ -143,6 +157,8 @@ export interface CallLog {
   ended_at: string | null;
   rodo_consent_played: boolean;
   rodo_consent_at: string | null;
+  deleted_at?: string | null;
+  status?: string;
   created_at: string;
   tokens_input?: number;
   tokens_output?: number;
@@ -190,7 +206,7 @@ export interface Feedback {
   created_at: string;
 }
 
-export type PlanKey = "start_100" | "pro_500" | "enterprise_2000" | "elastic_0" | "pro_249" | "lux_599";
+export type PlanKey = "elastic_0" | "enterprise_2000";
 
 export interface Voice {
   id: string;

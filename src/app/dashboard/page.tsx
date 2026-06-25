@@ -95,7 +95,7 @@ export default function DashboardPage() {
             setPerms(p.role || null, p.isOwner, p.isSuperAdmin, p.permissions || []);
           }
         })
-        .catch(() => {});
+        .catch((e) => console.error("[dashboard] fetch error:", e));
       const [logsRes, reservationsRes, feedbackRes] = await Promise.all([
         supabase.from("call_logs").select("*").eq("business_id", biz.id).is("deleted_at", null).order("created_at", { ascending: false }).limit(50),
         supabase.from("reservations").select("*").eq("business_id", biz.id).order("reserved_at", { ascending: false }).limit(100),
@@ -164,6 +164,9 @@ export default function DashboardPage() {
           extension={business.extension}
           businessName={business.name}
           tokensUsed={business.tokens_used_this_month ?? Math.ceil(Math.floor(totalSeconds / 60) * 1000)}
+          subscriptionStatus={subStatus}
+          trialEndsAt={trialEndsAt}
+          createdAt={business.created_at}
         />
       )}
 

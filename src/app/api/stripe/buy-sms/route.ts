@@ -1,28 +1,34 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase-server";
 import { getStripe } from "@/lib/stripe";
 import { convertPrice, type Currency } from "@/lib/pricing";
-import { SMS_PACKAGES, getSmsPackagePrice } from "@/lib/sms-pricing";
+import { getSmsPackagePrice } from "@/lib/sms-pricing";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").trim();
-
-const SUPPORTED_CURRENCIES: Currency[] = ["pln", "eur", "usd"];
 
 function stripeLocale(currency: Currency): "pl" | "en" {
   return currency === "pln" ? "pl" : "en";
 }
+
+const buySmsSchema = z.object({
+  businessId: z.string().uuid(),
+  smsCount: z.number().int().min(1),
+  currency: z.enum(["pln", "eur", "usd"]).optional().default("pln"),
+});
 
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { businessId, smsCount, currency = "pln" } = await request.json();
-  const cur: Currency = SUPPORTED_CURRENCIES.includes(currency) ? currency : "pln";
-  const count = parseInt(smsCount, 10);
-  if (!businessId || !count || count < 1) {
-    return NextResponse.json({ error: "Invalid SMS count" }, { status: 400 });
+  const raw = await request.json();
+  const parsed = buySmsSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
   }
+
+  const { businessId, smsCount, currency } = parsed.data;
 
   const { data: business } = await supabase
     .from("businesses")
@@ -32,13 +38,13 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const pricePLN = getSmsPackagePrice(count);
-  const priceInCurrency = convertPrice(pricePLN, cur);
+  const pricePLN = getSmsPackagePrice(smsCount);
+  const priceInCurrency = convertPrice(pricePLN, currency);
   const amountCents = Math.round(priceInCurrency * 100);
 
   const stripe = getStripe();
 
-  const paymentTypes: Array<"card" | "blik" | "p24"> = cur === "pln"
+  const paymentTypes: Array<"card" | "blik" | "p24"> = currency === "pln"
     ? ["card", "blik", "p24"]
     : ["card"];
 
@@ -47,12 +53,12 @@ export async function POST(request: Request) {
     payment_method_types: paymentTypes,
     line_items: [{
       price_data: {
-        currency: cur,
+        currency,
         product_data: {
-          name: cur === "pln" ? `Pakiet ${count} SMS` : `SMS Pack ${count}`,
-          description: cur === "pln"
-            ? `${count} wiadomości SMS – ${pricePLN.toFixed(2).replace(".", ",")} PLN`
-            : `${count} SMS messages – ${priceInCurrency.toFixed(2).replace(".", ",")} ${cur.toUpperCase()}`,
+          name: currency === "pln" ? `Pakiet ${smsCount} SMS` : `SMS Pack ${smsCount}`,
+          description: currency === "pln"
+            ? `${smsCount} wiadomości SMS – ${pricePLN.toFixed(2).replace(".", ",")} PLN`
+            : `${smsCount} SMS messages – ${priceInCurrency.toFixed(2).replace(".", ",")} ${currency.toUpperCase()}`,
         },
         unit_amount: amountCents,
       },
@@ -65,13 +71,13 @@ export async function POST(request: Request) {
       businessId,
       userId: user.id,
       type: "sms_package",
-      sms_count: String(count),
-      currency: cur,
+      sms_count: String(smsCount),
+      currency,
       amount_pln: String(pricePLN),
     },
     success_url: `${BASE_URL}/dashboard?payment=success`,
     cancel_url: `${BASE_URL}/dashboard?payment=cancel`,
-    locale: stripeLocale(cur),
+    locale: stripeLocale(currency),
   });
 
   if (session.url) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { WITALINE_INTEGRACJE_EMAIL } from "@/lib/constants";
 import WidgetSettings from "./WidgetSettings";
 import WebhookApiSettings from "./WebhookApiSettings";
 import GoogleCalendarSettings from "./GoogleCalendarSettings";
@@ -298,7 +299,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
               Dla klientów Enterprise budujemy dedykowane integracje.
             </p>
             <p className="text-xs text-zinc-400">
-              Skontaktuj się: <a href="mailto:integracje@witaline.pl" className="text-brand-500 hover:text-brand-600">integracje@witaline.pl</a>
+              Skontaktuj się: <a href={`mailto:${WITALINE_INTEGRACJE_EMAIL}`} className="text-brand-500 hover:text-brand-600">{WITALINE_INTEGRACJE_EMAIL}</a>
             </p>
           </div>
         </div>

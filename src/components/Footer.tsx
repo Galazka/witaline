@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import { WITALINE_CONTACT_EMAIL, WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 
 export default function Footer() {
   return (
@@ -50,8 +51,8 @@ export default function Footer() {
           <div>
             <p className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-4">Kontakt</p>
             <ul className="space-y-2.5 text-sm">
-              <li><a href="tel:+48732125752" className="text-zinc-300 hover:text-brand-400 transition-colors font-medium">+48 732 125 752</a></li>
-              <li><a href="mailto:kontakt@witaline.pl" className="text-zinc-400 hover:text-brand-400 transition-colors">kontakt@witaline.pl</a></li>
+              <li><a href={`tel:${WITALINE_PHONE_NUMBER}`} className="text-zinc-300 hover:text-brand-400 transition-colors font-medium">{WITALINE_PHONE_DISPLAY}</a></li>
+              <li><a href={`mailto:${WITALINE_CONTACT_EMAIL}`} className="text-zinc-400 hover:text-brand-400 transition-colors">{WITALINE_CONTACT_EMAIL}</a></li>
               <li className="text-zinc-500 text-xs">Pon-Pt 9:00-17:00</li>
               <li className="mt-3">
                 <a href="#kontakt" className="inline-flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 transition-colors font-medium">

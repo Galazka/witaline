@@ -66,7 +66,7 @@ export default function CrmPipeline({ businessId, callLogs, onNavigate }: Props)
     fetch(`/api/leads?businessId=${businessId}`)
       .then(r => r.ok ? r.json() : [])
       .then(data => { if (Array.isArray(data)) setLeads(data); })
-      .catch(() => {})
+      .catch((e) => console.error("[CrmPipeline] fetch error:", e))
       .finally(() => setLoading(false));
   }, [businessId]);
 

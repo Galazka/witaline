@@ -1,17 +1,16 @@
 ﻿export const PLANS = {
+  ELASTIC: 0,
+  ENTERPRISE: 999,
+  // Legacy — kept for backward compat
   START: 199,
   PRO: 249,
   GROWTH: 399,
   LUX: 599,
-  ENTERPRISE: 999
 };
 
 export const PLAN_NAMES = {
-  START: "Start",
-  PRO: "Pro",
-  GROWTH: "Growth",
-  LUX: "Lux",
-  ENTERPRISE: "Enterprise"
+  ELASTIC: "Elastyczny",
+  ENTERPRISE: "Enterprise",
 };
 
 export interface ElasticTier {
@@ -33,17 +32,19 @@ export const ELASTIC_TIERS: ElasticTier[] = [
 ];
 
 export const billingModels = [
-  { key: "self_service", label: "Self-Service", desc: "Pay-as-you-go, konfiguracja w 15 minut", icon: "🚀", features: ["Własny numer telefonu", "Panel administracyjny", "Podstawowa analityka", "Support e-mail"] },
-  { key: "enterprise", label: "Enterprise", desc: "Dedykowane wdrożenie, SLA 24/7, własny onboarding", icon: "🏢", features: ["Wszystko z Self-Service", "Priorytetowe wsparcie 24/7", "Niestandardowe integracje", "SLA 99.9%"] },
+  { key: "elastic_0", label: "Elastyczny", desc: "Pay-as-you-go, płacisz tylko za użycie, bez abonamentu", icon: "🚀", features: ["Własny numer telefonu", "Panel administracyjny", "0 zł/mies", "Support e-mail"] },
+  { key: "enterprise_2000", label: "Enterprise", desc: "Dedykowane wdrożenie, SLA 24/7, własny onboarding", icon: "🏢", features: ["Wszystko z Elastycznego", "Priorytetowe wsparcie 24/7", "Niestandardowe integracje", "SLA 99.9%"] },
 ];
 
 export const plans: Record<string, PlanConfig> = {
+  // Legacy plans — kept for backward compat with existing businesses
   start: { label: "Start", value: "start", price: 199, pricePLN: "199 PLN", minutes: 250, overagePerToken: 0.002, monthlyTokens: 250000, monthlyVoiceMinutes: 250, maxConsultants: 3, features: [] },
   pro: { label: "Pro", value: "pro", price: 249, pricePLN: "249 PLN", minutes: 300, overagePerToken: 0.0015, monthlyTokens: 300000, monthlyVoiceMinutes: 300, maxConsultants: 3, features: [] },
   growth: { label: "Growth", value: "growth", price: 399, pricePLN: "399 PLN", minutes: 600, overagePerToken: 0.001, monthlyTokens: 600000, monthlyVoiceMinutes: 600, maxConsultants: 3, features: [] },
   lux: { label: "Lux", value: "lux", price: 599, pricePLN: "599 PLN", minutes: 800, overagePerToken: 0.0008, monthlyTokens: 800000, monthlyVoiceMinutes: 800, maxConsultants: 3, features: [] },
   enterprise: { label: "Enterprise", value: "enterprise", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 3, features: [] },
   self_service: { label: "Self-Service", value: "self_service", price: 0, pricePLN: "0 PLN", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 1, features: [] },
+  // Active plans
   elastic_0: { label: "Elastyczny", value: "elastic_0", price: 0, pricePLN: "od 0,85 PLN/min", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 99, features: [] },
   enterprise_2000: { label: "Enterprise", value: "enterprise_2000", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 99, features: [] },
 };

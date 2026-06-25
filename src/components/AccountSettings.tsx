@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { WITALINE_RODO_EMAIL } from "@/lib/constants";
 
 interface Voice {
   id: string;
@@ -30,7 +31,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
   useEffect(() => {
     fetch("/api/business/voice").then(r => r.ok && r.json()).then(d => {
       if (d) { setVoices(d.available || []); setCurrentVoiceId(d.voiceId || null); }
-    }).catch(() => {});
+    }).catch((e) => console.error("[AccountSettings] fetch error:", e));
   }, []);
 
   async function handleVoiceChange(newVoiceId: string) {
@@ -163,7 +164,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
         </p>
         <p className="text-xs text-zinc-500 mt-2">
           Masz prawo do bycia zapomnianym — administrator może usunąć wszystkie dane powiązane z numerem telefonu.
-          Skontaktuj się z <a href="mailto:rodo@witaline.pl" className="text-brand-400 hover:underline">rodo@witaline.pl</a>.
+          Skontaktuj się z <a href={`mailto:${WITALINE_RODO_EMAIL}`} className="text-brand-400 hover:underline">{WITALINE_RODO_EMAIL}</a>.
         </p>
       </div>
 

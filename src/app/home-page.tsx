@@ -6,6 +6,7 @@ import Logo from "@/components/Logo";
 import FloatingWidget from "@/components/FloatingWidget";
 import DemoAudioPlayer from "@/components/DemoAudioPlayer";
 import SavingsCalculator from "@/components/SavingsCalculator";
+import { WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PricingSection from "@/components/PricingSection";
 import { t, initLocale, getLocale, translations_raw, type Locale } from "@/lib/i18n";
@@ -154,7 +155,7 @@ function FaqSection({ faqItems: items, locale }: { faqItems: { q: string; a: str
           </div>
           <p className="font-semibold text-zinc-900 mb-1">{locale === "en" ? "Still have questions?" : "Masz więcej pytań?"}</p>
           <p className="text-xs text-zinc-500 mb-4">{locale === "en" ? "We reply within 15 minutes" : "Oddzwonimy w 15 minut"}</p>
-          <a href="tel:+48732125752" className="block w-full bg-brand-400 text-white py-2.5 rounded-xl font-medium text-sm hover:bg-brand-500 transition mb-2">+48 732 125 752</a>
+          <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="block w-full bg-brand-400 text-white py-2.5 rounded-xl font-medium text-sm hover:bg-brand-500 transition mb-2">{WITALINE_PHONE_DISPLAY}</a>
           <a href="#kontakt" className="block w-full text-zinc-600 py-2.5 rounded-xl font-medium text-sm border border-zinc-200 hover:border-brand-200 hover:bg-brand-50 transition">{locale === "en" ? "Write to us" : "Napisz do nas"}</a>
         </div>
 
@@ -333,12 +334,12 @@ export default function HomePage() {
                 <Link href="/register" className="btn-primary text-base px-8 py-3.5 shadow-lg shadow-brand-500/20 hover:shadow-xl hover:shadow-brand-500/25 transition-all duration-300">
                   Rozpocznij 7-dniowy trial
                 </Link>
-                <a href="tel:+48732125752" className="inline-flex items-center gap-2.5 border border-zinc-200 text-zinc-700 hover:border-brand-200 hover:text-brand-700 hover:bg-brand-50/50 rounded-xl px-6 py-3.5 transition-all group">
+                <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="inline-flex items-center gap-2.5 border border-zinc-200 text-zinc-700 hover:border-brand-200 hover:text-brand-700 hover:bg-brand-50/50 rounded-xl px-6 py-3.5 transition-all group">
                   <span className="relative flex w-2.5 h-2.5">
                     <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-40" />
                     <span className="relative rounded-full bg-green-500 w-2.5 h-2.5" />
                   </span>
-                  <span className="text-base font-semibold">+48 732 125 752</span>
+                  <span className="text-base font-semibold">{WITALINE_PHONE_DISPLAY}</span>
                 </a>
               </div>
             </AnimatedDiv>
@@ -815,9 +816,9 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-400/5 via-transparent to-transparent" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 text-center relative">
           <p className="text-sm text-brand-300/80 font-medium mb-4">Zadzwoń i sprawdź &mdash; asystent odbiera 24/7</p>
-          <a href="tel:+48732125752" className="inline-flex items-center gap-4 bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] hover:border-brand-400/30 rounded-2xl px-8 py-4 transition-all group">
+          <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="inline-flex items-center gap-4 bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] hover:border-brand-400/30 rounded-2xl px-8 py-4 transition-all group">
             <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse-soft" />
-            <span className="text-2xl md:text-3xl font-bold text-white tracking-wide font-mono group-hover:text-brand-200 transition-colors">+48 732 125 752</span>
+            <span className="text-2xl md:text-3xl font-bold text-white tracking-wide font-mono group-hover:text-brand-200 transition-colors">{WITALINE_PHONE_DISPLAY}</span>
             <svg className="w-5 h-5 text-white/30 group-hover:text-brand-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>

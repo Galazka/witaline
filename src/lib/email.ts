@@ -1,5 +1,6 @@
 import { sendEmail, fetchInvoicePdf } from "@/lib/sendgrid";
 import type { SendGridResult } from "@/lib/sendgrid";
+import { WITALINE_CONTACT_EMAIL } from "@/lib/constants";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl";
 
@@ -137,7 +138,7 @@ export async function sendPaymentFailedEmail(to: string, businessName: string): 
         <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">Nie udalo sie przetworzyc platnosci za konto <strong>${businessName}</strong>. Prosze o aktualizacje danych platnosci.</p>
         <a href="${APP_URL}/dashboard" style="display:inline-block;background:#EF4444;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;">Aktualizuj platnosc →</a>
         <hr style="border:none;border-top:1px solid #e4e4e7;margin:32px 0;">
-        <p style="font-size:12px;color:#a1a1aa;margin:0;">Jesli masz pytania: kontakt@witaline.pl</p>
+        <p style="font-size:12px;color:#a1a1aa;margin:0;">Jesli masz pytania: ${WITALINE_CONTACT_EMAIL}</p>
       </div>`),
     categories: ["payment-failed"],
   });

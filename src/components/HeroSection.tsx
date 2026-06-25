@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import VoiceAgent from "@/components/VoiceAgent";
+import { WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 import AIChatPreview from "@/components/AIChatPreview";
 
 function ParallaxWrapper({ children, speed = 0.15, className = "" }: { children: React.ReactNode; speed?: number; className?: string }) {
@@ -98,7 +99,7 @@ export default function HeroSection({ tr }: HeroSectionProps) {
               </p>
 
               <div className="flex items-center gap-3 pt-2">
-                <a href="tel:+48732125752" className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">+48 732 125 752</a>
+                <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">{WITALINE_PHONE_DISPLAY}</a>
                 <span className="text-xs text-zinc-400">· Zadzwoń i sprawdź</span>
               </div>
               <p className="text-[11px] text-zinc-400 -mt-2">Połączenie wg taryfy operatora — bez dodatkowych opłat</p>

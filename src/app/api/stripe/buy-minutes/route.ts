@@ -1,27 +1,33 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase-server";
 import { getStripe } from "@/lib/stripe";
-import { getElasticRate, convertPrice, CURRENCY_RATES, type Currency } from "@/lib/pricing";
+import { getElasticRate, convertPrice, type Currency } from "@/lib/pricing";
 
 const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").trim();
-
-const SUPPORTED_CURRENCIES: Currency[] = ["pln", "eur", "usd"];
 
 function stripeLocale(currency: Currency): "pl" | "en" {
   return currency === "pln" ? "pl" : "en";
 }
+
+const buyMinutesSchema = z.object({
+  businessId: z.string().uuid(),
+  minutes: z.number().int().min(50).max(5000),
+  currency: z.enum(["pln", "eur", "usd"]).optional().default("pln"),
+});
 
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { businessId, minutes, currency = "pln" } = await request.json();
-  const cur: Currency = SUPPORTED_CURRENCIES.includes(currency) ? currency : "pln";
-  const mins = parseInt(minutes, 10);
-  if (!businessId || !mins || mins < 50 || mins > 5000) {
-    return NextResponse.json({ error: "Invalid minutes (50-5000)" }, { status: 400 });
+  const raw = await request.json();
+  const parsed = buyMinutesSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
   }
+
+  const { businessId, minutes, currency } = parsed.data;
 
   const { data: business } = await supabase
     .from("businesses")
@@ -31,15 +37,15 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const ratePLN = getElasticRate(mins);
-  const amountPLN = mins * ratePLN;
-  const amountInCurrency = convertPrice(amountPLN, cur);
+  const ratePLN = getElasticRate(minutes);
+  const amountPLN = minutes * ratePLN;
+  const amountInCurrency = convertPrice(amountPLN, currency);
   const amountCents = Math.round(amountInCurrency * 100);
-  const rateDisplay = convertPrice(ratePLN, cur).toFixed(2).replace(".", ",");
+  const rateDisplay = convertPrice(ratePLN, currency).toFixed(2).replace(".", ",");
 
   const stripe = getStripe();
 
-  const paymentTypes: Array<"card" | "blik" | "p24"> = cur === "pln"
+  const paymentTypes: Array<"card" | "blik" | "p24"> = currency === "pln"
     ? ["card", "blik", "p24"]
     : ["card"];
 
@@ -48,10 +54,10 @@ export async function POST(request: Request) {
     payment_method_types: paymentTypes,
     line_items: [{
       price_data: {
-        currency: cur,
+        currency,
         product_data: {
-          name: `Pakiet ${mins} minut`,
-          description: `Pakiet rozmów AI — ${mins} min × ${rateDisplay} ${cur.toUpperCase()}/min`,
+          name: `Pakiet ${minutes} minut`,
+          description: `Pakiet rozmów AI — ${minutes} min × ${rateDisplay} ${currency.toUpperCase()}/min`,
         },
         unit_amount: amountCents,
       },
@@ -64,14 +70,14 @@ export async function POST(request: Request) {
       businessId,
       userId: user.id,
       type: "minute_package",
-      minutes: String(mins),
+      minutes: String(minutes),
       rate: String(ratePLN),
-      currency: cur,
+      currency,
       amount_pln: String(Math.round(amountPLN * 100) / 100),
     },
     success_url: `${BASE_URL}/dashboard?payment=success`,
     cancel_url: `${BASE_URL}/dashboard?payment=cancel`,
-    locale: stripeLocale(cur),
+    locale: stripeLocale(currency),
   });
 
   if (session.url) {

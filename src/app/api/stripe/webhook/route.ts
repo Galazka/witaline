@@ -15,11 +15,11 @@ export async function POST(request: Request) {
   const stripe = getStripe();
   let event;
   try {
-    if (endpointSecret && endpointSecret !== "dev" && endpointSecret.startsWith("whsec_")) {
-      event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
-    } else {
-      event = JSON.parse(body);
+    if (!endpointSecret.startsWith("whsec_")) {
+      console.error("[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured — rejecting all webhooks");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
+    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
           title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
           message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
           metadata: { currency, amount_pln: amountPLN, minutes },
-        }).catch(() => {});
+        }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
 
         console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance });
       }
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
           title: currency === "pln" ? "Zakupiono pakiet SMS" : "SMS package purchased",
           message: `${smsCount} SMS — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
           metadata: { currency, amount_pln: amountPLN, sms_count: smsCount },
-        }).catch(() => {});
+        }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
 
         console.log("[stripe] sms package purchased:", { businessId, smsCount, currency, amountPLN });
       }
@@ -155,7 +155,7 @@ export async function POST(request: Request) {
         title: currency === "pln" ? "Subskrypcja aktywowana" : "Subscription activated",
         message: `${obj?.metadata?.plan || "subscription"}${currency !== "pln" ? ` (${currency.toUpperCase()})` : ""} — ${amountPLN.toFixed(2).replace(".", ",")} PLN`,
         metadata: { currency, amount_pln: amountPLN, plan: obj?.metadata?.plan },
-      }).catch(() => {});
+      }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
 
       const { data: biz } = await supabaseAdmin
         .from("businesses")

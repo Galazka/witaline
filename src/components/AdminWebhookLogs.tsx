@@ -29,7 +29,7 @@ export default function AdminWebhookLogs() {
     fetch("/api/admin/webhook-logs?" + params)
       .then(r => r.json())
       .then(d => { setLogs(d.logs || []); setTotal(d.total || 0); })
-      .catch(() => {})
+      .catch((e) => console.error("[AdminWebhookLogs] fetch error:", e))
       .finally(() => setLoading(false));
   }, [page, filterStatus]);
 

@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPlanConfig } from "@/lib/pricing";
 import { twiml, escapeXml } from "@/lib/twilio-utils";
+import { WITALINE_MAIN_BUSINESS_ID, WITALINE_PHONE_NUMBER } from "@/lib/constants";
 import type { PlanKey } from "@/types/database";
-
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 function isSpam(addOns: string | null): boolean {
   if (!addOns) return false;
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
   const callerId = formData.get("From") as string;
   const callSid = formData.get("CallSid") as string;
   const addOns = formData.get("AddOns") as string | null;
-  const mainNumber = process.env.TWILIO_PHONE_NUMBER || "+48732125752";
+  const mainNumber = process.env.TWILIO_PHONE_NUMBER || WITALINE_PHONE_NUMBER;
 
   console.log("[incoming] Call received:", { twilioNumber, callerId, callSid, isMain: twilioNumber === mainNumber });
 
@@ -104,7 +103,7 @@ export async function POST(request: Request) {
 
   const config = getPlanConfig(business.current_plan as PlanKey);
   if (business.minutes_used_this_week >= config.monthlyVoiceMinutes) {
-    if (business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {
+    if (business.current_plan !== "elastic_0" && business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {
       return twiml(
         `<Say language="pl-PL">Przepraszamy, firma ${escapeXml(business.name)} wyczerpala limit minut na ten tydzien. Prosimy zadzwonic pozniej.</Say><Hangup/>`
       );

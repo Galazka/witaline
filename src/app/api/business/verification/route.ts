@@ -69,8 +69,9 @@ export async function PATCH(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Only admin@witaline.pl can approve
-  if (user.email !== "admin@witaline.pl") {
+  // Only admin can approve
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail || !adminEmail.split(",").includes(user.email || "")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

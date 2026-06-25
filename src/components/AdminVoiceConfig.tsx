@@ -188,7 +188,7 @@ export default function AdminVoiceConfig() {
                       >
                         <option value="">— Domyślny ({defaultVoice?.display_name || "Maja"}) —</option>
                         {voices.filter(v => v.active).filter(v => {
-                          const planOrder = ["elastic_0", "start_100", "pro_249", "pro_500", "lux_599", "enterprise_2000"];
+                          const planOrder = ["elastic_0", "enterprise_2000"];
                           const bizIdx = planOrder.indexOf(b.current_plan as string);
                           const minIdx = planOrder.indexOf(v.min_plan as string);
                           return bizIdx >= minIdx;

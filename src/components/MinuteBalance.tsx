@@ -9,6 +9,7 @@ export default function MinuteBalance({ businessId }: { businessId: string }) {
   const [loading, setLoading] = useState(true);
   const [minutes, setMinutes] = useState(100);
   const [buying, setBuying] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
   const supabase = createClient();
 
   useEffect(() => {
@@ -34,15 +35,21 @@ export default function MinuteBalance({ businessId }: { businessId: string }) {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else alert("Błąd: " + (data.error || "Nieznany błąd"));
+      else setPurchaseError(data.error || "Nieznany błąd");
     } catch {
-      alert("Błąd połączenia");
+      setPurchaseError("Błąd połączenia");
     }
     setBuying(false);
   }
 
   return (
     <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm space-y-5">
+      {purchaseError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+          <span>{purchaseError}</span>
+          <button onClick={() => setPurchaseError("")} className="ml-auto text-red-400 hover:text-red-600 text-xs">OK</button>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-zinc-900">Saldo minut</h3>

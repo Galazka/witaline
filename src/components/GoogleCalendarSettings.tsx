@@ -18,7 +18,7 @@ export default function GoogleCalendarSettings({ businessId }: Props) {
         setConnected(data.connected);
         setExpired(data.expired || false);
       })
-      .catch(() => {})
+      .catch((e) => console.error("[GoogleCalendarSettings] error:", e))
       .finally(() => setChecking(false));
   }, [businessId]);
 

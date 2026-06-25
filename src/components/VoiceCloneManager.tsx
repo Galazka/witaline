@@ -17,13 +17,13 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
   const [result, setResult] = useState<{ success: boolean; voice_id?: string; display_name?: string; error?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (currentPlan !== "enterprise_2000" && currentPlan !== "lux_599") {
+  if (currentPlan !== "enterprise_2000") {
     return (
       <div className="bg-white rounded-xl p-6 text-center space-y-3">
         <span className="text-4xl block">🎤</span>
         <h3 className="text-lg font-semibold text-zinc-900">Klonowanie głosu</h3>
         <p className="text-sm text-zinc-500 max-w-md mx-auto">
-          Klonowanie głosu dostępne w pakiecie Lux i Enterprise. Zadbaj o unikalne brzmienie swojego asystenta AI.
+          Klonowanie głosu dostępne w pakiecie Enterprise. Zadbaj o unikalne brzmienie swojego asystenta AI.
         </p>
         <a
           href="#"

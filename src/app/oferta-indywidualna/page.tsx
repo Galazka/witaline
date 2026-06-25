@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useState, useEffect } from "react";
+import { WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 
 const processSteps = [
   { step: "1", title: "Rozmowa diagnostyczna", desc: "30-minutowa rozmowa, podczas której poznajemy Twoją firmę, procesy i potrzeby. Żadnego formularza — po prostu rozmawiamy.", icon: "📞", duration: "30 min" },
@@ -72,9 +73,9 @@ export default function OfertaIndywidualnaPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="#cennik" className="btn-primary text-base px-8 py-3.5 shadow-lg shadow-brand-500/25">Sprawdź widełki cenowe</a>
-            <a href="tel:+48732125752" className="inline-flex items-center gap-3 border border-brand-200 text-brand-700 hover:bg-brand-50 rounded-xl px-6 py-3.5 transition-all">
+            <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="inline-flex items-center gap-3 border border-brand-200 text-brand-700 hover:bg-brand-50 rounded-xl px-6 py-3.5 transition-all">
               <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse-soft" />
-              <span className="text-base font-semibold">+48 732 125 752</span>
+              <span className="text-base font-semibold">{WITALINE_PHONE_DISPLAY}</span>
             </a>
           </div>
         </div>
@@ -391,9 +392,9 @@ export default function OfertaIndywidualnaPage() {
           <h2 className="text-3xl md:text-4xl font-bold font-display tracking-tight mb-4">Gotów, żebyśmy zajęli się resztą?</h2>
           <p className="text-brand-200/80 mb-8 max-w-xl mx-auto">Zostaw numer, oddzwonimy w 15 minut. Albo zadzwoń od razu — asystent odbiera 24/7.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="tel:+48732125752" className="inline-flex items-center gap-3 bg-white/[0.08] border border-white/15 hover:bg-white/[0.12] rounded-2xl px-6 py-3.5 transition-all">
+            <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="inline-flex items-center gap-3 bg-white/[0.08] border border-white/15 hover:bg-white/[0.12] rounded-2xl px-6 py-3.5 transition-all">
               <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse-soft" />
-              <span className="text-lg font-semibold">+48 732 125 752</span>
+              <span className="text-lg font-semibold">{WITALINE_PHONE_DISPLAY}</span>
             </a>
             <Link href="/register?plan=enterprise" className="btn-primary text-base px-8 py-3.5 shadow-lg shadow-brand-500/25">Wybierz ten model</Link>
           </div>

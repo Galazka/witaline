@@ -295,12 +295,8 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                   onChange={(e) => setPlan(e.target.value)}
                   className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm"
                 >
-                  <option value="elastic_0">Elastyczny — 0 zł/mies</option>
-                  <option value="start_100">Start — 299 zł/mies</option>
-                  <option value="pro_249">Pro — 249 zł/mies</option>
-                  <option value="pro_500">Growth — 599 zł/mies</option>
-                  <option value="lux_599">Lux — 599 zł/mies</option>
-                  <option value="enterprise_2000">Enterprise — 1199 zł/mies</option>
+                  <option value="elastic_0">Elastyczny — 0 zł/mies, pay-as-you-go</option>
+                  <option value="enterprise_2000">Enterprise — indywidualna wycena</option>
                 </select>
               </div>
               <div>

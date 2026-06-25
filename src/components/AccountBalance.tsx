@@ -21,23 +21,39 @@ export default function AccountBalance({
   const [buying, setBuying] = useState(false);
   const [minutes, setMinutes] = useState(100);
   const [smsCount, setSmsCount] = useState(100);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
+  const [trialMinutesUsed, setTrialMinutesUsed] = useState(0);
+  const [trialSmsUsed, setTrialSmsUsed] = useState(0);
+  const [isTrialing, setIsTrialing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
   const supabase = createClient();
+
+  const FREE_TRIAL_MINUTES = 15;
+  const FREE_TRIAL_SMS = 10;
 
   const fetchData = async () => {
     try {
       const { data, error } = await supabase
         .from("businesses")
-        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased")
+        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, subscription_status, trial_ends_at, trial_minutes_used, trial_sms_used, created_at")
         .eq("id", businessId)
         .maybeSingle();
       if (data && !error) {
-        setBalance(parseFloat(data.prepaid_minutes || "0"));
+        const d = data as any;
+        setBalance(parseFloat(d.prepaid_minutes || "0"));
         setSmsData({
-          used: (data as any).sms_used || 0,
-          limit: (data as any).sms_limit || 0,
-          extra: (data as any).sms_extra_purchased || 0,
-          remaining: getSmsRemaining(data as any),
+          used: d.sms_used || 0,
+          limit: d.sms_limit || 0,
+          extra: d.sms_extra_purchased || 0,
+          remaining: getSmsRemaining(d),
         });
+        setIsTrialing(d.subscription_status === "trialing");
+        setTrialMinutesUsed(d.trial_minutes_used || 0);
+        setTrialSmsUsed(d.trial_sms_used || 0);
+        if (d.subscription_status === "trialing") {
+          const trialEnd = d.trial_ends_at ? new Date(d.trial_ends_at) : new Date(new Date(d.created_at).getTime() + 7 * 86400000);
+          setTrialDaysLeft(Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / 86400000)));
+        }
       }
     } catch (e) {
       console.warn("[AccountBalance] fetch error:", e);
@@ -64,9 +80,9 @@ export default function AccountBalance({
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else alert("Błąd: " + (data.error || "Nieznany błąd"));
+      else setPurchaseError(data.error || "Nieznany błąd");
     } catch {
-      alert("Błąd połączenia");
+      setPurchaseError("Błąd połączenia");
     }
     setBuying(false);
   }
@@ -78,6 +94,7 @@ export default function AccountBalance({
 
   async function handleBuySms() {
     setBuying(true);
+    setPurchaseError("");
     try {
       const res = await fetch("/api/stripe/buy-sms", {
         method: "POST",
@@ -86,9 +103,9 @@ export default function AccountBalance({
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else alert("Błąd: " + (data.error || "Nieznany błąd"));
+      else setPurchaseError(data.error || "Nieznany błąd");
     } catch {
-      alert("Błąd połączenia");
+      setPurchaseError("Błąd połączenia");
     }
     setBuying(false);
   }
@@ -112,6 +129,15 @@ export default function AccountBalance({
         </button>
       </div>
 
+      {/* Error message */}
+      {purchaseError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+          <span>{purchaseError}</span>
+          <button onClick={() => setPurchaseError("")} className="ml-auto text-red-400 hover:text-red-600 text-xs">OK</button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 bg-zinc-50 p-1 rounded-lg">
         {tabs.map((t) => (
@@ -129,7 +155,28 @@ export default function AccountBalance({
         ))}
       </div>
 
-      {(balance < 50 || smsData.remaining < 20) && (
+      {isTrialing && (
+        <div className="bg-brand-50 border border-brand-200 rounded-xl p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-brand-800">
+              🎯 Okres próbny — zostało {trialDaysLeft} dni
+            </p>
+            <a href="/dashboard?tab=upgrade" className="text-xs text-brand-600 font-medium hover:underline">
+              Dodaj środki →
+            </a>
+          </div>
+          <div className="flex gap-4">
+            <span className="text-xs px-2 py-0.5 bg-white text-brand-700 rounded-full">
+              🎙️ {Math.min(trialMinutesUsed, FREE_TRIAL_MINUTES)}/{FREE_TRIAL_MINUTES} min
+            </span>
+            <span className="text-xs px-2 py-0.5 bg-white text-brand-700 rounded-full">
+              ✉️ {Math.min(trialSmsUsed, FREE_TRIAL_SMS)}/{FREE_TRIAL_SMS} SMS
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!isTrialing && (balance < 50 || smsData.remaining < 20) && (
         <div className={`rounded-xl px-4 py-3 text-sm flex items-center gap-2 ${(balance < 20 || smsData.remaining < 10) ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
           <span>

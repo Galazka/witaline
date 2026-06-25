@@ -75,7 +75,7 @@ export async function createBooking(params: {
       serviceType,
       reservedAt,
       businessName: biz.name || "",
-    }, businessId).catch(() => {});
+    }, businessId).catch((e) => console.warn("[calendar] error:", e));
   }
 
   // Sync to Google Calendar if connected
@@ -85,7 +85,7 @@ export async function createBooking(params: {
     startDateTime: reservedAt,
     endDateTime: new Date(new Date(reservedAt).getTime() + duration * 60000).toISOString(),
     description: `Klient: ${callerName}\nTelefon: ${callerPhone || "—"}\nNotatki: ${notes || "—"}`,
-  }).catch(() => {});
+  }).catch((e) => console.warn("[calendar] error:", e));
 
   return { ok: true, reservation };
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { connectToAgent, twiml } from "@/lib/twilio-utils";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const CALL_LIMIT_PER_NUMBER = 5;
 const WINDOW_SECONDS = 60;
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 // In-memory IP rate limiter (resets on server restart — fine for Twilio)
 const ipHits = new Map<string, number[]>();
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   if (toClean) {
     const { data: biz } = await supabaseAdmin
       .from("businesses")
-      .select("id, name, voice_id, trial_ends_at, subscription_status")
+      .select("id, name, voice_id, trial_ends_at, subscription_status, trial_minutes_used")
       .eq("twilio_number", toClean)
       .maybeSingle();
 
@@ -83,13 +83,17 @@ export async function POST(request: Request) {
       businessId = biz.id;
       businessName = biz.name || "WitaLine";
 
-      // Block calls for expired trials
+      const TRIAL_MAX_MINUTES = 15;
+
+      // Block calls for expired trials or exceeded trial minute cap
       if (
-        biz.subscription_status === "trialing" &&
-        biz.trial_ends_at &&
-        new Date(biz.trial_ends_at) < new Date()
+        biz.subscription_status === "trialing"
       ) {
-        return twiml(`<Say language="pl-PL">Numer jest obecnie nieaktywny. Aby odnowić usługę, odwiedź witaline.pl. Dziękujemy.</Say><Hangup/>`);
+        const trialExpired = biz.trial_ends_at && new Date(biz.trial_ends_at) < new Date();
+        const trialMinutesExceeded = (biz.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+        if (trialExpired || trialMinutesExceeded) {
+          return twiml(`<Say language="pl-PL">Numer jest obecnie nieaktywny. Aby odnowić usługę, odwiedź witaline.pl. Dziękujemy.</Say><Hangup/>`);
+        }
       }
 
       if (biz.voice_id) {

@@ -7,6 +7,7 @@ import { sendWebhook } from "@/lib/webhook-outbound";
 import { enqueueJob } from "@/lib/job-queue";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
 import { analyzeCall } from "@/lib/analyze-call";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function verifyWebhook(request: Request): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
@@ -29,8 +30,6 @@ function classifyCall(summary: string, transcript: string): Classification {
   if (/\b(pytanie|pytam|chciałem zapytać|inform|jak działa|czy mogę|help|porad|dlaczego|gdzie|kiedy|jak|co to)\b/.test(text)) return "question";
   return "unknown";
 }
-
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 const OFFER_SMS_TEXTS: Record<string, string> = {
   elastic: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta ELASTYCZNA: 0 zł/mies, płacisz tylko za użycie, 1,00 zł/min. Sprawdź: https://witaline.pl/cennik`,
@@ -169,7 +168,7 @@ export async function POST(request: Request) {
     metadata: metadata as Record<string, unknown>,
     currentPlan: isMainLine ? "main" : (await supabaseAdmin.from("businesses").select("current_plan, minutes_used_this_week").eq("id", businessId).maybeSingle())?.data?.current_plan || "start_100",
     minutesUsed: isMainLine ? 0 : (await supabaseAdmin.from("businesses").select("current_plan, minutes_used_this_week").eq("id", businessId).maybeSingle())?.data?.minutes_used_this_week || 0,
-  }).catch(() => {});
+  }).catch((e) => console.error("[call-completed] notify error:", e));
 
   if (isMainLine) {
     const classification = classifyCall(summary || "", transcript || "");
@@ -199,7 +198,7 @@ export async function POST(request: Request) {
       .single();
 
     if (callLog) {
-      analyzeCall(transcript || "", summary || "", callLog.id).catch(() => {});
+      analyzeCall(transcript || "", summary || "", callLog.id).catch((e) => console.error("[call-completed] analyze error:", e));
 
       await supabaseAdmin.from("conversations").insert({
         business_id: WITALINE_MAIN_BUSINESS_ID,
@@ -259,13 +258,23 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 });
   if (business.suspended) return NextResponse.json({ error: "Account suspended" }, { status: 403 });
-  if (business.subscription_status === "trialing" && business.trial_ends_at && new Date(business.trial_ends_at) < new Date()) {
-    return NextResponse.json({ error: "Trial expired" }, { status: 402 });
+  const TRIAL_MAX_MINUTES = 15;
+
+  if (business.subscription_status === "trialing") {
+    const trialExpired = business.trial_ends_at && new Date(business.trial_ends_at) < new Date();
+    const trialMinutesExceeded = (business.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+    if (trialExpired || trialMinutesExceeded) {
+      return NextResponse.json({ error: trialExpired ? "Trial expired" : "Trial minute limit reached" }, { status: 402 });
+    }
   }
 
   const planConfig = getPlanConfig(business.current_plan);
-  if (business.minutes_used_this_week >= planConfig.monthlyVoiceMinutes && business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {
-    return NextResponse.json({ error: "Limit exceeded" }, { status: 429 });
+
+  // Block non-elastic plans that exceed their monthly limit
+  if (business.current_plan !== "elastic_0" && business.current_plan !== "enterprise_2000") {
+    if (business.minutes_used_this_week >= planConfig.monthlyVoiceMinutes) {
+      return NextResponse.json({ error: "Limit exceeded" }, { status: 429 });
+    }
   }
 
   const costPln = calculateCost(durationSeconds, business.current_plan);
@@ -303,7 +312,7 @@ export async function POST(request: Request) {
   const minutesToAdd = Math.ceil(durationSeconds / 60);
 
   if (callLog) {
-    analyzeCall(transcript || "", summary || "", callLog.id).catch(() => {});
+    analyzeCall(transcript || "", summary || "", callLog.id).catch((e) => console.error("[call-completed] analyze error:", e));
 
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
@@ -330,13 +339,20 @@ export async function POST(request: Request) {
   const currentPrepaid = parseFloat(business.prepaid_minutes || "0");
   const newPrepaid = currentPrepaid > 0 ? Math.max(0, Math.round((currentPrepaid - minutesToAdd) * 100) / 100) : currentPrepaid;
 
+  const updateData: Record<string, unknown> = {
+    minutes_used_this_week: (business.minutes_used_this_week || 0) + minutesToAdd,
+    tokens_used_this_month: (business.tokens_used_this_month || 0) + estimatedTokens,
+    prepaid_minutes: newPrepaid,
+  };
+
+  // Track trial usage separately for abuse prevention
+  if (business.subscription_status === "trialing") {
+    updateData.trial_minutes_used = (business.trial_minutes_used || 0) + minutesToAdd;
+  }
+
   await supabaseAdmin
     .from("businesses")
-    .update({
-      minutes_used_this_week: (business.minutes_used_this_week || 0) + minutesToAdd,
-      tokens_used_this_month: (business.tokens_used_this_month || 0) + estimatedTokens,
-      prepaid_minutes: newPrepaid,
-    })
+    .update(updateData)
     .eq("id", businessId);
 
   const reservation = extractReservation(customData);

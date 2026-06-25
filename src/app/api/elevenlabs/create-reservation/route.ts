@@ -1,24 +1,33 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { createClient } from "@/lib/supabase-server";
 import { createBooking } from "@/lib/calendar";
 import { sendSlackNotification, reservationSlackBlocks } from "@/lib/slack-notify";
-import { logAudit } from "@/lib/audit-log";
+
+const reservationSchema = z.object({
+  business_id: z.string().uuid(),
+  reserved_at: z.string().min(1, "reserved_at is required"),
+  service_type: z.string().min(1, "service_type is required"),
+  caller_name: z.string().min(1, "caller_name is required"),
+  caller_phone: z.string().max(50).optional(),
+  notes: z.string().max(5000).optional(),
+});
 
 export async function POST(request: Request) {
   try {
     const body = await request.json() as Record<string, unknown>;
-    const params = body.parameters as Record<string, unknown> | undefined;
-    const businessId = (params?.business_id || body.business_id || (body.custom_data as Record<string, unknown> | undefined)?.business_id) as string | undefined;
-    const reservedAt = (params?.reserved_at || body.reserved_at) as string | undefined;
-    const serviceType = (params?.service_type || body.service_type) as string | undefined;
-    const callerName = (params?.caller_name || body.caller_name) as string | undefined;
-    const callerPhone = (params?.caller_phone || body.caller_phone) as string | undefined;
-    const notes = (params?.notes || body.notes) as string | undefined;
-
-    if (!businessId || !reservedAt || !serviceType || !callerName) {
-      return NextResponse.json({ ok: false, error: "Missing required fields: business_id, reserved_at, service_type, caller_name" }, { status: 400 });
+    const raw = body.parameters
+      ? (body.parameters as Record<string, unknown>)
+      : {
+          ...(body as Record<string, unknown>),
+          ...((body.custom_data as Record<string, unknown>) || {}),
+        };
+    const parsed = reservationSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ ok: false, error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
     }
+
+    const { business_id: businessId, reserved_at: reservedAt, service_type: serviceType, caller_name: callerName, caller_phone: callerPhone, notes } = parsed.data;
 
     const result = await createBooking({
       businessId,

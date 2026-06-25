@@ -17,7 +17,7 @@ export default function SmsStatusWidget({ businessId }: Props) {
     fetch(`/api/business/sms/status?businessId=${businessId}`)
       .then(r => r.json())
       .then(setData)
-      .catch(() => {})
+      .catch((e) => console.error("[SmsStatusWidget] fetch error:", e))
       .finally(() => setLoading(false));
   }, [businessId]);
 

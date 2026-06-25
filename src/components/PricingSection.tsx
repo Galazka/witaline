@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 import { formatPrice, calculateSelfServicePrice, calculateElasticPrice, ELASTIC_TIERS, CONFIG, convertPrice, CURRENCY_SYMBOLS, formatPriceCurrency, formatPriceMin, type SelfServiceConfig, type Currency } from "@/lib/pricing";
 import { SMS_PACKAGES, getSmsPriceNettoForRate, getFreeSmsForRate } from "@/lib/sms-pricing";
 import type { Locale } from "@/lib/i18n";
@@ -243,7 +244,7 @@ export default function PricingSection({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-700">{locale === "pl" ? "Sprawdź naszego asystenta AI" : "Test our AI assistant now"}</p>
-                    <a href="tel:+48732125752" className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">+48 732 125 752</a>
+                    <a href={"tel:" + WITALINE_PHONE_NUMBER} className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">{WITALINE_PHONE_DISPLAY}</a>
                   </div>
                 </div>
               </div>
@@ -273,6 +274,9 @@ export default function PricingSection({
                     {tr.tryFree}
                   </Link>
                   <p className="text-center text-[10px] text-zinc-400 mt-2">{tr.noCard}</p>
+                  <p className="text-center text-[9px] text-brand-500 mt-1 font-medium">
+                    {locale === "pl" ? "15 min rozmów + 10 SMS gratis" : "15 call minutes + 10 SMS free"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -406,7 +410,7 @@ function EnterpriseSection({ locale, tr, currency }: { locale: Locale; tr: Prici
             <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.monthly} ({tr.startingFrom})</span><span className="font-medium">{formatPriceLocal(monthlyBrutto, currency)}</span></div>
             <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{tr.firstMonth}</span><span className="text-brand-500">{formatPriceLocal(monthlyBrutto + setupFee, currency)}</span></div>
           </div>
-          <a href="tel:+48732125752" className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 mb-2">{tr.callUs}</a>
+          <a href={"tel:" + WITALINE_PHONE_NUMBER} className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 mb-2">{tr.callUs}</a>
           <a href="/oferta-indywidualna" className="block w-full text-center bg-white text-zinc-700 py-3 rounded-2xl font-semibold border border-zinc-200 hover:bg-brand-50 transition">{tr.seeOffer}</a>
         </div>
       </div>

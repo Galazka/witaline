@@ -94,7 +94,7 @@ export default function DemoAudioPlayer() {
         audio.currentTime = 0;
         setCurrentTime(0);
       }
-      audio.play().catch(() => {});
+      audio.play().catch((e) => console.warn("[DemoAudioPlayer] play error:", e));
       setIsPlaying(true);
     }
   }, [isPlaying, currentTime]);

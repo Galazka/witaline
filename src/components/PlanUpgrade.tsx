@@ -128,7 +128,8 @@ export default function PlanUpgrade({
         </h3>
         <div className="grid md:grid-cols-2 gap-4">
           {billingModels.map((model) => {
-            const isCurrent = (model.key === "self_service" && (currentPlan === "elastic_0" || currentPlan === "start_100" || currentPlan === "pro_500")) || (model.key === "enterprise" && currentPlan === "enterprise_2000");
+            const cp = currentPlan as string;
+            const isCurrent = (model.key === "elastic_0" && (cp === "elastic_0" || cp === "self_service" || cp === "start_100" || cp === "pro_500")) || (model.key === "enterprise_2000" && cp === "enterprise_2000");
             return (
               <button
                 key={model.key}

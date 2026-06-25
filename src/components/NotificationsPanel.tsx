@@ -50,7 +50,7 @@ export default function NotificationsPanel({ businessId }: { businessId: string 
           setUnreadCount(data.notifications.filter((n: Notification) => !n.is_read).length);
         }
       })
-      .catch(() => {});
+      .catch((e) => console.error("[NotificationsPanel] fetch error:", e));
   }, [businessId]);
 
   useEffect(() => {

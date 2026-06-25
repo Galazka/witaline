@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { WITALINE_CONTACT_EMAIL } from "@/lib/constants";
 
 const VoiceAgent = dynamic(() => import("@/components/VoiceAgent"), {
   ssr: false,
@@ -39,7 +40,7 @@ Chat i widget na stronie sa nielimitowane w kazdym planie.
 Rejestracja online w 5 minut. Bez karty kredytowej. 7 dni za darmo.
 
 ## Kontakt
-Email: kontakt@witaline.pl
+Email: ${WITALINE_CONTACT_EMAIL}
 
 Odpowiadaj po polsku, krotko i naturalnie. Zachecaj do rejestracji i testowania.`;
 

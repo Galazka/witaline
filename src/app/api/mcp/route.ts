@@ -5,21 +5,25 @@ import { setPendingTransfer } from "@/lib/transfer-store";
 import { getActiveCallSids } from "@/lib/active-call-store";
 import { withCache } from "@/lib/cache";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
+import { WITALINE_MAIN_BUSINESS_ID as WITALINE_MAIN_BUSINESS } from "@/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const WITALINE_MAIN_BUSINESS = "00000000-0000-0000-0000-000000000001";
 
 async function checkTrial(businessId: string): Promise<boolean> {
   if (businessId === WITALINE_MAIN_BUSINESS) return true;
   const { data } = await supabaseAdmin
     .from("businesses")
-    .select("subscription_status, trial_ends_at")
+    .select("subscription_status, trial_ends_at, trial_minutes_used")
     .eq("id", businessId)
     .maybeSingle();
   if (!data) return false;
-  if (data.subscription_status === "trialing" && data.trial_ends_at && new Date(data.trial_ends_at) < new Date()) return false;
+  const TRIAL_MAX_MINUTES = 15;
+  if (data.subscription_status === "trialing") {
+    const expired = data.trial_ends_at && new Date(data.trial_ends_at) < new Date();
+    const minutesExceeded = (data.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+    if (expired || minutesExceeded) return false;
+  }
   return true;
 }
 

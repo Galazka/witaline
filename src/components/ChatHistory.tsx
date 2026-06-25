@@ -48,7 +48,7 @@ const channelEmoji: Record<string, string> = {
 };
 
 function isPremiumPlan(plan?: string): boolean {
-  return plan === "pro_500" || plan === "enterprise_2000" || plan === "pro_249" || plan === "lux_599";
+  return plan === "enterprise_2000";
 }
 
 export default function ChatHistory({ businessId, businessPlan }: Props) {

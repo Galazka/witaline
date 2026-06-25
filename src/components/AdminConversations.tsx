@@ -160,7 +160,7 @@ export default function AdminConversations() {
             detail,
           } : m));
         })
-        .catch(() => {});
+        .catch((e) => console.error("[AdminConversations] error:", e));
     }
   }
 

@@ -47,7 +47,7 @@ async function handleJobMain(p: Record<string, unknown>): Promise<void> {
     .single();
 
   if (callLog) {
-    analyzeCall(transcript, summary, callLog.id).catch(() => {});
+    analyzeCall(transcript, summary, callLog.id).catch((e) => console.error("[process-jobs] analyze error:", e));
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
       channel: "voice",
@@ -84,7 +84,7 @@ async function handleJobMain(p: Record<string, unknown>): Promise<void> {
       was_helpful: null,
       started_at: new Date(Date.now() - durationSeconds * 1000).toISOString(),
       ended_at: new Date().toISOString(),
-    }).catch(() => {});
+    }).catch((e) => console.error("[process-jobs] error:", e));
   }
 }
 
@@ -133,7 +133,7 @@ async function handleJobClient(p: Record<string, unknown>): Promise<void> {
   const minutesToAdd = Math.ceil(durationSeconds / 60);
 
   if (callLog) {
-    analyzeCall(transcript, summary, callLog.id).catch(() => {});
+    analyzeCall(transcript, summary, callLog.id).catch((e) => console.error("[process-jobs] analyze error:", e));
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
       channel: "voice",
@@ -178,7 +178,7 @@ async function handleJobClient(p: Record<string, unknown>): Promise<void> {
       was_helpful: null,
       started_at: new Date(Date.now() - durationSeconds * 1000).toISOString(),
       ended_at: new Date().toISOString(),
-    }).catch(() => {});
+    }).catch((e) => console.error("[process-jobs] error:", e));
   }
 }
 

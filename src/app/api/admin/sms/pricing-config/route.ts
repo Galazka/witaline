@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import {
@@ -55,16 +56,31 @@ export async function GET() {
   });
 }
 
+const updateLimitsSchema = z.object({
+  action: z.literal("update_limits"),
+  business_id: z.string().uuid(),
+  sms_limit: z.number().int().min(0).optional(),
+  sms_extra_purchased: z.number().int().min(0).optional(),
+  sms_enabled: z.boolean().optional(),
+});
+
+const toggleAllSchema = z.object({
+  action: z.literal("toggle_all"),
+  enabled: z.boolean(),
+});
+
 export async function PATCH(request: Request) {
-  const { error } = await checkAdminAuth();
-  if (error) return error;
+  const auth = await checkAdminAuth();
+  if (auth.error) return auth.error;
 
-  const body = await request.json();
-  const { action } = body;
+  const raw = await request.json();
 
-  if (action === "update_limits") {
-    const { business_id, sms_limit, sms_extra_purchased, sms_enabled } = body;
-    if (!business_id) return NextResponse.json({ error: "Missing business_id" }, { status: 400 });
+  if (raw.action === "update_limits") {
+    const parsed = updateLimitsSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
+    }
+    const { business_id, sms_limit, sms_extra_purchased, sms_enabled } = parsed.data;
     const updateData: Record<string, unknown> = {};
     if (sms_limit !== undefined) updateData.sms_limit = sms_limit;
     if (sms_extra_purchased !== undefined) updateData.sms_extra_purchased = sms_extra_purchased;
@@ -74,8 +90,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true });
   }
 
-  if (action === "toggle_all") {
-    const { enabled } = body;
+  if (raw.action === "toggle_all") {
+    const parsed = toggleAllSchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues.map(i => `${i.path}: ${i.message}`).join("; ") }, { status: 400 });
+    }
+    const { enabled } = parsed.data;
     const { error: dbError } = await supabaseAdmin
       .from("businesses")
       .update({ sms_enabled: enabled })
