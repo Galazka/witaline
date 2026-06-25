@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendTrialActivationEmail } from "@/lib/email";
 
 async function assignExtension(supabaseA: typeof supabaseAdmin, businessId: string): Promise<string | null> {
   const { data: existing } = await supabaseA
@@ -74,9 +74,13 @@ export async function POST(request: Request) {
 
   const extension = await assignExtension(supabaseAdmin, business.id);
 
-  // Send welcome email (non-blocking)
+  // Send welcome + trial activation emails (non-blocking)
   if (user.email) {
     fireWelcomeEmail(user.email, name, plan);
+    const testNumber = process.env.WITALINE_TEST_NUMBER || process.env.TWILIO_PHONE_NUMBER || "+48 732 125 752";
+    sendTrialActivationEmail(user.email, name, testNumber).catch(e =>
+      console.error("[onboarding] trial activation email error:", e)
+    );
   }
 
   // Insert template services if provided

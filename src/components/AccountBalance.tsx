@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { getElasticRate, ELASTIC_TIERS } from "@/lib/pricing";
-import { SMS_PACKAGES, getSmsPricingConfig, getSmsRemaining, formatSmsCost, type SmsPricingConfig } from "@/lib/sms-pricing";
+import { SMS_PACKAGES, getSmsPricingConfig, getSmsRemaining, getSmsPackagePrice, formatSmsCost, type SmsPricingConfig } from "@/lib/sms-pricing";
 
 type Tab = "minutes" | "sms";
 
@@ -88,9 +88,8 @@ export default function AccountBalance({
   }
 
   // ─── SMS package ─────────────────────────────────────────────
-  const pkg = SMS_PACKAGES.find(p => p.smsCount === smsCount) || SMS_PACKAGES[0];
-  const smsPricePLN = pkg.clientPricePLN;
-  const smsPricePerSms = pkg.pricePerSmsPLN;
+  const smsPricePLN = getSmsPackagePrice(smsCount);
+  const smsPricePerSms = Math.round((smsPricePLN / smsCount) * 100) / 100;
 
   async function handleBuySms() {
     setBuying(true);

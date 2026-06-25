@@ -42,13 +42,17 @@ function twilioApiRequest(method: "GET" | "POST", path: string, creds: TwilioCre
   });
 }
 
-function registerCall(fromNumber: string, toNumber: string, businessId?: string, callSid?: string): Promise<string> {
+function registerCall(fromNumber: string, toNumber: string, businessId?: string, callSid?: string, trialMinutesRemaining?: number): Promise<string> {
   return new Promise((resolve, reject) => {
+    const dynVars: Record<string, string | undefined> = { business_id: businessId || "00000000-0000-0000-0000-000000000001", caller_number: fromNumber, call_sid: callSid || "" };
+    if (trialMinutesRemaining !== undefined && trialMinutesRemaining >= 0) {
+      dynVars.trial_minutes_remaining = String(trialMinutesRemaining);
+    }
     const body = JSON.stringify({
       agent_id: process.env.ELEVENLABS_AGENT_ID,
       from_number: fromNumber, to_number: toNumber, direction: "inbound",
-      dynamic_vars: businessId ? { business_id: businessId, call_sid: callSid || undefined, caller_phone: fromNumber || undefined, to_number: toNumber || undefined } : undefined,
-      conversation_initiation_client_data: { dynamic_variables: { business_id: businessId || "00000000-0000-0000-0000-000000000001", caller_number: fromNumber, call_sid: callSid || "" } }
+      dynamic_vars: businessId ? { business_id: businessId, call_sid: callSid || undefined, caller_phone: fromNumber || undefined, to_number: toNumber || undefined, trial_minutes_remaining: trialMinutesRemaining !== undefined ? String(trialMinutesRemaining) : undefined } : undefined,
+      conversation_initiation_client_data: { dynamic_variables: dynVars }
     });
     const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY! } }, (res) => {
       let d = "";
@@ -87,13 +91,13 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
   });
 }
 
-export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string): Promise<Response> {
+export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string, trialMinutesRemaining?: number): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfigucji. Prosimy spróbować później.</Say><Hangup/>`);
   // Store callSid for MCP handler to find if agent doesn't pass it
   await setActiveCallSid(businessId, callSid);
   try {
-    const xml = await registerCall(fromNumber, toNumber, businessId, callSid);
+    const xml = await registerCall(fromNumber, toNumber, businessId, callSid, trialMinutesRemaining);
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
     if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
     // Store conversation_id in memory for in-flight transfer

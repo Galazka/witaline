@@ -101,7 +101,7 @@ export default function DashboardHeader({
         <div className="bg-white rounded-xl border border-zinc-200 p-5">
           <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">Pakiet</p>
           <p className="text-lg font-semibold text-zinc-900">{planLabels[plan]}</p>
-          <p className="text-xs text-zinc-400 mt-1">{config.label} · {config.pricePLN} PLN/mies</p>
+          <p className="text-xs text-zinc-400 mt-1">{plan === "elastic_0" ? config.pricePLN : `${config.pricePLN} brutto/mies`}</p>
         </div>
 
         {/* Minuty */}
@@ -111,20 +111,24 @@ export default function DashboardHeader({
           </p>
           <div className="flex items-baseline gap-1 mb-2">
             <span className="text-2xl font-bold text-brand-400">{minutesUsed}</span>
-            <span className="text-sm text-zinc-400">/ {config.monthlyVoiceMinutes} min</span>
+            <span className="text-sm text-zinc-400">{config.monthlyVoiceMinutes ? `/ ${config.monthlyVoiceMinutes} min` : "min (pay-as-you-go)"}</span>
           </div>
-          <div className="w-full h-2 bg-brand-50 rounded-full overflow-hidden mb-1">
-            <div className={`h-full rounded-full transition-all duration-500 ${barColor(minsPct)}`}
-              style={{ width: `${minsPct}%` }} />
-          </div>
-          <div className="flex justify-between text-[10px]">
-            <span className="text-zinc-400">{minsPct}% wykorzystano</span>
-            {remainingMinutes > 0 ? (
-              <span className="text-brand-600 font-medium">~{remainingMinutes} min zostało</span>
-            ) : (
-              <span className="text-red-500 font-medium">Limit wyczerpany</span>
-            )}
-          </div>
+          {config.monthlyVoiceMinutes > 0 && (
+            <>
+              <div className="w-full h-2 bg-brand-50 rounded-full overflow-hidden mb-1">
+                <div className={`h-full rounded-full transition-all duration-500 ${barColor(minsPct)}`}
+                  style={{ width: `${minsPct}%` }} />
+              </div>
+              <div className="flex justify-between text-[10px]">
+                <span className="text-zinc-400">{minsPct}% wykorzystano</span>
+                {remainingMinutes > 0 ? (
+                  <span className="text-brand-600 font-medium">~{remainingMinutes} min zostało</span>
+                ) : (
+                  <span className="text-red-500 font-medium">Limit wyczerpany</span>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Tokeny */}
@@ -134,20 +138,24 @@ export default function DashboardHeader({
           </p>
           <div className="flex items-baseline gap-1 mb-2">
             <span className="text-2xl font-bold text-purple-500">{formatNumber(tokensUsed)}</span>
-            <span className="text-sm text-zinc-400">/ {formatNumber(config.monthlyTokens)} tok</span>
+            <span className="text-sm text-zinc-400">{config.monthlyTokens ? `/ ${formatNumber(config.monthlyTokens)} tok` : "tok (pay-as-you-go)"}</span>
           </div>
-          <div className="w-full h-2 bg-brand-50 rounded-full overflow-hidden mb-1">
-            <div className={`h-full rounded-full transition-all duration-500 ${barColor(tokensPct)}`}
-              style={{ width: `${tokensPct}%` }} />
-          </div>
-          <div className="flex justify-between text-[10px]">
-            <span className="text-zinc-400">{tokensPct}% wykorzystano</span>
-            {remainingTokens > 0 ? (
-              <span className="text-purple-600 font-medium">{formatNumber(remainingTokens)} tok zostało</span>
-            ) : (
-              <span className="text-red-500 font-medium">Limit wyczerpany</span>
-            )}
-          </div>
+          {config.monthlyTokens > 0 && (
+            <>
+              <div className="w-full h-2 bg-brand-50 rounded-full overflow-hidden mb-1">
+                <div className={`h-full rounded-full transition-all duration-500 ${barColor(tokensPct)}`}
+                  style={{ width: `${tokensPct}%` }} />
+              </div>
+              <div className="flex justify-between text-[10px]">
+                <span className="text-zinc-400">{tokensPct}% wykorzystano</span>
+                {remainingTokens > 0 ? (
+                  <span className="text-purple-600 font-medium">{formatNumber(remainingTokens)} tok zostało</span>
+                ) : (
+                  <span className="text-red-500 font-medium">Limit wyczerpany</span>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Zaoszczędzony czas */}

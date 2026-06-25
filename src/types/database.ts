@@ -191,6 +191,12 @@ export interface Reservation {
   duration_minutes: number;
   notes: string;
   status: "pending" | "confirmed" | "cancelled" | "completed";
+  created_by_type?: "ai_agent" | "admin" | "staff" | "client";
+  created_by_user_id?: string | null;
+  google_event_id?: string | null;
+  confirmed_at?: string | null;
+  sms_confirmation_sent?: boolean;
+  sms_reminder_sent?: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPlanConfig } from "@/lib/pricing";
 import { twiml, escapeXml } from "@/lib/twilio-utils";
+import { sendSms } from "@/lib/twilio-sms";
+import { sendTrialExpiredEmail, getTrialExpiredSmsText } from "@/lib/email";
 import { WITALINE_MAIN_BUSINESS_ID, WITALINE_PHONE_NUMBER } from "@/lib/constants";
 import type { PlanKey } from "@/types/database";
 
@@ -99,6 +101,24 @@ export async function POST(request: Request) {
     return twiml(
       `<Say language="pl-PL">Przepraszamy, konto firmy ${escapeXml(business.name)} jest chwilowo nieaktywne. Prosimy o kontakt z administratorem.</Say><Hangup/>`
     );
+  }
+
+  // Trial limit check — block if trial expired or minutes exceeded
+  const TRIAL_MAX_MINUTES = 15;
+  if (business.subscription_status === "trialing") {
+    const trialExpired = business.trial_ends_at && new Date(business.trial_ends_at) < new Date();
+    const trialMinutesExceeded = (business.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+    if (trialExpired || trialMinutesExceeded) {
+      sendSms(callerId, getTrialExpiredSmsText(), undefined, business.id).catch(e =>
+        console.error("[incoming] trial-block sms error:", e)
+      );
+      if (business.owner_email) {
+        sendTrialExpiredEmail(business.owner_email, business.name || "Firma").catch(e =>
+          console.error("[incoming] trial-block email error:", e)
+        );
+      }
+      return twiml(`<Say language="pl-PL">Okres probny wygasl. Wyslismy SMS z linkiem do doładowania konta. Dziekujemy.</Say><Hangup/>`);
+    }
   }
 
   const config = getPlanConfig(business.current_plan as PlanKey);

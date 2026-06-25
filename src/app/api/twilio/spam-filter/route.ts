@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { connectToAgent, twiml } from "@/lib/twilio-utils";
+import { sendSms } from "@/lib/twilio-sms";
+import { sendTrialExpiredEmail, getTrialExpiredSmsText } from "@/lib/email";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const CALL_LIMIT_PER_NUMBER = 5;
@@ -70,12 +72,13 @@ export async function POST(request: Request) {
   let businessName = "WitaLine";
   let voiceId: string | undefined;
   let voiceName: string | undefined;
+  let trialMinutesRemaining: number | undefined;
 
   const toClean = to.replace(/^\+/, "").replace(/\D/g, "");
   if (toClean) {
     const { data: biz } = await supabaseAdmin
       .from("businesses")
-      .select("id, name, voice_id, trial_ends_at, subscription_status, trial_minutes_used")
+      .select("id, name, voice_id, owner_email, trial_ends_at, subscription_status, trial_minutes_used")
       .eq("twilio_number", toClean)
       .maybeSingle();
 
@@ -85,14 +88,22 @@ export async function POST(request: Request) {
 
       const TRIAL_MAX_MINUTES = 15;
 
-      // Block calls for expired trials or exceeded trial minute cap
-      if (
-        biz.subscription_status === "trialing"
-      ) {
+      if (biz.subscription_status === "trialing") {
         const trialExpired = biz.trial_ends_at && new Date(biz.trial_ends_at) < new Date();
-        const trialMinutesExceeded = (biz.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+        const trialMinutesUsed = biz.trial_minutes_used || 0;
+        const trialMinutesExceeded = trialMinutesUsed >= TRIAL_MAX_MINUTES;
+        trialMinutesRemaining = Math.max(0, TRIAL_MAX_MINUTES - trialMinutesUsed);
+
         if (trialExpired || trialMinutesExceeded) {
-          return twiml(`<Say language="pl-PL">Numer jest obecnie nieaktywny. Aby odnowić usługę, odwiedź witaline.pl. Dziękujemy.</Say><Hangup/>`);
+          sendSms(from, getTrialExpiredSmsText(), undefined, businessId).catch(e =>
+            console.error("[spam-filter] trial-block sms error:", e)
+          );
+          if (biz.owner_email) {
+            sendTrialExpiredEmail(biz.owner_email, biz.name || "Firma").catch(e =>
+              console.error("[spam-filter] trial-block email error:", e)
+            );
+          }
+          return twiml(`<Say language="pl-PL">Okres probny wygasl. Wyslismy SMS z linkiem do doładowania konta. Dziekujemy.</Say><Hangup/>`);
         }
       }
 
@@ -128,7 +139,8 @@ export async function POST(request: Request) {
     to,
     voiceId,
     voiceName,
-    origin
+    origin,
+    trialMinutesRemaining
   );
 }
 

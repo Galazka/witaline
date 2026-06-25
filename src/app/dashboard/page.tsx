@@ -55,6 +55,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [inView, setInView] = useState(true);
   const [subStatus, setSubStatus] = useState<string>("");
   const [trialEndsAt, setTrialEndsAt] = useState<string>("");
@@ -253,8 +254,19 @@ export default function DashboardPage() {
             year={calYear} month={calMonth}
             onPrevMonth={() => { if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); } else setCalMonth(m => m - 1); }}
             onNextMonth={() => { if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); } else setCalMonth(m => m + 1); }}
+            onDayClick={(day) => {
+              setSelectedDay(day);
+              document.getElementById("new-reservation-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
           />
-          <NewReservationForm businessId={business.id} onCreated={() => fetchAll()} />
+          <div id="new-reservation-form">
+            <NewReservationForm
+              businessId={business.id}
+              onCreated={() => { fetchAll(); setSelectedDay(null); }}
+              prefillDate={selectedDay ? `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}T12:00` : undefined}
+              onClose={() => setSelectedDay(null)}
+            />
+          </div>
           <ReservationsTable
             reservations={reservations} loading={loading}
             onStatusChange={handleReservationStatus} onDelete={handleReservationDelete}

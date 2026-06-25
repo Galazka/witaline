@@ -38,8 +38,9 @@ export async function POST(request: Request) {
   if (!business) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const ratePLN = getElasticRate(minutes);
-  const amountPLN = minutes * ratePLN;
-  const amountInCurrency = convertPrice(amountPLN, currency);
+  const amountNettoPLN = minutes * ratePLN;
+  const amountBruttoPLN = Math.round(amountNettoPLN * 1.23 * 100) / 100;
+  const amountInCurrency = convertPrice(amountBruttoPLN, currency);
   const amountCents = Math.round(amountInCurrency * 100);
   const rateDisplay = convertPrice(ratePLN, currency).toFixed(2).replace(".", ",");
 
@@ -56,8 +57,8 @@ export async function POST(request: Request) {
       price_data: {
         currency,
         product_data: {
-          name: `Pakiet ${minutes} minut`,
-          description: `Pakiet rozmów AI — ${minutes} min × ${rateDisplay} ${currency.toUpperCase()}/min`,
+          name: `Pakiet ${minutes} minut brutto`,
+          description: `Pakiet rozmów AI — ${minutes} min × ${rateDisplay} ${currency.toUpperCase()}/min + 23% VAT`,
         },
         unit_amount: amountCents,
       },
@@ -73,7 +74,8 @@ export async function POST(request: Request) {
       minutes: String(minutes),
       rate: String(ratePLN),
       currency,
-      amount_pln: String(Math.round(amountPLN * 100) / 100),
+      amount_netto_pln: String(amountNettoPLN),
+      amount_brutto_pln: String(amountBruttoPLN),
     },
     success_url: `${BASE_URL}/dashboard?payment=success`,
     cancel_url: `${BASE_URL}/dashboard?payment=cancel`,

@@ -55,9 +55,9 @@ export async function POST(request: Request) {
       price_data: {
         currency,
         product_data: {
-          name: currency === "pln" ? `Pakiet ${smsCount} SMS` : `SMS Pack ${smsCount}`,
+          name: currency === "pln" ? `Pakiet ${smsCount} SMS brutto` : `SMS Pack ${smsCount}`,
           description: currency === "pln"
-            ? `${smsCount} wiadomości SMS – ${pricePLN.toFixed(2).replace(".", ",")} PLN`
+            ? `${smsCount} wiadomości SMS – ${pricePLN.toFixed(2).replace(".", ",")} PLN brutto`
             : `${smsCount} SMS messages – ${priceInCurrency.toFixed(2).replace(".", ",")} ${currency.toUpperCase()}`,
         },
         unit_amount: amountCents,
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       type: "sms_package",
       sms_count: String(smsCount),
       currency,
-      amount_pln: String(pricePLN),
+      amount_brutto_pln: String(pricePLN),
     },
     success_url: `${BASE_URL}/dashboard?payment=success`,
     cancel_url: `${BASE_URL}/dashboard?payment=cancel`,

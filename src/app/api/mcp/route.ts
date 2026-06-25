@@ -5,6 +5,7 @@ import { setPendingTransfer } from "@/lib/transfer-store";
 import { getActiveCallSids } from "@/lib/active-call-store";
 import { withCache } from "@/lib/cache";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
+import { createBooking, checkAvailability } from "@/lib/calendar";
 import { WITALINE_MAIN_BUSINESS_ID as WITALINE_MAIN_BUSINESS } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -30,8 +31,8 @@ async function checkTrial(businessId: string): Promise<boolean> {
 const TOOLS = [
   { name: "business_lookup", description: "Wyszukaj firme po nazwie lub numerze wewnetrznym", inputSchema: { type: "object", properties: { query: { type: "string", description: "Nazwa firmy lub numer wewnetrzny (DTMF)" } }, required: ["query"] } },
   { name: "save_lead", description: "Zapisz lead/wiadomosc od klienta", inputSchema: { type: "object", properties: { name: { type: "string", description: "Imie i nazwisko klienta" }, phone: { type: "string", description: "Numer telefonu klienta" }, message: { type: "string", description: "Tresc wiadomosci" }, business_id: { type: "string", description: "ID firmy (z dynamic_variables)" } }, required: ["name", "phone"] } },
-  { name: "check_availability", description: "Sprawdz dostepnosc terminow", inputSchema: { type: "object", properties: { business_id: { type: "string", description: "ID firmy" }, date: { type: "string", description: "Data w formacie YYYY-MM-DD" } }, required: ["business_id", "date"] } },
-  { name: "create_reservation", description: "Utworz rezerwacje/spotkanie", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
+  { name: "check_availability", description: "Sprawdz dostepnosc terminow. Jesli available=false, sprawdz pola nextDates lub nextSlots — zaproponuj klientowi nastepne wolne terminy.", inputSchema: { type: "object", properties: { business_id: { type: "string", description: "ID firmy" }, date: { type: "string", description: "Data w formacie YYYY-MM-DD" } }, required: ["business_id", "date"] } },
+  { name: "create_reservation", description: "Utworz rezerwacje/spotkanie. Jesli termin jest zajety, Narzedzie zwroci conflicts i nextSlots — wtedy zapytaj klienta o inny termin z propozycji.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
   { name: "get_services", description: "Pobierz liste uslug firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
   { name: "get_business_hours", description: "Pobierz godziny otwarcia firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
   { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta. Po udanym przekazaniu agent musi sie pozegnac i zakonczyc rozmowe.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id"] } },
@@ -136,29 +137,28 @@ export async function POST(request: NextRequest) {
       else if (toolName === "check_availability") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
         const date = args.date || "";
-        const cacheKey = `hours:${bizId}`;
-        const hours = await withCache(cacheKey, async () => {
-          const { data } = await supabaseAdmin.from("businesses").select("calendar_settings").eq("id", bizId).maybeSingle();
-          if (data?.calendar_settings) {
-            try { return typeof data.calendar_settings === "string" ? JSON.parse(data.calendar_settings) : data.calendar_settings; } catch {}
-          }
-          return {};
-        }, 30_000) as Record<string, unknown>;
-        const dayName = ["niedziela","poniedzialek","wtorek","sroda","czwartek","piatek","sobota"][new Date(date).getDay()];
-        const daySlots = dayName ? (hours[dayName] as unknown[]) || [] : [];
-        result = JSON.stringify({ ok: true, date, day: dayName, slots: daySlots, calendar_settings: hours });
+        const avail = await checkAvailability(bizId, date);
+        result = JSON.stringify({ ok: true, ...avail, date });
       }
       else if (toolName === "create_reservation") {
-        const { data, error } = await supabaseAdmin.from("reservations").insert({
-          business_id: args.business_id || WITALINE_MAIN_BUSINESS,
-          reserved_at: args.reserved_at,
-          service_type: args.service_type,
-          caller_name: args.caller_name,
-          caller_phone: args.caller_phone || "",
-          status: "confirmed",
-          created_at: new Date().toISOString()
-        }).select().single();
-        result = JSON.stringify({ ok: !error, reservation: error ? null : data, error: error?.message });
+        const bookingResult = await createBooking({
+          businessId: args.business_id || WITALINE_MAIN_BUSINESS,
+          reservedAt: args.reserved_at,
+          serviceType: args.service_type,
+          callerName: args.caller_name,
+          callerPhone: args.caller_phone || "",
+          createdByType: "ai_agent",
+        });
+        if (bookingResult.ok) {
+          result = JSON.stringify({ ok: true, reservation: bookingResult.reservation });
+        } else {
+          result = JSON.stringify({
+            ok: false,
+            error: ("error" in bookingResult ? bookingResult.error : "Booking failed"),
+            conflicts: "conflicts" in bookingResult ? bookingResult.conflicts : undefined,
+            nextSlots: "nextSlots" in bookingResult ? bookingResult.nextSlots : undefined,
+          });
+        }
       }
       else if (toolName === "transfer_to_human") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;

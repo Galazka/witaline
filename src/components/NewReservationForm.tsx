@@ -1,30 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   businessId: string;
   onCreated: () => void;
+  prefillDate?: string;
+  onClose?: () => void;
 }
 
 const inputClass =
   "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 placeholder:text-zinc-400 transition";
 
-export default function NewReservationForm({ businessId, onCreated }: Props) {
+type ConflictInfo = {
+  id: string;
+  reserved_at: string;
+  duration_minutes: number;
+};
+
+type SlotInfo = {
+  date: string;
+  time: string;
+  label: string;
+};
+
+export default function NewReservationForm({ businessId, onCreated, prefillDate, onClose }: Props) {
   const [open, setOpen] = useState(false);
   const [callerName, setCallerName] = useState("");
   const [callerPhone, setCallerPhone] = useState("");
   const [serviceType, setServiceType] = useState("");
-  const [reservedAt, setReservedAt] = useState("");
+  const [reservedAt, setReservedAt] = useState(prefillDate || "");
   const [duration, setDuration] = useState(30);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [conflict, setConflict] = useState<ConflictInfo[] | null>(null);
+  const [nextSlots, setNextSlots] = useState<SlotInfo[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<SlotInfo[]>([]);
+  const [showAvailable, setShowAvailable] = useState(false);
+
+  useEffect(() => {
+    if (prefillDate) {
+      setReservedAt(prefillDate);
+      setOpen(true);
+    }
+  }, [prefillDate]);
+
+  // Fetch available slots when date changes
+  useEffect(() => {
+    if (!reservedAt || !open) return;
+    const dateOnly = reservedAt.slice(0, 10);
+    fetch(`/api/business/availability?business_id=${businessId}&date=${dateOnly}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.slots) {
+          setAvailableSlots(data.slots.map((s: { time: string; label: string }) => ({
+            date: dateOnly,
+            time: s.time,
+            label: s.label,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [reservedAt, open, businessId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!serviceType || !reservedAt) return;
+
+    // If we had a conflict and are forcing, send force=true
+    // Otherwise, normal flow
     setSaving(true);
-    await fetch("/api/reservations", {
+    setConflict(null);
+    setNextSlots([]);
+
+    const res = await fetch("/api/reservations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -35,23 +84,55 @@ export default function NewReservationForm({ businessId, onCreated }: Props) {
         reserved_at: new Date(reservedAt).toISOString(),
         duration_minutes: duration,
         notes,
+        force: conflict !== null,
       }),
     });
+
+    const data = await res.json();
+
     setSaving(false);
+
+    if (data.conflict || (!data.ok && data.nextSlots)) {
+      setConflict(data.conflicts || []);
+      setNextSlots(data.nextSlots || []);
+      return;
+    }
+
+    if (!data.ok) {
+      setConflict([{ id: "error", reserved_at: "", duration_minutes: 0 }]);
+      return;
+    }
+
+    // Success
+    resetForm();
+    onCreated();
+  }
+
+  function resetForm() {
     setOpen(false);
     setCallerName("");
     setCallerPhone("");
     setServiceType("");
-    setReservedAt("");
+    setReservedAt(prefillDate || "");
     setDuration(30);
     setNotes("");
-    onCreated();
+    setConflict(null);
+    setNextSlots([]);
+    setShowAvailable(false);
+    onClose?.();
+  }
+
+  function fillSlot(slot: SlotInfo) {
+    setReservedAt(`${slot.date}T${slot.time}`);
+    setConflict(null);
+    setNextSlots([]);
+    setShowAvailable(false);
   }
 
   return (
     <div>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); setConflict(null); setNextSlots([]); }}
         className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
       >
         + Nowa rezerwacja
@@ -74,7 +155,28 @@ export default function NewReservationForm({ businessId, onCreated }: Props) {
             required
           />
           <div className="grid grid-cols-2 gap-4">
-            <input type="datetime-local" value={reservedAt} onChange={(e) => setReservedAt(e.target.value)} className={inputClass} required />
+            <div>
+              <input type="datetime-local" value={reservedAt} onChange={(e) => { setReservedAt(e.target.value); setConflict(null); }} className={inputClass} required />
+              {availableSlots.length > 0 && !conflict && (
+                <button type="button" onClick={() => setShowAvailable(!showAvailable)} className="text-xs text-brand-600 mt-1 hover:underline">
+                  {showAvailable ? "Ukryj" : `Pokaż wolne terminy (${availableSlots.length})`}
+                </button>
+              )}
+              {showAvailable && availableSlots.length > 0 && (
+                <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
+                  {availableSlots.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => fillSlot(s)}
+                      className="block w-full text-left text-xs px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100 transition"
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <select value={duration} onChange={(e) => setDuration(Number(e.target.value))} className={inputClass}>
               <option value={15}>15 min</option>
               <option value={30}>30 min</option>
@@ -84,26 +186,93 @@ export default function NewReservationForm({ businessId, onCreated }: Props) {
               <option value={120}>120 min</option>
             </select>
           </div>
-          <textarea
-            placeholder="Notatki (opcjonalnie)"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className={inputClass}
-            rows={2}
-          />
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
-          >
-            {saving ? "Zapisywanie..." : "Zapisz rezerwację"}
-          </button>
+
+          {/* Conflict warning */}
+          {conflict && conflict.length > 0 && conflict[0].id !== "error" && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <span className="text-amber-600 text-sm font-medium">Konflikt terminów</span>
+              </div>
+              <p className="text-sm text-amber-700">
+                Ten termin koliduje z {conflict.length} istniejącą rezerwacją:
+              </p>
+              <ul className="text-xs text-amber-600 space-y-1">
+                {conflict.map((c) => (
+                  <li key={c.id}>• {new Date(c.reserved_at).toLocaleString("pl-PL")} ({c.duration_minutes} min)</li>
+                ))}
+              </ul>
+
+              {/* Next available slots */}
+              {nextSlots.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-amber-700 mb-2">Dostępne terminy:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {nextSlots.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => fillSlot(s)}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-700 hover:bg-amber-100 transition"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="text-sm px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition disabled:opacity-50"
+                >
+                  {saving ? "..." : "Mimo to zapisz"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setConflict(null); setNextSlots([]); }}
+                  className="text-sm px-4 py-2 rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition"
+                >
+                  Edytuj termin
+                </button>
+              </div>
+            </div>
+          )}
+
+          {conflict && conflict.length === 1 && conflict[0].id === "error" && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">Nie udało się zapisać rezerwacji. Spróbuj ponownie.</p>
+            </div>
+          )}
+
+          {!conflict && (
+            <>
+              <textarea
+                placeholder="Notatki (opcjonalnie)"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className={inputClass}
+                rows={2}
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+                >
+                  {saving ? "Sprawdzanie..." : "Zapisz rezerwację"}
+                </button>
+                {onClose && (
+                  <button type="button" onClick={resetForm} className="text-sm text-zinc-400 hover:text-zinc-600 px-3">
+                    Anuluj
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </form>
       )}
     </div>
   );
 }
-
-
-
-

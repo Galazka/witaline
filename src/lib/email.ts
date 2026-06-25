@@ -56,29 +56,148 @@ export async function sendWelcomeEmail(to: string, businessName: string, plan: s
   });
 }
 
-// ── Trial expiry ───────────────────────────────────────────────
+// ── Trial activation ───────────────────────────────────────────
+export async function sendTrialActivationEmail(to: string, businessName: string, testNumber: string): Promise<EmailResult> {
+  return sendEmail({
+    to,
+    subject: `Twój asystent AI jest gotowy — ${businessName}`,
+    html: wrapper(`
+      ${header("Asystent aktywny")}
+      <div style="padding:32px;">
+        <h2 style="font-size:20px;color:#171717;margin:0 0 16px;">Cześć ${businessName}!</h2>
+        <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">
+          Twój asystent AI WitaLine jest już aktywny i gotowy do odbierania telefonów.
+        </p>
+        <div style="background:#f0fdf4;border-radius:12px;padding:20px;margin:0 0 24px;">
+          <p style="font-size:13px;color:#1C6323;margin:0 0 8px;font-weight:600;">Przetestuj swojego asystenta:</p>
+          <p style="font-size:24px;font-weight:700;color:#3CBF4A;margin:0 0 4px;letter-spacing:1px;">${testNumber}</p>
+          <p style="font-size:12px;color:#52525b;margin:0;">Zadzwoń na ten numer i sprawdź, jak asystent odpowiada na pytania o Twoją firmę.</p>
+        </div>
+        <h3 style="font-size:15px;color:#171717;margin:0 0 12px;">Co dalej?</h3>
+        <ol style="font-size:14px;color:#52525b;line-height:1.8;margin:0 0 24px;padding-left:20px;">
+          <li>Zaloguj się do panelu i edytuj prompt asystenta</li>
+          <li>Dodaj bazę wiedzy o swojej firmie</li>
+          <li>Skonfiguruj godziny pracy i kalendarz</li>
+          <li>Wklej widget na swoją stronę www</li>
+        </ol>
+        <a href="${APP_URL}/dashboard" style="display:inline-block;background:#3CBF4A;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(60,191,74,0.3);">Przejdź do panelu →</a>
+        <hr style="border:none;border-top:1px solid #e4e4e7;margin:32px 0;">
+        <p style="font-size:12px;color:#a1a1aa;margin:0;">Masz pytania? Odpisz na tego maila.</p>
+      </div>`),
+    categories: ["trial-activation"],
+  });
+}
+
+// ── First call congratulations ─────────────────────────────────
+export async function sendFirstCallEmail(to: string, businessName: string, durationSeconds: number): Promise<EmailResult> {
+  const minutes = Math.round(durationSeconds / 60);
+  return sendEmail({
+    to,
+    subject: `Pierwsza rozmowa odebrana! 🎉 — ${businessName}`,
+    html: wrapper(`
+      ${header("Pierwsza rozmowa")}
+      <div style="padding:32px;">
+        <h2 style="font-size:20px;color:#171717;margin:0 0 16px;">Świetnie, ${businessName}!</h2>
+        <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">
+          Twój asystent AI odebrał pierwszą rozmowę${minutes ? ` (${minutes} min)` : ""}! 🎉
+        </p>
+        <div style="background:#f0fdf4;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center;">
+          <p style="font-size:40px;font-weight:700;color:#1C6323;margin:0;">1</p>
+          <p style="font-size:13px;color:#52525b;margin:4px 0 0;">odebrana rozmowa</p>
+        </div>
+        <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">
+          Sprawdź szczegóły rozmowy i transkrypcję w panelu. Daj nam znać, jak Ci się podoba!
+        </p>
+        <a href="${APP_URL}/dashboard" style="display:inline-block;background:#3CBF4A;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(60,191,74,0.3);">Zobacz szczegóły →</a>
+        <hr style="border:none;border-top:1px solid #e4e4e7;margin:32px 0;">
+        <p style="font-size:12px;color:#a1a1aa;margin:0;">Masz pytania? Odpisz na tego maila. Chętnie pomożemy!</p>
+      </div>`),
+    categories: ["first-call"],
+  });
+}
+
+// ── Trial expiry (3 days before) ───────────────────────────────
 export async function sendTrialExpiryEmail(to: string, businessName: string, daysLeft: number): Promise<EmailResult> {
   return sendEmail({
     to,
-    subject: `Trial WitaLine konczy sie za ${daysLeft} dni`,
+    subject: `Trial WitaLine kończy się za ${daysLeft} dni`,
     html: wrapper(`
       ${header("WitaLine")}
       <div style="padding:32px;">
-        <h2 style="font-size:20px;color:#171717;margin:0 0 16px;">Czesc ${businessName},</h2>
+        <h2 style="font-size:20px;color:#171717;margin:0 0 16px;">Cześć ${businessName},</h2>
         <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">
-          Twoj <strong>7-dniowy okres probny</strong> konczy sie za <strong>${daysLeft} dni</strong>.
-          Po jego zakonczeniu asystent AI przestanie odbierac telefony.
+          Twój <strong>7-dniowy okres próbny</strong> kończy się za <strong>${daysLeft} dni</strong>.
+          Po jego zakończeniu asystent AI przestanie odbierać telefony.
         </p>
         <div style="background:#fef3c7;border-radius:12px;padding:20px;margin:0 0 24px;">
-          <p style="font-size:13px;color:#92400e;margin:0;font-weight:600;">Aby kontynuowac, wybierz plan:</p>
-          <p style="font-size:13px;color:#92400e;margin:8px 0 0;">Start 199 PLN/mc · Growth 399 PLN/mc · Lux 599 PLN/mc · Enterprise 999 PLN/mc</p>
+          <p style="font-size:13px;color:#92400e;margin:0;font-weight:600;">Aby kontynuować, doładuj konto:</p>
+          <p style="font-size:13px;color:#92400e;margin:8px 0 0;">Model elastyczny — 0 zł/mies, płacisz tylko za użycie. Cena od 1,00 PLN/min brutto.</p>
         </div>
-        <a href="${APP_URL}/dashboard" style="display:inline-block;background:#3CBF4A;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(60,191,74,0.3);">Wybierz plan →</a>
+        <a href="${APP_URL}/dashboard" style="display:inline-block;background:#3CBF4A;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(60,191,74,0.3);">Doładuj konto →</a>
         <hr style="border:none;border-top:1px solid #e4e4e7;margin:32px 0;">
-        <p style="font-size:12px;color:#a1a1aa;margin:0;">Nie chcesz kontynuowac? Nic nie rob konto zostanie zawieszone po wygasnieciu trialu.</p>
+        <p style="font-size:12px;color:#a1a1aa;margin:0;">Nie chcesz kontynuować? Nic nie rób — konto zostanie zawieszone po wygaśnięciu trialu.</p>
       </div>`),
     categories: ["trial"],
   });
+}
+
+// ── Trial minute warning (80% usage) ───────────────────────────
+export async function sendTrialMinuteWarningEmail(to: string, businessName: string, minutesUsed: number, maxMinutes: number): Promise<EmailResult> {
+  const remaining = maxMinutes - minutesUsed;
+  return sendEmail({
+    to,
+    subject: `Wykorzystałeś ${minutesUsed} z ${maxMinutes} minut okresu próbnego — WitaLine`,
+    html: wrapper(`
+      ${header("WitaLine")}
+      <div style="padding:32px;">
+        <h2 style="font-size:20px;color:#171717;margin:0 0 16px;">Cześć ${businessName},</h2>
+        <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">
+          Wykorzystałeś już <strong>${minutesUsed} z ${maxMinutes} minut</strong> w okresie próbnym.
+          Pozostało Ci około <strong>${Math.max(0, remaining)} minut</strong> darmowych rozmów.
+        </p>
+        <div style="background:#fef3c7;border-radius:12px;padding:20px;margin:0 0 24px;">
+          <p style="font-size:13px;color:#92400e;margin:0;font-weight:600;">Po wyczerpaniu limitu:</p>
+          <p style="font-size:13px;color:#92400e;margin:8px 0 0;">Asystent przestanie odbierać telefony. Aby kontynuować, doładuj konto w panelu.</p>
+        </div>
+        <a href="${APP_URL}/dashboard" style="display:inline-block;background:#3CBF4A;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(60,191,74,0.3);">Doładuj konto →</a>
+        <hr style="border:none;border-top:1px solid #e4e4e7;margin:32px 0;">
+        <p style="font-size:12px;color:#a1a1aa;margin:0;">Masz pytania? Odpisz na tego maila.</p>
+      </div>`),
+    categories: ["trial-warning"],
+  });
+}
+
+// ── Trial fully expired ────────────────────────────────────────
+export async function sendTrialExpiredEmail(to: string, businessName: string): Promise<EmailResult> {
+  return sendEmail({
+    to,
+    subject: `Okres próbny WitaLine wygasł — doładuj konto, aby kontynuować`,
+    html: wrapper(`
+      ${header("Okres próbny zakończony")}
+      <div style="padding:32px;">
+        <h2 style="font-size:20px;color:#171717;margin:0 0 16px;">Cześć ${businessName},</h2>
+        <p style="font-size:15px;color:#52525b;line-height:1.6;margin:0 0 24px;">
+          Twój <strong>okres próbny</strong> w WitaLine dobiegł końca.
+          Asystent AI przestał odbierać telefony.
+        </p>
+        <div style="background:#fef3c7;border-radius:12px;padding:20px;margin:0 0 24px;">
+          <p style="font-size:13px;color:#92400e;margin:0;font-weight:600;">Aby wznowić:</p>
+          <p style="font-size:13px;color:#92400e;margin:8px 0 0;">
+            Nie potrzebujesz abonamentu. Kup pakiet minut w modelu elastycznym — płacisz tylko za wykorzystane minuty.
+            Cena już od <strong>1,00 PLN/min brutto</strong>.
+          </p>
+        </div>
+        <a href="${APP_URL}/dashboard" style="display:inline-block;background:#3CBF4A;color:white;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(60,191,74,0.3);">Doładuj konto →</a>
+        <hr style="border:none;border-top:1px solid #e4e4e7;margin:32px 0;">
+        <p style="font-size:12px;color:#a1a1aa;margin:0;">Masz pytania? Odpisz na tego maila.</p>
+      </div>`),
+    categories: ["trial-expired"],
+  });
+}
+
+// ── Trial fully consumed — SMS sent to caller ──────────────────
+export function getTrialExpiredSmsText(): string {
+  return `Okres probny WitaLine wygasl. Twoj asystent AI przestal odbierac telefony. Doładuj konto: ${APP_URL}/dashboard`;
 }
 
 // ── Payment confirmation ───────────────────────────────────────

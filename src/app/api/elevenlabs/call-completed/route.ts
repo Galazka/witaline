@@ -258,6 +258,20 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 });
   if (business.suspended) return NextResponse.json({ error: "Account suspended" }, { status: 403 });
+
+  // Detect first ever call for this business → send congratulations email
+  const { count: existingCallCount } = await supabaseAdmin
+    .from("call_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("business_id", businessId);
+
+  const isFirstCall = existingCallCount === 0 || (existingCallCount === 1 && metadata.twilio_call_sid);
+  if (isFirstCall && business.owner_email) {
+    const { sendFirstCallEmail } = await import("@/lib/email");
+    sendFirstCallEmail(business.owner_email, business.name || "Firma", durationSeconds).catch(e =>
+      console.error("[call-completed] first-call email error:", e)
+    );
+  }
   const TRIAL_MAX_MINUTES = 15;
 
   if (business.subscription_status === "trialing") {
@@ -347,7 +361,19 @@ export async function POST(request: Request) {
 
   // Track trial usage separately for abuse prevention
   if (business.subscription_status === "trialing") {
-    updateData.trial_minutes_used = (business.trial_minutes_used || 0) + minutesToAdd;
+    const oldTrialMinutes = business.trial_minutes_used || 0;
+    const newTrialMinutes = oldTrialMinutes + minutesToAdd;
+    updateData.trial_minutes_used = newTrialMinutes;
+    // Send warning email when crossing 80% threshold (12 of 15 min)
+    const WARNING_THRESHOLD = 12;
+    if (oldTrialMinutes < WARNING_THRESHOLD && newTrialMinutes >= WARNING_THRESHOLD) {
+      const { sendTrialMinuteWarningEmail } = await import("@/lib/email");
+      if (business.owner_email) {
+        sendTrialMinuteWarningEmail(business.owner_email, business.name || "Firma", Math.ceil(newTrialMinutes), 15).catch(e =>
+          console.error("[call-completed] trial warning email error:", e)
+        );
+      }
+    }
   }
 
   await supabaseAdmin
