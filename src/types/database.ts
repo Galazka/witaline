@@ -165,6 +165,8 @@ export interface CallLog {
   tokens_total?: number;
   quality_score?: number | null;
   quick_summary?: string;
+  flagged?: boolean;
+  flag_color?: string | null;
 }
 
 export interface SmsLog {
@@ -290,13 +292,15 @@ export interface Conversation {
   tokens_input?: number;
   tokens_output?: number;
   tokens_total?: number;
+  flagged?: boolean;
+  flag_color?: string | null;
 }
 
 export interface Message {
   id: string;
   conversation_id: string;
   business_id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "system" | "human";
   content: string;
   metadata: Record<string, unknown>;
   created_at: string;

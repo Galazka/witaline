@@ -10,41 +10,30 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const body = await request.json();
 
-  const { data: conv, error: convErr } = await supabaseAdmin
-    .from("conversations")
+  const { data: log, error: logErr } = await supabaseAdmin
+    .from("call_logs")
     .select("business_id")
     .eq("id", id)
     .single();
 
-  if (convErr || !conv) return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+  if (logErr || !log) return NextResponse.json({ error: "Call log not found" }, { status: 404 });
 
   const { data: biz } = await supabaseAdmin
     .from("businesses")
     .select("id")
-    .eq("id", conv.business_id)
+    .eq("id", log.business_id)
     .eq("owner_uid", session.user.id)
     .single();
 
   if (!biz) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const updates: Record<string, any> = {};
-
-  if (body.status) {
-    const validStatuses = ["active", "ended", "archived"];
-    if (!validStatuses.includes(body.status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-    }
-    updates.status = body.status;
-    if (body.status === "ended") updates.ended_at = new Date().toISOString();
-    if (body.status === "active") updates.ended_at = null;
-  }
-
   if (body.flagged !== undefined) updates.flagged = body.flagged;
   if (body.flag_color !== undefined) updates.flag_color = body.flag_color;
   if (body.deleted !== undefined) updates.deleted_at = body.deleted ? new Date().toISOString() : null;
 
   const { error } = await supabaseAdmin
-    .from("conversations")
+    .from("call_logs")
     .update(updates)
     .eq("id", id);
 

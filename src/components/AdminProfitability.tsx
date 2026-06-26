@@ -168,7 +168,7 @@ export default function AdminProfitability() {
                 const isProfitable = profitPerMonth >= 0;
 
                 return (
-                  <tr key={plan.key} className={`border-b border-zinc-100 last:border-b-0 ${plan.hot ? "bg-brand-50/50" : ""}`}>
+                  <tr key={plan.key} className="border-b border-zinc-100 last:border-b-0">
                     <td className="px-4 py-3 font-semibold text-zinc-900">{plan.label}</td>
                     <td className="px-4 py-3 font-mono">{plan.pricePLN.toFixed(0)} zł</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">€{(plan.pricePLN / usdPlnRate * eurUsdRate).toFixed(0)}</td>
