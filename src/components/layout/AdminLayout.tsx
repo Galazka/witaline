@@ -14,7 +14,7 @@ import type { Session } from "@supabase/supabase-js";
 
 type AdminTab =
   | "dashboard" | "leads" | "businesses" | "witaline" | "messages"
-  | "feedback" | "conversations" | "voice"
+  | "feedback" | "conversations" | "live-chat" | "voice"
   | "coupons" | "callbacks" | "sms" | "blocklist"
   | "security" | "costs" | "porty" | "webhooks" | "email" | "agents" | "support"
   // Deprecated but still handled in admin page (redirect to relevant tabs)
@@ -45,6 +45,7 @@ const sidebarItems = (leadCount: number) => [
     children: [
       { key: "messages" as AdminTab, label: "Wiadomości", icon: <IconMail className="w-4 h-4" /> },
       { key: "conversations" as AdminTab, label: "Rozmowy", icon: <IconMessageSquare className="w-4 h-4" /> },
+      { key: "live-chat" as AdminTab, label: "Czaty na żywo", icon: <IconMessage className="w-4 h-4" /> },
       { key: "webhooks" as AdminTab, label: "Webhooki", icon: <IconMessageSquare className="w-4 h-4" /> },
       { key: "sms" as AdminTab, label: "SMS", icon: <IconMessage className="w-4 h-4" /> },
       { key: "feedback" as AdminTab, label: "Opinie", icon: <IconStar className="w-4 h-4" /> },

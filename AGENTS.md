@@ -153,6 +153,7 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - [x] **Regulamin cleanup**: removed subscription plans, rollover section, stale pricing ✅
 - [x] **Maja system prompt**: elastic-only pricing, transfer only on request, WitaLine knowledge ✅
 - [x] **Tomek consultant**: +48790824762 added to DB + .env ✅
+- [x] **RBAC team invites** — TeamManager w sidebarze "Zespół", invite by email z auto-create auth user, RLS policies ✅
 - [ ] **Test end-to-end**: zadzwoń na +48 732 125 752, sprawdź DB
 - [x] **Language Detection** — already enabled in agent Rob (built_in_tools.language_detection) ✅
 - [x] **Dashboard**: plan key fix verified (`elastic_0`/`enterprise_2000` w `plans` + `getPlanConfig()`) ✅
