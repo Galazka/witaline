@@ -104,6 +104,17 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Twilio Subaccounts**: obsługa wielodzierżawców, SID podaje się w `TWILIO_ACCOUNT_SID` dla każdego biznesu (konfiguracja w panelu admina)
 - **Railway healthcheck**: ✅ resolved — port hardcoded to 3000 in start script, Railway proxy port set to 3000
 
+## Recent Changes (June 26, 2026)
+- **Auto-topup E2E**: shared `executeAutoTopup()` module, immediate trigger in call-completed, elastic rate, `railway.json` cron config ✅
+- **BusinessLiveChat**: new component replacing ChatHistory w/ Realtime, reply input, close/reopen, status badges ✅
+- **Widget polling**: co 3s odświeża wiadomości, widzi odpowiedzi konsultanta na żywo ✅
+- **Transfer do konsultanta**: przycisk "Porozmawiaj z konsultantem" w widgetcie, API request-human, tag `oczekuje_na_konsultanta`, notyfikacja ✅
+- **Conversations API fix**: `/api/conversations/[id]/messages` wspiera path param ✅
+- **Pricing cleanup**: usunięte legacy plany (START/PRO/GROWTH/LUX), unified `getPlanLabel()`, fix AdminProfitability `plan.hot` ✅
+- **Conversation flags/trash/export**: `flagged` + `flag_color` + `deleted_at` przez API PATCH, context menu (flag/kolor/kosz), CSV export conversations + call-logs ✅
+- **Filter bar**: `ConversationFilterBar.tsx` + `ConversationContextMenu.tsx` — shared komponenty dla BusinessLiveChat i CallTable ✅
+- **CallTable enhancements**: flag toggle, export button, bulk trash ✅
+
 ## Recent Changes (June 24-25, 2026)
 - **Registration fix**: text colors on dark background (changed `text-zinc-900`/`text-zinc-700` → `text-white`/`text-white/80`) w `src/app/(marketing)/register/page.tsx`
 - **Business categories**: added 15 new kategorii (Adwokat, Kancelaria, Restauracja, Hotel, etc.) w `src/lib/templates.ts`
@@ -112,6 +123,10 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **MCP tools via ElevenLabs UI**: agent ma już przypisane narzędzia MCP (widoczne w dashboardzie ElevenLabs) — `transfer_to_human` z `caller_phone: optional`
 
 ## To Do
+- [x] **Uruchom migrację 054-live-chat.sql** w Supabase SQL Editor (messages role 'human') ✅
+- [x] **Uruchom migrację 055-conversation-flags.sql** w Supabase SQL Editor ✅
+- [x] **Dodaj CRON_SECRET do Railway env** (wygenerowany: b39c43e784...) ✅
+- [x] **Skonfiguruj cron-job.org** — 2 joby: auto-topup (co 5 min), process-jobs (co 1 min) ✅
 - [x] **Run `RUN-MIGRATION.sql`** w Supabase SQL Editor ✅
 - [x] **Przypisz webhook do agenta** w ElevenLabs dashboard ✅
 - [x] **Włącz client-data webhook** w ElevenLabs dashboard ✅

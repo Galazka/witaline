@@ -12,6 +12,7 @@ import PhoneSettings from "@/components/PhoneSettings";
 import BusinessLiveChat from "@/components/BusinessLiveChat";
 import AccountSettings from "@/components/AccountSettings";
 import SecuritySettings from "@/components/SecuritySettings";
+import TeamManager from "@/components/TeamManager";
 import SecurityCenter from "@/components/SecurityCenter";
 import ActivityFeed from "@/components/ActivityFeed";
 import CalendarView from "@/components/CalendarView";
@@ -68,7 +69,7 @@ export default function DashboardPage() {
   const isTrialExpired = subStatus === "trialing" && trialEndsAt && new Date(trialEndsAt) < new Date();
   const isBlocked = isTrialExpired || subStatus === "past_due" || subStatus === "canceled" || subStatus === "incomplete";
 
-  const alwaysAccessible = ["overview", "upgrade", "account", "security"];
+  const alwaysAccessible = ["overview", "upgrade", "account", "team", "security"];
   const tabBlocked = isBlocked && !alwaysAccessible.includes(tab);
 
   useEffect(() => { initLocale(); fetchAll(); }, []);
@@ -342,6 +343,10 @@ export default function DashboardPage() {
             <ReferralCard businessId={business.id} />
           </div>
         </div>
+      )}
+
+      {tab === "team" && business && (
+        <TeamManager businessId={business.id} />
       )}
 
       {tab === "security" && business && (

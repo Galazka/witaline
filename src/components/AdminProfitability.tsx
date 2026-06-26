@@ -216,7 +216,7 @@ export default function AdminProfitability() {
             const profitUSD = profit / usdPlnRate;
             const profitEUR = profitUSD * eurUsdRate;
             return (
-              <div key={plan.key} className={`border rounded-lg p-4 ${plan.hot ? "border-brand-400 bg-brand-50/50" : "border-zinc-100"}`}>
+              <div key={plan.key} className="border rounded-lg p-4 border-zinc-100">
                 <p className="text-sm font-semibold text-zinc-900">{plan.label}</p>
                 <p className="text-2xl font-bold text-zinc-900">{profit.toFixed(0)} zł</p>
                 <p className="text-xs text-zinc-400">€{profitEUR.toFixed(0)} · ${profitUSD.toFixed(0)}</p>
