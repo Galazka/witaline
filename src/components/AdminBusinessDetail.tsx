@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, Fragment } from "react";
 import AdminBusinessEditor from "./AdminBusinessEditor";
+import { getPlanLabel } from "@/lib/pricing";
 
 /* ── Types ── */
 
@@ -58,11 +59,6 @@ function fmtDuration(sec: number) {
   const s = sec % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
-
-const planLabels: Record<string, string> = {
-  start_100: "Start", pro_500: "Growth", enterprise_2000: "Enterprise",
-  elastic_0: "Elastyczny", pro_249: "Pro", lux_599: "Lux",
-};
 
 const classificationStyle: Record<string, string> = {
   order: "bg-green-100 text-green-700",
@@ -185,7 +181,7 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <p className="text-[10px] text-zinc-400 uppercase">Plan</p>
-            <p className="font-medium text-zinc-900">{planLabels[business.current_plan] || business.current_plan}</p>
+            <p className="font-medium text-zinc-900">{getPlanLabel(business.current_plan)}</p>
           </div>
           <div>
             <p className="text-[10px] text-zinc-400 uppercase">Branża</p>

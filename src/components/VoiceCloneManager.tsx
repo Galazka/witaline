@@ -17,7 +17,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
   const [result, setResult] = useState<{ success: boolean; voice_id?: string; display_name?: string; error?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (currentPlan !== "enterprise_2000") {
+  if (currentPlan !== "enterprise_2000" && currentPlan !== "enterprise") {
     return (
       <div className="bg-white rounded-xl p-6 text-center space-y-3">
         <span className="text-4xl block">🎤</span>

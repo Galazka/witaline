@@ -381,6 +381,14 @@ export async function POST(request: Request) {
     .update(updateData)
     .eq("id", businessId);
 
+  // Auto-topup: if balance below threshold, trigger immediately
+  if (business.auto_topup_enabled) {
+    const { executeAutoTopup } = await import("@/lib/auto-topup");
+    executeAutoTopup(businessId, { ...business, ...updateData }).catch((e: any) =>
+      console.error("[call-completed] auto-topup error:", e)
+    );
+  }
+
   const reservation = extractReservation(customData);
   if (reservation && callLog) {
     await supabaseAdmin.from("reservations").insert({

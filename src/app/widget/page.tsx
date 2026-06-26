@@ -36,6 +36,8 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
   const [tab, setTab] = useState<"chat" | "voice">("chat");
   const [callDuration, setCallDuration] = useState(0);
   const [callActive, setCallActive] = useState(false);
+  const [transferRequested, setTransferRequested] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -56,20 +58,24 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
 
         if (initialConvId) {
           try {
-            const hres = await fetch(`/api/conversations/${initialConvId}/messages`);
-            if (hres.ok) {
-              const history = await hres.json();
-              const restored: Message[] = (history.messages || history || []).map((m: any) => ({
-                role: m.role === "user" ? "user" : "bot",
-                text: m.content,
-                timestamp: new Date(m.created_at).getTime(),
-              }));
+              const hres = await fetch(`/api/conversations/${initialConvId}/messages`);
+              if (hres.ok) {
+                const history = await hres.json();
+                const restored: Message[] = ((history.messages || []) as any[]).map((m: any) => ({
+                  role: m.role === "user" ? "user" : "bot",
+                  text: m.content,
+                  timestamp: new Date(m.created_at).getTime(),
+                }));
 
-              if (restored.length > 1) {
-                setMessages(restored);
-              } else {
-                setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
-              }
+                if (restored.length > 1) {
+                  setMessages(restored);
+                  const historyArr = (history.messages || []) as any[];
+                  if (historyArr.length > 0) {
+                    pollRef.current.lastId = historyArr[historyArr.length - 1].id;
+                  }
+                } else {
+                  setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
+                }
             } else {
               setMessages([{ role: "bot", text: greeting, timestamp: Date.now() }]);
             }
@@ -87,6 +93,30 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages, isTyping]);
+
+  const pollRef = useRef<{ lastId: string | null }>({ lastId: null });
+  useEffect(() => {
+    if (!conversationId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/conversations/${conversationId}/messages`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const incoming = (data.messages || []) as any[];
+        if (incoming.length === 0) return;
+        const lastServerId = incoming[incoming.length - 1].id;
+        if (lastServerId === pollRef.current.lastId) return;
+        pollRef.current.lastId = lastServerId;
+        const updated: Message[] = incoming.map((m: any) => ({
+          role: m.role === "user" ? "user" as const : "bot" as const,
+          text: `${m.role === "human" ? "👤 Konsultant: " : ""}${m.content}`,
+          timestamp: new Date(m.created_at).getTime(),
+        }));
+        setMessages(updated);
+      } catch { /* silent */ }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [conversationId]);
 
   useEffect(() => {
     if (callActive) {
@@ -139,6 +169,20 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
       setMessages(prev => [...prev, { role: "bot", text: "Błąd połączenia.", timestamp: Date.now() }]);
     }
     setIsTyping(false);
+  }
+
+  async function handleRequestHuman() {
+    if (!conversationId || !businessId || transferring) return;
+    setTransferring(true);
+    try {
+      const res = await fetch(`/api/widget/${businessId}/request-human`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId }),
+      });
+      if (res.ok) setTransferRequested(true);
+    } catch { /* silent */ }
+    setTransferring(false);
   }
 
   if (loading) {
@@ -228,6 +272,27 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
               </div>
             )}
           </div>
+
+          {/* Transfer request */}
+          {conversationId && !transferRequested && (
+            <div className="px-4 pt-2 shrink-0">
+              <button
+                onClick={handleRequestHuman}
+                disabled={transferring}
+                className="w-full text-xs text-zinc-400 hover:text-brand-500 transition flex items-center justify-center gap-1.5 py-2 border border-dashed border-zinc-200 rounded-lg hover:border-brand-300"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                {transferring ? "Proszę czekać..." : "Porozmawiaj z konsultantem"}
+              </button>
+            </div>
+          )}
+          {transferRequested && (
+            <div className="px-4 pt-2 shrink-0">
+              <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-center">
+                Prośba o konsultanta została wysłana. Konsultant odpowie tutaj.
+              </div>
+            </div>
+          )}
 
           {/* Input */}
           <div className="border-t border-zinc-100 p-3 shrink-0">

@@ -9,7 +9,7 @@ import CallTable from "@/components/CallTable";
 import PlanUpgrade from "@/components/PlanUpgrade";
 import ReferralCard from "@/components/ReferralCard";
 import PhoneSettings from "@/components/PhoneSettings";
-import ChatHistory from "@/components/ChatHistory";
+import BusinessLiveChat from "@/components/BusinessLiveChat";
 import AccountSettings from "@/components/AccountSettings";
 import SecuritySettings from "@/components/SecuritySettings";
 import SecurityCenter from "@/components/SecurityCenter";
@@ -38,7 +38,6 @@ import IntegrationsDashboard from "@/components/IntegrationsDashboard";
 import IntegrationsSettings from "@/components/IntegrationsSettings";
 import WebhookApiSettings from "@/components/WebhookApiSettings";
 import GoogleCalendarSettings from "@/components/GoogleCalendarSettings";
-import NotificationsPanel from "@/components/NotificationsPanel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ConsultantListManager from "@/components/ConsultantListManager";
 import BillingHistory from "@/components/BillingHistory";
@@ -257,8 +256,7 @@ export default function DashboardPage() {
       ) : (<>
       {tab === "chats" && business && (
         <div className="space-y-6">
-          <NotificationsPanel businessId={business.id} />
-          <ChatHistory businessId={business.id} businessPlan={business.current_plan as PlanKey} />
+          <BusinessLiveChat businessId={business.id} />
         </div>
       )}
 

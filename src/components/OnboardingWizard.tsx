@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { plans } from "@/lib/pricing";
+import { plans, getPlanLabel } from "@/lib/pricing";
 
 interface BusinessData {
   id: string;
@@ -52,15 +52,6 @@ const STEPS = [
   { icon: GlobeIcon, title: "Widget", description: "Wklej na swoja strone" },
   { icon: CheckIcon, title: "Gotowe", description: "Panel gotowy do pracy" },
 ];
-
-const PLAN_LABELS: Record<string, string> = {
-  start_100: "Start",
-  pro_500: "Pro",
-  enterprise_2000: "Enterprise",
-  elastic_0: "Elastyczny",
-  pro_249: "Pro",
-  lux_599: "Lux",
-};
 
 export default function OnboardingWizard() {
   const [business, setBusiness] = useState<BusinessData | null>(null);
@@ -166,8 +157,8 @@ export default function OnboardingWizard() {
     );
   }
 
-  const planLabel = PLAN_LABELS[business.plan] || business.plan;
-  const planConfig = Object.values(plans).find(p => p.value === business.plan) || plans.self_service;
+  const planLabel = getPlanLabel(business.plan);
+  const planConfig = plans[business.plan] || plans.elastic_0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-brand-50/30">

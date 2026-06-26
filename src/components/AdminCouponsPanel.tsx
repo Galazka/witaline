@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Coupon, DiscountRule } from "@/types/database";
+import { getPlanLabel } from "@/lib/pricing";
 
 export default function AdminCouponsPanel() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -136,7 +137,7 @@ export default function AdminCouponsPanel() {
     setPlans(plans.includes(plan) ? plans.filter(p => p !== plan) : [...plans, plan]);
   }
 
-  const planOptions = ["start_100", "pro_500", "enterprise_2000", "elastic_0", "pro_249", "lux_599"];
+  const planOptions = ["elastic_0", "enterprise_2000"];
 
   if (loading) return <p className="text-zinc-400 text-sm">Ładowanie...</p>;
 
@@ -202,7 +203,7 @@ export default function AdminCouponsPanel() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                       couponPlans.includes(p) ? "bg-brand-100 border-brand-400 text-brand-600" : "border-zinc-200 text-zinc-500 hover:bg-brand-50"
                     }`}>
-                    {p.replace("_", " ")}
+                    {getPlanLabel(p)}
                   </button>
                 ))}
               </div>
@@ -326,7 +327,7 @@ export default function AdminCouponsPanel() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                       discPlans.includes(p) ? "bg-brand-100 border-brand-400 text-brand-600" : "border-zinc-200 text-zinc-500 hover:bg-brand-50"
                     }`}>
-                    {p.replace("_", " ")}
+                    {getPlanLabel(p)}
                   </button>
                 ))}
               </div>

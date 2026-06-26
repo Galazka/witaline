@@ -10,10 +10,6 @@ interface PricingValues {
   elasticTierStep: number;
   elasticStartMin: number;
   elasticMaxMin: number;
-  planStart: number;
-  planGrowth: number;
-  planPro: number;
-  planLux: number;
   planEnterprise: number;
   addonOwnNumber: number;
   addonGoogleCalendar: number;
@@ -36,10 +32,6 @@ const DEFAULTS: PricingValues = {
   elasticTierStep: 500,
   elasticStartMin: 50,
   elasticMaxMin: 5000,
-  planStart: 299,
-  planGrowth: 600,
-  planPro: 300,
-  planLux: 800,
   planEnterprise: 1500,
   addonOwnNumber: 49,
   addonGoogleCalendar: 39,
@@ -256,11 +248,7 @@ export default function AdminPricingSimulator() {
             </div>
 
             <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-              <h3 className="text-sm font-semibold text-zinc-900">Plany abonamentowe (ceny netto)</h3>
-              <Slider label="START (250 min)" value={vals.planStart} min={99} max={999} step={10} suffix=" zł" onChange={v => update("planStart", v)} />
-              <Slider label="GROWTH (600 min)" value={vals.planGrowth} min={199} max={1999} step={10} suffix=" zł" onChange={v => update("planGrowth", v)} />
-              <Slider label="PRO (300 min)" value={vals.planPro} min={99} max={999} step={10} suffix=" zł" onChange={v => update("planPro", v)} />
-              <Slider label="LUX (800 min)" value={vals.planLux} min={199} max={1999} step={10} suffix=" zł" onChange={v => update("planLux", v)} />
+              <h3 className="text-sm font-semibold text-zinc-900">Enterprise</h3>
               <Slider label="ENTERPRISE (1500 min)" value={vals.planEnterprise} min={499} max={4999} step={50} suffix=" zł" onChange={v => update("planEnterprise", v)} />
             </div>
 
@@ -308,10 +296,7 @@ export default function AdminPricingSimulator() {
                   </thead>
                   <tbody>
                     {[
-                      { name: "START", price: vals.planStart, min: 250 },
-                      { name: "GROWTH", price: vals.planGrowth, min: 600, hot: true },
-                      { name: "PRO", price: vals.planPro, min: 300 },
-                      { name: "LUX", price: vals.planLux, min: 800 },
+                      { name: "Elastyczny", price: vals.elasticBaseRate, min: 1, isElastic: true },
                       { name: "ENTERPRISE", price: vals.planEnterprise, min: 1500 },
                     ].map(p => {
                       const rpm = p.price / p.min;

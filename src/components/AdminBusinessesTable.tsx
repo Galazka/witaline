@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { getPlanLabel } from "@/lib/pricing";
 
 /* ── Types ── */
 interface BizStats {
@@ -42,14 +43,9 @@ interface Props {
   onDetail?: (id: string) => void;
 }
 
-const planLabels: Record<string, string> = {
-  start_100: "Start",
-  pro_500: "Growth",
-  enterprise_2000: "Enterprise",
-  elastic_0: "Elastyczny",
-  pro_249: "Pro",
-  lux_599: "Lux",
-};
+function getPlanList() {
+  return ["elastic_0", "enterprise_2000"];
+}
 
 /* ── Helpers ── */
 
@@ -302,7 +298,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                       {/* Plan */}
                       <td className="px-3 py-2.5">
                         <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-600">
-                          {planLabels[b.current_plan] || b.current_plan}
+                          {getPlanLabel(b.current_plan)}
                         </span>
                       </td>
 

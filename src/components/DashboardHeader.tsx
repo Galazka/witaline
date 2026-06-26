@@ -1,6 +1,6 @@
 "use client";
 
-import { getUsedPercentage, getPlanConfig } from "@/lib/pricing";
+import { getUsedPercentage, getPlanConfig, getPlanLabel } from "@/lib/pricing";
 import type { PlanKey } from "@/types/database";
 
 interface Props {
@@ -38,20 +38,7 @@ export default function DashboardHeader({
   const tokensPct = Math.min(100, Math.round((tokensUsed / config.monthlyTokens) * 100));
   const remainingMinutes = Math.max(0, config.monthlyVoiceMinutes - minutesUsed);
   const remainingTokens = Math.max(0, config.monthlyTokens - tokensUsed);
-  const planLabels: Record<string, string> = {
-    start_100: "Start",
-    pro_500: "Growth",
-    enterprise_2000: "Enterprise",
-    elastic_0: "Elastyczny",
-    pro_249: "Pro",
-    lux_599: "Lux",
-    start: "Start",
-    pro: "Pro",
-    growth: "Growth",
-    lux: "Lux",
-    enterprise: "Enterprise",
-    self_service: "Self-Service",
-  };
+  const planLabel = getPlanLabel(plan);
 
   // Trial info
   const isTrialing = subscriptionStatus === "trialing";
@@ -100,7 +87,7 @@ export default function DashboardHeader({
         {/* Pakiet */}
         <div className="bg-white rounded-xl border border-zinc-200 p-5">
           <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">Pakiet</p>
-          <p className="text-lg font-semibold text-zinc-900">{planLabels[plan]}</p>
+          <p className="text-lg font-semibold text-zinc-900">{planLabel}</p>
           <p className="text-xs text-zinc-400 mt-1">{plan === "elastic_0" ? config.pricePLN : `${config.pricePLN} brutto/mies`}</p>
         </div>
 

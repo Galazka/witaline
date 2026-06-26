@@ -4,11 +4,8 @@ import { useState, type JSX } from "react";
 import { ELASTIC_TIERS, calculateElasticPrice, INTERNAL_COST_PER_MIN } from "@/lib/pricing";
 
 const PLANS = [
-  { key: "start", label: "START", pricePLN: 299, includedMinutes: 250 },
-  { key: "growth", label: "GROWTH", pricePLN: 600, includedMinutes: 600, hot: true },
-  { key: "enterprise", label: "ENTERPRISE", pricePLN: 1500, includedMinutes: 1500 },
-  { key: "pro", label: "PRO", pricePLN: 300, includedMinutes: 300 },
-  { key: "lux", label: "LUX", pricePLN: 800, includedMinutes: 800 },
+  { key: "elastic_0", label: "ELASTYCZNY", pricePLN: 0, includedMinutes: 0 },
+  { key: "enterprise_2000", label: "ENTERPRISE", pricePLN: 999, includedMinutes: 1500 },
 ];
 
 const EUR_RATE = 0.92;

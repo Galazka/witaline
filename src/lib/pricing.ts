@@ -1,19 +1,4 @@
-﻿export const PLANS = {
-  ELASTIC: 0,
-  ENTERPRISE: 999,
-  // Legacy — kept for backward compat
-  START: 199,
-  PRO: 249,
-  GROWTH: 399,
-  LUX: 599,
-};
-
-export const PLAN_NAMES = {
-  ELASTIC: "Elastyczny",
-  ENTERPRISE: "Enterprise",
-};
-
-export interface ElasticTier {
+﻿export interface ElasticTier {
   minMinutes: number;
   maxMinutes: number;
   from: number;
@@ -37,14 +22,6 @@ export const billingModels = [
 ];
 
 export const plans: Record<string, PlanConfig> = {
-  // Legacy plans — kept for backward compat with existing businesses
-  start: { label: "Start", value: "start", price: 199, pricePLN: "199 PLN", minutes: 250, overagePerToken: 0.002, monthlyTokens: 250000, monthlyVoiceMinutes: 250, maxConsultants: 3, features: [] },
-  pro: { label: "Pro", value: "pro", price: 249, pricePLN: "249 PLN", minutes: 300, overagePerToken: 0.0015, monthlyTokens: 300000, monthlyVoiceMinutes: 300, maxConsultants: 3, features: [] },
-  growth: { label: "Growth", value: "growth", price: 399, pricePLN: "399 PLN", minutes: 600, overagePerToken: 0.001, monthlyTokens: 600000, monthlyVoiceMinutes: 600, maxConsultants: 3, features: [] },
-  lux: { label: "Lux", value: "lux", price: 599, pricePLN: "599 PLN", minutes: 800, overagePerToken: 0.0008, monthlyTokens: 800000, monthlyVoiceMinutes: 800, maxConsultants: 3, features: [] },
-  enterprise: { label: "Enterprise", value: "enterprise", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 3, features: [] },
-  self_service: { label: "Self-Service", value: "self_service", price: 0, pricePLN: "0 PLN", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 1, features: [] },
-  // Active plans
   elastic_0: { label: "Elastyczny", value: "elastic_0", price: 0, pricePLN: "od 0,85 PLN/min", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 99, features: [] },
   enterprise_2000: { label: "Enterprise", value: "enterprise_2000", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 99, features: [] },
 };
@@ -110,12 +87,17 @@ export function calculateElasticPrice(minutes: number): ElasticPriceBreakdown {
 export function calculateCost(durationSeconds: number, planKey: string): number {
   const minutes = durationSeconds / 60;
   if (planKey.startsWith("elastic")) return minutes * getElasticRate(minutes);
-  const config = getPlanConfig(planKey);
-  return config ? minutes * (config.price / config.minutes) : minutes * ELASTIC_TIERS[0].rate;
+  const config = plans[planKey];
+  return config ? minutes * (config.price / (config.minutes || 1)) : minutes * ELASTIC_TIERS[0].rate;
+}
+
+export function getPlanLabel(planKey: string): string {
+  if (plans[planKey]) return plans[planKey].label;
+  if (planKey === "enterprise") return "Enterprise";
+  return planKey;
 }
 
 export function getPlanConfig(planKey: string) {
-  // First check if planKey exists directly in plans (for elastic_0, enterprise_2000, etc.)
   const directPlan = plans[planKey];
   if (directPlan) {
     return {
@@ -133,27 +115,7 @@ export function getPlanConfig(planKey: string) {
       features: directPlan.features,
     };
   }
-  const normalized = planKey.toUpperCase().replace(/_?(\d+).*/, "").trim();
-  const plan = Object.keys(PLANS).find(k => k === normalized);
-  if (!plan || !PLANS[plan as keyof typeof PLANS]) {
-    return { name: "Custom", planId: "custom", label: "Custom", price: 0, pricePLN: "0 PLN", pricePerMonth: 0, minutes: 0, monthlyVoiceMinutes: 0, monthlyTokens: 0, maxConsultants: 3, overagePerToken: 0, features: [] };
-  }
-  const price = PLANS[plan as keyof typeof PLANS];
-  const p = Object.values(plans).find(x => x.label === PLAN_NAMES[plan as keyof typeof PLAN_NAMES]);
-  return {
-    name: PLAN_NAMES[plan as keyof typeof PLAN_NAMES],
-    planId: plan,
-    label: p?.label || PLAN_NAMES[plan as keyof typeof PLAN_NAMES],
-    price,
-    pricePLN: p?.pricePLN || `${price} PLN`,
-    pricePerMonth: price,
-    minutes: p?.minutes || 250,
-    monthlyVoiceMinutes: p?.minutes || 250,
-    monthlyTokens: p?.monthlyTokens || 250000,
-    maxConsultants: plan === "START" ? 1 : plan === "PRO" ? 3 : plan === "GROWTH" ? 5 : plan === "LUX" ? 10 : 99,
-    overagePerToken: p?.overagePerToken || 0.002,
-    features: []
-  };
+  return { name: "Elastyczny", planId: "elastic_0", label: "Elastyczny", price: 0, pricePLN: "od 0,85 PLN/min", pricePerMonth: 0, minutes: 0, monthlyVoiceMinutes: 0, monthlyTokens: 0, maxConsultants: 99, overagePerToken: 0.002, features: [] };
 }
 
 export function getElasticRate(minutes: number): number {
@@ -175,7 +137,7 @@ export const ADDONS = {
   voiceClone: { name: "Klonowanie głosu", price: 49 },
   unlimitedConsultants: { name: "Nieograniczeni konsultanci", price: 49 },
   prioritySupport: { name: "Priorytetowe wsparcie", price: 29 },
-  sla247: { name: "SLA 24/7", price: 99 }
+  sla247: { name: "SLA 24/7", price: 99 },
 };
 
 export function formatPLN(amount: number | string): string {
@@ -226,10 +188,7 @@ export function formatPriceMin(ratePLN: number, currency: Currency): string {
 }
 
 export function getPlanOverageRate(planKey: string): number {
-  const normalized = planKey.toUpperCase().replace(/_?(\d+).*/, "").trim();
-  const plan = Object.keys(PLANS).find(k => k === normalized);
-  if (!plan) return 0.002;
-  const p = Object.values(plans).find(x => x.label === PLAN_NAMES[plan as keyof typeof PLAN_NAMES]);
+  const p = plans[planKey];
   return p?.overagePerToken ?? 0.002;
 }
 
