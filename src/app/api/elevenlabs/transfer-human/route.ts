@@ -88,6 +88,20 @@ export async function POST(request: Request) {
 
     console.log("[transfer-human] transfer stored for", storeKey, "→", target.number);
 
+    // Create support conversation
+    try {
+      await supabaseAdmin.from("support_conversations").insert({
+        business_id: businessId,
+        customer_phone: callerPhone || null,
+        customer_name: null,
+        source: "transfer",
+        status: "open",
+      });
+      console.log("[transfer-human] support conversation created");
+    } catch (convErr) {
+      console.warn("[transfer-human] failed to create support conversation:", convErr);
+    }
+
     return NextResponse.json({
       ok: true,
       target: target.number,

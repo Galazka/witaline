@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { type JSX, useState } from "react";
 import { IconChevronDown, IconChevronLeft } from "./icons";
 
@@ -25,6 +25,7 @@ interface Props {
 export default function Sidebar({ items, activeKey, onNavigate, logo, bottomContent }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
+  const router = useRouter();
 
   const toggleSubmenu = (key: string) => {
     setExpandedMenus(prev => {
@@ -77,7 +78,13 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
 
     return (
       <button
-        onClick={() => onNavigate(item.key)}
+        onClick={() => {
+          if (item.href) {
+            router.push(item.href);
+          } else {
+            onNavigate(item.key);
+          }
+        }}
         className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
           active
             ? "bg-brand-50/80 text-brand-700 shadow-sm"

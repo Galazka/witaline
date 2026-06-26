@@ -22,7 +22,10 @@ CREATE INDEX IF NOT EXISTS idx_referrals_status ON referrals(status);
 CREATE INDEX IF NOT EXISTS idx_referral_coupons_business ON referral_coupons(business_id);
 CREATE INDEX IF NOT EXISTS idx_referral_coupons_code ON referral_coupons(code);
 
--- Generate referral codes for existing businesses (if none)
+-- Add referral_code column first (if missing)
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS referral_code TEXT;
+
+-- Then generate codes for existing rows
 UPDATE businesses
 SET referral_code = LOWER(SUBSTRING(MD5(random()::text || id::text), 1, 8))
-WHERE referral_code IS NULL;
+WHERE referral_code IS NULL OR referral_code = '';

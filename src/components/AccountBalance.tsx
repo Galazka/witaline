@@ -26,6 +26,9 @@ export default function AccountBalance({
   const [trialSmsUsed, setTrialSmsUsed] = useState(0);
   const [isTrialing, setIsTrialing] = useState(false);
   const [purchaseError, setPurchaseError] = useState("");
+  const [autoTopup, setAutoTopup] = useState(false);
+  const [autoTopupThreshold, setAutoTopupThreshold] = useState(20);
+  const [autoTopupPackSize, setAutoTopupPackSize] = useState(100);
   const supabase = createClient();
 
   const FREE_TRIAL_MINUTES = 15;
@@ -35,7 +38,7 @@ export default function AccountBalance({
     try {
       const { data, error } = await supabase
         .from("businesses")
-        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, subscription_status, trial_ends_at, trial_minutes_used, trial_sms_used, created_at")
+        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, subscription_status, trial_ends_at, trial_minutes_used, trial_sms_used, created_at, auto_topup_enabled, auto_topup_minutes_threshold, auto_topup_pack_size")
         .eq("id", businessId)
         .maybeSingle();
       if (data && !error) {
@@ -50,6 +53,9 @@ export default function AccountBalance({
         setIsTrialing(d.subscription_status === "trialing");
         setTrialMinutesUsed(d.trial_minutes_used || 0);
         setTrialSmsUsed(d.trial_sms_used || 0);
+        setAutoTopup(d.auto_topup_enabled || false);
+        setAutoTopupThreshold(d.auto_topup_minutes_threshold || 20);
+        setAutoTopupPackSize(d.auto_topup_pack_size || 100);
         if (d.subscription_status === "trialing") {
           const trialEnd = d.trial_ends_at ? new Date(d.trial_ends_at) : new Date(new Date(d.created_at).getTime() + 7 * 86400000);
           setTrialDaysLeft(Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / 86400000)));
@@ -176,10 +182,12 @@ export default function AccountBalance({
       )}
 
       {!isTrialing && (balance < 50 || smsData.remaining < 20) && (
-        <div className={`rounded-xl px-4 py-3 text-sm flex items-center gap-2 ${(balance < 20 || smsData.remaining < 10) ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
+        <div className={`rounded-xl px-4 py-3 text-sm flex items-center gap-2 ${(balance < 0 || balance < 20 || smsData.remaining < 10) ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
           <span>
-            {balance < 20
+            {balance < 0
+              ? "Ujemne saldo minut! Doładuj konto aby odblokować połączenia przychodzące."
+              : balance < 20
               ? "Krytycznie niskie saldo minut! Doładuj konto aby nie przerwać obsługi połączeń."
               : balance < 50
               ? "Pozostało mało minut. Rozważ doładowanie aby uniknąć przerwy."
@@ -199,7 +207,7 @@ export default function AccountBalance({
         <div className="space-y-4">
           <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
             <span className="text-sm text-zinc-600">Dostępne minuty</span>
-            <span className="text-xl font-bold text-brand-500">
+            <span className={`text-xl font-bold ${balance < 0 ? "text-red-500" : "text-brand-500"}`}>
               {loading ? "..." : balance.toFixed(0)}
             </span>
           </div>
@@ -360,11 +368,93 @@ export default function AccountBalance({
         </div>
       )}
 
+      {/* Auto top-up toggle */}
+      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <h3 className="text-sm font-semibold text-zinc-900 mb-3">Automatyczne doładowanie</h3>
+        <p className="text-xs text-zinc-500 mb-4">
+          Gdy saldo spadnie poniżej progu, automatycznie doładujemy konto pakietem minut za Ciebie.
+        </p>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm text-zinc-700">Włączone</span>
+          <button
+            onClick={async () => {
+              const newVal = !autoTopup;
+              const res = await fetch("/api/business/auto-topup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ businessId, enabled: newVal, threshold: autoTopupThreshold, packSize: autoTopupPackSize }),
+              });
+              if (res.ok) setAutoTopup(newVal);
+              else {
+                const err = await res.json();
+                alert(err.error || "Nie udało się zapisać");
+              }
+            }}
+            className={`relative w-12 h-6 rounded-full transition-colors ${autoTopup ? "bg-brand-400" : "bg-zinc-200"}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoTopup ? "translate-x-6" : ""}`} />
+          </button>
+        </div>
+        {autoTopup && (
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-600">Próg minut</span>
+                <span className="text-xs font-medium text-zinc-900">{autoTopupThreshold} min</span>
+              </div>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                step="10"
+                value={autoTopupThreshold}
+                onChange={e => {
+                  const v = Number(e.target.value);
+                  setAutoTopupThreshold(v);
+                  fetch("/api/business/auto-topup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ businessId, threshold: v }),
+                  }).catch(() => {});
+                }}
+                className="w-full accent-brand-400"
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-zinc-600">Pakiet minut</span>
+                <span className="text-xs font-medium text-zinc-900">{autoTopupPackSize} min</span>
+              </div>
+              <input
+                type="range"
+                min="50"
+                max="500"
+                step="50"
+                value={autoTopupPackSize}
+                onChange={e => {
+                  const v = Number(e.target.value);
+                  setAutoTopupPackSize(v);
+                  fetch("/api/business/auto-topup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ businessId, packSize: v }),
+                  }).catch(() => {});
+                }}
+                className="w-full accent-brand-400"
+              />
+              <p className="text-xs text-zinc-400 mt-2">
+                Doładowanie {autoTopupPackSize} min automatycznie przy saldo &lt; {autoTopupThreshold} min
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Summary footer */}
       <div className="bg-zinc-50 rounded-xl px-4 py-3 text-xs text-zinc-500 space-y-1">
         <div className="flex justify-between">
           <span>Minuty głosowe</span>
-          <span className="font-medium text-zinc-700">{balance.toFixed(0)} min</span>
+          <span className={`font-medium ${balance < 0 ? "text-red-500" : "text-zinc-700"}`}>{balance.toFixed(0)} min</span>
         </div>
         <div className="flex justify-between">
           <span>SMS</span>

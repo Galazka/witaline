@@ -351,7 +351,7 @@ export async function POST(request: Request) {
   });
 
   const currentPrepaid = parseFloat(business.prepaid_minutes || "0");
-  const newPrepaid = currentPrepaid > 0 ? Math.max(0, Math.round((currentPrepaid - minutesToAdd) * 100) / 100) : currentPrepaid;
+  const newPrepaid = currentPrepaid > 0 ? Math.round((currentPrepaid - minutesToAdd) * 100) / 100 : currentPrepaid;
 
   const updateData: Record<string, unknown> = {
     minutes_used_this_week: (business.minutes_used_this_week || 0) + minutesToAdd,
