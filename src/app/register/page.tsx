@@ -150,7 +150,7 @@ export default function RegisterPage() {
 if (done) return (
   <div className="flex-1 flex items-center justify-center p-4 min-h-screen bg-gradient-to-br from-brand-950 via-brand-900 to-brand-950">
     <div className="max-w-md text-center space-y-6 animate-fade-in-up">
-      <div className="w-20 h-20 bg-brand-400/20 rounded-full flex items-center justify-center mx-auto">
+      <div className="w-20 h-20 bg-[#0d9488]/20 rounded-full flex items-center justify-center mx-auto">
         <svg className="w-10 h-10 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
       </div>
       <h2 className="text-2xl md:text-3xl font-bold text-white font-display">Konto aktywne!</h2>
