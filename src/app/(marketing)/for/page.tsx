@@ -13,10 +13,10 @@ export default function ForPage() {
     <main className="min-h-screen bg-white">
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-zinc-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-[#3CBF4A]">WitaLine</Link>
-          <Link href="/register" className="bg-[#3CBF4A] text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-[#34a840] transition-colors">
-            Wypróbuj za darmo
-          </Link>
+<Link href="/" className="text-xl font-bold text-[#0d9488]">WitaLine</Link>
+          <Link href="/register" className="bg-[#0d9488] text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-[#0f766e] transition-colors">
+             Wypróbuj za darmo
+           </Link>
         </div>
       </nav>
       <section className="py-24">
