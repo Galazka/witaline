@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
       let result = "";
 
       let bizId = args.business_id || WITALINE_MAIN_BUSINESS;
-      if (toolName !== "business_lookup" && toolName !== "send_whatsapp") {
+      // transfer_to_human works even during trial - do not block
+      if (toolName !== "business_lookup" && toolName !== "transfer_to_human" && toolName !== "send_whatsapp") {
         if (!(await checkTrial(bizId))) {
           result = JSON.stringify({ ok: false, error: "Trial expired" });
           return NextResponse.json({ jsonrpc: "2.0", id, result: { content: [{ type: "text", text: result }] } });
@@ -160,64 +161,66 @@ export async function POST(request: NextRequest) {
           });
         }
       }
-      else if (toolName === "transfer_to_human") {
-        const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
-        const callerPhone = args.caller_phone || "";
-        const toNumber = args.to_number || "";
-        let callSid = args.call_sid || "";
+else if (toolName === "transfer_to_human") {
+         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+         const callerPhone = args.caller_phone || "";
+         const toNumber = args.to_number || "";
+         let callSid = args.call_sid || "";
 
-        if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
-          const allSids = await getActiveCallSids(bizId);
-          callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
-        }
+         if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
+           const allSids = await getActiveCallSids(bizId);
+           callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
+         }
 
-        let targetNumber = "";
-        const { data: consultants } = await supabaseAdmin
-          .from("business_consultants")
-          .select("phone")
-          .eq("business_id", bizId)
-          .order("sort_order", { ascending: true });
-        if (consultants && consultants.length > 0) {
-          targetNumber = consultants[0].phone;
-        } else {
-          const { data: biz } = await supabaseAdmin
-            .from("businesses")
-            .select("phone, name, twilio_number")
-            .eq("id", bizId)
-            .maybeSingle();
-          targetNumber = biz?.phone || process.env.WITALINE_CONSULTANT_NUMBER || "";
-        }
+         // Pobierz informacje o firmie i konsultantach
+         const { data: biz } = await supabaseAdmin
+           .from("businesses")
+           .select("name, twilio_number, phone, system_prompt")
+           .eq("id", bizId)
+           .maybeSingle();
 
-        if (!targetNumber) {
-          result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
-        } else {
-          const { data: biz } = await supabaseAdmin
-            .from("businesses")
-            .select("name, twilio_number")
-            .eq("id", bizId)
-            .maybeSingle();
-          const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
+         const { data: consultants } = await supabaseAdmin
+           .from("business_consultants")
+           .select("phone")
+           .eq("business_id", bizId)
+           .order("sort_order", { ascending: true });
 
-          // Store pending transfer — transfer-router picks this up when ElevenLabs stream ends
-          await setPendingTransfer(callSid || bizId, {
-            businessId: bizId,
-            targetNumber,
-            callerId,
-            businessName: biz?.name || "WitaLine",
-            fromNumber: callerPhone,
-            toNumber,
-            createdAt: Date.now(),
-          });
+         const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
 
-          console.log("[MCP transfer_to_human] stored for", bizId, "->", targetNumber);
-          result = JSON.stringify({
-            ok: true,
-            target: targetNumber,
-            business: biz?.name || "WitaLine",
-            message: "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie.",
-          });
-        }
-      }
+         // Czy firma ma własnych konsultantów?
+         const hasOwnConsultant = consultants && consultants.length > 0;
+
+         // Numer docelowy: konsultant firmy lub numer WitaLine jako fallback
+         const targetNumber = hasOwnConsultant
+           ? consultants[0].phone
+           : (biz?.phone || process.env.WITALINE_CONSULTANT_NUMBER || process.env.TWILIO_PHONE_NUMBER || "");
+
+         if (!targetNumber) {
+           result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
+         } else {
+           // Store pending transfer — transfer-router picks this up when ElevenLabs stream ends
+           await setPendingTransfer(callSid || bizId, {
+             businessId: bizId,
+             targetNumber,
+             callerId,
+             businessName: biz?.name || "WitaLine",
+             fromNumber: callerPhone,
+             toNumber,
+             createdAt: Date.now(),
+           });
+
+           console.log("[MCP transfer_to_human] stored for", bizId, "->", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
+           result = JSON.stringify({
+             ok: true,
+             target: targetNumber,
+             business: biz?.name || "WitaLine",
+             has_human_consultant: hasOwnConsultant,
+             message: hasOwnConsultant
+               ? "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie."
+               : "Brak konsultanta w tej firmie. Agent pozostanie w rozmowie. Przekaż ofertę firmy i spytaj, czy klient ma pytania.",
+           });
+         }
+       }
       else if (toolName === "create_checkout") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
         const plan = args.plan || "growth";

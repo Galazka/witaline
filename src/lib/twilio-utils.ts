@@ -42,7 +42,7 @@ function twilioApiRequest(method: "GET" | "POST", path: string, creds: TwilioCre
   });
 }
 
-function registerCall(fromNumber: string, toNumber: string, businessId?: string, callSid?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<string> {
+export function registerCall(fromNumber: string, toNumber: string, businessId?: string, callSid?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<string> {
   return new Promise((resolve, reject) => {
     const dynVars: Record<string, string | undefined> = { business_id: businessId || "00000000-0000-0000-0000-000000000001", caller_number: fromNumber, call_sid: callSid || "" };
     if (trialMinutesRemaining !== undefined && trialMinutesRemaining >= 0) {
