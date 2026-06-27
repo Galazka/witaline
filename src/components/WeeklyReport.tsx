@@ -88,7 +88,7 @@ export default function WeeklyReport({ businessId }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white/45 rounded-xl p-4 border border-white/20">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Rozmowy</p>
-          <p className="text-2xl font-bold text-brand-400 mt-1">{data.total_calls}</p>
+          <p className="text-2xl font-bold text-[#0d9488] mt-1">{data.total_calls}</p>
           <p className="text-[10px] text-zinc-500 mt-0.5 flex items-center">
             {data.total_minutes} min
             <TrendArrow current={data.total_calls} previous={data.previous_week.total_calls} />
@@ -97,7 +97,7 @@ export default function WeeklyReport({ businessId }: Props) {
         </div>
         <div className="bg-white/45 rounded-xl p-4 border border-white/20">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Lead&apos;y</p>
-          <p className="text-2xl font-bold text-brand-400 mt-1">{data.total_leads}</p>
+          <p className="text-2xl font-bold text-[#0d9488] mt-1">{data.total_leads}</p>
           <p className="text-[10px] text-zinc-500 mt-0.5 flex items-center">
             poprzedni
             <TrendArrow current={data.total_leads} previous={data.previous_week.total_leads} />
@@ -106,7 +106,7 @@ export default function WeeklyReport({ businessId }: Props) {
         </div>
         <div className="bg-white/45 rounded-xl p-4 border border-white/20">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Rezerwacje</p>
-          <p className="text-2xl font-bold text-brand-400 mt-1">{data.total_bookings}</p>
+          <p className="text-2xl font-bold text-[#0d9488] mt-1">{data.total_bookings}</p>
           <p className="text-[10px] text-zinc-500 mt-0.5 flex items-center">
             poprzedni
             <TrendArrow current={data.total_bookings} previous={data.previous_week.total_bookings} />
@@ -115,7 +115,7 @@ export default function WeeklyReport({ businessId }: Props) {
         </div>
         <div className="bg-white/45 rounded-xl p-4 border border-white/20">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">SMS</p>
-          <p className="text-2xl font-bold text-brand-400 mt-1">{data.total_sms}</p>
+          <p className="text-2xl font-bold text-[#0d9488] mt-1">{data.total_sms}</p>
           <p className="text-[10px] text-zinc-500 mt-0.5 flex items-center">
             poprzedni
             <TrendArrow current={data.total_sms} previous={data.previous_week.total_sms} />
@@ -135,7 +135,7 @@ export default function WeeklyReport({ businessId }: Props) {
                 <span className="text-[10px] text-zinc-500">{val.calls}</span>
                 <div className="w-full bg-brand-100 rounded-md overflow-hidden flex-1 self-end" style={{ width: "100%" }}>
                   <div
-                    className="w-full bg-brand-400 rounded-md transition-all self-end"
+                    className="w-full bg-[#0d9488] rounded-md transition-all self-end"
                     style={{ height: `${Math.max(pct, 2)}%`, minHeight: val.calls > 0 ? "4px" : "0", marginTop: "auto" }}
                   />
                 </div>
@@ -160,7 +160,7 @@ export default function WeeklyReport({ businessId }: Props) {
                   <div key={key} className="flex items-center gap-2 text-xs">
                     <span className="w-24 text-zinc-600 truncate">{classLabels[key] || key}</span>
                     <div className="flex-1 h-4 bg-brand-100 rounded overflow-hidden">
-                      <div className="h-full bg-brand-400/70 rounded" style={{ width: `${pct}%` }} />
+                      <div className="h-full bg-[#0d9488]/70 rounded" style={{ width: `${pct}%` }} />
                     </div>
                     <span className="w-8 text-right text-zinc-400">{count}</span>
                     <span className="w-8 text-right text-zinc-600">{pct}%</span>

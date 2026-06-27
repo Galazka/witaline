@@ -446,13 +446,13 @@ function Nav() {
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold text-[#3CBF4A] tracking-tight">WitaLine</Link>
+        <Link href="/" className="text-xl font-bold text-[#0d9488] tracking-tight">WitaLine</Link>
         <div className="flex items-center gap-6">
           <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="text-sm text-zinc-500 hover:text-zinc-900 hidden sm:flex items-center gap-2 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
             {WITALINE_PHONE_DISPLAY}
           </a>
-          <Link href="/register" className="bg-[#3CBF4A] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#34a840] transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
+          <Link href="/register" className="bg-[#0d9488] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#34a840] transition-all shadow-sm hover:shadow-md active:scale-[0.98]">
             Wypróbuj za darmo
           </Link>
         </div>
@@ -484,7 +484,7 @@ function Hero({ industry }: { industry: IndustryConfig }) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/register"
-              className="bg-[#3CBF4A] text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-[#34a840] transition-all shadow-lg shadow-green-200 hover:shadow-xl active:scale-[0.98] w-full sm:w-auto text-center"
+              className="bg-[#0d9488] text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-[#34a840] transition-all shadow-lg shadow-green-200 hover:shadow-xl active:scale-[0.98] w-full sm:w-auto text-center"
             >
               {industry.cta}
             </Link>
@@ -539,7 +539,7 @@ function Stats() {
             { value: "24/7", label: "Obsługa bez przerw" },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-[#3CBF4A] mb-1">{stat.value}</div>
+              <div className="text-3xl sm:text-4xl font-bold text-[#0d9488] mb-1">{stat.value}</div>
               <div className="text-sm text-zinc-500">{stat.label}</div>
             </div>
           ))}
@@ -560,8 +560,8 @@ function Benefits({ industry }: { industry: IndustryConfig }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {industry.benefits.map((b, i) => (
             <div key={i} className="group flex items-start gap-4 p-5 rounded-2xl bg-green-50/50 hover:bg-green-50 border border-green-100/50 hover:border-green-200 transition-all">
-              <div className="w-8 h-8 rounded-full bg-[#3CBF4A]/10 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
-                <svg className="w-4 h-4 text-[#3CBF4A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+              <div className="w-8 h-8 rounded-full bg-[#0d9488]/10 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
+                <svg className="w-4 h-4 text-[#0d9488]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
               </div>
               <span className="text-zinc-700 text-sm leading-relaxed">{b}</span>
             </div>
@@ -587,7 +587,7 @@ function HowItWorks() {
             { step: "03", title: "Gotowe!", desc: "Przekieruj połączenia na WitaLine. Asystent odbiera rozmowy 24/7, Ty dostajesz raporty." },
           ].map((item) => (
             <div key={item.step} className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-[#3CBF4A] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200">
+              <div className="w-16 h-16 rounded-2xl bg-[#0d9488] text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200">
                 {item.step}
               </div>
               <h3 className="text-xl font-semibold text-zinc-900 mb-3">{item.title}</h3>
@@ -612,7 +612,7 @@ function Features({ industry }: { industry: IndustryConfig }) {
           {industry.features.map((f, i) => (
             <div key={i} className="group bg-white rounded-2xl p-6 border border-zinc-100 hover:border-green-200 hover:shadow-lg hover:shadow-green-100/50 transition-all duration-300">
               <div className="text-4xl mb-5 group-hover:scale-110 transition-transform duration-300 inline-block">{f.icon}</div>
-              <h3 className="font-semibold text-zinc-900 mb-2 group-hover:text-[#3CBF4A] transition-colors">{f.title}</h3>
+              <h3 className="font-semibold text-zinc-900 mb-2 group-hover:text-[#0d9488] transition-colors">{f.title}</h3>
               <p className="text-sm text-zinc-500 leading-relaxed">{f.desc}</p>
             </div>
           ))}
@@ -636,7 +636,7 @@ function PricingPreview() {
               </p>
               <Link
                 href="/register"
-                className="inline-flex bg-[#3CBF4A] text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-[#34a840] transition-all shadow-sm"
+                className="inline-flex bg-[#0d9488] text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-[#34a840] transition-all shadow-sm"
               >
                 Sprawdź cennik
               </Link>
@@ -696,8 +696,8 @@ function FAQ({ industry }: { industry: IndustryConfig }) {
           {faqs.map((faq, i) => (
             <details key={i} className="group rounded-2xl border border-zinc-200 open:border-green-200 open:bg-green-50/30 transition-all">
               <summary className="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
-                <span className="text-sm font-medium text-zinc-900 group-open:text-[#3CBF4A] transition-colors">{faq.q}</span>
-                <svg className="w-5 h-5 text-zinc-400 group-open:rotate-180 group-open:text-[#3CBF4A] transition-all shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span className="text-sm font-medium text-zinc-900 group-open:text-[#0d9488] transition-colors">{faq.q}</span>
+                <svg className="w-5 h-5 text-zinc-400 group-open:rotate-180 group-open:text-[#0d9488] transition-all shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>

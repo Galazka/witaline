@@ -274,17 +274,17 @@ export default function AdminRealCosts() {
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Od:</label>
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Do:</label>
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value as ViewCurrency)}
-            className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-brand-400"
+            className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-[#0d9488]"
             title="Wyświetl w">
             <option value="PLN">PLN (zł)</option>
             <option value="EUR">EUR (€)</option>
@@ -296,12 +296,12 @@ export default function AdminRealCosts() {
             </span>
           )}
           <button onClick={fetchData}
-            className="px-3 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
+            className="px-3 py-1.5 text-xs font-medium bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition">
             Odswiez
           </button>
           <label className="flex items-center gap-1.5 text-xs text-zinc-500 cursor-pointer">
             <input type="checkbox" checked={comparePrev} onChange={() => setComparePrev(!comparePrev)}
-              className="rounded border-zinc-300 text-brand-400 focus:ring-brand-200" />
+              className="rounded border-zinc-300 text-[#0d9488] focus:ring-[#0d9488]/20" />
             Porownaj z poprzednim okresem
           </label>
           <button
@@ -319,9 +319,9 @@ export default function AdminRealCosts() {
         </div>
         <div className="flex items-center gap-3">
           <input type="text" placeholder="Szukaj firmy..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none focus:border-brand-400 w-48" />
+            className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none focus:border-[#0d9488] w-48" />
           <button onClick={exportCsv}
-            className="px-3 py-1.5 text-xs font-medium bg-brand-50 text-zinc-600 rounded-lg hover:bg-brand-100 transition">
+            className="px-3 py-1.5 text-xs font-medium bg-brand-50 text-zinc-600 rounded-lg hover:bg-[#ccfbf1] transition">
             CSV
           </button>
         </div>
@@ -350,7 +350,7 @@ export default function AdminRealCosts() {
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod</p>
-          <p className="text-xl font-bold text-brand-500 mt-1">{fmt(totalRevenue)}</p>
+          <p className="text-xl font-bold text-[#0d9488] mt-1">{fmt(totalRevenue)}</p>
         </div>
         <div className="bg-white rounded-xl border border-zinc-200 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Marza</p>
@@ -388,11 +388,11 @@ export default function AdminRealCosts() {
       <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
         <button
           onClick={() => setShowCallCosts(!showCallCosts)}
-          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-brand-50 transition"
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-[#f0fdfa] transition"
         >
           <span className="flex items-center gap-2">
             <span>📞 Koszty połączeń</span>
-            <span className="text-[10px] bg-brand-100 text-brand-700 rounded-full px-2 py-0.5 font-medium">
+            <span className="text-[10px] bg-[#ccfbf1] text-[#065f46] rounded-full px-2 py-0.5 font-medium">
               {callLogs.length} rozmów
             </span>
           </span>
@@ -456,7 +456,7 @@ export default function AdminRealCosts() {
       <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
         <button
           onClick={() => setShowOwnCosts(!showOwnCosts)}
-          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-brand-50 transition"
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-[#f0fdfa] transition"
         >
           <span className="flex items-center gap-2">
             <span>📊 Koszty wlasne</span>
@@ -542,7 +542,7 @@ export default function AdminRealCosts() {
                   <div key={item.id} className="flex items-center justify-between text-xs px-3 py-2 bg-white border border-zinc-100 rounded-lg hover:bg-zinc-50 group">
                     <div className="flex items-center gap-3 min-w-0">
                       <input type="checkbox" checked={item.is_paid} onChange={() => togglePaid(item.id, !item.is_paid)}
-                        className="rounded border-zinc-300 text-brand-400 focus:ring-brand-200 shrink-0" />
+                        className="rounded border-zinc-300 text-[#0d9488] focus:ring-[#0d9488]/20 shrink-0" />
                       <div className="min-w-0">
                         <p className={`font-medium truncate ${item.is_paid ? "text-zinc-400 line-through" : "text-zinc-700"}`}>
                           {item.name}
@@ -580,18 +580,18 @@ export default function AdminRealCosts() {
             {/* Add item button + form */}
             {!showAddItem ? (
               <button onClick={() => setShowAddItem(true)}
-                className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+                className="text-xs text-[#0d9488] hover:text-[#0f766e] font-medium">
                 + Dodaj koszt
               </button>
             ) : (
               <div className="bg-brand-50 rounded-xl p-4 space-y-3">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    placeholder="Nazwa" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                    placeholder="Nazwa" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
                   <input type="number" value={newItem.amount || ""} onChange={(e) => setNewItem({ ...newItem, amount: Number(e.target.value) })}
-                    placeholder="Kwota" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                    placeholder="Kwota" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
                   <select value={newItem.frequency} onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
-                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400">
+                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]">
                     <option value="monthly">Miesieczny</option>
                     <option value="quarterly">Kwartalny</option>
                     <option value="yearly">Roczny</option>
@@ -599,11 +599,11 @@ export default function AdminRealCosts() {
                     <option value="irregular">Nieregularny</option>
                   </select>
                   <input type="date" value={newItem.due_date} onChange={(e) => setNewItem({ ...newItem, due_date: e.target.value })}
-                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <select value={newItem.category} onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400">
+                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]">
                     <option value="marketing">Marketing</option>
                     <option value="server">Serwer / hosting</option>
                     <option value="tools">Narzedzia</option>
@@ -612,11 +612,11 @@ export default function AdminRealCosts() {
                     <option value="other">Inne</option>
                   </select>
                   <input value={newItem.notes} onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
-                    placeholder="Notatki" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-400" />
+                    placeholder="Notatki" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => saveCostItem(newItem)} disabled={!newItem.name || !newItem.amount}
-                    className="px-4 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 disabled:opacity-50 transition">
+                    className="px-4 py-1.5 text-xs font-medium bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] disabled:opacity-50 transition">
                     Dodaj
                   </button>
                   <button onClick={() => setShowAddItem(false)}
@@ -668,7 +668,7 @@ export default function AdminRealCosts() {
                   const barColor = marginPctVal > 20 ? "bg-green-500" : marginPctVal >= 0 ? "bg-amber-500" : "bg-red-500";
 
                   return (
-                    <tr key={b.id} className={`border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 transition ${b.is_centrala ? "bg-amber-50/50" : ""}`}>
+                    <tr key={b.id} className={`border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition ${b.is_centrala ? "bg-amber-50/50" : ""}`}>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-zinc-900">{b.name}</span>
@@ -693,12 +693,12 @@ export default function AdminRealCosts() {
                               const pct = Number(e.target.value);
                               if (pct >= 0 && pct <= 100) handleDiscountChange(b.id, Math.round(stdRevenue * (1 - pct / 100) * 100) / 100);
                             }}
-                            className="w-14 px-1.5 py-1 border border-zinc-200 rounded text-xs text-zinc-700 text-center focus:outline-none focus:border-brand-400"
+                            className="w-14 px-1.5 py-1 border border-zinc-200 rounded text-xs text-zinc-700 text-center focus:outline-none focus:border-[#0d9488]"
                             disabled={savingDiscount === b.id} />
                           <span className="text-[10px] text-zinc-400">%</span>
                         </div>
                       </td>
-                      <td className={`p-3 font-medium ${b.customRevenue !== null ? "text-amber-600" : "text-brand-600"}`}>{fmt(effectiveRevenue)}</td>
+                      <td className={`p-3 font-medium ${b.customRevenue !== null ? "text-amber-600" : "text-[#0d9488]"}`}>{fmt(effectiveRevenue)}</td>
                       <td className={`p-3 font-medium ${marginColor}`}>{margin >= 0 ? "+" : ""}{fmt(margin)}</td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
@@ -723,7 +723,7 @@ export default function AdminRealCosts() {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod (klienci)</p>
-            <p className="text-lg font-bold text-brand-600">{fmt(totalRevenue)}</p>
+            <p className="text-lg font-bold text-[#0d9488]">{fmt(totalRevenue)}</p>
           </div>
           <div className="bg-zinc-50 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug (klienci)</p>
@@ -767,7 +767,7 @@ export default function AdminRealCosts() {
           <span className="text-zinc-200">|</span>
           <span className="text-zinc-400">Lacznie: <strong className="text-red-700">{fmt(totalAllCosts)}</strong></span>
           <span className="text-zinc-200">|</span>
-          <span className="text-zinc-400">Przychod: <strong className="text-brand-600">{fmt(totalRevenue)}</strong></span>
+          <span className="text-zinc-400">Przychod: <strong className="text-[#0d9488]">{fmt(totalRevenue)}</strong></span>
           <span className="text-zinc-200">|</span>
           <span className="text-zinc-400">Marza: <strong className={totalMargin >= 0 ? "text-green-600" : "text-red-500"}>{fmt(totalMargin)}</strong></span>
         </div>

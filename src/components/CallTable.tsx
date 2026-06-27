@@ -239,7 +239,7 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
               onClick={() => setDateFilter(f.key)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
                 dateFilter === f.key
-                  ? "bg-brand-400 text-white"
+                  ? "bg-[#0d9488] text-white"
                   : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
               }`}
             >
@@ -264,7 +264,7 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
                 onClick={() => toggleSort(key)}
                 className={`px-2 py-1 rounded ${
                   sortKey === key
-                    ? "bg-brand-50 text-brand-600 font-semibold"
+                    ? "bg-[#f0fdfa] text-[#0d9488] font-semibold"
                     : "text-zinc-500 hover:text-zinc-700"
                 }`}
               >
@@ -273,7 +273,7 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
             );
           })}
           <button onClick={handleExport}
-            className="px-2 py-1 rounded text-zinc-500 hover:text-brand-600 hover:bg-brand-50 transition flex items-center gap-1">
+            className="px-2 py-1 rounded text-zinc-500 hover:text-[#0f766e] hover:bg-[#f0fdfa] transition flex items-center gap-1">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             Eksport
           </button>
@@ -281,7 +281,7 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between bg-brand-50 border border-brand-200 rounded-lg px-4 py-2">
+        <div className="flex items-center justify-between bg-brand-50 border border-[#0d9488]/20 rounded-lg px-4 py-2">
           <span className="text-sm text-brand-700 font-medium">
             Wybrano {selectedIds.size} z {sorted.length}
           </span>
@@ -314,15 +314,15 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
             return (
               <div
                 key={log.id}
-                className={`bg-white/55 backdrop-blur-xl border border-white/20 rounded-lg overflow-hidden ${selectedIds.has(log.id) ? "ring-2 ring-brand-400" : ""}`}
+                className={`bg-white/55 backdrop-blur-xl border border-white/20 rounded-lg overflow-hidden ${selectedIds.has(log.id) ? "ring-2 ring-[#0d9488]" : ""}`}
               >
-                <div className="w-full flex items-center gap-2 px-4 py-3 hover:bg-brand-50/50 transition">
+                <div className="w-full flex items-center gap-2 px-4 py-3 hover:bg-[#f0fdfa]/50 transition">
                   <input
                     type="checkbox"
                     checked={selectedIds.has(log.id)}
                     onChange={() => toggleSelect(log.id)}
                     onClick={(e) => e.stopPropagation()}
-                    className="rounded border-zinc-300 text-brand-400 focus:ring-brand-200 shrink-0"
+                    className="rounded border-zinc-300 text-[#0d9488] focus:ring-[#0d9488]/20 shrink-0"
                   />
                   <button onClick={(e) => { e.stopPropagation(); handleFlag(log.id, !!log.flagged); }}
                     className="shrink-0 text-sm opacity-60 hover:opacity-100 transition"
@@ -359,7 +359,7 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
                     {log.business_name && showBusiness && (
                       <p className="text-xs flex items-center gap-1 mt-0.5">
                         {log.business_id === WITALINE_MAIN_ID ? (
-                          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-brand-100 text-brand-700 font-medium">
+                          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-[#ccfbf1] text-[#065f46] font-medium">
                             WitaLine
                           </span>
                         ) : (
@@ -437,7 +437,7 @@ export default function CallTable({ logs, loading, showBusiness = true, isAdmin 
                     )}
                   </div>
                   {log.recording_url && (
-                    <span title="Nagranie dostępne" className="text-brand-600 text-sm shrink-0">
+                    <span title="Nagranie dostępne" className="text-[#0d9488] text-sm shrink-0">
                       ▶
                     </span>
                   )}

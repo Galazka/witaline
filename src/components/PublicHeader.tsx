@@ -30,7 +30,7 @@ export default function PublicHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-zinc-500 hover:text-brand-500 transition-colors font-medium"
+                className="text-zinc-500 hover:text-[#0f766e] transition-colors font-medium"
               >
                 {link.label}
               </Link>
@@ -41,7 +41,7 @@ export default function PublicHeader() {
           <LanguageSwitcher />
           <Link
             href="/login"
-            className="hidden sm:inline-flex text-sm text-zinc-600 hover:text-brand-500 transition-colors font-medium px-3 py-2"
+            className="hidden sm:inline-flex text-sm text-zinc-600 hover:text-[#0f766e] transition-colors font-medium px-3 py-2"
           >
             Zaloguj
           </Link>

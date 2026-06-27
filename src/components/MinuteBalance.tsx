@@ -56,7 +56,7 @@ export default function MinuteBalance({ businessId }: { businessId: string }) {
           <p className="text-xs text-zinc-500">Wykorzystujesz minuty z zakupionych pakietów.</p>
         </div>
         <div className="text-right">
-          <span className="text-2xl font-bold text-brand-500">
+          <span className="text-2xl font-bold text-[#0d9488]">
             {loading ? "..." : balance.toFixed(0)}
           </span>
           <span className="text-sm text-zinc-400 ml-1">min</span>
@@ -80,7 +80,7 @@ export default function MinuteBalance({ businessId }: { businessId: string }) {
               step={50}
               value={minutes}
               onChange={e => setMinutes(parseInt(e.target.value))}
-              className="w-full accent-brand-400"
+              className="w-full accent-[#0d9488]"
             />
             <div className="flex justify-between text-xs text-zinc-400 mt-1">
               <span>50 min</span>
@@ -108,7 +108,7 @@ export default function MinuteBalance({ businessId }: { businessId: string }) {
               </div>
             )}
             {nextTier && (
-              <p className="text-xs text-brand-500 pt-1">
+              <p className="text-xs text-[#0d9488] pt-1">
                 Przy pakiecie {nextTier.minMinutes} min stawka spada do {nextTier.ratePerMin.toFixed(2).replace(".", ",")} PLN/min
               </p>
             )}
@@ -117,7 +117,7 @@ export default function MinuteBalance({ businessId }: { businessId: string }) {
           <button
             onClick={handleBuy}
             disabled={buying}
-            className="w-full bg-brand-400 text-white py-3 rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+            className="w-full bg-[#0d9488] text-white py-3 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
           >
             {buying ? "Przekierowanie do Stripe..." : `Kup pakiet ${minutes} min`}
           </button>

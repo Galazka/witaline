@@ -105,7 +105,7 @@ export default function AdminStats() {
             <button
               key={key}
               onClick={() => handleRangeChange(key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${range === key ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"}`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${range === key ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}
             >
               {label}
             </button>
@@ -117,17 +117,17 @@ export default function AdminStats() {
             <button
               onClick={() => { if (fromDate && toDate) { setRange("custom"); fetchStats("custom", fromDate, toDate); } }}
               disabled={!fromDate || !toDate}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-400 text-white hover:bg-brand-500 transition disabled:opacity-50"
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#0d9488] text-white hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               Filtruj
             </button>
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleRefresh} disabled={isLoading} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-zinc-600 hover:bg-brand-100 transition disabled:opacity-50">
+          <button onClick={handleRefresh} disabled={isLoading} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1] transition disabled:opacity-50">
             {refreshing ? "Odświeżanie..." : "🔄 Odśwież"}
           </button>
-          <button onClick={exportCSV} disabled={!stats} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-zinc-600 hover:bg-brand-100 transition disabled:opacity-50">
+          <button onClick={exportCSV} disabled={!stats} className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1] transition disabled:opacity-50">
             📥 Export CSV
           </button>
         </div>
@@ -162,7 +162,7 @@ export default function AdminStats() {
             </div>
             <div className="bg-white rounded-xl border border-zinc-200 p-3">
               <p className="text-xs text-zinc-400">📅 Rezerwacje</p>
-              <p className="text-lg font-bold text-brand-400">{stats.bookings}</p>
+              <p className="text-lg font-bold text-[#0d9488]">{stats.bookings}</p>
             </div>
             <div className="bg-white rounded-xl border border-zinc-200 p-3">
               <p className="text-xs text-zinc-400">💬 Czaty</p>
@@ -183,7 +183,7 @@ export default function AdminStats() {
                   <div key={h.hour} className="flex items-center gap-2 text-xs">
                     <span className="w-10 text-right text-zinc-400 shrink-0 font-mono">{h.hour}</span>
                     <div className="flex-1 h-5 bg-brand-50 rounded-full overflow-hidden">
-                      <div className="h-full bg-brand-400/80 rounded-full transition-all" style={{ width: `${(h.count / maxHourly) * 100}%`, minWidth: h.count ? 4 : 0 }} />
+                      <div className="h-full bg-[#0d9488]/80 rounded-full transition-all" style={{ width: `${(h.count / maxHourly) * 100}%`, minWidth: h.count ? 4 : 0 }} />
                     </div>
                     <span className="w-6 text-left text-zinc-500 font-medium">{h.count || ""}</span>
                   </div>
@@ -205,7 +205,7 @@ export default function AdminStats() {
                   </thead>
                   <tbody>
                     {stats.dailyData.map(d => (
-                      <tr key={d.date} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                      <tr key={d.date} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                         <td className="px-3 py-2 font-medium text-zinc-900 whitespace-nowrap">{d.date}</td>
                         <td className="px-3 py-2">{d.calls}</td>
                         <td className="px-3 py-2">{d.convos}</td>
@@ -232,7 +232,7 @@ export default function AdminStats() {
                   </thead>
                   <tbody>
                     {stats.topCallers.map(([num, count]) => (
-                      <tr key={num} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                      <tr key={num} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                         <td className="px-3 py-2 font-mono text-sm text-zinc-900 whitespace-nowrap">{num}</td>
                         <td className="px-3 py-2 font-semibold">{count}</td>
                       </tr>

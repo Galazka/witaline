@@ -161,12 +161,12 @@ export default function AccountBalance({
       </div>
 
       {isTrialing && (
-        <div className="bg-brand-50 border border-brand-200 rounded-xl p-4 space-y-2">
+        <div className="bg-brand-50 border border-[#0d9488]/20 rounded-xl p-4 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-brand-800">
               🎯 Okres próbny — zostało {trialDaysLeft} dni
             </p>
-            <a href="/dashboard?tab=upgrade" className="text-xs text-brand-600 font-medium hover:underline">
+            <a href="/dashboard?tab=upgrade" className="text-xs text-[#0d9488] font-medium hover:underline">
               Dodaj środki →
             </a>
           </div>
@@ -207,7 +207,7 @@ export default function AccountBalance({
         <div className="space-y-4">
           <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
             <span className="text-sm text-zinc-600">Dostępne minuty</span>
-            <span className={`text-xl font-bold ${balance < 0 ? "text-red-500" : "text-brand-500"}`}>
+            <span className={`text-xl font-bold ${balance < 0 ? "text-red-500" : "text-[#0d9488]"}`}>
               {loading ? "..." : balance.toFixed(0)}
             </span>
           </div>
@@ -229,7 +229,7 @@ export default function AccountBalance({
                   step={50}
                   value={minutes}
                   onChange={e => setMinutes(parseInt(e.target.value))}
-                  className="w-full accent-brand-400"
+                  className="w-full accent-[#0d9488]"
                 />
                 <div className="flex justify-between text-xs text-zinc-400 mt-1">
                   <span>50 min</span>
@@ -251,7 +251,7 @@ export default function AccountBalance({
                   <span>{totalBrutto.toFixed(2).replace(".", ",")} zł</span>
                 </div>
                 {nextTier && (
-                  <p className="text-xs text-brand-500 pt-1">
+                  <p className="text-xs text-[#0d9488] pt-1">
                     Przy {nextTier.minMinutes}+ min stawka {nextTier.ratePerMin.toFixed(2).replace(".", ",")} PLN/min
                   </p>
                 )}
@@ -260,7 +260,7 @@ export default function AccountBalance({
               <button
                 onClick={handleBuyMinutes}
                 disabled={buying}
-                className="w-full bg-brand-400 text-white py-3 rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+                className="w-full bg-[#0d9488] text-white py-3 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
               >
                 {buying ? "Przekierowanie..." : `Kup ${minutes} min — ${totalBrutto.toFixed(2).replace(".", ",")} zł`}
               </button>
@@ -280,7 +280,7 @@ export default function AccountBalance({
               </p>
             </div>
             <div className="text-right">
-              <span className="text-xl font-bold text-brand-500">
+              <span className="text-xl font-bold text-[#0d9488]">
                 {loading ? "..." : smsData.remaining}
               </span>
               <span className="text-xs text-zinc-400 ml-1">/ {smsData.limit + smsData.extra}</span>
@@ -293,7 +293,7 @@ export default function AccountBalance({
             <div className="bg-zinc-50 rounded-full h-2.5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  smsData.remaining < 10 ? "bg-red-500" : smsData.remaining < (smsData.limit + smsData.extra) * 0.25 ? "bg-amber-500" : "bg-brand-400"
+                  smsData.remaining < 10 ? "bg-red-500" : smsData.remaining < (smsData.limit + smsData.extra) * 0.25 ? "bg-amber-500" : "bg-[#0d9488]"
                 }`}
                 style={{ width: `${smsData.remaining > 0 ? ((smsData.used / (smsData.limit + smsData.extra)) * 100) : 0}%` }}
               />
@@ -313,13 +313,13 @@ export default function AccountBalance({
                     onClick={() => setSmsCount(p.smsCount)}
                     className={`px-2 py-2 rounded-xl border text-center transition ${
                       smsCount === p.smsCount
-                        ? "border-brand-400 bg-brand-50"
-                        : "border-zinc-200 hover:border-brand-200"
+                        ? "border-[#0d9488] bg-brand-50"
+                        : "border-zinc-200 hover:border-[#0d9488]/20"
                     }`}
                   >
                     <div className="text-lg font-bold text-zinc-800">{p.smsCount}</div>
                     <div className="text-[10px] text-zinc-400">SMS</div>
-                    <div className="text-xs font-semibold text-brand-500 mt-1">{p.clientPricePLN} zł</div>
+                    <div className="text-xs font-semibold text-[#0d9488] mt-1">{p.clientPricePLN} zł</div>
                   </button>
                 ))}
               </div>
@@ -337,7 +337,7 @@ export default function AccountBalance({
                   step={10}
                   value={smsCount}
                   onChange={e => setSmsCount(parseInt(e.target.value))}
-                  className="w-full accent-brand-400"
+                  className="w-full accent-[#0d9488]"
                 />
                 <div className="flex justify-between text-xs text-zinc-400 mt-1">
                   <span>10 SMS</span>
@@ -359,7 +359,7 @@ export default function AccountBalance({
               <button
                 onClick={handleBuySms}
                 disabled={buying}
-                className="w-full bg-brand-400 text-white py-3 rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+                className="w-full bg-[#0d9488] text-white py-3 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
               >
                 {buying ? "Przekierowanie..." : `Kup ${smsCount} SMS — ${smsPricePLN.toFixed(2).replace(".", ",")} zł`}
               </button>
@@ -390,7 +390,7 @@ export default function AccountBalance({
                 alert(err.error || "Nie udało się zapisać");
               }
             }}
-            className={`relative w-12 h-6 rounded-full transition-colors ${autoTopup ? "bg-brand-400" : "bg-zinc-200"}`}
+            className={`relative w-12 h-6 rounded-full transition-colors ${autoTopup ? "bg-[#0d9488]" : "bg-zinc-200"}`}
           >
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoTopup ? "translate-x-6" : ""}`} />
           </button>
@@ -417,7 +417,7 @@ export default function AccountBalance({
                     body: JSON.stringify({ businessId, threshold: v }),
                   }).catch(() => {});
                 }}
-                className="w-full accent-brand-400"
+                className="w-full accent-[#0d9488]"
               />
             </div>
             <div>
@@ -440,7 +440,7 @@ export default function AccountBalance({
                     body: JSON.stringify({ businessId, packSize: v }),
                   }).catch(() => {});
                 }}
-                className="w-full accent-brand-400"
+                className="w-full accent-[#0d9488]"
               />
               <p className="text-xs text-zinc-400 mt-2">
                 Doładowanie {autoTopupPackSize} min automatycznie przy saldo &lt; {autoTopupThreshold} min

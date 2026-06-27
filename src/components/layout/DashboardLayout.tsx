@@ -112,7 +112,7 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
   if (session === "loading") return (
     <div className="flex-1 flex items-center justify-center bg-[#FAFAF9]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-zinc-400">Sprawdzanie uprawnień...</p>
       </div>
     </div>
@@ -122,7 +122,7 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
     <div className="flex-1 flex items-center justify-center bg-[#FAFAF9] p-4">
       <div className="text-center max-w-sm">
         <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-50 flex items-center justify-center">
-          <svg className="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+          <svg className="w-6 h-6 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
         </div>
         <h2 className="text-lg font-semibold text-zinc-800 mb-1">Wymagane logowanie</h2>
         <p className="text-sm text-zinc-400 mb-4">Zaloguj się, aby uzyskać dostęp do panelu.</p>

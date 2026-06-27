@@ -60,7 +60,7 @@ export default function GoogleCalendarSettings({ businessId }: Props) {
             className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
               connected && !expired
                 ? "bg-green-100 text-green-700 hover:bg-green-200"
-                : "bg-brand-400 text-white hover:bg-brand-500"
+                : "bg-[#0d9488] text-white hover:bg-[#0f766e]"
             }`}
           >
             {connected && !expired ? "Polaczono" : "Polacz Google Calendar"}

@@ -134,7 +134,7 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
             Ostatnia aktywność
           </h3>
           {unreadCount > 0 && (
-            <span className="text-[10px] font-medium text-brand-400 bg-brand-400/10 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-medium text-[#0d9488] bg-[#0d9488]/10 px-1.5 py-0.5 rounded-full">
               {unreadCount} nowe
             </span>
           )}
@@ -152,7 +152,7 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
             </button>
           </div>
           {unreadCount > 0 && (
-            <button onClick={markAllRead} className="text-xs text-brand-400 hover:text-brand-300 transition">Oznacz wszystkie jako przeczytane</button>
+            <button onClick={markAllRead} className="text-xs text-[#0d9488] hover:text-[#0d9488] transition">Oznacz wszystkie jako przeczytane</button>
           )}
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
                     </div>
                     <p className="text-xs text-zinc-400 mt-0.5 line-clamp-2">{activity.message}</p>
                   </div>
-                  {isUnread && <span className="w-1.5 h-1.5 bg-brand-400 rounded-full shrink-0 mt-2" />}
+                  {isUnread && <span className="w-1.5 h-1.5 bg-[#0d9488] rounded-full shrink-0 mt-2" />}
                 </button>
               );
             })}

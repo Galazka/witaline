@@ -82,7 +82,7 @@ export default function AdminContactMessages() {
       {/* View toggle */}
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          <button onClick={() => { setView("active"); setChecked(new Set()); }} className={`px-4 py-2 text-sm font-medium rounded-lg transition ${view === "active" ? "bg-brand-100 text-brand-600" : "text-zinc-500 hover:text-zinc-700"}`}>
+          <button onClick={() => { setView("active"); setChecked(new Set()); }} className={`px-4 py-2 text-sm font-medium rounded-lg transition ${view === "active" ? "bg-[#ccfbf1] text-[#0d9488]" : "text-zinc-500 hover:text-zinc-700"}`}>
             Aktywne {view === "active" && unread > 0 && <span className="ml-1 text-xs">({unread})</span>}
           </button>
           <button onClick={() => { setView("trashed"); setChecked(new Set()); }} className={`px-4 py-2 text-sm font-medium rounded-lg transition ${view === "trashed" ? "bg-red-100 text-red-600" : "text-zinc-500 hover:text-zinc-700"}`}>
@@ -104,7 +104,7 @@ export default function AdminContactMessages() {
             </button>
           ) : (
             <>
-              <button onClick={() => apiAction([...checked], "restore")} className="text-sm px-3 py-1.5 rounded-lg bg-brand-400 text-white hover:bg-brand-500 transition">
+              <button onClick={() => apiAction([...checked], "restore")} className="text-sm px-3 py-1.5 rounded-lg bg-[#0d9488] text-white hover:bg-[#0f766e] transition">
                 Przywróć
               </button>
               <button onClick={() => permanentDelete([...checked])} className="text-sm px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
@@ -128,7 +128,7 @@ export default function AdminContactMessages() {
           <div className="space-y-2">
             {/* Select all */}
             <label className="flex items-center gap-2 px-1 py-1 cursor-pointer">
-              <input type="checkbox" checked={checked.size === messages.length && messages.length > 0} onChange={toggleAll} className="accent-brand-400 rounded" />
+              <input type="checkbox" checked={checked.size === messages.length && messages.length > 0} onChange={toggleAll} className="accent-[#0d9488] rounded" />
               <span className="text-xs text-zinc-400">Zaznacz wszystkie</span>
             </label>
             {messages.map(msg => {
@@ -139,11 +139,11 @@ export default function AdminContactMessages() {
                     type="checkbox"
                     checked={checked.has(msg.id)}
                     onChange={() => toggleCheck(msg.id)}
-                    className="accent-brand-400 rounded mt-4"
+                    className="accent-[#0d9488] rounded mt-4"
                   />
                   <button
                     onClick={() => { setSelectedId(msg.id); if (!msg.read) apiAction([msg.id], "read"); }}
-                    className={`flex-1 text-left bg-white rounded-xl border p-4 transition hover:shadow-sm ${selectedId === msg.id ? "border-brand-400 shadow-sm" : "border-zinc-200"} ${!msg.read && !isTrashed ? "border-l-4 border-l-brand-400" : ""}`}
+                    className={`flex-1 text-left bg-white rounded-xl border p-4 transition hover:shadow-sm ${selectedId === msg.id ? "border-[#0d9488] shadow-sm" : "border-zinc-200"} ${!msg.read && !isTrashed ? "border-l-4 border-l-[#0d9488]" : ""}`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -156,7 +156,7 @@ export default function AdminContactMessages() {
                   </button>
                   {isTrashed ? (
                     <div className="flex flex-col gap-1 mt-3 shrink-0">
-                      <button onClick={() => apiAction([msg.id], "restore")} className="text-[10px] px-2 py-1 rounded bg-brand-100 text-brand-600 hover:bg-brand-200" title="Przywróć">↩</button>
+                      <button onClick={() => apiAction([msg.id], "restore")} className="text-[10px] px-2 py-1 rounded bg-[#ccfbf1] text-[#0d9488] hover:bg-[#0d9488]/20" title="Przywróć">↩</button>
                       <button onClick={() => permanentDelete([msg.id])} className="text-[10px] px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200" title="Usuń na stałe">✕</button>
                     </div>
                   ) : (
@@ -181,7 +181,7 @@ export default function AdminContactMessages() {
               {selected.website && (
                 <div className="bg-white rounded-lg px-4 py-2 text-sm">
                   <span className="text-zinc-400">www: </span>
-                  <a href={selected.website} target="_blank" rel="noopener noreferrer" className="text-brand-500 hover:underline">{selected.website}</a>
+                  <a href={selected.website} target="_blank" rel="noopener noreferrer" className="text-[#0d9488] hover:underline">{selected.website}</a>
                 </div>
               )}
               <div className="bg-white rounded-xl p-4">
@@ -190,12 +190,12 @@ export default function AdminContactMessages() {
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => apiAction([selected.id], selected.read ? "unread" : "read")}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition ${selected.read ? "bg-brand-50 text-zinc-600 hover:bg-brand-100" : "bg-brand-100 text-brand-600 hover:bg-brand-200"}`}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition ${selected.read ? "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]" : "bg-[#ccfbf1] text-[#0d9488] hover:bg-[#0d9488]/20"}`}
                 >
                   {selected.read ? "Oznacz jako nieprzeczytane" : "Oznacz jako przeczytane"}
                 </button>
                 {selected.deleted_at ? (
-                  <button onClick={() => apiAction([selected.id], "restore")} className="text-xs px-3 py-1.5 rounded-lg bg-brand-100 text-brand-600 hover:bg-brand-200 font-medium">
+                  <button onClick={() => apiAction([selected.id], "restore")} className="text-xs px-3 py-1.5 rounded-lg bg-[#ccfbf1] text-[#0d9488] hover:bg-[#0d9488]/20 font-medium">
                     Przywróć
                   </button>
                 ) : (

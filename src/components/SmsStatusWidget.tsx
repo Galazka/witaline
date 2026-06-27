@@ -37,20 +37,20 @@ export default function SmsStatusWidget({ businessId }: Props) {
       <div className="flex items-center justify-between">
         <span className="text-sm text-zinc-600">SMS</span>
         <div className="text-right">
-          <span className={`text-lg font-bold ${smsRemaining < 10 ? "text-red-500" : "text-brand-400"}`}>{smsRemaining}</span>
+          <span className={`text-lg font-bold ${smsRemaining < 10 ? "text-red-500" : "text-[#0d9488]"}`}>{smsRemaining}</span>
           <span className="text-xs text-zinc-400 ml-1">/ {smsTotal}</span>
         </div>
       </div>
 
       {smsTotal > 0 && (
         <div className="w-full h-1.5 bg-brand-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all ${usagePercent > 80 ? "bg-red-500" : usagePercent > 50 ? "bg-amber-500" : "bg-brand-400"}`}
+          <div className={`h-full rounded-full transition-all ${usagePercent > 80 ? "bg-red-500" : usagePercent > 50 ? "bg-amber-500" : "bg-[#0d9488]"}`}
             style={{ width: `${Math.min(100, usagePercent)}%` }} />
         </div>
       )}
 
       <a href="/dashboard?tab=sms"
-        className="block w-full text-center bg-brand-50 text-brand-600 py-2 rounded-lg text-xs font-medium hover:bg-brand-100 transition mt-1">
+        className="block w-full text-center bg-[#f0fdfa] text-[#0d9488] py-2 rounded-lg text-xs font-medium hover:bg-[#ccfbf1] transition mt-1">
         Zarządzaj SMS → Dokup pakiet
       </a>
     </div>

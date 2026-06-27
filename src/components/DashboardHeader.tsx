@@ -55,15 +55,15 @@ export default function DashboardHeader({
   function barColor(pct: number): string {
     if (pct > 90) return "bg-red-500";
     if (pct > 75) return "bg-amber-500";
-    return "bg-brand-500";
+    return "bg-[#0d9488]";
   }
 
   return (
     <div className="space-y-4">
       {extension && (
-        <div className="bg-gradient-to-r from-brand-50 to-brand-100 border-2 border-brand-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="bg-gradient-to-r from-[#f0fdfa] to-[#ccfbf1] border-2 border-[#0d9488]/20 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="text-xs font-medium text-brand-600 uppercase tracking-wider mb-1">
+            <p className="text-xs font-medium text-[#0d9488] uppercase tracking-wider mb-1">
               Twoja firma na WitaLine
             </p>
             <p className="text-lg font-bold text-zinc-900">
@@ -74,9 +74,9 @@ export default function DashboardHeader({
               aby połączyć się bezpośrednio z Tobą
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-white rounded-xl px-6 py-4 border border-brand-200 shadow-sm">
+          <div className="flex items-center gap-3 bg-white rounded-xl px-6 py-4 border border-[#0d9488]/20 shadow-sm">
             <span className="text-xs text-zinc-400 uppercase tracking-wider">Twój kod:</span>
-            <span className="text-4xl font-bold text-brand-500 font-mono tracking-widest">
+            <span className="text-4xl font-bold text-[#0d9488] font-mono tracking-widest">
               # {extension} *
             </span>
           </div>
@@ -97,7 +97,7 @@ export default function DashboardHeader({
             ⏱️ Wykorzystane minuty
           </p>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-2xl font-bold text-brand-400">{minutesUsed}</span>
+            <span className="text-2xl font-bold text-[#0d9488]">{minutesUsed}</span>
             <span className="text-sm text-zinc-400">{config.monthlyVoiceMinutes ? `/ ${config.monthlyVoiceMinutes} min` : "min (pay-as-you-go)"}</span>
           </div>
           {config.monthlyVoiceMinutes > 0 && (
@@ -109,7 +109,7 @@ export default function DashboardHeader({
               <div className="flex justify-between text-[10px]">
                 <span className="text-zinc-400">{minsPct}% wykorzystano</span>
                 {remainingMinutes > 0 ? (
-                  <span className="text-brand-600 font-medium">~{remainingMinutes} min zostało</span>
+                  <span className="text-[#0d9488] font-medium">~{remainingMinutes} min zostało</span>
                 ) : (
                   <span className="text-red-500 font-medium">Limit wyczerpany</span>
                 )}
@@ -151,7 +151,7 @@ export default function DashboardHeader({
             💰 Zaoszczędzony czas
           </p>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-brand-400">{totalSavingsMinutes}</span>
+            <span className="text-2xl font-bold text-[#0d9488]">{totalSavingsMinutes}</span>
             <span className="text-sm text-zinc-400">minut obsłużonych przez AI</span>
           </div>
           <p className="text-xs text-zinc-400 mt-1">
@@ -161,7 +161,7 @@ export default function DashboardHeader({
       </div>
 
       {isTrialing && (
-        <div className={`border rounded-xl p-4 ${trialExpired ? "bg-red-50 border-red-200" : "bg-brand-50 border-brand-200"}`}>
+        <div className={`border rounded-xl p-4 ${trialExpired ? "bg-red-50 border-red-200" : "bg-brand-50 border-[#0d9488]/20"}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-start gap-3">
               <span className="text-lg shrink-0">{trialExpired ? "⛔" : "🎯"}</span>
@@ -171,7 +171,7 @@ export default function DashboardHeader({
                     ? "Okres próbny wygasł"
                     : `Darmowy okres próbny — zostało ${trialDaysLeft} dni`}
                 </p>
-                <p className={`text-xs mt-1 ${trialExpired ? "text-red-600" : "text-brand-600"}`}>
+                <p className={`text-xs mt-1 ${trialExpired ? "text-red-600" : "text-[#0d9488]"}`}>
                   {trialExpired
                     ? "Dodaj środki, aby kontynuować korzystanie z WitaLine."
                     : `Bezpłatnie: ${FREE_TRIAL_MINUTES} min połączeń · ${FREE_TRIAL_SMS} SMS`}
@@ -189,7 +189,7 @@ export default function DashboardHeader({
             {!trialExpired && (
               <a
                 href="/dashboard?tab=upgrade"
-                className="shrink-0 bg-brand-500 text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-brand-600 transition text-center"
+                className="shrink-0 bg-[#0d9488] text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-[#0d3d3a] transition text-center"
               >
                 Dodaj środki
               </a>

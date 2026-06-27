@@ -12,7 +12,7 @@ interface Props {
 
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
-  confirmed: "bg-brand-100 text-brand-500",
+  confirmed: "bg-brand-100 text-[#0d9488]",
   cancelled: "bg-red-100 text-red-800",
   completed: "bg-brand-50 text-zinc-600",
 };
@@ -77,7 +77,7 @@ export default function ReservationsTable({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Szukaj rezerwacji..."
-            className="w-full pl-9 pr-4 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488]"
           />
         </div>
         <button
@@ -111,7 +111,7 @@ export default function ReservationsTable({
                 const date = new Date(r.reserved_at);
                 const srcType = r.created_by_type || "";
                 return (
-                  <tr key={r.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 transition">
+                  <tr key={r.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition">
                     <td className="px-4 py-3">
                       <p className="font-medium text-zinc-900">{r.caller_name || "—"}</p>
                       <p className="text-xs text-zinc-400">{r.caller_phone}</p>

@@ -204,15 +204,15 @@ export default function ConsultantListManager({ businessId, label, description, 
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="Imię"
-                    className="flex-1 min-w-0 px-2 py-1 text-sm border border-brand-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-200"
+                    className="flex-1 min-w-0 px-2 py-1 text-sm border border-brand-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
                   />
                   <input
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
                     placeholder="+48..."
-                    className="w-40 px-2 py-1 text-sm border border-brand-300 rounded-md font-mono focus:outline-none focus:ring-2 focus:ring-brand-200"
+                    className="w-40 px-2 py-1 text-sm border border-brand-300 rounded-md font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
                   />
-                  <button onClick={handleSaveEdit} disabled={saving} className="text-xs text-brand-500 hover:text-brand-600 font-medium shrink-0">Zapisz</button>
+                  <button onClick={handleSaveEdit} disabled={saving} className="text-xs text-[#0d9488] hover:text-[#0f766e] font-medium shrink-0">Zapisz</button>
                   <button onClick={() => setEditingId(null)} className="text-xs text-zinc-400 hover:text-zinc-600 shrink-0">Anuluj</button>
                 </>
               ) : (
@@ -239,18 +239,18 @@ export default function ConsultantListManager({ businessId, label, description, 
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Imię"
-            className="flex-1 min-w-0 px-2 py-1 text-sm border border-zinc-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="flex-1 min-w-0 px-2 py-1 text-sm border border-zinc-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
           />
           <input
             value={newPhone}
             onChange={(e) => setNewPhone(e.target.value)}
             placeholder="+48 123 456 789"
-            className="w-40 px-2 py-1 text-sm border border-zinc-200 rounded-md bg-white font-mono focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="w-40 px-2 py-1 text-sm border border-zinc-200 rounded-md bg-white font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
           />
           <button
             onClick={handleAdd}
             disabled={saving || !newName.trim() || !newPhone.trim()}
-            className="shrink-0 px-3 py-1.5 text-xs font-medium text-white bg-brand-400 rounded-md hover:bg-brand-500 disabled:opacity-40 transition"
+            className="shrink-0 px-3 py-1.5 text-xs font-medium text-white bg-[#0d9488] rounded-md hover:bg-[#0f766e] disabled:opacity-40 transition"
           >
             + Dodaj
           </button>

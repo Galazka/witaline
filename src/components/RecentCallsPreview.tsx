@@ -20,7 +20,7 @@ export default function RecentCallsPreview({ callLogs, onClick }: Props) {
     <div>
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Statystyki głosowe</p>
-        <button onClick={onClick} className="text-xs text-brand-400 hover:text-brand-500 transition">Zobacz wszystkie →</button>
+        <button onClick={onClick} className="text-xs text-[#0d9488] hover:text-[#0f766e] transition">Zobacz wszystkie →</button>
       </div>
 
       {/* Mini stats cards */}
@@ -31,7 +31,7 @@ export default function RecentCallsPreview({ callLogs, onClick }: Props) {
         </div>
         <div className="bg-white/55 backdrop-blur-xl rounded-xl border border-white/20 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Zamówienia</p>
-          <p className="text-lg font-bold text-brand-400">{ordersCount}</p>
+          <p className="text-lg font-bold text-[#0d9488]">{ordersCount}</p>
         </div>
         <div className="bg-white/55 backdrop-blur-xl rounded-xl border border-white/20 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Śr. czas</p>
@@ -50,7 +50,7 @@ export default function RecentCallsPreview({ callLogs, onClick }: Props) {
             <span className="text-zinc-500">Skuteczność:</span>
             <span className="text-green-600 font-medium">{helpfulCount} pozytywnych</span>
             <div className="flex-1 h-2 bg-brand-100 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-500 rounded-full" style={{ width: `${(ordersCount / Math.max(callLogs.length, 1)) * 100}%` }} />
+              <div className="h-full bg-[#0d9488] rounded-full" style={{ width: `${(ordersCount / Math.max(callLogs.length, 1)) * 100}%` }} />
             </div>
             <span className="text-zinc-500">{Math.round((ordersCount / Math.max(callLogs.length, 1)) * 100)}%</span>
           </div>
@@ -63,7 +63,7 @@ export default function RecentCallsPreview({ callLogs, onClick }: Props) {
           <div className="p-4 text-center text-sm text-zinc-400">Brak połączeń</div>
         ) : (
           recentCalls.map(call => (
-            <div key={call.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 transition cursor-pointer" onClick={onClick}>
+            <div key={call.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f0fdfa] transition cursor-pointer" onClick={onClick}>
               <span className="text-sm">{call.classification === "order" ? "🛒" : "❓"}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-zinc-900">{call.caller_id || "Anonim"}</p>

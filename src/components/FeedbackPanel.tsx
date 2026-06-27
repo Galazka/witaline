@@ -27,7 +27,7 @@ const categoryLabels: Record<string, string> = {
 
 const categoryColors: Record<string, string> = {
   general: "bg-brand-50 text-zinc-600",
-  service: "bg-brand-100 text-brand-500",
+  service: "bg-brand-100 text-[#0d9488]",
   booking: "bg-blue-100 text-blue-800",
   support: "bg-amber-100 text-amber-800",
   complaint: "bg-red-100 text-red-800",
@@ -69,7 +69,7 @@ export default function FeedbackPanel({ feedback, loading }: Props) {
                 <div key={star} className="flex items-center gap-2 text-xs">
                   <span className="w-6 text-zinc-400">{star}★</span>
                   <div className="flex-1 h-2 bg-brand-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    <div className="h-full bg-[#0d9488] rounded-full transition-all" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="w-6 text-right text-zinc-500">{count}</span>
                 </div>

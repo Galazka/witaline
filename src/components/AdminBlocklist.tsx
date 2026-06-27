@@ -88,19 +88,19 @@ export default function AdminBlocklist() {
             value={phone}
             onChange={e => setPhone(e.target.value)}
             placeholder="+48 123 456 789"
-            className="flex-1 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400"
+            className="flex-1 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488]"
           />
           <input
             type="text"
             value={reason}
             onChange={e => setReason(e.target.value)}
             placeholder="Powód blokady"
-            className="flex-1 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400"
+            className="flex-1 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488]"
           />
           <button
             type="submit"
             disabled={adding || !phone.trim()}
-            className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50 whitespace-nowrap"
+            className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50 whitespace-nowrap"
           >
             {adding ? "Dodawanie..." : "Dodaj"}
           </button>
@@ -134,7 +134,7 @@ export default function AdminBlocklist() {
               </thead>
               <tbody>
                 {items.map(item => (
-                  <tr key={item.id} className="border-b border-zinc-50 hover:bg-brand-50/50 transition-colors">
+                  <tr key={item.id} className="border-b border-zinc-50 hover:bg-[#f0fdfa]/50 transition-colors">
                     <td className="px-4 py-3 font-medium text-zinc-900">{item.phone}</td>
                     <td className="px-4 py-3 text-zinc-600">{item.reason}</td>
                     <td className="px-4 py-3 text-zinc-600">{item.blocked_by}</td>

@@ -51,8 +51,8 @@ export default function CalendarView({ reservations, year, month, onPrevMonth, o
 
   const statusDot: Record<string, string> = {
     pending: "bg-amber-400",
-    confirmed: "bg-brand-500",
-    completed: "bg-brand-400",
+    confirmed: "bg-[#0d9488]",
+    completed: "bg-[#0d9488]",
     cancelled: "bg-red-400",
   };
 
@@ -98,7 +98,7 @@ export default function CalendarView({ reservations, year, month, onPrevMonth, o
                 <>
                   <div
                     className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                      isToday ? "bg-brand-400 text-white" : "text-zinc-500"
+                      isToday ? "bg-[#0d9488] text-white" : "text-zinc-500"
                     }`}
                   >
                     {day}
@@ -129,7 +129,7 @@ export default function CalendarView({ reservations, year, month, onPrevMonth, o
                   )}
                   {dayReservations.length === 0 && (
                     <div className="flex items-center justify-center h-8 opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-[10px] text-brand-400">+</span>
+                      <span className="text-[10px] text-[#0d9488]">+</span>
                     </div>
                   )}
                 </>

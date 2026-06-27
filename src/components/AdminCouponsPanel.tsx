@@ -144,7 +144,7 @@ export default function AdminCouponsPanel() {
   return (
     <div className="space-y-8">
       {message && (
-        <div className={`px-4 py-3 rounded-lg text-sm ${message.includes("Błąd") ? "bg-red-50 text-red-600" : "bg-brand-50 text-brand-600"}`}>
+        <div className={`px-4 py-3 rounded-lg text-sm ${message.includes("Błąd") ? "bg-red-50 text-red-600" : "bg-[#f0fdfa] text-[#0d9488]"}`}>
           {message}
         </div>
       )}
@@ -155,7 +155,7 @@ export default function AdminCouponsPanel() {
           <h3 className="text-lg font-semibold text-zinc-900">Kupony rabatowe</h3>
           <button
             onClick={() => setShowNewCoupon(!showNewCoupon)}
-            className="bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+            className="bg-[#0d9488] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
           >
             {showNewCoupon ? "Anuluj" : "+ Nowy kupon"}
           </button>
@@ -201,7 +201,7 @@ export default function AdminCouponsPanel() {
                 {planOptions.map(p => (
                   <button key={p} onClick={() => togglePlan(p, couponPlans, setCouponPlans)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
-                      couponPlans.includes(p) ? "bg-brand-100 border-brand-400 text-brand-600" : "border-zinc-200 text-zinc-500 hover:bg-brand-50"
+                      couponPlans.includes(p) ? "bg-brand-100 border-[#0d9488] text-[#0d9488]" : "border-zinc-200 text-zinc-500 hover:bg-[#f0fdfa]"
                     }`}>
                     {getPlanLabel(p)}
                   </button>
@@ -209,7 +209,7 @@ export default function AdminCouponsPanel() {
               </div>
             </div>
             <button onClick={handleCreateCoupon} disabled={saving || !couponCode}
-              className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50">
+              className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50">
               {saving ? "Tworzenie..." : "Utwórz kupon"}
             </button>
           </div>
@@ -235,7 +235,7 @@ export default function AdminCouponsPanel() {
               </thead>
               <tbody>
                 {coupons.map(c => (
-                  <tr key={c.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 transition">
+                  <tr key={c.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition">
                     <td className="px-4 py-3 font-mono font-bold text-zinc-900">{c.code}</td>
                     <td className="px-4 py-3 text-zinc-700">
                       {c.discount_percent ? `${c.discount_percent}%` : c.discount_amount ? `${c.discount_amount} zł` : "—"}
@@ -249,14 +249,14 @@ export default function AdminCouponsPanel() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        c.active ? "bg-brand-100 text-brand-600" : "bg-brand-50 text-zinc-500"
+                        c.active ? "bg-[#ccfbf1] text-[#0d9488]" : "bg-brand-50 text-zinc-500"
                       }`}>
                         {c.active ? "Aktywny" : "Nieaktywny"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <button onClick={() => handleToggleCoupon(c.id, c.active)}
-                        className={`text-xs font-medium ${c.active ? "text-red-500" : "text-brand-500"} hover:underline`}>
+                        className={`text-xs font-medium ${c.active ? "text-red-500" : "text-[#0d9488]"} hover:underline`}>
                         {c.active ? "Dezaktywuj" : "Aktywuj"}
                       </button>
                     </td>
@@ -274,7 +274,7 @@ export default function AdminCouponsPanel() {
           <h3 className="text-lg font-semibold text-zinc-900">Automatyczne zniżki czasowe</h3>
           <button
             onClick={() => setShowNewDiscount(!showNewDiscount)}
-            className="bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+            className="bg-[#0d9488] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
           >
             {showNewDiscount ? "Anuluj" : "+ Nowa reguła"}
           </button>
@@ -325,7 +325,7 @@ export default function AdminCouponsPanel() {
                 {planOptions.map(p => (
                   <button key={p} onClick={() => togglePlan(p, discPlans, setDiscPlans)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
-                      discPlans.includes(p) ? "bg-brand-100 border-brand-400 text-brand-600" : "border-zinc-200 text-zinc-500 hover:bg-brand-50"
+                      discPlans.includes(p) ? "bg-brand-100 border-[#0d9488] text-[#0d9488]" : "border-zinc-200 text-zinc-500 hover:bg-[#f0fdfa]"
                     }`}>
                     {getPlanLabel(p)}
                   </button>
@@ -333,7 +333,7 @@ export default function AdminCouponsPanel() {
               </div>
             </div>
             <button onClick={handleCreateDiscount} disabled={saving || !discName || !discStart || !discEnd}
-              className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50">
+              className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50">
               {saving ? "Tworzenie..." : "Utwórz regułę"}
             </button>
           </div>
@@ -362,7 +362,7 @@ export default function AdminCouponsPanel() {
                   const now = new Date();
                   const isActive = d.active && new Date(d.start_at) <= now && new Date(d.end_at) >= now;
                   return (
-                    <tr key={d.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 transition">
+                    <tr key={d.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition">
                       <td className="px-4 py-3 font-medium text-zinc-900">{d.name}</td>
                       <td className="px-4 py-3 text-zinc-700">
                         {d.discount_percent ? `${d.discount_percent}%` : d.discount_amount ? `${d.discount_amount} zł` : "—"}
@@ -376,7 +376,7 @@ export default function AdminCouponsPanel() {
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          isActive ? "bg-brand-100 text-brand-600" :
+                          isActive ? "bg-[#ccfbf1] text-[#0d9488]" :
                           d.active ? "bg-amber-100 text-amber-700" : "bg-brand-50 text-zinc-500"
                         }`}>
                           {isActive ? "Aktywna" : d.active ? "Zaplanowana" : "Nieaktywna"}
@@ -384,7 +384,7 @@ export default function AdminCouponsPanel() {
                       </td>
                       <td className="px-4 py-3">
                         <button onClick={() => handleToggleDiscount(d.id, d.active)}
-                          className={`text-xs font-medium ${d.active ? "text-red-500" : "text-brand-500"} hover:underline`}>
+                          className={`text-xs font-medium ${d.active ? "text-red-500" : "text-[#0d9488]"} hover:underline`}>
                           {d.active ? "Dezaktywuj" : "Aktywuj"}
                         </button>
                       </td>

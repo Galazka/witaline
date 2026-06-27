@@ -19,7 +19,7 @@ export default function AdminError({
         <p className="text-sm text-zinc-500 mb-4">Nie udało się załadować panelu administracyjnego.</p>
         <button
           onClick={reset}
-          className="px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 transition-colors"
+          className="px-4 py-2 rounded-lg bg-[#0d9488] text-white text-sm font-medium hover:bg-[#0d3d3a] transition-colors"
         >
           Spróbuj ponownie
         </button>

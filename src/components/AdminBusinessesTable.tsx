@@ -224,7 +224,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="🔍 Szukaj firmy, numeru, email..."
-            className="px-4 py-2 border border-zinc-200 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+            className="px-4 py-2 border border-zinc-200 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
           />
           <span className="text-xs text-zinc-400">{filtered.length} / {businesses.length} firm</span>
         </div>
@@ -241,7 +241,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
               onClick={() => handleSort(s.key as typeof sortBy)}
               className={`px-2.5 py-1.5 text-xs rounded-lg transition ${
                 sortBy === s.key
-                  ? "bg-brand-100 text-brand-600 font-medium"
+                  ? "bg-[#ccfbf1] text-[#0d9488] font-medium"
                   : "text-zinc-500 hover:text-zinc-700"
               }`}
             >
@@ -285,7 +285,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                   const subProgress = periodProgress(b.subscription_current_period_end, b.created_at);
 
                   return (
-                    <tr key={b.id} onClick={() => onDetail?.(b.id)} className={`border-b border-zinc-50 hover:bg-brand-50/50 transition-colors cursor-pointer ${
+                    <tr key={b.id} onClick={() => onDetail?.(b.id)} className={`border-b border-zinc-50 hover:bg-[#f0fdfa]/50 transition-colors cursor-pointer ${
                       b.subscription_status === "past_due" ? "bg-red-50/30" :
                       b.suspended ? "bg-white" : ""
                     }`}>
@@ -297,7 +297,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
 
                       {/* Plan */}
                       <td className="px-3 py-2.5">
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-600">
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#0d9488]">
                           {getPlanLabel(b.current_plan)}
                         </span>
                       </td>
@@ -364,7 +364,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                       {/* Kontakt */}
                       <td className="px-3 py-2.5">
                         <div className="flex flex-col gap-0.5">
-                          {b.phone && <a href={`tel:${b.phone}`} className="text-xs text-brand-500 hover:underline font-mono">{b.phone}</a>}
+                          {b.phone && <a href={`tel:${b.phone}`} className="text-xs text-[#0d9488] hover:underline font-mono">{b.phone}</a>}
                           {b.twilio_number && <span className="text-xs text-zinc-400 font-mono">{b.twilio_number}</span>}
                           {b.website_url && <a href={b.website_url} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline truncate max-w-[120px]">{b.website_url.replace(/^https?:\/\//, "")}</a>}
                         </div>
@@ -409,7 +409,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                       {/* Akcje */}
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap gap-1.5">
-                          <button onClick={(e) => { e.stopPropagation(); onEdit(b.id); }} className="text-xs px-2 py-1 rounded font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition whitespace-nowrap">
+                          <button onClick={(e) => { e.stopPropagation(); onEdit(b.id); }} className="text-xs px-2 py-1 rounded font-medium text-[#0d9488] bg-brand-50 hover:bg-[#ccfbf1] transition whitespace-nowrap">
                             Edytuj
                           </button>
                           <button onClick={(e) => { e.stopPropagation(); onDetail?.(b.id); }} className="text-xs px-2 py-1 rounded font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 transition whitespace-nowrap">

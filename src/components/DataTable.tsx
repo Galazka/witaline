@@ -92,7 +92,7 @@ function DataTable<T extends Record<string, unknown>>({
             value={search}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full rounded-lg border border-zinc-200 bg-white/70 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none backdrop-blur transition-colors focus:border-brand-400 focus:bg-white/80 focus:ring-2 focus:ring-brand-400/20"
+            className="w-full rounded-lg border border-zinc-200 bg-white/70 px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none backdrop-blur transition-colors focus:border-[#0d9488] focus:bg-white/80 focus:ring-2 focus:ring-[#0d9488]/20"
           />
         </div>
       )}
@@ -138,7 +138,7 @@ function DataTable<T extends Record<string, unknown>>({
                   onClick={() => onRowClick?.(item)}
                     className={`border-b border-zinc-200/70 transition-colors last:border-0 ${
                     onRowClick
-                      ? "cursor-pointer hover:bg-brand-50"
+                      ? "cursor-pointer hover:bg-[#f0fdfa]"
                       : "hover:bg-white/60"
                   }`}
                 >
@@ -168,14 +168,14 @@ function DataTable<T extends Record<string, unknown>>({
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={safePage === 0}
-              className="rounded-lg border border-zinc-200 bg-white/70 px-3 py-1.5 text-zinc-700 backdrop-blur transition-colors hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg border border-zinc-200 bg-white/70 px-3 py-1.5 text-zinc-700 backdrop-blur transition-colors hover:bg-[#f0fdfa] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Poprzednia
             </button>
             <button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={safePage >= totalPages - 1}
-              className="rounded-lg border border-zinc-200 bg-white/70 px-3 py-1.5 text-zinc-700 backdrop-blur transition-colors hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg border border-zinc-200 bg-white/70 px-3 py-1.5 text-zinc-700 backdrop-blur transition-colors hover:bg-[#f0fdfa] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Nast\u0119pna
             </button>

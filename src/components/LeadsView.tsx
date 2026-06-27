@@ -29,7 +29,7 @@ export default function LeadsView({ businessId }: Props) {
   return (
     <div className="bg-white rounded-xl border border-zinc-200 divide-y divide-zinc-100">
       {leads.map((lead) => (
-        <div key={lead.id} className="px-4 py-3 hover:bg-brand-50 transition">
+        <div key={lead.id} className="px-4 py-3 hover:bg-[#f0fdfa] transition">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-zinc-900">{lead.company_name}</p>
             <span className="text-xs text-zinc-400">{new Date(lead.created_at).toLocaleDateString("pl-PL")}</span>

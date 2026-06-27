@@ -102,11 +102,11 @@ export default function DemoAudioPlayer() {
   const progress = DURATION > 0 ? (currentTime / DURATION) * 100 : 0;
 
   return (
-    <div className="group bg-white/55 backdrop-blur-xl border border-zinc-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-brand-200/40 transition-all duration-300">
+    <div className="group bg-white/55 backdrop-blur-xl border border-zinc-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-[#0d9488]/20 transition-all duration-300">
       <div className="flex items-start gap-4">
         <button
           onClick={togglePlay}
-          className="shrink-0 mt-0.5 w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-500 text-white flex items-center justify-center shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 hover:scale-105 active:scale-95 transition-all duration-300"
+          className="shrink-0 mt-0.5 w-12 h-12 rounded-xl bg-gradient-to-br from-[#0d9488] to-[#0f766e] text-white flex items-center justify-center shadow-md shadow-[#0d9488]/20 hover:shadow-lg hover:shadow-[#0d9488]/30 hover:scale-105 active:scale-95 transition-all duration-300"
           aria-label={isPlaying ? "Wstrzymaj" : "Odtwórz"}
         >
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
@@ -145,7 +145,7 @@ export default function DemoAudioPlayer() {
             </span>
             <div className="flex-1 mx-3 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-400 to-brand-500 rounded-full transition-all duration-300"
+                className="h-full bg-gradient-to-r from-[#0d9488] to-[#0f766e] rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>

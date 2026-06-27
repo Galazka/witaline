@@ -138,12 +138,12 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
         {sortedWidgets.map((widget) => {
           const meta = WIDGET_TYPES.find(w => w.type === widget.type);
           return (
-            <div key={widget.type} className="px-5 py-3 flex items-center gap-4 hover:bg-brand-50 transition">
+            <div key={widget.type} className="px-5 py-3 flex items-center gap-4 hover:bg-[#f0fdfa] transition">
               {/* Toggle */}
               <button
                 onClick={() => toggleWidget(widget.type)}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  widget.enabled ? "bg-brand-400" : "bg-brand-100"
+                  widget.enabled ? "bg-[#0d9488]" : "bg-brand-100"
                 }`}
               >
                 <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -161,14 +161,14 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
               <div className="flex gap-1">
                 <button
                   onClick={() => moveWidget(widget.type, "up")}
-                  className="p-1.5 rounded-lg bg-brand-50 text-zinc-400 hover:bg-brand-100 hover:text-zinc-600 transition text-xs"
+                  className="p-1.5 rounded-lg bg-brand-50 text-zinc-400 hover:bg-[#ccfbf1] hover:text-zinc-600 transition text-xs"
                   title="Przenieś w górę"
                 >
                   ↑
                 </button>
                 <button
                   onClick={() => moveWidget(widget.type, "down")}
-                  className="p-1.5 rounded-lg bg-brand-50 text-zinc-400 hover:bg-brand-100 hover:text-zinc-600 transition text-xs"
+                  className="p-1.5 rounded-lg bg-brand-50 text-zinc-400 hover:bg-[#ccfbf1] hover:text-zinc-600 transition text-xs"
                   title="Przenieś w dół"
                 >
                   ↓
@@ -180,7 +180,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
       </div>
 
       {saving && (
-        <div className="px-5 py-2 bg-brand-50 border-t border-brand-100 text-xs text-brand-600 text-center">
+        <div className="px-5 py-2 bg-brand-50 border-t border-brand-100 text-xs text-[#0d9488] text-center">
           Zapisywanie...
         </div>
       )}

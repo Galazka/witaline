@@ -90,17 +90,17 @@ export default function StatsOverview({ businessId }: Props) {
       {/* Main stats */}
       <div className="bg-white rounded-xl border border-zinc-200 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Rozmowy</p>
-        <p className="text-3xl font-bold text-brand-400 mt-1">{stats.totalConversations}</p>
+        <p className="text-3xl font-bold text-[#0d9488] mt-1">{stats.totalConversations}</p>
         <p className="text-xs text-zinc-500 mt-1">łącznie</p>
       </div>
       <div className="bg-white rounded-xl border border-zinc-200 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Wiadomości</p>
-        <p className="text-3xl font-bold text-brand-400 mt-1">{stats.totalMessages}</p>
+        <p className="text-3xl font-bold text-[#0d9488] mt-1">{stats.totalMessages}</p>
         <p className="text-xs text-zinc-500 mt-1">śr. {stats.avgMessagesPerConv}/rozmowę</p>
       </div>
       <div className="bg-white rounded-xl border border-zinc-200 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Połączenia</p>
-        <p className="text-3xl font-bold text-brand-400 mt-1">{stats.totalCalls}</p>
+        <p className="text-3xl font-bold text-[#0d9488] mt-1">{stats.totalCalls}</p>
         <p className="text-xs text-zinc-500 mt-1">telefoniczne</p>
       </div>
       <div className="bg-white rounded-xl border border-zinc-200 p-5">
@@ -121,7 +121,7 @@ export default function StatsOverview({ businessId }: Props) {
           {stats.recentActivity.map((a, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
               <div
-                className="w-full bg-brand-400 rounded-t transition-all"
+                className="w-full bg-[#0d9488] rounded-t transition-all"
                 style={{ height: `${(a.count / maxActivity) * 100}%`, minHeight: a.count > 0 ? "4px" : "0" }}
               />
               <span className="text-[10px] text-zinc-400">

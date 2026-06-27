@@ -110,7 +110,7 @@ export default function ChatView({ conversation, agent, onUpdate }: Props) {
           {conversation.status === "closed" ? (
             <button
               onClick={handleReopen}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-400/20 text-brand-400 hover:bg-brand-400/30 transition"
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#0d9488]/20 text-[#0d9488] hover:bg-[#0d9488]/30 transition"
             >
               Otwórz ponownie
             </button>
@@ -146,7 +146,7 @@ export default function ChatView({ conversation, agent, onUpdate }: Props) {
               <div
                 className={`max-w-[70%] rounded-xl px-3 py-2 text-sm ${
                   msg.sender_type === "agent"
-                    ? "bg-brand-400 text-white rounded-br-sm"
+                    ? "bg-[#0d9488] text-white rounded-br-sm"
                     : msg.sender_type === "system"
                     ? "bg-zinc-800 text-zinc-400 text-xs text-center rounded-full px-4"
                     : "bg-zinc-800 text-zinc-200 rounded-bl-sm"

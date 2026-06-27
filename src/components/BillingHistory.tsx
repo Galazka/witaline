@@ -68,7 +68,7 @@ export default function BillingHistory({ businessId }: { businessId: string }) {
             </div>
             <div>
               <p className="text-[10px] uppercase text-zinc-400 tracking-wider">Kwota</p>
-              <p className="text-lg font-bold text-brand-500 mt-1">
+              <p className="text-lg font-bold text-[#0d9488] mt-1">
                 {(subscription.amount / 100).toFixed(2).replace(".", ",")} PLN
               </p>
             </div>
@@ -81,7 +81,7 @@ export default function BillingHistory({ businessId }: { businessId: string }) {
               </p>
             </div>
           </div>
-<a href={`/api/stripe/portal?businessId=${businessId}`} className="mt-4 inline-block text-xs text-brand-500 hover:text-brand-600 transition">
+<a href={`/api/stripe/portal?businessId=${businessId}`} className="mt-4 inline-block text-xs text-[#0d9488] hover:text-[#0f766e] transition">
              Zarządzaj subskrypcją w Stripe →
            </a>
         </div>
@@ -135,7 +135,7 @@ export default function BillingHistory({ businessId }: { businessId: string }) {
                     <td className="py-3">
                       {p.receipt_url && (
                         <a href={p.receipt_url} target="_blank" rel="noopener noreferrer"
-                          className="text-xs text-brand-500 hover:text-brand-600 transition">
+                          className="text-xs text-[#0d9488] hover:text-[#0f766e] transition">
                           Paragon →
                         </a>
                       )}
@@ -151,7 +151,7 @@ export default function BillingHistory({ businessId }: { businessId: string }) {
       {/* Customer portal link */}
       <a
         href={`/api/stripe/portal?businessId=${businessId}&returnUrl=${encodeURIComponent(returnUrl || window.location.href)}`}
-        className="block w-full text-center bg-brand-400 text-white py-3 rounded-xl text-sm font-medium hover:bg-brand-500 transition"
+        className="block w-full text-center bg-[#0d9488] text-white py-3 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition"
       >
         Panel zarządzania płatnościami (Stripe) →
       </a>

@@ -47,13 +47,13 @@ export default function MessageInput({ conversationId }: Props) {
           onKeyDown={handleKeyDown}
           placeholder="Napisz wiadomość... (Enter to send, Shift+Enter new line)"
           rows={1}
-          className="flex-1 bg-zinc-700 text-white text-sm rounded-xl px-3 py-2.5 placeholder-zinc-500 border border-zinc-600 focus:border-brand-400 focus:ring-1 focus:ring-brand-400 outline-none resize-none"
+          className="flex-1 bg-zinc-700 text-white text-sm rounded-xl px-3 py-2.5 placeholder-zinc-500 border border-zinc-600 focus:border-[#0d9488] focus:ring-1 focus:ring-[#0d9488] outline-none resize-none"
           disabled={sending}
         />
         <button
           onClick={handleSend}
           disabled={!text.trim() || sending}
-          className="shrink-0 bg-brand-400 text-white px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0 bg-[#0d9488] text-white px-3 py-2.5 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {sending ? "..." : "Wyślij"}
         </button>

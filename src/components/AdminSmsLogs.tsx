@@ -40,8 +40,8 @@ export default function AdminSmsLogs() {
   }
 
   const statusColors: Record<string, string> = {
-    sent: "bg-brand-100 text-brand-500",
-    delivered: "bg-brand-100 text-brand-500",
+    sent: "bg-brand-100 text-[#0d9488]",
+    delivered: "bg-brand-100 text-[#0d9488]",
     failed: "bg-red-100 text-red-600",
     pending: "bg-amber-100 text-amber-700",
     queued: "bg-brand-50 text-zinc-500",
@@ -85,7 +85,7 @@ export default function AdminSmsLogs() {
               </thead>
               <tbody>
                 {logs.map((log) => (
-                  <tr key={log.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                  <tr key={log.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                     <td className="px-4 py-3 font-medium text-zinc-900">{log.businesses?.name || "WitaLine"}</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-700">{log.to_number}</td>
                     <td className="px-4 py-3 max-w-xs truncate text-zinc-600">{log.message_body}</td>

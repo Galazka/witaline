@@ -58,13 +58,13 @@ export default function WidgetSettings({ businessId }: Props) {
       <div className="bg-white rounded-2xl p-6">
         <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3">Podgląd</p>
         <div className="relative bg-white rounded-xl border border-zinc-200 h-48 overflow-hidden">
-          <div className="absolute bottom-4 right-4 w-14 h-14 bg-gradient-to-br from-brand-400 to-brand-500 rounded-full flex items-center justify-center shadow-lg shadow-brand-400/30">
+          <div className="absolute bottom-4 right-4 w-14 h-14 bg-gradient-to-br from-[#0d9488] to-[#0f766e] rounded-full flex items-center justify-center shadow-lg shadow-[#0d9488]/30">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </div>
           <div className="absolute bottom-20 right-4 w-64 bg-white rounded-2xl shadow-xl border border-zinc-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-brand-400 to-brand-500 px-4 py-3 flex items-center gap-2">
+            <div className="bg-gradient-to-r from-[#0d9488] to-[#0f766e] px-4 py-3 flex items-center gap-2">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -144,7 +144,7 @@ export default function WidgetSettings({ businessId }: Props) {
 
         <button
           onClick={handleCopy}
-          className="w-full px-4 py-2.5 text-sm font-medium text-white bg-brand-400 rounded-xl hover:bg-brand-500 transition"
+          className="w-full px-4 py-2.5 text-sm font-medium text-white bg-[#0d9488] rounded-xl hover:bg-[#0f766e] transition"
         >
           {copied ? "✓ Skopiowano!" : "Kopiuj kod"}
         </button>
@@ -161,7 +161,7 @@ export default function WidgetSettings({ businessId }: Props) {
           ].map(item => (
             <div key={item.step} className="text-center">
               <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-sm font-bold text-brand-600">{item.step}</span>
+                <span className="text-sm font-bold text-[#0d9488]">{item.step}</span>
               </div>
               <p className="text-xs font-medium text-zinc-900">{item.title}</p>
               <p className="text-[10px] text-zinc-500 mt-0.5">{item.desc}</p>

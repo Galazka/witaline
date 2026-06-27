@@ -27,7 +27,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
         </p>
         <button
           onClick={() => window.location.href = "/dashboard?tab=upgrade"}
-          className="inline-block bg-brand-400 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+          className="inline-block bg-[#0d9488] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
         >
           Kup dodatek lub zmień plan
         </button>
@@ -91,7 +91,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
 
       {currentVoiceId && (
         <div className="bg-brand-50 rounded-xl p-4 space-y-1">
-          <p className="text-xs text-brand-600 font-medium">Aktualny głos</p>
+          <p className="text-xs text-[#0d9488] font-medium">Aktualny głos</p>
           <p className="text-sm text-zinc-900 font-medium">{currentVoiceName || "Głos niestandardowy"}</p>
           <p className="text-xs text-zinc-400 font-mono">{currentVoiceId}</p>
         </div>
@@ -100,7 +100,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
       {!showForm && !cloning && !result && (
         <button
           onClick={() => setShowForm(true)}
-          className="bg-brand-400 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+          className="bg-[#0d9488] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
         >
           Sklonuj mój głos
         </button>
@@ -115,7 +115,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
               value={cloneName}
               onChange={(e) => setCloneName(e.target.value)}
               placeholder="np. Mój głos - wersja 1"
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]"
             />
           </div>
 
@@ -128,7 +128,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
               accept="audio/*"
               multiple
               onChange={(e) => setFiles(Array.from(e.target.files || []))}
-              className="block w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100"
+              className="block w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:text-[#0d9488] hover:file:bg-brand-100"
             />
             {files.length > 0 && (
               <p className="text-xs text-zinc-500 mt-2">Wybrano {files.length} plików</p>
@@ -139,7 +139,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
             <button
               onClick={handleClone}
               disabled={!cloneName.trim() || files.length < 1}
-              className="bg-brand-400 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-[#0d9488] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Rozpocznij klonowanie
             </button>
@@ -155,7 +155,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
 
       {cloning && (
         <div className="bg-white rounded-xl p-8 text-center space-y-4">
-          <div className="w-10 h-10 border-4 border-brand-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-10 h-10 border-4 border-[#0d9488] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm font-medium text-zinc-700">Tworzenie klonu głosu...</p>
           <p className="text-xs text-zinc-400">To może potrwać kilka minut. Nie zamykaj tej strony.</p>
         </div>
@@ -169,7 +169,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
               <p className="text-sm text-zinc-700">Nazwa: <strong>{result.display_name}</strong></p>
               {result.voice_id && <p className="text-xs text-zinc-400 font-mono">ID: {result.voice_id}</p>}
               <div className="flex gap-3 pt-2">
-                <button onClick={handleTest} className="bg-brand-400 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition">
+                <button onClick={handleTest} className="bg-[#0d9488] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition">
                   Testuj
                 </button>
                 <button onClick={() => { setShowForm(false); setResult(null); setFiles([]); setCloneName(""); }} className="px-4 py-2 text-sm text-zinc-500 hover:text-zinc-700 transition">
@@ -181,7 +181,7 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
             <>
               <p className="text-red-700 font-medium">Klonowanie nie powiodło się</p>
               <p className="text-sm text-zinc-600">{result.error || "Spróbuj ponownie później."}</p>
-              <button onClick={() => { setResult(null); setShowForm(true); }} className="text-sm text-brand-400 hover:text-brand-500 transition font-medium">
+              <button onClick={() => { setResult(null); setShowForm(true); }} className="text-sm text-[#0d9488] hover:text-[#0f766e] transition font-medium">
                 Spróbuj ponownie
               </button>
             </>

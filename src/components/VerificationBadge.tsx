@@ -91,18 +91,18 @@ export default function VerificationBadge({ businessId, isOwner }: Props) {
               onChange={e => setNip(e.target.value)}
               placeholder="NIP (10 cyfr)"
               maxLength={10}
-              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
             />
             <input
               value={krs}
               onChange={e => setKrs(e.target.value)}
               placeholder="KRS (opcjonalnie)"
-              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
             />
             <button
               onClick={handleSubmit}
               disabled={submitting || (!nip && !krs)}
-              className="w-full px-4 py-2 text-sm font-medium text-white bg-brand-400 rounded-xl hover:bg-brand-500 transition disabled:opacity-50"
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-[#0d9488] rounded-xl hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {submitting ? "Wysyłanie..." : "Złóż wniosek weryfikacyjny"}
             </button>

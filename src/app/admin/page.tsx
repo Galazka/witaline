@@ -139,12 +139,12 @@ export default function AdminPage() {
             {showExport && (
               <div className="absolute left-0 top-full mt-1 bg-white border border-zinc-100 rounded-xl shadow-xl py-1 min-w-[180px] z-50">
                 {[["call_logs", "Call Logs"], ["conversations", "Rozmowy"], ["sms_logs", "SMS Logs"], ["all", "Wszystko"]].map(([val, label]) => (
-                  <button key={val} onClick={() => handleExport(val)} className="w-full text-left px-4 py-2 text-sm text-zinc-700 hover:bg-brand-50 transition-colors">{label}</button>
+                  <button key={val} onClick={() => handleExport(val)} className="w-full text-left px-4 py-2 text-sm text-zinc-700 hover:bg-[#f0fdfa] transition-colors">{label}</button>
                 ))}
               </div>
             )}
           </div>
-          <button onClick={handleSyncCalls} disabled={syncing} className="btn-ghost text-xs text-brand-500 hover:text-brand-600 disabled:opacity-40">
+          <button onClick={handleSyncCalls} disabled={syncing} className="btn-ghost text-xs text-[#0d9488] hover:text-[#0f766e] disabled:opacity-40">
             {syncing ? "Sync..." : "Sync rozmowy"}
           </button>
           <button onClick={() => setShowClearConfirm(true)} disabled={clearing} className="btn-ghost text-xs text-red-500 hover:text-red-600 disabled:opacity-40">
@@ -191,12 +191,12 @@ export default function AdminPage() {
                 <h2 className="text-lg font-bold text-zinc-900">WitaLine / linia główna</h2>
                 <p className="text-sm text-zinc-500 mt-1">Osobne menu dla numeru konsultanta głównej linii WitaLine.</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-500 flex items-center justify-center font-bold">W</div>
+              <div className="w-10 h-10 rounded-xl bg-[#f0fdfa] text-[#0d9488] flex items-center justify-center font-bold">W</div>
             </div>
             <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 mb-2">Numer konsultanta WitaLine</label>
-                <input value={witaLinePhone} onChange={(e) => setWitaLinePhone(e.target.value)} placeholder="+48 123 456 789" className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-200" />
+                <input value={witaLinePhone} onChange={(e) => setWitaLinePhone(e.target.value)} placeholder="+48 123 456 789" className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20" />
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={saveWitaLinePhone} disabled={witaLineSaving} className="btn-primary text-sm">{witaLineSaving ? "Zapisywanie..." : "Zapisz"}</button>
@@ -223,8 +223,8 @@ export default function AdminPage() {
       {tab === "sms" && (
         <div className="space-y-4">
           <div className="flex gap-2">
-            <button onClick={() => setSmsView("management")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "management" ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"}`}>Zarządzanie SMS</button>
-            <button onClick={() => setSmsView("logs")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "logs" ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"}`}>Logi SMS</button>
+            <button onClick={() => setSmsView("management")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "management" ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}>Zarządzanie SMS</button>
+            <button onClick={() => setSmsView("logs")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "logs" ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}>Logi SMS</button>
           </div>
           {smsView === "management" ? <AdminSmsManagement /> : <AdminSmsLogs />}
         </div>

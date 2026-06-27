@@ -33,7 +33,7 @@ const roleLabels: Record<string, string> = {
 const roleColors: Record<string, string> = {
   admin: "bg-purple-100 text-purple-700",
   manager: "bg-blue-100 text-blue-700",
-  receptionist: "bg-brand-100 text-brand-700",
+  receptionist: "bg-[#ccfbf1] text-[#065f46]",
   viewer: "bg-zinc-100 text-zinc-600",
 };
 
@@ -161,7 +161,7 @@ export default function TeamManager({ businessId }: { businessId: string }) {
         <div className="bg-white border border-zinc-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-500 flex items-center justify-center font-bold text-sm">
+              <div className="w-10 h-10 rounded-full bg-brand-100 text-[#0d9488] flex items-center justify-center font-bold text-sm">
                 {owner.email.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -184,7 +184,7 @@ export default function TeamManager({ businessId }: { businessId: string }) {
 
         {loading ? (
           <div className="flex items-center gap-2 py-4">
-            <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-zinc-400">Ładowanie...</p>
           </div>
         ) : staff.length > 0 ? (
@@ -223,7 +223,7 @@ export default function TeamManager({ businessId }: { businessId: string }) {
                       <select
                         value={m.role}
                         onChange={(e) => handleChangeRole(m.id, e.target.value)}
-                        className="text-xs px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-200 cursor-pointer"
+                        className="text-xs px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20 cursor-pointer"
                       >
                         {Object.entries(roleLabels).filter(([k]) => k !== "admin").map(([key, label]) => (
                           <option key={key} value={key}>{label}</option>
@@ -270,13 +270,13 @@ export default function TeamManager({ businessId }: { businessId: string }) {
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
             placeholder="email@pracownika.pl"
-            className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
             onKeyDown={(e) => e.key === "Enter" && handleInvite()}
           />
           <select
             value={inviteRole}
             onChange={e => setInviteRole(e.target.value)}
-            className="px-3 py-2 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="px-3 py-2 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
           >
             <option value="manager">Menedżer</option>
             <option value="receptionist">Recepcjonista</option>
@@ -285,7 +285,7 @@ export default function TeamManager({ businessId }: { businessId: string }) {
           <button
             onClick={handleInvite}
             disabled={inviting || !inviteEmail.trim()}
-            className="bg-brand-400 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50 shrink-0"
+            className="bg-[#0d9488] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50 shrink-0"
           >
             {inviting ? (
               <span className="flex items-center gap-1">

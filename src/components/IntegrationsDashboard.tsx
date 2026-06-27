@@ -145,7 +145,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
 
           <div className="grid sm:grid-cols-2 gap-3">
             {BOT_CAPABILITIES.map((cap) => (
-              <div key={cap.title} className="bg-white rounded-xl border border-zinc-200 p-4 hover:border-brand-200 transition">
+              <div key={cap.title} className="bg-white rounded-xl border border-zinc-200 p-4 hover:border-[#0d9488]/20 transition">
                 <div className="flex items-start gap-3">
                   <span className="text-xl shrink-0">{cap.icon}</span>
                   <div>
@@ -161,27 +161,27 @@ export default function IntegrationsDashboard({ businessId }: Props) {
             <h4 className="text-sm font-semibold text-zinc-900 mb-2">Jak to działa krok po kroku?</h4>
             <ol className="space-y-2 text-sm text-zinc-600">
               <li className="flex items-start gap-2">
-                <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+                <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
                 <span>Klient dzwoni na Twój numer — Maja odbiera automatycznie</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+                <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
                 <span>Maja identyfikuje intencję: pytanie, zamówienie, rezerwacja, oferta</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+                <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
                 <span>Jeśli potrzebne — sprawdza kalendarz, zapisuje lead, wysyła ofertę SMS</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
+                <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
                 <span>W razie potrzeby przekazuje do konsultanta (Ciebie lub Twojego zespołu)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">5</span>
+                <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">5</span>
                 <span>Po rozmowie: transkrypcja, podsumowanie AI, ocena jakości, podsumowanie SMS</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-5 h-5 bg-brand-400 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">6</span>
+                <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">6</span>
                 <span>Dane trafiają do CRM, na Slacka, do Twojego webhooka — wszystko automatycznie</span>
               </li>
             </ol>
@@ -200,7 +200,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
           <div>
             <h2 className="text-lg font-semibold text-zinc-900">REST API v1</h2>
             <p className="text-sm text-zinc-500 mt-1">
-              Programistyczny dostęp do danych WitaLine. Wszystkie zapytania wymagają nagłówka <code className="text-brand-500 bg-brand-50 px-1 rounded">Authorization: Bearer {"{klucz}"}</code>
+              Programistyczny dostęp do danych WitaLine. Wszystkie zapytania wymagają nagłówka <code className="text-[#0d9488] bg-brand-50 px-1 rounded">Authorization: Bearer {"{klucz}"}</code>
             </p>
           </div>
 
@@ -222,7 +222,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
               {apiKey && (
                 <button
                   onClick={async () => { await navigator.clipboard.writeText(apiKey); setApiKeyCopied(true); setTimeout(() => setApiKeyCopied(false), 2000); }}
-                  className="text-xs text-brand-500 hover:text-brand-600 shrink-0"
+                  className="text-xs text-[#0d9488] hover:text-[#0f766e] shrink-0"
                 >
                   {apiKeyCopied ? "Skopiowano!" : "Kopiuj"}
                 </button>
@@ -239,7 +239,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
             </div>
             <div className="divide-y divide-zinc-100">
               {API_ENDPOINTS.map((ep) => (
-                <div key={ep.path} className="flex items-start gap-4 px-4 py-3 hover:bg-brand-50/50 transition">
+                <div key={ep.path} className="flex items-start gap-4 px-4 py-3 hover:bg-[#f0fdfa]/50 transition">
                   <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded ${
                     ep.method === "GET"
                       ? "bg-green-100 text-green-700"
@@ -331,7 +331,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
                 </div>
                 <div className="mt-3 flex items-center gap-3 text-[10px]">
                   <a href={crm.docsUrl} target="_blank" rel="noopener noreferrer"
-                    className="text-brand-500 hover:text-brand-600 font-medium">
+                    className="text-[#0d9488] hover:text-[#0f766e] font-medium">
                     Dokumentacja →
                   </a>
                   <span className="text-zinc-300">|</span>
@@ -350,7 +350,7 @@ export default function IntegrationsDashboard({ businessId }: Props) {
               Dla klientów Enterprise budujemy dedykowane integracje.
             </p>
             <p className="text-xs text-zinc-400">
-              Skontaktuj się: <a href={`mailto:${WITALINE_INTEGRACJE_EMAIL}`} className="text-brand-500 hover:text-brand-600">{WITALINE_INTEGRACJE_EMAIL}</a>
+              Skontaktuj się: <a href={`mailto:${WITALINE_INTEGRACJE_EMAIL}`} className="text-[#0d9488] hover:text-[#0f766e]">{WITALINE_INTEGRACJE_EMAIL}</a>
             </p>
           </div>
         </div>

@@ -25,8 +25,8 @@ interface BizData {
 }
 
 const statusColors: Record<string, string> = {
-  sent: "bg-brand-100 text-brand-500",
-  delivered: "bg-brand-100 text-brand-500",
+  sent: "bg-brand-100 text-[#0d9488]",
+  delivered: "bg-brand-100 text-[#0d9488]",
   failed: "bg-red-100 text-red-600",
   pending: "bg-amber-100 text-amber-700",
   queued: "bg-brand-50 text-zinc-500",
@@ -70,7 +70,7 @@ export default function SmsHistory({ businessId }: { businessId: string }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-brand-50 rounded-xl p-4">
           <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Pozostało</p>
-          <p className={`text-2xl font-bold ${smsRemaining < 10 ? "text-red-500" : "text-brand-500"}`}>{smsRemaining}</p>
+          <p className={`text-2xl font-bold ${smsRemaining < 10 ? "text-red-500" : "text-[#0d9488]"}`}>{smsRemaining}</p>
           <p className="text-[10px] text-zinc-400">z {smsTotal}</p>
         </div>
         <div className="bg-green-50 rounded-xl p-4">
@@ -102,7 +102,7 @@ export default function SmsHistory({ businessId }: { businessId: string }) {
               className={`h-full rounded-full transition-all ${
                 smsRemaining < 10 ? "bg-red-500"
                 : smsRemaining < smsTotal * 0.2 ? "bg-amber-500"
-                : "bg-brand-400"
+                : "bg-[#0d9488]"
               }`}
               style={{ width: `${smsTotal > 0 ? Math.min(100, (((bizData?.sms_used || 0) / smsTotal) * 100)) : 0}%` }}
             />
@@ -114,12 +114,12 @@ export default function SmsHistory({ businessId }: { businessId: string }) {
       <div className="bg-zinc-50 rounded-xl p-4 text-xs text-zinc-500 space-y-1">
         <div className="flex justify-between"><span>Koszt Twilio (nasz)</span><span>{(sentCount * TWILIO_SMS_COST_PLN).toFixed(2).replace(".", ",")} zł</span></div>
         <div className="flex justify-between"><span>Cena dla klienta</span><span className="font-medium text-zinc-700">{totalSentCost.toFixed(2).replace(".", ",")} zł</span></div>
-        <div className="flex justify-between border-t border-zinc-200 pt-1"><span className="font-medium text-brand-600">Nasza marża</span><span className="font-medium text-brand-600">{(totalSentCost - sentCount * TWILIO_SMS_COST_PLN).toFixed(2).replace(".", ",")} zł</span></div>
+        <div className="flex justify-between border-t border-zinc-200 pt-1"><span className="font-medium text-[#0d9488]">Nasza marża</span><span className="font-medium text-[#0d9488]">{(totalSentCost - sentCount * TWILIO_SMS_COST_PLN).toFixed(2).replace(".", ",")} zł</span></div>
       </div>
 
       {/* Buy more link */}
       <a href="/dashboard?tab=costs"
-        className="block w-full text-center bg-brand-400 text-white py-3 rounded-xl text-sm font-medium hover:bg-brand-500 transition">
+        className="block w-full text-center bg-[#0d9488] text-white py-3 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition">
         Dokup pakiet SMS →
       </a>
 
@@ -166,7 +166,7 @@ export default function SmsHistory({ businessId }: { businessId: string }) {
                            });
                            if (res.ok) fetch(`/api/business/sms-logs?businessId=${businessId}`).then(r => r.json()).then(setLogs);
                          }}
-                         className="text-[10px] text-brand-500 hover:text-brand-600 underline"
+                         className="text-[10px] text-[#0d9488] hover:text-[#0f766e] underline"
                        >Ponów</button>
                      )}
                    </div>

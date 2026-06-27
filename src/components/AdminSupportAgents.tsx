@@ -80,7 +80,7 @@ export default function AdminSupportAgents() {
         <h2 className="text-lg font-semibold text-zinc-800">Agenci wsparcia</h2>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2 bg-brand-400 text-white rounded-xl text-sm font-medium hover:bg-brand-500 transition"
+          className="px-4 py-2 bg-[#0d9488] text-white rounded-xl text-sm font-medium hover:bg-[#0f766e] transition"
         >
           {showAdd ? "Anuluj" : "+ Dodaj agenta"}
         </button>
@@ -92,14 +92,14 @@ export default function AdminSupportAgents() {
             <button
               type="button"
               onClick={() => setAddMode("email")}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "email" ? "bg-brand-400 text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "email" ? "bg-[#0d9488] text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
             >
               Email + hasło
             </button>
             <button
               type="button"
               onClick={() => setAddMode("uuid")}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "uuid" ? "bg-brand-400 text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "uuid" ? "bg-[#0d9488] text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
             >
               UUID
             </button>
@@ -141,7 +141,7 @@ export default function AdminSupportAgents() {
           <button
             onClick={handleAdd}
             disabled={(addMode === "email" && (!newEmail.trim() || !newPassword.trim())) || (addMode === "uuid" && !newUserId.trim())}
-            className="px-4 py-2 bg-brand-400 text-white rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+            className="px-4 py-2 bg-[#0d9488] text-white rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
           >
             Dodaj
           </button>

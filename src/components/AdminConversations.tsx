@@ -240,7 +240,7 @@ export default function AdminConversations() {
           <div><p className="text-lg font-bold text-zinc-900">{stats.totalMinutes}</p><p className="text-[10px] text-zinc-400">Minuty</p></div>
           <div><p className="text-lg font-bold text-zinc-900">{stats.totalCost.toFixed(2)}</p><p className="text-[10px] text-zinc-400">Koszt</p></div>
           <div className="flex items-center justify-center">
-            <button onClick={fetchAll} className="text-[10px] text-brand-500 hover:underline">Odswiez</button>
+            <button onClick={fetchAll} className="text-[10px] text-[#0d9488] hover:underline">Odswiez</button>
           </div>
         </div>
       </div>
@@ -261,7 +261,7 @@ export default function AdminConversations() {
             const labels: Record<string, string> = { date: "Data", duration: "Czas", caller: "Rozmówca", channel: "Kanał", status: "Status", cost: "Koszt" };
             return (
               <button key={s} onClick={() => { if (sortBy === s) setSortDir(d => d === "asc" ? "desc" : "asc"); else { setSortBy(s); setSortDir("desc"); } }}
-                className={`px-2.5 py-1.5 text-xs rounded-lg transition ${sortBy === s ? "bg-brand-100 text-brand-600 font-medium" : "text-zinc-500 hover:text-zinc-700"}`}>
+                className={`px-2.5 py-1.5 text-xs rounded-lg transition ${sortBy === s ? "bg-[#ccfbf1] text-[#0d9488] font-medium" : "text-zinc-500 hover:text-zinc-700"}`}>
                 {labels[s]} {sortBy === s ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </button>
             );
@@ -289,7 +289,7 @@ export default function AdminConversations() {
               <div key={m.id} className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
                 {/* Card header — always visible */}
                 <button onClick={() => setExpandedId(isExpanded ? null : m.id)}
-                  className="w-full text-left p-4 hover:bg-brand-50 transition">
+                  className="w-full text-left p-4 hover:bg-[#f0fdfa] transition">
                   <div className="flex items-start gap-4">
                     <span className="text-lg shrink-0 mt-0.5">{channelIcon[m.channel] || "📞"}</span>
                     <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 text-sm">

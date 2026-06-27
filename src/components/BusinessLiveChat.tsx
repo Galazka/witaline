@@ -284,7 +284,7 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
                 <div className="flex gap-2">
                   {selected.status === "ended" ? (
                     <button onClick={handleReopen}
-                      className="text-xs px-3 py-1.5 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition font-medium">Otwórz</button>
+                      className="text-xs px-3 py-1.5 rounded-lg bg-[#f0fdfa] text-[#0d9488] hover:bg-[#ccfbf1] transition font-medium">Otwórz</button>
                   ) : (
                     <button onClick={handleClose}
                       className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition font-medium">Zakończ</button>
@@ -297,7 +297,7 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
                   <div key={msg.id}
                     className={`flex ${msg.role === "user" || msg.role === "human" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === "user" ? "bg-brand-400 text-white rounded-br-md" :
+                      msg.role === "user" ? "bg-[#0d9488] text-white rounded-br-md" :
                       msg.role === "human" ? "bg-brand-200 text-zinc-800 rounded-br-md" :
                       "bg-brand-50 text-zinc-800 rounded-bl-md"
                     }`}>
@@ -318,10 +318,10 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
                     <textarea ref={inputRef}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }}}
                       placeholder="Napisz odpowiedź..." rows={1}
-                      className="flex-1 bg-zinc-50 text-zinc-900 text-sm rounded-xl px-3 py-2.5 placeholder-zinc-400 border border-zinc-200 focus:border-brand-400 focus:ring-1 focus:ring-brand-400 outline-none resize-none"
+                      className="flex-1 bg-zinc-50 text-zinc-900 text-sm rounded-xl px-3 py-2.5 placeholder-zinc-400 border border-zinc-200 focus:border-[#0d9488] focus:ring-1 focus:ring-[#0d9488] outline-none resize-none"
                       disabled={sending} />
                     <button onClick={handleSend} disabled={sending}
-                      className="shrink-0 bg-brand-400 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50">{sending ? "..." : "Wyślij"}</button>
+                      className="shrink-0 bg-[#0d9488] text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50">{sending ? "..." : "Wyślij"}</button>
                   </div>
                 </div>
               )}

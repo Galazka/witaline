@@ -159,7 +159,7 @@ export default function AdminLiveChat() {
                 onClick={() => { setStatusFilter(s); setLoading(true); }}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
                   statusFilter === s
-                    ? "bg-brand-400 text-white"
+                    ? "bg-[#0d9488] text-white"
                     : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                 }`}
               >
@@ -172,14 +172,14 @@ export default function AdminLiveChat() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && fetchConversations()}
             placeholder="Szukaj rozmowy..."
-            className="w-full px-3 py-1.5 text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+            className="w-full px-3 py-1.5 text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : conversations.length === 0 ? (
             <div className="text-center py-8 px-4">
@@ -257,7 +257,7 @@ export default function AdminLiveChat() {
               {selected.caller_id && (
                 <a
                   href={`tel:${selected.caller_id}`}
-                  className="text-xs text-brand-500 hover:text-brand-600 px-2 py-1 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 transition"
+                  className="text-xs text-[#0d9488] hover:text-[#0f766e] px-2 py-1 rounded-lg hover:bg-[#f0fdfa] dark:hover:bg-brand-900/20 transition"
                 >
                   {selected.caller_id}
                 </a>
@@ -267,7 +267,7 @@ export default function AdminLiveChat() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {loadingMessages ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="w-5 h-5 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : messages.length === 0 ? (
                 <p className="text-xs text-zinc-400 text-center py-8">Brak wiadomości</p>
@@ -280,7 +280,7 @@ export default function AdminLiveChat() {
                     <div
                       className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap rounded-2xl ${
                         msg.role === "user"
-                          ? "bg-brand-400 text-white rounded-br-md"
+                          ? "bg-[#0d9488] text-white rounded-br-md"
                           : msg.role === "human"
                           ? "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 rounded-bl-md"
                           : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-md"
@@ -309,12 +309,12 @@ export default function AdminLiveChat() {
                     }
                   }}
                   placeholder="Odpowiedz jako admin..."
-                  className="flex-1 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand-400/30 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 transition-colors"
                 />
                 <button
                   onClick={handleSendReply}
                   disabled={!replyText.trim() || sending}
-                  className="w-10 h-10 bg-brand-400 text-white rounded-xl flex items-center justify-center hover:bg-brand-500 transition disabled:opacity-30 shrink-0"
+                  className="w-10 h-10 bg-[#0d9488] text-white rounded-xl flex items-center justify-center hover:bg-[#0f766e] transition disabled:opacity-30 shrink-0"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

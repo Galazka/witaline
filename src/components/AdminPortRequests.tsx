@@ -60,7 +60,7 @@ export default function AdminPortRequests() {
       <div className="flex gap-2">
         {["", "pending", "in_progress", "completed", "rejected"].map((s) => (
           <button key={s} onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${statusFilter === s ? "bg-brand-400 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${statusFilter === s ? "bg-[#0d9488] text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}
           >
             {s ? STATUS_LABEL[s] || s : "Wszystkie"}
           </button>
@@ -114,7 +114,7 @@ function PortRequestCard({ request, onUpdate }: { request: PortRequest; onUpdate
           <option value="rejected">Odrzucone</option>
         </select>
         <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notatka admina..." className="flex-1 px-2 py-1 text-xs border border-zinc-200 rounded bg-white" />
-        <button onClick={() => onUpdate(request.id, selectedStatus, note)} className="px-3 py-1 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
+        <button onClick={() => onUpdate(request.id, selectedStatus, note)} className="px-3 py-1 text-xs font-medium bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition">
           Aktualizuj
         </button>
       </div>

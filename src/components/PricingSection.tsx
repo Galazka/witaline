@@ -9,7 +9,7 @@ import type { Locale } from "@/lib/i18n";
 
 function CheckIcon() {
   return (
-    <svg className="w-5 h-5 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-5 h-5 text-[#0d9488] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   );
@@ -117,18 +117,18 @@ export default function PricingSection({
     <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
       <div className="max-w-5xl mx-auto relative">
         <div className="text-center mb-12 md:mb-16">
-          <span className="inline-block bg-brand-100 text-brand-700 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">{tr.overline}</span>
+          <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">{tr.overline}</span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">{tr.title}</h2>
           {tr.subtitle && <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed">{tr.subtitle}</p>}
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3 mb-2">
           <button onClick={() => setTab("configurator")}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "configurator" ? "bg-brand-400 text-white shadow-lg shadow-brand-500/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
+            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "configurator" ? "bg-[#0d9488] text-white shadow-lg shadow-[#0d9488]/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-[#f0fdfa]"}`}>
             {tr.configurator}
           </button>
           <button onClick={() => setTab("enterprise")}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "enterprise" ? "bg-brand-400 text-white shadow-lg shadow-brand-500/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
+            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${tab === "enterprise" ? "bg-[#0d9488] text-white shadow-lg shadow-[#0d9488]/30" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-[#f0fdfa]"}`}>
             {tr.enterprise}
           </button>
         </div>
@@ -155,13 +155,13 @@ export default function PricingSection({
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-sm text-zinc-500">{tr.minutes}</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl md:text-5xl font-bold text-brand-500 font-display">{minutes}</span>
+                    <span className="text-4xl md:text-5xl font-bold text-[#0d9488] font-display">{minutes}</span>
                     <span className="text-sm text-zinc-400">{locale === "pl" ? "min/mies" : "min/mo"}</span>
                   </div>
                 </div>
                 <input type="range" min={50} max={5000} step={10} value={minutes}
                   onChange={(e) => setMinutes(parseInt(e.target.value))}
-                  className="w-full h-2.5 bg-brand-100 rounded-full appearance-none cursor-pointer accent-brand-400" />
+                  className="w-full h-2.5 bg-brand-100 rounded-full appearance-none cursor-pointer accent-[#0d9488]" />
                 <div className="flex justify-between text-xs text-zinc-400 mt-1">
                   <span>50</span><span>1000</span><span>2000</span><span>3000</span><span>4000</span><span>5000</span>
                 </div>
@@ -170,7 +170,7 @@ export default function PricingSection({
               {/* Tier badges */}
               <div className="flex flex-wrap gap-1.5 mb-6">
                 {ELASTIC_TIERS.map(t => (
-                  <span key={t.minMinutes} className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-brand-400 text-white" : "bg-zinc-100 text-zinc-400"}`}>
+                  <span key={t.minMinutes} className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-[#0d9488] text-white" : "bg-zinc-100 text-zinc-400"}`}>
                     {t.maxMinutes === Infinity ? `${t.minMinutes}+` : `${t.minMinutes}–${t.maxMinutes}`}: {formatPriceMin(t.ratePerMin, currency)}
                   </span>
                 ))}
@@ -180,17 +180,17 @@ export default function PricingSection({
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
                     <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.perMin}</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatPriceLocal(elastic.ratePerMin, currency)}</p>
+                  <p className="text-2xl font-bold text-[#0d9488]">{formatPriceLocal(elastic.ratePerMin, currency)}</p>
                     <p className="text-[10px] text-zinc-400">{tr.netto}</p>
                 </div>
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.monthly} ({tr.netto})</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatPriceLocal(elastic.monthlyNetto, currency)}</p>
+                  <p className="text-2xl font-bold text-[#0d9488]">{formatPriceLocal(elastic.monthlyNetto, currency)}</p>
                   <p className="text-[10px] text-zinc-400">{tr.exclVat}</p>
                 </div>
                 <div className="bg-brand-50 rounded-xl p-4 text-center">
                   <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{tr.monthly} ({tr.brutto})</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatPriceLocal(elastic.monthlyBrutto, currency)}</p>
+                  <p className="text-2xl font-bold text-[#0d9488]">{formatPriceLocal(elastic.monthlyBrutto, currency)}</p>
                   <p className="text-[10px] text-zinc-400">{tr.inclVat}</p>
                 </div>
               </div>
@@ -202,9 +202,9 @@ export default function PricingSection({
               <div className="grid md:grid-cols-2 gap-2">
                 {addonDefs.map(a => (
                   <button key={a.key} onClick={() => toggleAddon(a.key)}
-                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition ${addons[a.key] ? "border-brand-400 bg-brand-50" : "border-zinc-200 hover:border-brand-200"}`}>
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition ${addons[a.key] ? "border-[#0d9488] bg-brand-50" : "border-zinc-200 hover:border-[#0d9488]/20"}`}>
                     <div className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${addons[a.key] ? "bg-brand-400 border-brand-400" : "border-zinc-300"}`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${addons[a.key] ? "bg-[#0d9488] border-[#0d9488]" : "border-zinc-300"}`}>
                         {addons[a.key] && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                       </div>
                       <span className="text-sm text-zinc-700">{a.label}</span>
@@ -229,7 +229,7 @@ export default function PricingSection({
                     ))}
                     <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold">
                       <span className="text-zinc-700">{tr.totalNetto}</span>
-                      <span className="text-brand-500">{formatPriceLocal(full.monthlyNetto, currency)}</span>
+                      <span className="text-[#0d9488]">{formatPriceLocal(full.monthlyNetto, currency)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-zinc-500">{tr.totalBrutto}</span>
@@ -238,22 +238,22 @@ export default function PricingSection({
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-brand-50 to-brand-100/50 rounded-xl p-5 flex items-center gap-4">
+                <div className="bg-gradient-to-r from-[#f0fdfa] to-[#ccfbf1]/50 rounded-xl p-5 flex items-center gap-4">
                   <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                    <svg className="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    <svg className="w-5 h-5 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-zinc-700">{locale === "pl" ? "Sprawdź naszego asystenta AI" : "Test our AI assistant now"}</p>
-                    <a href={"tel:" + WITALINE_PHONE_NUMBER} className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">{WITALINE_PHONE_DISPLAY}</a>
+                    <a href={"tel:" + WITALINE_PHONE_NUMBER} className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-[#0f766e] transition-colors">{WITALINE_PHONE_DISPLAY}</a>
                   </div>
                 </div>
               </div>
 
               <div className="md:col-span-2">
-                <div className="sticky top-24 bg-white border-2 border-brand-400 rounded-2xl p-6 shadow-lg shadow-brand-500/10">
+                <div className="sticky top-24 bg-white border-2 border-[#0d9488] rounded-2xl p-6 shadow-lg shadow-[#0d9488]/10">
                   <p className="text-sm font-semibold text-zinc-700 mb-1">{tr.yourPlan}</p>
                   <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-4xl font-bold text-brand-500 font-display">{formatPriceLocal(full.monthlyBrutto, currency)}</span>
+                    <span className="text-4xl font-bold text-[#0d9488] font-display">{formatPriceLocal(full.monthlyBrutto, currency)}</span>
                     <span className="text-zinc-400 text-xs">{locale === "pl" ? "/mies" : "/mo"}</span>
                   </div>
                   <p className="text-xs text-zinc-400 mb-4">{tr.netto}: {formatPriceLocal(full.monthlyNetto, currency)}</p>
@@ -261,20 +261,20 @@ export default function PricingSection({
                   <div className="bg-brand-50 rounded-xl px-3 py-2 mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-zinc-500">{tr.rate}</span>
-                      <span className="text-sm font-bold text-brand-600">{formatPriceLocal(elastic.ratePerMin, currency)}/min {tr.netto}</span>
+                      <span className="text-sm font-bold text-[#0d9488]">{formatPriceLocal(elastic.ratePerMin, currency)}/min {tr.netto}</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-xs text-zinc-500">{tr.overage}</span>
-                      <span className="text-sm font-bold text-brand-600">{formatPriceLocal(full.overageNetto, currency)}/min {tr.netto}</span>
+                      <span className="text-sm font-bold text-[#0d9488]">{formatPriceLocal(full.overageNetto, currency)}/min {tr.netto}</span>
                     </div>
                   </div>
 
                   <Link href={{ pathname: "/register", query: { config: JSON.stringify(cfg) } }}
-                    className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20">
+                    className="block w-full text-center bg-[#0d9488] text-white py-3 rounded-2xl font-semibold hover:bg-[#0f766e] transition shadow-lg shadow-[#0d9488]/20">
                     {tr.tryFree}
                   </Link>
                   <p className="text-center text-[10px] text-zinc-400 mt-2">{tr.noCard}</p>
-                  <p className="text-center text-[9px] text-brand-500 mt-1 font-medium">
+                  <p className="text-center text-[9px] text-[#0d9488] mt-1 font-medium">
                     {locale === "pl" ? "15 min rozmów + 10 SMS gratis" : "15 call minutes + 10 SMS free"}
                   </p>
                 </div>
@@ -288,7 +288,7 @@ export default function PricingSection({
         {/* ── SMS Pricing Info Section ─────────────────────────────── */}
         <div className="max-w-4xl mx-auto mt-12 pt-12 border-t border-zinc-200">
           <div className="text-center mb-8">
-            <span className="inline-block bg-brand-100 text-brand-700 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-3">
+            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-3">
               {locale === "pl" ? "Wiadomości SMS" : "SMS Messaging"}
             </span>
             <h3 className="text-2xl font-bold text-zinc-900 font-display">
@@ -308,7 +308,7 @@ export default function PricingSection({
                 {locale === "pl" ? "Cena za wiadomość" : "Per message"}
               </h4>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-brand-500 font-display">
+                <span className="text-3xl font-bold text-[#0d9488] font-display">
                   {formatPriceLocal(SMS_PACKAGES[0].pricePerSmsPLN, currency)}
                 </span>
                 <span className="text-sm text-zinc-400">
@@ -322,15 +322,15 @@ export default function PricingSection({
               </p>
               <ul className="space-y-2 text-sm text-zinc-600">
                 <li className="flex items-start gap-2">
-                  <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  <svg className="w-4 h-4 text-[#0d9488] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
                   {locale === "pl" ? "Automatyczne wysyłanie ofert i podsumowań" : "Auto-send offers and summaries"}
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  <svg className="w-4 h-4 text-[#0d9488] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
                   {locale === "pl" ? "Potwierdzenia rezerwacji i przypomnienia" : "Booking confirmations & reminders"}
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  <svg className="w-4 h-4 text-[#0d9488] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
                   {locale === "pl" ? "Własny limit SMS w panelu" : "Dedicated SMS limit in dashboard"}
                 </li>
               </ul>
@@ -351,7 +351,7 @@ export default function PricingSection({
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold text-brand-500">{formatPriceLocal(pkg.clientPricePLN, currency)}</span>
+                      <span className="text-sm font-bold text-[#0d9488]">{formatPriceLocal(pkg.clientPricePLN, currency)}</span>
                       <span className="text-[10px] text-zinc-400 ml-1">
                         ({formatPriceLocal(pkg.pricePerSmsPLN, currency)}/{locale === "pl" ? "sms" : "msg"})
                       </span>
@@ -393,25 +393,25 @@ function EnterpriseSection({ locale, tr, currency }: { locale: Locale; tr: Prici
           <label className="text-sm font-semibold text-zinc-800 mb-3 block">{tr.minutes}</label>
           <input type="range" min={500} max={20000} step={100} value={minutes}
             onChange={(e) => setMinutes(parseInt(e.target.value))}
-            className="w-full h-2 bg-brand-100 rounded-full appearance-none cursor-pointer accent-brand-400 mb-2" />
+            className="w-full h-2 bg-brand-100 rounded-full appearance-none cursor-pointer accent-[#0d9488] mb-2" />
           <div className="flex justify-between text-xs text-zinc-400"><span>500</span><span>5000</span><span>10000</span><span>20000+</span></div>
-          <p className="text-center text-3xl font-bold text-brand-500 font-display mt-4">{minutes.toLocaleString("pl-PL")}</p>
+          <p className="text-center text-3xl font-bold text-[#0d9488] font-display mt-4">{minutes.toLocaleString("pl-PL")}</p>
         </div>
       </div>
       <div className="space-y-6">
-        <div className="sticky top-24 bg-gradient-to-b from-brand-50 to-white border border-brand-200 rounded-2xl p-6 shadow-lg shadow-brand-500/10">
+        <div className="sticky top-24 bg-gradient-to-b from-brand-50 to-white border border-[#0d9488]/20 rounded-2xl p-6 shadow-lg shadow-[#0d9488]/10">
           <p className="text-sm font-semibold text-brand-700 mb-1">{tr.startingFrom}</p>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-4xl font-bold text-brand-500 font-display">{formatPriceLocal(monthlyBrutto, currency)}</span>
+            <span className="text-4xl font-bold text-[#0d9488] font-display">{formatPriceLocal(monthlyBrutto, currency)}</span>
             <span className="text-zinc-400 text-xs">{locale === "pl" ? "/mies" : "/mo"}</span>
           </div>
           <div className="space-y-3 mb-6">
             <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.setupFee}</span><span className="font-medium">{formatPriceLocal(setupFee, currency)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-zinc-600">{tr.monthly} ({tr.startingFrom})</span><span className="font-medium">{formatPriceLocal(monthlyBrutto, currency)}</span></div>
-            <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{tr.firstMonth}</span><span className="text-brand-500">{formatPriceLocal(monthlyBrutto + setupFee, currency)}</span></div>
+            <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm font-bold"><span className="text-zinc-700">{tr.firstMonth}</span><span className="text-[#0d9488]">{formatPriceLocal(monthlyBrutto + setupFee, currency)}</span></div>
           </div>
-          <a href={"tel:" + WITALINE_PHONE_NUMBER} className="block w-full text-center bg-brand-400 text-white py-3 rounded-2xl font-semibold hover:bg-brand-500 transition shadow-lg shadow-brand-500/20 mb-2">{tr.callUs}</a>
-          <a href="/oferta-indywidualna" className="block w-full text-center bg-white text-zinc-700 py-3 rounded-2xl font-semibold border border-zinc-200 hover:bg-brand-50 transition">{tr.seeOffer}</a>
+          <a href={"tel:" + WITALINE_PHONE_NUMBER} className="block w-full text-center bg-[#0d9488] text-white py-3 rounded-2xl font-semibold hover:bg-[#0f766e] transition shadow-lg shadow-[#0d9488]/20 mb-2">{tr.callUs}</a>
+          <a href="/oferta-indywidualna" className="block w-full text-center bg-white text-zinc-700 py-3 rounded-2xl font-semibold border border-zinc-200 hover:bg-[#f0fdfa] transition">{tr.seeOffer}</a>
         </div>
       </div>
     </div>

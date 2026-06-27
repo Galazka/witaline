@@ -62,13 +62,13 @@ export default function HeroSection({ tr }: HeroSectionProps) {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-6 md:space-y-8">
               <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 rounded-full px-3 py-1 text-xs text-brand-700 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-400" style={{ animation: "pulseDot 2s ease-in-out infinite" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0d9488]" style={{ animation: "pulseDot 2s ease-in-out infinite" }} />
                 {tr.badge}
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.1] font-display text-brand-900">
                 {tr.title1}{" "}
-                <span className="bg-gradient-to-r from-brand-500 to-brand-400 bg-clip-text text-transparent">{tr.title2}</span>{" "}
+                <span className="bg-gradient-to-r from-[#0f766e] to-[#0d9488] bg-clip-text text-transparent">{tr.title2}</span>{" "}
                 {tr.title3}
               </h1>
 
@@ -79,19 +79,19 @@ export default function HeroSection({ tr }: HeroSectionProps) {
               <div className="flex flex-col sm:flex-row gap-2.5">
                 <Link
                   href="/register"
-                  className="bg-brand-500 text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-brand-600 transition text-sm shadow-lg shadow-brand-500/25 text-center"
+                  className="bg-[#0d9488] text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-[#0d3d3a] transition text-sm shadow-lg shadow-[#0d9488]/25 text-center"
                 >
                   {tr.cta1}
                 </Link>
                 <a
                   href="#wyprobuj"
-                  className="border border-brand-200 text-brand-700 px-6 py-3.5 rounded-xl font-semibold hover:bg-brand-50 transition text-sm text-center"
+                  className="border border-[#0d9488]/20 text-brand-700 px-6 py-3.5 rounded-xl font-semibold hover:bg-[#f0fdfa] transition text-sm text-center"
                 >
                   {tr.cta2}
                 </a>
               </div>
 
-              <p className="text-xs text-brand-400/60 flex items-center gap-1.5 flex-wrap">
+              <p className="text-xs text-[#0d9488]/60 flex items-center gap-1.5 flex-wrap">
                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -99,7 +99,7 @@ export default function HeroSection({ tr }: HeroSectionProps) {
               </p>
 
               <div className="flex items-center gap-3 pt-2">
-                <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-brand-500 transition-colors">{WITALINE_PHONE_DISPLAY}</a>
+                <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="text-lg font-bold text-zinc-900 tracking-wide font-mono hover:text-[#0f766e] transition-colors">{WITALINE_PHONE_DISPLAY}</a>
                 <span className="text-xs text-zinc-400">· Zadzwoń i sprawdź</span>
               </div>
               <p className="text-[11px] text-zinc-400 -mt-2">Połączenie wg taryfy operatora — bez dodatkowych opłat</p>

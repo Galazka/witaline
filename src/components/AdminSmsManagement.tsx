@@ -125,19 +125,19 @@ export default function AdminSmsManagement() {
           <div className="grid grid-cols-4 gap-3">
             <div className="bg-brand-50 rounded-xl p-3 text-center">
               <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Firmy z SMS</p>
-              <p className="text-xl font-bold text-brand-500">{enabledCount}/{data.length}</p>
+              <p className="text-xl font-bold text-[#0d9488]">{enabledCount}/{data.length}</p>
             </div>
             <div className="bg-brand-50 rounded-xl p-3 text-center">
               <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Pozostało</p>
-              <p className="text-xl font-bold text-brand-500">{totalRemaining}</p>
+              <p className="text-xl font-bold text-[#0d9488]">{totalRemaining}</p>
             </div>
             <div className="bg-brand-50 rounded-xl p-3 text-center">
               <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Łączny limit</p>
-              <p className="text-xl font-bold text-brand-500">{totalCapacity}</p>
+              <p className="text-xl font-bold text-[#0d9488]">{totalCapacity}</p>
             </div>
             <div className="bg-brand-50 rounded-xl p-3 text-center">
               <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Koszt Twilio/SMS</p>
-              <p className="text-xl font-bold text-brand-500">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
+              <p className="text-xl font-bold text-[#0d9488]">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
             </div>
           </div>
 
@@ -176,7 +176,7 @@ export default function AdminSmsManagement() {
                   <tr><td colSpan={8} className="text-center py-8 text-zinc-400">Brak firm z konfiguracją SMS</td></tr>
                 ) : (
                   data.map(b => (
-                    <tr key={b.id} className="border-b border-zinc-100 hover:bg-brand-50 transition">
+                    <tr key={b.id} className="border-b border-zinc-100 hover:bg-[#f0fdfa] transition">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-zinc-900">{b.name}</span>
@@ -208,7 +208,7 @@ export default function AdminSmsManagement() {
                               <button onClick={() => setEditingId(null)}
                                 className="px-2.5 py-1 text-[11px] text-zinc-500 hover:text-zinc-700 transition">Anuluj</button>
                               <button onClick={() => handleSave(b.id)}
-                                className="px-2.5 py-1 bg-brand-400 text-white text-[11px] font-medium rounded-lg hover:bg-brand-500 transition">Zapisz</button>
+                                className="px-2.5 py-1 bg-[#0d9488] text-white text-[11px] font-medium rounded-lg hover:bg-[#0f766e] transition">Zapisz</button>
                             </div>
                           </td>
                         </>
@@ -225,7 +225,7 @@ export default function AdminSmsManagement() {
                           <td className="py-3 pr-4">
                             <div className="flex items-center gap-2">
                               <div className="w-24 bg-brand-50 rounded-full h-2">
-                                <div className={`h-2 rounded-full transition-all ${b.usagePercent > 80 ? "bg-red-500" : b.usagePercent > 50 ? "bg-amber-500" : "bg-brand-400"}`}
+                                <div className={`h-2 rounded-full transition-all ${b.usagePercent > 80 ? "bg-red-500" : b.usagePercent > 50 ? "bg-amber-500" : "bg-[#0d9488]"}`}
                                   style={{ width: `${Math.min(100, b.usagePercent)}%` }} />
                               </div>
                               <span className="text-[11px] text-zinc-400">{b.usagePercent}%</span>
@@ -268,12 +268,12 @@ export default function AdminSmsManagement() {
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-brand-50 rounded-xl p-4 text-center">
                 <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Marża</p>
-                <p className="text-2xl font-bold text-brand-500">{100}%</p>
+                <p className="text-2xl font-bold text-[#0d9488]">{100}%</p>
                 <p className="text-[10px] text-zinc-400">(100% = 2× kosztu Twilio)</p>
               </div>
               <div className="bg-brand-50 rounded-xl p-4 text-center">
                 <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Cena klienta/SMS</p>
-                <p className="text-2xl font-bold text-brand-500">0,50 zł</p>
+                <p className="text-2xl font-bold text-[#0d9488]">0,50 zł</p>
                 <p className="text-[10px] text-zinc-400">zysk: 0,25 zł/SMS</p>
               </div>
             </div>
@@ -299,7 +299,7 @@ export default function AdminSmsManagement() {
                       <td className="py-2 pr-4 font-medium">{p.smsCount} SMS</td>
                       <td className="py-2 pr-4">{p.clientPricePLN.toFixed(2).replace(".", ",")} zł</td>
                       <td className="py-2 pr-4 text-zinc-500">{p.witalineCostPLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-brand-500">{p.marginPLN.toFixed(2).replace(".", ",")} zł</td>
+                      <td className="py-2 pr-4 text-[#0d9488]">{p.marginPLN.toFixed(2).replace(".", ",")} zł</td>
                       <td className="py-2 pr-4">{p.pricePerSmsPLN.toFixed(2).replace(".", ",")} zł</td>
                     </tr>
                   ))}

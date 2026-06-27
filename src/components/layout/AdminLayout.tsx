@@ -100,7 +100,7 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   if (session === "loading") return (
     <div className="flex-1 flex items-center justify-center bg-[#FAFAF9]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-zinc-400">Sprawdzanie uprawnień...</p>
       </div>
     </div>
@@ -111,7 +111,7 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
       <div className="flex-1 flex items-center justify-center bg-[#FAFAF9]">
         <div className="text-center max-w-xs">
           <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-50 flex items-center justify-center">
-            <IconShield className="w-6 h-6 text-brand-500" />
+            <IconShield className="w-6 h-6 text-[#0d9488]" />
           </div>
           <h2 className="text-lg font-semibold text-zinc-800 mb-1">Brak dostępu</h2>
           <p className="text-sm text-zinc-400 mb-4">Zaloguj się, aby uzyskać dostęp do panelu administracyjnego.</p>

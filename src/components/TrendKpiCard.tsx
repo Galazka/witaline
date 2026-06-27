@@ -15,10 +15,10 @@ const COLOR_CONFIG: Record<
   { bg: string; glow: string; text: string; ring: string }
 > = {
   brand: {
-    bg: "bg-brand-400/15",
+    bg: "bg-[#0d9488]/15",
     glow: "rgba(60,191,74,0.35)",
-    text: "text-brand-400",
-    ring: "ring-brand-400/30",
+    text: "text-[#0d9488]",
+    ring: "ring-[#0d9488]/30",
   },
   amber: {
     bg: "bg-amber-400/15",
@@ -77,7 +77,7 @@ export default function TrendKpiCard({
 
   return (
     <div
-      className="group relative bg-white/55 backdrop-blur-xl border border-white/20 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-brand-200"
+      className="group relative bg-white/55 backdrop-blur-xl border border-white/20 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-[#0d9488]/20"
       style={
         {
           "--glow-color": cfg.glow,

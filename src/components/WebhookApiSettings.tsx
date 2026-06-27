@@ -46,11 +46,11 @@ export default function WebhookApiSettings({ businessId }: { businessId: string 
 
       <input value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)}
         placeholder="https://twoja-firma.pl/webhook/witaline"
-        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200 font-mono" />
+        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20 font-mono" />
 
       <input value={webhookSecret} onChange={e => setWebhookSecret(e.target.value)}
         placeholder="Secret do HMAC (opcjonalnie)"
-        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200 font-mono" />
+        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20 font-mono" />
 
       <hr className="border-zinc-100" />
 
@@ -59,11 +59,11 @@ export default function WebhookApiSettings({ businessId }: { businessId: string 
 
       <input value={slackUrl} onChange={e => setSlackUrl(e.target.value)}
         placeholder="https://hooks.slack.com/services/..."
-        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200 font-mono" />
+        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20 font-mono" />
 
       <div className="flex items-center gap-3">
         <button onClick={handleSave} disabled={saving}
-          className="bg-brand-400 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50">
+          className="bg-[#0d9488] text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50">
           {saving ? "Zapisywanie..." : "Zapisz webhook"}
         </button>
         {toast && <span className="text-xs text-zinc-500">{toast}</span>}
@@ -72,14 +72,14 @@ export default function WebhookApiSettings({ businessId }: { businessId: string 
       <hr className="border-zinc-100" />
 
       <h3 className="text-sm font-semibold text-zinc-900">API Key (REST API v1)</h3>
-      <p className="text-xs text-zinc-400">Klucz do odczytu danych przez zewnętrzne systemy. Użyj w nagłówku <code className="text-brand-500">Authorization: Bearer &lt;klucz&gt;</code></p>
+      <p className="text-xs text-zinc-400">Klucz do odczytu danych przez zewnętrzne systemy. Użyj w nagłówku <code className="text-[#0d9488]">Authorization: Bearer &lt;klucz&gt;</code></p>
 
       <div className="flex items-center gap-2">
         <code className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm font-mono text-zinc-700 select-all">
           {apiKey || "—"}
         </code>
         <button onClick={handleGenerateApiKey}
-          className="shrink-0 bg-white border border-zinc-200 text-zinc-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-50 transition">
+          className="shrink-0 bg-white border border-zinc-200 text-zinc-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#f0fdfa] transition">
           {apiKey ? "Generuj nowy" : "Generuj klucz"}
         </button>
       </div>

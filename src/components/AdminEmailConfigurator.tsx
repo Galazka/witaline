@@ -109,7 +109,7 @@ export default function AdminEmailConfigurator() {
               <input
                 value={editing.subject || ""}
                 onChange={(e) => setEditing({ ...editing, subject: e.target.value })}
-                className="w-full px-3 py-2 border border-zinc-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+                className="w-full px-3 py-2 border border-zinc-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
               />
             </div>
             <div>
@@ -117,7 +117,7 @@ export default function AdminEmailConfigurator() {
               <textarea
                 value={editing.html || ""}
                 onChange={(e) => setEditing({ ...editing, html: e.target.value })}
-                className="w-full px-3 py-2 border border-zinc-200 rounded text-sm font-mono h-48 focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+                className="w-full px-3 py-2 border border-zinc-200 rounded text-sm font-mono h-48 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
               />
             </div>
             <div>
@@ -125,7 +125,7 @@ export default function AdminEmailConfigurator() {
               <p className="text-xs text-zinc-400">{`{{businessName}}, {{dashboardUrl}}, {{minutesUsed}}, {{maxMinutes}}, {{remaining}}, {{testNumber}}, {{leadName}}, {{leadPhone}}, {{leadInterest}}, {{daysLeft}}`}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={save} disabled={saving} className="bg-brand-400 text-white px-5 py-2 rounded text-sm font-medium hover:bg-brand-500 disabled:opacity-50">
+              <button onClick={save} disabled={saving} className="bg-[#0d9488] text-white px-5 py-2 rounded text-sm font-medium hover:bg-[#0f766e] disabled:opacity-50">
                 {saving ? "Zapisywanie..." : "Zapisz"}
               </button>
               <button onClick={showPreview} className="bg-zinc-100 text-zinc-700 px-5 py-2 rounded text-sm font-medium hover:bg-zinc-200">

@@ -21,19 +21,19 @@ export default function ElasticCostCalculator() {
       <div className="space-y-3">
         <input type="range" min={50} max={5000} step={10} value={minutes}
           onChange={(e) => setMinutes(parseInt(e.target.value))}
-          className="w-full h-2 bg-brand-100 rounded-full appearance-none cursor-pointer accent-brand-400" />
+          className="w-full h-2 bg-brand-100 rounded-full appearance-none cursor-pointer accent-[#0d9488]" />
         <div className="flex justify-between text-xs text-zinc-400">
           <span>50 min</span><span>1000</span><span>2500</span><span>5000</span>
         </div>
       </div>
 
       <div className="text-center">
-        <p className="text-5xl font-bold text-brand-400 font-display">{minutes}</p>
+        <p className="text-5xl font-bold text-[#0d9488] font-display">{minutes}</p>
         <p className="text-sm text-zinc-500 mt-1">minut rozmów miesięcznie</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-brand-400 bg-brand-50 p-4 text-center">
+        <div className="rounded-xl border border-[#0d9488] bg-brand-50 p-4 text-center">
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Stawka/min</p>
           <p className="text-xl font-bold text-zinc-900 mt-1">{price.ratePerMin.toFixed(2).replace(".", ",")} zł</p>
         </div>
@@ -49,7 +49,7 @@ export default function ElasticCostCalculator() {
 
       <div className="flex flex-wrap gap-1.5 justify-center">
         {ELASTIC_TIERS.map(t => (
-          <span key={t.minMinutes} className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-brand-400 text-white" : "bg-zinc-100 text-zinc-400"}`}>
+          <span key={t.minMinutes} className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${minutes >= t.minMinutes && minutes <= t.maxMinutes ? "bg-[#0d9488] text-white" : "bg-zinc-100 text-zinc-400"}`}>
             {t.minMinutes === 0 ? "0" : t.minMinutes}-{t.maxMinutes}: {t.ratePerMin.toFixed(2).replace(".",",")}
           </span>
         ))}

@@ -83,7 +83,7 @@ export default function SupportLayout() {
               onClick={() => { setFilter(s); setSelected(null); }}
               className={`flex-1 px-2 py-1.5 text-xs font-medium rounded-md transition ${
                 filter === s
-                  ? "bg-brand-400 text-white"
+                  ? "bg-[#0d9488] text-white"
                   : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700"
               }`}
             >

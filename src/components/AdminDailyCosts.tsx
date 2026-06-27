@@ -224,24 +224,24 @@ export default function AdminDailyCosts() {
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Od:</label>
             <input type="date" value={from} onChange={e => setFrom(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Do:</label>
             <input type="date" value={to} onChange={e => setTo(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value as "PLN" | "EUR" | "USD")}
-            className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-brand-400"
+            className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-[#0d9488]"
             title="Wyświetl w">
             <option value="PLN">PLN</option>
             <option value="EUR">EUR</option>
             <option value="USD">USD</option>
           </select>
           <button onClick={fetchData}
-            className="px-3 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
+            className="px-3 py-1.5 text-xs font-medium bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition">
             Odśwież
           </button>
           <button onClick={handleSync} disabled={syncing}
@@ -277,7 +277,7 @@ export default function AdminDailyCosts() {
         </div>
         <div className="bg-white rounded-lg border border-zinc-200 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Przychód</p>
-          <p className="text-lg font-bold text-brand-500">{fmt(totalRevenue)}</p>
+          <p className="text-lg font-bold text-[#0d9488]">{fmt(totalRevenue)}</p>
         </div>
         <div className="bg-white rounded-lg border border-zinc-200 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Wynik</p>
@@ -291,11 +291,11 @@ export default function AdminDailyCosts() {
           <p className="text-lg font-bold text-zinc-900">{daysElapsed}/{totalDays}</p>
           <p className="text-[10px] text-zinc-400">{daysRemaining} pozostało</p>
         </div>
-        <div className="bg-brand-50 rounded-lg border border-brand-200 p-3">
+        <div className="bg-brand-50 rounded-lg border border-[#0d9488]/20 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Prognoza przychód</p>
-          <p className="text-lg font-bold text-brand-600">{fmt(projectedRevenue)}</p>
+          <p className="text-lg font-bold text-[#0d9488]">{fmt(projectedRevenue)}</p>
         </div>
-        <div className="bg-brand-50 rounded-lg border border-brand-200 p-3">
+        <div className="bg-brand-50 rounded-lg border border-[#0d9488]/20 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Prognoza koszt</p>
           <p className="text-lg font-bold text-amber-600">{fmt(projectedCost)}</p>
         </div>
@@ -354,13 +354,13 @@ export default function AdminDailyCosts() {
                       <tr
                         key={day.date}
                         onClick={() => setExpandedDay(isExpanded ? null : day.date)}
-                        className={`border-b border-zinc-100 cursor-pointer hover:bg-brand-50/50 transition ${isToday ? "bg-brand-50/30" : ""}`}
+                        className={`border-b border-zinc-100 cursor-pointer hover:bg-[#f0fdfa]/50 transition ${isToday ? "bg-brand-50/30" : ""}`}
                       >
                         <td className="p-2.5">
                           <div className="flex items-center gap-2">
                             <span className={`w-1.5 h-1.5 rounded-full ${day.profit >= 0 ? "bg-green-500" : "bg-red-500"}`} />
                             <span className="font-medium text-zinc-800">{fmtDateFull(day.date)}</span>
-                            {isToday && <span className="text-[9px] bg-brand-100 text-brand-600 rounded-full px-1.5 py-0.5 font-semibold">Dziś</span>}
+                            {isToday && <span className="text-[9px] bg-[#ccfbf1] text-[#0d9488] rounded-full px-1.5 py-0.5 font-semibold">Dziś</span>}
                           </div>
                         </td>
                         <td className="p-2.5 text-right text-zinc-700 font-medium">{day.calls.length}</td>
@@ -369,7 +369,7 @@ export default function AdminDailyCosts() {
                         <td className="p-2.5 text-right text-zinc-500">{fmt(day.totalTwilio)}</td>
                         <td className="p-2.5 text-right text-zinc-500">{fmt(day.totalOpenrouter)}</td>
                         <td className="p-2.5 text-right text-red-600 font-medium">{fmt(day.totalCost)}</td>
-                        <td className="p-2.5 text-right text-brand-600 font-medium">{fmt(day.totalRevenue)}</td>
+                        <td className="p-2.5 text-right text-[#0d9488] font-medium">{fmt(day.totalRevenue)}</td>
                         <td className={`p-2.5 text-right font-bold ${day.profit >= 0 ? "text-green-600" : "text-red-500"}`}>
                           {day.profit >= 0 ? "+" : ""}{fmt(day.profit)}
                         </td>
@@ -433,7 +433,7 @@ export default function AdminDailyCosts() {
                                           <td className="py-1.5 pr-2 text-right text-zinc-500">{fmt(call.cost_twilio)}</td>
                                           <td className="py-1.5 pr-2 text-right text-zinc-500">{fmt(call.cost_openrouter)}</td>
                                           <td className="py-1.5 pr-2 text-right text-red-500 font-medium">{fmt(cost)}</td>
-                                          <td className="py-1.5 text-right text-brand-500 font-medium">{rev > 0 ? fmt(rev) : "—"}</td>
+                                          <td className="py-1.5 text-right text-[#0d9488] font-medium">{rev > 0 ? fmt(rev) : "—"}</td>
                                         </tr>
                                         {isCallExpanded && call.business_name && (
                                           <tr key={`${call.id}-meta`}>
@@ -473,7 +473,7 @@ export default function AdminDailyCosts() {
                   <td className="p-2.5 text-right text-zinc-600">{fmt(dailyGroups.reduce((s, d) => s + d.totalTwilio, 0))}</td>
                   <td className="p-2.5 text-right text-zinc-600">{fmt(dailyGroups.reduce((s, d) => s + d.totalOpenrouter, 0))}</td>
                   <td className="p-2.5 text-right text-red-600">{fmt(totalCost)}</td>
-                  <td className="p-2.5 text-right text-brand-600">{fmt(totalRevenue)}</td>
+                  <td className="p-2.5 text-right text-[#0d9488]">{fmt(totalRevenue)}</td>
                   <td className={`p-2.5 text-right ${totalProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
                     {totalProfit >= 0 ? "+" : ""}{fmt(totalProfit)}
                   </td>
@@ -496,7 +496,7 @@ export default function AdminDailyCosts() {
                   <td className="p-2.5 text-right text-zinc-500">—</td>
                   <td className="p-2.5 text-right text-zinc-500">—</td>
                   <td className="p-2.5 text-right text-amber-600 font-medium">{fmt(projectedCost)}</td>
-                  <td className="p-2.5 text-right text-brand-600 font-medium">{fmt(projectedRevenue)}</td>
+                  <td className="p-2.5 text-right text-[#0d9488] font-medium">{fmt(projectedRevenue)}</td>
                   <td className={`p-2.5 text-right font-bold ${projectedProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
                     {projectedProfit >= 0 ? "+" : ""}{fmt(projectedProfit)}
                   </td>

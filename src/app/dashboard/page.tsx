@@ -134,7 +134,7 @@ export default function DashboardPage() {
   if (loading) return (
     <div className="flex-1 flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-zinc-400">Ładowanie...</p>
       </div>
     </div>
@@ -143,12 +143,12 @@ export default function DashboardPage() {
   return !business ? (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="max-w-md text-center space-y-5">
-        <div className="w-20 h-20 bg-gradient-to-br from-brand-50 to-brand-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
-          <svg className="w-10 h-10 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+        <div className="w-20 h-20 bg-gradient-to-br from-[#f0fdfa] to-[#ccfbf1] rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <svg className="w-10 h-10 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
         </div>
         <h2 className="text-xl font-bold text-zinc-900">Nie masz jeszcze firmy</h2>
         <p className="text-sm text-zinc-500 max-w-xs mx-auto">Aby korzystać z dashboardu, musisz najpierw skonfigurować profil firmy.</p>
-        <a href="/register" className="inline-flex items-center gap-2 bg-brand-400 text-white px-6 py-3 rounded-xl font-medium hover:bg-brand-500 transition shadow-lg shadow-brand-400/20">Skonfiguruj firmę <span>→</span></a>
+        <a href="/register" className="inline-flex items-center gap-2 bg-[#0d9488] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#0f766e] transition shadow-lg shadow-[#0d9488]/20">Skonfiguruj firmę <span>→</span></a>
       </div>
     </div>
   ) : (
@@ -199,7 +199,7 @@ export default function DashboardPage() {
               finally { setBuyingMinutes(false); }
             }}
             disabled={buyingMinutes}
-            className="shrink-0 bg-brand-400 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-500 transition shadow-sm disabled:opacity-50"
+            className="shrink-0 bg-[#0d9488] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#0f766e] transition shadow-sm disabled:opacity-50"
           >
             {buyingMinutes ? "Przekierowywanie..." : "Doładuj konto"}
           </button>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
           </div>
           <h3 className="text-lg font-semibold text-zinc-900 mb-2">Ta sekcja jest zablokowana</h3>
           <p className="text-sm text-zinc-500 max-w-sm mx-auto mb-6">Po wygaśnięciu okresu próbnego funkcje takie jak rozmowy, czaty, SMS-y i leady są niedostępne. Wybierz plan, aby kontynuować.</p>
-          <button onClick={() => setTab("upgrade")} className="bg-brand-400 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-brand-500 transition shadow-sm">Wybierz plan</button>
+          <button onClick={() => setTab("upgrade")} className="bg-[#0d9488] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[#0f766e] transition shadow-sm">Wybierz plan</button>
         </div>
       ) : (<>
       {tab === "chats" && business && (
@@ -402,7 +402,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="w-full bg-zinc-100 rounded-full h-2">
-              <div className="bg-brand-400 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (totalSeconds / 60) / getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes * 100)}%` }} />
+              <div className="bg-[#0d9488] h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (totalSeconds / 60) / getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes * 100)}%` }} />
             </div>
             <p className="text-xs text-zinc-400">{getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes > 0
               ? `${Math.round((totalSeconds / 60) / getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes * 100)}% wykorzystanego limitu`
@@ -442,7 +442,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-zinc-500">Twój koszt z WitaLine</span>
-                  <span className="font-semibold text-brand-600">{formatPLN(totalCost)}</span>
+                  <span className="font-semibold text-[#0d9488]">{formatPLN(totalCost)}</span>
                 </div>
                 <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm">
                   <span className="text-zinc-700 font-medium">Oszczędność</span>
@@ -485,7 +485,7 @@ export default function DashboardPage() {
                 </table>
               </div>
               {callLogs.length > 20 && (
-                <button onClick={() => setTab("calls")} className="text-xs text-brand-500 hover:text-brand-600 transition">Zobacz wszystkie {callLogs.length} rozmów →</button>
+                <button onClick={() => setTab("calls")} className="text-xs text-[#0d9488] hover:text-[#0f766e] transition">Zobacz wszystkie {callLogs.length} rozmów →</button>
               )}
               <p className="text-[10px] text-zinc-400 pt-2">* Koszty naliczane zgodnie z cennikiem planu {getPlanConfig(business.current_plan as PlanKey).label}. Stawka za dodatkowe minuty: {formatPLN(getPlanConfig(business.current_plan as PlanKey).overagePerToken * 1000)}/min.</p>
             </div>

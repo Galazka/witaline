@@ -48,7 +48,7 @@ export default function ReferralCard({ businessId }: { businessId: string }) {
 
       <button
         onClick={copyLink}
-        className="w-full bg-brand-400 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+        className="w-full bg-[#0d9488] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
       >
         {copied ? "Skopiowano!" : "Skopiuj link polecenia"}
       </button>
@@ -58,9 +58,9 @@ export default function ReferralCard({ businessId }: { businessId: string }) {
           <h4 className="text-sm font-semibold text-zinc-900 mb-3">Twoje kupon rabatowy</h4>
           <div className="space-y-2">
             {activeCoupons.map((c) => (
-              <div key={c.id} className="bg-gradient-to-r from-brand-50 to-green-50 border border-brand-200 rounded-lg p-4">
+              <div key={c.id} className="bg-gradient-to-r from-[#f0fdfa] to-[#ccfbf1] border border-[#0d9488]/20 rounded-lg p-4">
                 <p className="text-lg font-bold text-brand-700 tracking-wider">{c.code}</p>
-                <p className="text-sm text-brand-600 mt-1">{c.discount_percent}% rabatu na następne doładowanie</p>
+                <p className="text-sm text-[#0d9488] mt-1">{c.discount_percent}% rabatu na następne doładowanie</p>
                 <p className="text-xs text-zinc-400 mt-1">Ważny do {new Date(c.expires_at).toLocaleDateString("pl-PL")}</p>
               </div>
             ))}

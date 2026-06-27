@@ -84,7 +84,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
         </div>
         <h3 className="text-lg font-bold text-zinc-900 mb-1">Konto zostało usunięte</h3>
         <p className="text-sm text-zinc-500">Wszystkie dane zostały trwale usunięte. Za chwilę nastąpi przekierowanie.</p>
-        <button onClick={() => window.location.href = "/"} className="mt-4 text-sm text-brand-400 hover:underline">Wróć do strony głównej</button>
+        <button onClick={() => window.location.href = "/"} className="mt-4 text-sm text-[#0d9488] hover:underline">Wróć do strony głównej</button>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
       {/* Balance */}
       <div className="bg-white rounded-xl border border-zinc-200 p-5">
         <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Saldo prepaid</p>
-        <p className="text-2xl font-bold text-brand-400">{(balance || 0).toFixed(2)} PLN</p>
+        <p className="text-2xl font-bold text-[#0d9488]">{(balance || 0).toFixed(2)} PLN</p>
         <p className="text-xs text-zinc-400 mt-1">Koszt numeru: 30 PLN | Minuty: wg planu</p>
       </div>
 
@@ -119,7 +119,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
                     onClick={() => handleVoiceChange(v.id)}
                     disabled={savingVoice}
                     className={`p-3 rounded-xl border-2 text-left transition ${
-                      currentVoiceId === v.id ? "border-brand-400 bg-brand-50 ring-2 ring-brand-400/20" : "border-zinc-200 hover:border-zinc-300"
+                      currentVoiceId === v.id ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20" : "border-zinc-200 hover:border-zinc-300"
                     }`}
                   >
                     <p className="text-sm font-medium text-zinc-900">{v.display_name}</p>
@@ -140,7 +140,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
                     onClick={() => handleVoiceChange(v.id)}
                     disabled={savingVoice}
                     className={`p-3 rounded-xl border-2 text-left transition ${
-                      currentVoiceId === v.id ? "border-brand-400 bg-brand-50 ring-2 ring-brand-400/20" : "border-zinc-200 hover:border-zinc-300"
+                      currentVoiceId === v.id ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20" : "border-zinc-200 hover:border-zinc-300"
                     }`}
                   >
                     <p className="text-sm font-medium text-zinc-900">{v.display_name}</p>
@@ -159,12 +159,12 @@ export default function AccountSettings({ businessId, balance }: Props) {
       <div className="bg-white rounded-xl border border-zinc-200 p-5">
         <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Informacje o koncie</p>
         <p className="text-xs text-zinc-500">
-          Twoje dane są przechowywane zgodnie z <a href="/polityka-prywatnosci" className="text-brand-400 hover:underline">Polityką prywatności</a>.
+          Twoje dane są przechowywane zgodnie z <a href="/polityka-prywatnosci" className="text-[#0d9488] hover:underline">Polityką prywatności</a>.
           Nagrania i transkrypcje są automatycznie usuwane po 30 dniach.
         </p>
         <p className="text-xs text-zinc-500 mt-2">
           Masz prawo do bycia zapomnianym — administrator może usunąć wszystkie dane powiązane z numerem telefonu.
-          Skontaktuj się z <a href={`mailto:${WITALINE_RODO_EMAIL}`} className="text-brand-400 hover:underline">{WITALINE_RODO_EMAIL}</a>.
+          Skontaktuj się z <a href={`mailto:${WITALINE_RODO_EMAIL}`} className="text-[#0d9488] hover:underline">{WITALINE_RODO_EMAIL}</a>.
         </p>
       </div>
 

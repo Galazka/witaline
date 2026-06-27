@@ -32,7 +32,7 @@ export default function SavingsCalculator() {
           </div>
           <input type="range" min={10} max={500} step={5} value={callsPerDay}
             onChange={e => setCallsPerDay(parseInt(e.target.value))}
-            className="w-full accent-brand-400" />
+            className="w-full accent-[#0d9488]" />
           <div className="flex justify-between text-xs text-zinc-400"><span>10</span><span>500</span></div>
         </div>
 
@@ -43,7 +43,7 @@ export default function SavingsCalculator() {
           </div>
           <input type="range" min={1} max={15} step={1} value={avgMinutes}
             onChange={e => setAvgMinutes(parseInt(e.target.value))}
-            className="w-full accent-brand-400" />
+            className="w-full accent-[#0d9488]" />
           <div className="flex justify-between text-xs text-zinc-400"><span>1 min</span><span>15 min</span></div>
         </div>
 
@@ -54,7 +54,7 @@ export default function SavingsCalculator() {
           </div>
           <input type="range" min={1} max={5} step={1} value={receptionists}
             onChange={e => setReceptionists(parseInt(e.target.value))}
-            className="w-full accent-brand-400" />
+            className="w-full accent-[#0d9488]" />
           <div className="flex justify-between text-xs text-zinc-400"><span>1</span><span>5</span></div>
         </div>
       </div>
@@ -75,9 +75,9 @@ export default function SavingsCalculator() {
       <div className={`mt-4 rounded-xl p-5 text-center ${showSavings ? "bg-brand-50" : "bg-zinc-50"}`}>
         {showSavings ? (
           <>
-            <p className="text-xs text-brand-600 uppercase tracking-wider font-medium">Oszczędzasz miesięcznie</p>
-            <p className="text-3xl font-bold text-brand-500 font-display">{monthlySavings.toLocaleString("pl-PL")} zł</p>
-            <p className="text-xs text-brand-400 mt-1">Rocznie: {annualSavings.toLocaleString("pl-PL")} zł</p>
+            <p className="text-xs text-[#0d9488] uppercase tracking-wider font-medium">Oszczędzasz miesięcznie</p>
+            <p className="text-3xl font-bold text-[#0d9488] font-display">{monthlySavings.toLocaleString("pl-PL")} zł</p>
+            <p className="text-xs text-[#0d9488] mt-1">Rocznie: {annualSavings.toLocaleString("pl-PL")} zł</p>
           </>
         ) : (
           <p className="text-sm text-zinc-400">WitaLine kosztuje mniej niż etat już od 30 rozmów dziennie</p>

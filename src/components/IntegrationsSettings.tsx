@@ -71,12 +71,12 @@ export default function IntegrationsSettings({ businessId }: Props) {
         {loading ? (
           <p className="text-sm text-zinc-400">Sprawdzanie...</p>
         ) : calendarConnected ? (
-          <div className="bg-brand-50 border border-brand-200 rounded-xl p-4 flex items-center justify-between">
+          <div className="bg-brand-50 border border-[#0d9488]/20 rounded-xl p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-brand-500">
+              <p className="text-sm font-medium text-[#0d9488]">
                 Kalendarz podłączony
               </p>
-              <p className="text-xs text-brand-600">{calendarEmail}</p>
+              <p className="text-xs text-[#0d9488]">{calendarEmail}</p>
             </div>
             <button
               onClick={handleDisconnectCalendar}
@@ -88,7 +88,7 @@ export default function IntegrationsSettings({ businessId }: Props) {
         ) : (
           <button
             onClick={handleConnectCalendar}
-            className="bg-white border border-zinc-200 text-zinc-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-50 transition inline-flex items-center gap-2"
+            className="bg-white border border-zinc-200 text-zinc-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#f0fdfa] transition inline-flex items-center gap-2"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
@@ -115,18 +115,18 @@ export default function IntegrationsSettings({ businessId }: Props) {
               placeholder="+48 123 456 789"
               value={testSmsPhone}
               onChange={(e) => setTestSmsPhone(e.target.value)}
-              className="flex-1 px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 placeholder:text-zinc-400 transition"
+              className="flex-1 px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] placeholder:text-zinc-400 transition"
             />
             <button
               onClick={handleTestSms}
               disabled={!testSmsPhone || testSmsStatus === "sending"}
-              className="bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+              className="bg-[#0d9488] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {testSmsStatus === "sending" ? "Wysyłanie..." : "Wyślij test"}
             </button>
           </div>
           {testSmsStatus === "sent" && (
-            <p className="text-xs text-brand-600">SMS wysłany!</p>
+            <p className="text-xs text-[#0d9488]">SMS wysłany!</p>
           )}
           {testSmsStatus === "error" && (
             <p className="text-xs text-red-500">

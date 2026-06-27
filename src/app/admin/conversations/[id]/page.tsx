@@ -65,8 +65,8 @@ export default function ConversationPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <a href="/admin/conversations" className="text-brand-500 hover:text-brand-400 text-sm">&larr; Powrót do listy</a>
-        <h1 className="text-2xl font-bold text-brand-600 mt-2">Szczegóły rozmowy</h1>
+        <a href="/admin/conversations" className="text-[#0d9488] hover:text-[#0d9488] text-sm">&larr; Powrót do listy</a>
+        <h1 className="text-2xl font-bold text-[#0d9488] mt-2">Szczegóły rozmowy</h1>
         <p className="font-mono text-sm text-gray-500 mt-1">{data.conversation_id}</p>
       </div>
 
@@ -124,7 +124,7 @@ export default function ConversationPage() {
             {turns.map((turn, i) => (
               <div key={i} className={`p-3 rounded-lg ${turn.role === "agent" ? "bg-brand-950/50 ml-4" : "bg-brand-900/20 mr-4"}`}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className={`text-xs font-semibold uppercase ${turn.role === "agent" ? "text-brand-400" : "text-blue-400"}`}>
+                  <span className={`text-xs font-semibold uppercase ${turn.role === "agent" ? "text-[#0d9488]" : "text-blue-400"}`}>
                     {turn.role === "agent" ? "Maja" : "Klient"}
                   </span>
                   <span className="text-xs text-gray-500">{turn.time_in_call_secs}s</span>

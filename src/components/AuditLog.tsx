@@ -90,7 +90,7 @@ export default function AuditLog({ businessId }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-zinc-900">Dziennik zmian</h3>
-        <button onClick={fetchLogs} className="text-xs text-brand-500 hover:underline">Odśwież</button>
+        <button onClick={fetchLogs} className="text-xs text-[#0d9488] hover:underline">Odśwież</button>
       </div>
 
       {loading ? (
@@ -100,7 +100,7 @@ export default function AuditLog({ businessId }: Props) {
       ) : (
         <div className="space-y-1">
           {logs.map(log => (
-            <div key={log.id} className="flex items-start gap-3 py-2 px-3 hover:bg-brand-50 rounded-lg transition">
+            <div key={log.id} className="flex items-start gap-3 py-2 px-3 hover:bg-[#f0fdfa] rounded-lg transition">
               <div className="w-1.5 h-1.5 bg-brand-200 rounded-full mt-1.5 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-zinc-700">
@@ -135,7 +135,7 @@ export default function AuditLog({ businessId }: Props) {
         <div className="flex justify-center">
           <button
             onClick={() => { setPage(p => p + 1); fetchLogs(); }}
-            className="text-xs text-brand-500 hover:underline"
+            className="text-xs text-[#0d9488] hover:underline"
           >
             Następna strona
           </button>

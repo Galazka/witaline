@@ -10,7 +10,7 @@ interface Props {
 }
 
 const inputClass =
-  "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 placeholder:text-zinc-400 transition";
+  "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] placeholder:text-zinc-400 transition";
 
 type ConflictInfo = {
   id: string;
@@ -133,7 +133,7 @@ export default function NewReservationForm({ businessId, onCreated, prefillDate,
     <div>
       <button
         onClick={() => { setOpen(!open); setConflict(null); setNextSlots([]); }}
-        className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+        className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
       >
         + Nowa rezerwacja
       </button>
@@ -158,7 +158,7 @@ export default function NewReservationForm({ businessId, onCreated, prefillDate,
             <div>
               <input type="datetime-local" value={reservedAt} onChange={(e) => { setReservedAt(e.target.value); setConflict(null); }} className={inputClass} required />
               {availableSlots.length > 0 && !conflict && (
-                <button type="button" onClick={() => setShowAvailable(!showAvailable)} className="text-xs text-brand-600 mt-1 hover:underline">
+                <button type="button" onClick={() => setShowAvailable(!showAvailable)} className="text-xs text-[#0d9488] mt-1 hover:underline">
                   {showAvailable ? "Ukryj" : `Pokaż wolne terminy (${availableSlots.length})`}
                 </button>
               )}
@@ -259,7 +259,7 @@ export default function NewReservationForm({ businessId, onCreated, prefillDate,
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+                  className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
                 >
                   {saving ? "Sprawdzanie..." : "Zapisz rezerwację"}
                 </button>

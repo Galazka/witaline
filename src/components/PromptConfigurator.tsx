@@ -292,8 +292,8 @@ export default function PromptConfigurator({ businessId, systemPrompt, menuCatal
               onClick={() => setActiveSection(s.key)}
               className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition ${
                 activeSection === s.key
-                  ? "bg-brand-400 text-white"
-                  : "text-zinc-600 hover:bg-brand-50"
+                  ? "bg-[#0d9488] text-white"
+                  : "text-zinc-600 hover:bg-[#f0fdfa]"
               }`}
             >
               {s.label}
@@ -323,7 +323,7 @@ export default function PromptConfigurator({ businessId, systemPrompt, menuCatal
                       onClick={() => setConfig({ ...config, industry: ind.value })}
                       className={`text-left p-2.5 rounded-xl border-2 text-sm transition ${
                         config.industry === ind.value
-                          ? "border-brand-400 bg-brand-50"
+                          ? "border-[#0d9488] bg-brand-50"
                           : "border-zinc-200 hover:border-zinc-300"
                       }`}
                     >
@@ -341,7 +341,7 @@ export default function PromptConfigurator({ businessId, systemPrompt, menuCatal
                       onClick={() => setConfig({ ...config, tone: t.value as PromptConfig["tone"] })}
                       className={`text-left p-3 rounded-xl border-2 transition ${
                         config.tone === t.value
-                          ? "border-brand-400 bg-brand-50"
+                          ? "border-[#0d9488] bg-brand-50"
                           : "border-zinc-200 hover:border-zinc-300"
                       }`}
                     >
@@ -473,7 +473,7 @@ export default function PromptConfigurator({ businessId, systemPrompt, menuCatal
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2.5 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50"
+          className="px-6 py-2.5 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition disabled:opacity-50"
         >
           {saving ? "Zapisywanie..." : "💾 Zapisz i wygeneruj prompt"}
         </button>

@@ -30,13 +30,13 @@ export default function DashboardError({
         <div className="flex flex-col gap-2">
           <button
             onClick={reset}
-            className="w-full px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors shadow-sm"
+            className="w-full px-5 py-2.5 rounded-xl bg-[#0d9488] text-white text-sm font-semibold hover:bg-[#0d3d3a] transition-colors shadow-sm"
           >
             Spróbuj ponownie
           </button>
           <a
             href="/dashboard"
-            className="w-full px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-sm font-medium hover:border-brand-200 hover:text-brand-500 transition-colors"
+            className="w-full px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-sm font-medium hover:border-[#0d9488]/20 hover:text-[#0f766e] transition-colors"
           >
             Odśwież stronę
           </a>
