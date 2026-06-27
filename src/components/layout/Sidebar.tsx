@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { type JSX, useState } from "react";
 import { IconChevronDown, IconChevronLeft } from "./icons";
 
@@ -20,12 +20,17 @@ interface Props {
   onNavigate: (key: string) => void;
   logo?: JSX.Element;
   bottomContent?: JSX.Element;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({ items, activeKey, onNavigate, logo, bottomContent }: Props) {
-  const [collapsed, setCollapsed] = useState(false);
+export default function Sidebar({ items, activeKey, onNavigate, logo, bottomContent, mobileOpen, onMobileClose }: Props) {
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const router = useRouter();
+
+  // When mobileOpen prop is provided, use it (true = open, false = closed)
+  const collapsed = mobileOpen !== undefined ? !mobileOpen : internalCollapsed;
 
   const toggleSubmenu = (key: string) => {
     setExpandedMenus(prev => {
@@ -111,41 +116,56 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
   };
 
   return (
-    <aside
-      className={`fixed left-0 top-0 h-screen bg-[#0c1929] border-r border-white/5 z-50 flex flex-col transition-all duration-300 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
-    >
-      <div className="h-16 flex items-center px-4 border-b border-white/5">
-        {logo || (
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#0d9488] rounded-xl flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-bold">W</span>
-            </div>
-            {!collapsed && (
-              <span className="text-base font-bold text-white/90 font-display tracking-tight">WitaLine</span>
-            )}
-          </Link>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto p-1.5 rounded-lg hover:bg-white/5 text-white/30 hidden lg:block transition-colors"
-        >
-          {collapsed ? <IconChevronLeft className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4 rotate-90" />}
-        </button>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5 scrollbar-thin">
-        {items.map((item) => (
-          <NavItem key={item.key} item={item} />
-        ))}
-      </nav>
-
-      {bottomContent && (
-        <div className="border-t border-white/5 p-3">
-          {bottomContent}
-        </div>
+    <>
+      {/* Mobile overlay when sidebar open */}
+      {!collapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+        />
       )}
-    </aside>
+      <aside
+        className={`fixed left-0 top-0 h-screen bg-[#0c1929] border-r border-white/5 z-50 flex flex-col transition-all duration-300 ${
+          collapsed ? "-translate-x-full lg:w-16 lg:translate-x-0" : "w-64 lg:w-64"
+        }`}
+      >
+        <div className="h-16 flex items-center px-4 border-b border-white/5">
+          {logo || (
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-[#0d9488] rounded-xl flex items-center justify-center shrink-0">
+                <span className="text-white text-xs font-bold">W</span>
+              </div>
+              {!collapsed && (
+                <span className="text-base font-bold text-white/90 font-display tracking-tight">WitaLine</span>
+              )}
+            </Link>
+          )}
+          <button
+            onClick={() => {
+              if (mobileOpen !== undefined) {
+                onMobileClose?.();
+              } else {
+                setInternalCollapsed(!internalCollapsed);
+              }
+            }}
+            className="ml-auto p-1.5 rounded-lg hover:bg-white/5 text-white/30 hidden lg:block transition-colors"
+          >
+            {collapsed ? <IconChevronLeft className="w-4 h-4" /> : <IconChevronDown className="w-4 h-4 rotate-90" />}
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5 scrollbar-thin">
+          {items.map((item) => (
+            <NavItem key={item.key} item={item} />
+          ))}
+        </nav>
+
+        {bottomContent && (
+          <div className="border-t border-white/5 p-3">
+            {bottomContent}
+          </div>
+        )}
+      </aside>
+    </>
   );
 }

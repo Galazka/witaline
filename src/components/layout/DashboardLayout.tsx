@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useMemo, type ReactNode
 import { createClient } from "@/lib/supabase";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
+import MobileBottomNav from "./MobileBottomNav";
 import {
   IconHome, IconChart, IconPhone, IconCalendar, IconMessage,
   IconDollar, IconUser, IconShield, IconSettings, IconUsers, IconStar, IconCheck,
@@ -137,18 +138,8 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
     <DashboardPermContext.Provider value={permCtx}>
     <DashboardTabContext.Provider value={{ tab, setTab }}>
       <div className="flex min-h-screen bg-zinc-50">
-        <div className="hidden lg:block">
-          <Sidebar items={filteredSidebar} activeKey={tab} onNavigate={(key) => setTab(key as DashboardTab)} />
-        </div>
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
-            <div className="absolute left-0 top-0 h-full">
-              <Sidebar items={filteredSidebar} activeKey={tab} onNavigate={(key) => { setTab(key as DashboardTab); setMobileOpen(false); }} />
-            </div>
-          </div>
-        )}
-        <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+        <Sidebar items={filteredSidebar} activeKey={tab} onNavigate={(key) => setTab(key as DashboardTab)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pb-16 lg:pb-0">
           <TopNav
             title="Dashboard"
             onMenuToggle={() => setMobileOpen(!mobileOpen)}
@@ -160,6 +151,7 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
+        <MobileBottomNav activeKey={tab} onNavigate={(key) => setTab(key as DashboardTab)} />
       </div>
     </DashboardTabContext.Provider>
     </DashboardPermContext.Provider>

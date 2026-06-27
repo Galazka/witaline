@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, t
 import { createClient } from "@/lib/supabase";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
+import MobileBottomNav from "./MobileBottomNav";
 import {
   IconHome, IconBuilding, IconUsers, IconChart, IconMessage,
   IconPhone, IconDollar, IconMail, IconShield, IconLock,
@@ -128,18 +129,8 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   return (
     <AdminTabContext.Provider value={{ tab, setTab, data, refresh: fetchData }}>
       <div className="flex min-h-screen bg-[#FAFAF9]">
-        <div className="hidden lg:block">
-          <Sidebar items={items} activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} />
-        </div>
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-            <div className="absolute left-0 top-0 h-full animate-slide-in-right">
-              <Sidebar items={items} activeKey={tab} onNavigate={(key) => { setTab(key as AdminTab); setMobileOpen(false); }} />
-            </div>
-          </div>
-        )}
-        <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+        <Sidebar items={items} activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pb-16 lg:pb-0">
           <TopNav
             title={tab.charAt(0).toUpperCase() + tab.slice(1)}
             onMenuToggle={() => setMobileOpen(!mobileOpen)}
@@ -151,6 +142,7 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
+        <MobileBottomNav activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} />
       </div>
     </AdminTabContext.Provider>
   );
