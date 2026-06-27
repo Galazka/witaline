@@ -197,18 +197,10 @@ else if (toolName === "transfer_to_human") {
 
           if (!targetNumber) {
             result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
-          } else if (!hasOwnConsultant) {
-            // Brak konsultanta - agent kontynuuje rozmowę, nie robimy nic
-            console.log("[MCP transfer_to_human] no human consultant for", bizId, "- agent continues");
-            result = JSON.stringify({
-              ok: true,
-              target: targetNumber,
-              business: biz?.name || "WitaLine",
-              has_human_consultant: false,
-              message: "Brak konsultanta w tej firmie. Agent pozostanie w rozmowie. Przekaż ofertę firmy i spytaj, czy klient ma pytania.",
-            });
           } else {
             // Store pending transfer — transfer-router picks this up when ElevenLabs stream ends
+            // gdy hasOwnConsultant=false, targetNumber=TWOJ_NUMER (+48790824762) - WitaLine centrala
+            // gdy hasOwnConsultant=true, targetNumber=numer konsultanta firmy
             await setPendingTransfer(callSid || bizId, {
               businessId: bizId,
               targetNumber,
@@ -224,8 +216,10 @@ else if (toolName === "transfer_to_human") {
               ok: true,
               target: targetNumber,
               business: biz?.name || "WitaLine",
-              has_human_consultant: true,
-              message: "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie.",
+              has_human_consultant: hasOwnConsultant,
+              message: hasOwnConsultant
+                ? "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie."
+                : "Brak konsultanta w tej firmie. Transfer do centrali WitaLine. Pożegnaj się i zakończ rozmowę.",
             });
           }
         }

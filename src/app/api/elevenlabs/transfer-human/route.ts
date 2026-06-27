@@ -82,37 +82,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ number: target.number });
     }
 
-    // Custom tool: zapisz zamiar transferu w shared store TYLKO gdy jest prawdziwy konsultant
-    // Stream zakończy się naturalnie → Twilio wykona <Redirect> → transfer-router sprawdzi store
-    if (target.hasHumanConsultant) {
-      const storeKey = callSid || businessId;
-      await setPendingTransfer(storeKey, {
-        businessId,
-        targetNumber: target.number,
-        callerId: target.callerId,
-        businessName: target.businessName,
-        fromNumber: callerPhone,
-        toNumber,
-        createdAt: Date.now(),
+    // Zawsze zapisuj pending transfer - transfer-router obsłuży różnicę
+    // gdy hasHumanConsultant=false, transfer-router po prostu zakończy rozmowę po streamie
+    // ale Maja może najpierw zaoferować pomoc jako konsultant WitaLine
+    const storeKey = callSid || businessId;
+    await setPendingTransfer(storeKey, {
+      businessId,
+      targetNumber: target.number,
+      callerId: target.callerId,
+      businessName: target.businessName,
+      fromNumber: callerPhone,
+      toNumber,
+      createdAt: Date.now(),
+    });
+
+    console.log("[transfer-human] transfer stored for", storeKey, "→", target.number, "hasHumanConsultant:", target.hasHumanConsultant);
+
+    // Create support conversation
+    try {
+      await supabaseAdmin.from("support_conversations").insert({
+        business_id: businessId,
+        customer_phone: callerPhone || null,
+        customer_name: null,
+        source: "transfer",
+        status: "open",
       });
-
-      console.log("[transfer-human] transfer stored for", storeKey, "→", target.number);
-
-      // Create support conversation
-      try {
-        await supabaseAdmin.from("support_conversations").insert({
-          business_id: businessId,
-          customer_phone: callerPhone || null,
-          customer_name: null,
-          source: "transfer",
-          status: "open",
-        });
-        console.log("[transfer-human] support conversation created");
-      } catch (convErr) {
-        console.warn("[transfer-human] failed to create support conversation:", convErr);
-      }
-    } else {
-      console.log("[transfer-human] no human consultant for", businessId, "- agent continues without transfer");
+      console.log("[transfer-human] support conversation created");
+    } catch (convErr) {
+      console.warn("[transfer-human] failed to create support conversation:", convErr);
     }
 
     return NextResponse.json({
@@ -122,7 +119,7 @@ export async function POST(request: Request) {
       has_human_consultant: target.hasHumanConsultant,
       message: target.hasHumanConsultant
         ? `Transfer initiated to ${target.number}. Caller will be connected when Stream ends.`
-        : "Brak konsultanta w tej firmie. Agent pozostanie w rozmowie.",
+        : `Brak konsultanta w tej firmie. Transfer do centrali WitaLine: ${target.number}. Pożegnaj się i zakończ rozmowę.`,
     });
 
   } catch (err) {

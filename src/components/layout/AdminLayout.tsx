@@ -139,7 +139,7 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
             notificationContext="admin"
           />
           <main className="flex-1 p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">{children}</div>
+            {children}
           </main>
         </div>
         <MobileBottomNav activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} context="admin" />

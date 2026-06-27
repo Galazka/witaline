@@ -42,72 +42,11 @@ export async function POST(request: Request) {
     const callerId = pending.callerId || process.env.TWILIO_PHONE_NUMBER || "";
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
 
-    // Czy firma ma prawdziwych konsultantów?
+    // Czy firma ma prawdziwych konsultantów? Użyj ich numeru jeśli tak, w przeciwnym razie użyj target z pending (WitaLine centrala)
     const hasRealConsultants = consultants && consultants.length > 0;
-
-    if (!hasRealConsultants) {
-      // Brak konsultanta — agent kontynuuje z wiedzą o firmie (internal transfer)
-      console.log("[transfer-router] internal transfer - no human consultant, routing to Maja with business context");
-
-      // Pobierz dane firmy dla kontekstu
-      const { data: biz } = await supabaseAdmin
-        .from("businesses")
-        .select("id, name, system_prompt, phone, services, calendar_settings")
-        .eq("id", pending.businessId)
-        .maybeSingle();
-
-      const from = pending.fromNumber || fromNumber;
-      const to = toNumber || pending.toNumber || callerId;
-
-      // Rejestruj nową sesję z kontekstem firmy
-      try {
-        const agentId = process.env.ELEVENLABS_AGENT_ID;
-        if (agentId) {
-          const dynamicVars = {
-            business_id: biz?.id || pending.businessId,
-            call_sid: callSid,
-            caller_phone: from,
-            to_number: to,
-            internal_transfer: "true",
-            transfer_business_name: biz?.name || "WitaLine",
-          };
-
-          const body = JSON.stringify({
-            agent_id: agentId,
-            from_number: from,
-            to_number: to,
-            direction: "inbound",
-            dynamic_vars: dynamicVars,
-            conversation_initiation_client_data: { dynamic_variables: dynamicVars },
-          });
-
-          const res = await fetch("https://api.elevenlabs.io/v1/convai/twilio/register-call", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "xi-api-key": process.env.ELEVENLABS_API_KEY!,
-            },
-            body,
-          });
-
-          if (res.ok) {
-            const xml = await res.text();
-            return new NextResponse(xml, {
-              status: 200,
-              headers: { "Content-Type": "application/xml" },
-            });
-          }
-        }
-      } catch (err) {
-        console.error("[transfer-router] register-call failed for internal transfer:", err);
-      }
-
-      // Fallback - just hangup if register fails
-      return twiml("<Hangup/>");
-    }
+    const targetPhone = hasRealConsultants ? consultants[0].phone : pending.targetNumber;
 
     // Real consultant exists - use queue flow
-    const consultantPhone = consultants[0].phone;
     const queueName = `handoff_${callSid || "fallback"}`;
     const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
@@ -119,7 +58,7 @@ export async function POST(request: Request) {
 <Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
 `);
 
-    dialConsultantToQueue(consultantPhone, callerId, queueName, baseUrl, pending.businessId, callSid)
+    dialConsultantToQueue(targetPhone, callerId, queueName, baseUrl, pending.businessId, callSid)
       .catch(err => console.error("[transfer-router] dial consultant failed:", err));
 
     return responseTwiml;

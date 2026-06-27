@@ -27,7 +27,15 @@ interface Props {
 export default function Sidebar({ items, activeKey, onNavigate, logo, bottomContent, mobileOpen, onMobileClose }: Props) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
+  const [isDesktop, setIsDesktop] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
 
   // Auto-expand parent menu if activeKey is a child
   useEffect(() => {
@@ -42,8 +50,9 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
     }
   }, [activeKey, items]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When mobileOpen prop is provided, use it (true = open, false = closed)
-  const collapsed = mobileOpen !== undefined ? !mobileOpen : internalCollapsed;
+  // On desktop: always expanded (internalCollapsed controls desktop state)
+  // On mobile: mobileOpen controls visibility
+  const collapsed = internalCollapsed;
 
   const toggleSubmenu = (key: string) => {
     setExpandedMenus(prev => {
@@ -63,7 +72,7 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
 
     if (hasChildren) {
       return (
-        <div>
+        <div className="w-full">
           <button
             onClick={() => toggleSubmenu(item.key)}
             className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
@@ -131,7 +140,7 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
   return (
     <>
       {/* Mobile overlay when sidebar open */}
-      {!collapsed && (
+      {!isDesktop && mobileOpen !== undefined && mobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onMobileClose}
@@ -139,7 +148,13 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
       )}
       <aside
         className={`fixed left-0 top-0 h-screen bg-[#0c1929] border-r border-white/5 z-50 flex flex-col transition-all duration-300 ${
-          collapsed ? "-translate-x-full lg:w-16 lg:translate-x-0" : "w-64 lg:w-64"
+          isDesktop
+            ? internalCollapsed
+              ? "w-16"
+              : "w-64"
+            : mobileOpen
+              ? "w-64 translate-x-0"
+              : "-translate-x-full w-64"
         }`}
       >
         <div className="h-16 flex items-center px-4 border-b border-white/5">
@@ -155,7 +170,7 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
           )}
           <button
             onClick={() => {
-              if (mobileOpen !== undefined) {
+              if (!isDesktop && mobileOpen !== undefined) {
                 onMobileClose?.();
               } else {
                 setInternalCollapsed(!internalCollapsed);
