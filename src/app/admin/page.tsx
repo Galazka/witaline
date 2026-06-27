@@ -118,8 +118,8 @@ export default function AdminPage() {
     <div className="space-y-6">
       {/* Decorative bg */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-brand-50/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-60 h-60 bg-brand-50/10 rounded-full blur-3xl" />
+        <div className="absolute -top-20 -right-20 w-80 h-80 bg-brand-50/10 dark:bg-brand-900/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-60 h-60 bg-brand-50/8 dark:bg-brand-900/8 rounded-full blur-3xl" />
       </div>
 
       {error && <p className="text-red-600 bg-red-50 px-4 py-3 rounded-xl text-sm border border-red-100">{error}</p>}
@@ -185,22 +185,22 @@ export default function AdminPage() {
 
       {tab === "witaline" && (
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="bg-white border border-brand-100 rounded-2xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-brand-800 border dark:border-brand-700 rounded-2xl p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-zinc-900">WitaLine / linia główna</h2>
-                <p className="text-sm text-zinc-500 mt-1">Osobne menu dla numeru konsultanta głównej linii WitaLine.</p>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">WitaLine / linia główna</h2>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Osobne menu dla numeru konsultanta głównej linii WitaLine.</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-[#f0fdfa] text-[#0d9488] flex items-center justify-center font-bold">W</div>
+              <div className="w-10 h-10 rounded-xl bg-[#f0fdfa] dark:bg-brand-900 text-[#0d9488] flex items-center justify-center font-bold">W</div>
             </div>
-            <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-4">
+            <div className="mt-6 rounded-xl border border-zinc-200 dark:border-brand-700 bg-zinc-50 dark:bg-brand-900/50 p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-2">Numer konsultanta WitaLine</label>
-                <input value={witaLinePhone} onChange={(e) => setWitaLinePhone(e.target.value)} placeholder="+48 123 456 789" className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20" />
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Numer konsultanta WitaLine</label>
+                <input value={witaLinePhone} onChange={(e) => setWitaLinePhone(e.target.value)} placeholder="+48 123 456 789" className="w-full px-4 py-2.5 border border-zinc-200 dark:border-brand-700 rounded-lg text-sm bg-white dark:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20" />
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={saveWitaLinePhone} disabled={witaLineSaving} className="btn-primary text-sm">{witaLineSaving ? "Zapisywanie..." : "Zapisz"}</button>
-                {witaLineToast && <span className="text-xs text-zinc-500">{witaLineToast}</span>}
+                {witaLineToast && <span className="text-xs text-zinc-500 dark:text-zinc-400">{witaLineToast}</span>}
               </div>
             </div>
             <ConsultantListManager businessId="00000000-0000-0000-0000-000000000001" />
@@ -223,8 +223,8 @@ export default function AdminPage() {
       {tab === "sms" && (
         <div className="space-y-4">
           <div className="flex gap-2">
-            <button onClick={() => setSmsView("management")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "management" ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}>Zarządzanie SMS</button>
-            <button onClick={() => setSmsView("logs")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "logs" ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}>Logi SMS</button>
+            <button onClick={() => setSmsView("management")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "management" ? "bg-[#0d9488] text-white" : "bg-brand-50 dark:bg-brand-900 text-zinc-600 dark:text-zinc-300 hover:bg-[#ccfbf1] dark:hover:bg-brand-800"}`}>Zarządzanie SMS</button>
+            <button onClick={() => setSmsView("logs")} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${smsView === "logs" ? "bg-[#0d9488] text-white" : "bg-brand-50 dark:bg-brand-900 text-zinc-600 dark:text-zinc-300 hover:bg-[#ccfbf1] dark:hover:bg-brand-800"}`}>Logi SMS</button>
           </div>
           {smsView === "management" ? <AdminSmsManagement /> : <AdminSmsLogs />}
         </div>
@@ -237,10 +237,10 @@ export default function AdminPage() {
       {tab === "porty" && <AdminPortRequests />}
       {tab === "numery" && <AdminPhoneStats />}
       {tab === "pricing" && <AdminPricingSimulator />}
-      {tab === "email" && <AdminEmailConfigurator />}
-{tab === "agents" && <AdminSupportAgents />}
+{tab === "email" && <AdminEmailConfigurator />}
+       {tab === "agents" && <AdminSupportAgents />}
        {tab === "verifications" && <AdminVerificationManager />}
-       </div>
+      </div>
     </div>
   );
 

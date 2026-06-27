@@ -99,23 +99,23 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   useEffect(() => { fetchData(); }, [fetchData]);
 
   if (session === "loading") return (
-    <div className="flex-1 flex items-center justify-center bg-[#FAFAF9]">
+    <div className="flex-1 flex items-center justify-center bg-[#FAFAF9] dark:bg-brand-950">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-zinc-400">Sprawdzanie uprawnień...</p>
+        <p className="text-sm text-zinc-400 dark:text-zinc-400">Sprawdzanie uprawnień...</p>
       </div>
     </div>
   );
 
   if (!session) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#FAFAF9]">
+      <div className="flex-1 flex items-center justify-center bg-[#FAFAF9] dark:bg-brand-950">
         <div className="text-center max-w-xs">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-50 flex items-center justify-center">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-50 dark:bg-brand-900 flex items-center justify-center">
             <IconShield className="w-6 h-6 text-[#0d9488]" />
           </div>
-          <h2 className="text-lg font-semibold text-zinc-800 mb-1">Brak dostępu</h2>
-          <p className="text-sm text-zinc-400 mb-4">Zaloguj się, aby uzyskać dostęp do panelu administracyjnego.</p>
+          <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-1">Brak dostępu</h2>
+          <p className="text-sm text-zinc-400 dark:text-zinc-400 mb-4">Zaloguj się, aby uzyskać dostęp do panelu administracyjnego.</p>
           <a href="/login" className="btn-primary text-sm px-5 py-2.5">Zaloguj się</a>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
 
   return (
     <AdminTabContext.Provider value={{ tab, setTab, data, refresh: fetchData }}>
-      <div className="flex min-h-screen bg-[#FAFAF9]">
+      <div className="flex min-h-screen bg-[#FAFAF9] dark:bg-brand-950">
         <Sidebar items={items} activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
         <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pb-16 lg:pb-0">
           <TopNav
