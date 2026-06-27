@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const CANONICAL_HOST = "witaline.pl";
+
 async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -35,6 +37,15 @@ const guestRoutes = ["/login", "/register"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") || "";
+
+  // Redirect www → non-www (301 permanent) before everything else
+  if (host.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = CANONICAL_HOST;
+    return NextResponse.redirect(url, { status: 301 });
+  }
+
   const { supabaseResponse, user } = await updateSession(request);
 
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
@@ -48,6 +59,18 @@ export async function proxy(request: NextRequest) {
 
   if (user && isGuest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  const securityHeaders: Record<string, string> = {
+    "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+  };
+
+  for (const [key, value] of Object.entries(securityHeaders)) {
+    supabaseResponse.headers.set(key, value);
   }
 
   return supabaseResponse;

@@ -17,21 +17,20 @@ export default function VoiceCloneManager({ businessId, currentPlan, currentVoic
   const [result, setResult] = useState<{ success: boolean; voice_id?: string; display_name?: string; error?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (currentPlan !== "enterprise_2000" && currentPlan !== "enterprise") {
+  if (currentPlan !== "enterprise_2000" && currentPlan !== "enterprise" && !currentPlan?.startsWith("elastic")) {
     return (
       <div className="bg-white rounded-xl p-6 text-center space-y-3">
         <span className="text-4xl block">🎤</span>
         <h3 className="text-lg font-semibold text-zinc-900">Klonowanie głosu</h3>
         <p className="text-sm text-zinc-500 max-w-md mx-auto">
-          Klonowanie głosu dostępne w pakiecie Enterprise. Zadbaj o unikalne brzmienie swojego asystenta AI.
+          Klonowanie głosu dostępne jako dodatek przy zakupie pakietu minut lub w pakiecie Enterprise.
         </p>
-        <a
-          href="#"
-          onClick={(e) => { e.preventDefault(); window.location.href = "/dashboard?tab=upgrade"; }}
+        <button
+          onClick={() => window.location.href = "/dashboard?tab=upgrade"}
           className="inline-block bg-brand-400 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
         >
-          Przejdź do upgrade
-        </a>
+          Kup dodatek lub zmień plan
+        </button>
       </div>
     );
   }

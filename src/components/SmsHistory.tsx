@@ -14,6 +14,7 @@ interface SmsLog {
   sent_at: string | null;
   created_at: string;
   cost_pln?: number;
+  error_message?: string;
 }
 
 interface BizData {
@@ -125,34 +126,64 @@ export default function SmsHistory({ businessId }: { businessId: string }) {
       {/* History */}
       <div className="space-y-2">
         <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Wysłane SMS-y ({logs.length})</p>
-        {logs.length === 0 ? (
-          <div className="border border-dashed border-zinc-200 rounded-xl p-8 text-center">
-            <p className="text-sm text-zinc-400">Brak wysłanych SMS-ów</p>
-            <p className="text-xs text-zinc-400 mt-1">SMS-y są wysyłane automatycznie po rozmowach z asystentem AI</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {logs.map(log => (
-              <div key={log.id} className="bg-white rounded-xl border border-zinc-100 p-4 space-y-2 hover:border-zinc-200 transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-zinc-500">{log.to_number}</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[log.status] || "bg-zinc-50 text-zinc-600"}`}>
-                      {statusLabels[log.status] || log.status}
-                    </span>
-                    <span className="text-[10px] text-zinc-400">{perUnitPrice.toFixed(2).replace(".", ",")} zł</span>
-                  </div>
-                </div>
-                <p className="text-sm text-zinc-700 whitespace-pre-wrap line-clamp-3">{log.message_body}</p>
-                <p className="text-[10px] text-zinc-400">
-                  {log.sent_at
-                    ? new Date(log.sent_at).toLocaleString("pl-PL")
-                    : new Date(log.created_at).toLocaleString("pl-PL")}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+{logs.length === 0 ? (
+           <div className="border border-dashed border-zinc-200 rounded-xl p-8 text-center">
+             <p className="text-sm text-zinc-400">Brak wysłanych SMS-ów</p>
+             <p className="text-xs text-zinc-400 mt-1">SMS-y są wysyłane automatycznie po rozmowach z asystentem AI</p>
+           </div>
+         ) : (
+           <div className="space-y-2">
+             {/* Search/filter */}
+             <input
+               type="text"
+               placeholder="Szukaj po numerze lub treści..."
+               onChange={e => {
+                 const query = e.target.value.toLowerCase();
+                 const filtered = (document.querySelectorAll("[data-sms-row]") as NodeListOf<HTMLElement>);
+                 filtered.forEach(row => {
+                   const text = row.textContent?.toLowerCase() || "";
+                   row.style.display = text.includes(query) ? "" : "none";
+                 });
+               }}
+               className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm mb-2"
+             />
+             {logs.map(log => (
+               <div key={log.id} data-sms-row className="bg-white rounded-xl border border-zinc-100 p-4 space-y-2 hover:border-zinc-200 transition">
+                 <div className="flex items-center justify-between">
+                   <span className="text-xs font-mono text-zinc-500">{log.to_number}</span>
+                   <div className="flex items-center gap-2">
+                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[log.status] || "bg-zinc-50 text-zinc-600"}`}>
+                       {statusLabels[log.status] || log.status}
+                     </span>
+                     <span className="text-[10px] text-zinc-400">{perUnitPrice.toFixed(2).replace(".", ",")} zł</span>
+                     {log.status === "failed" && (
+                       <button
+                         onClick={async () => {
+                           const res = await fetch("/api/sms/retry", {
+                             method: "POST",
+                             headers: { "Content-Type": "application/json" },
+                             body: JSON.stringify({ logId: log.id }),
+                           });
+                           if (res.ok) fetch(`/api/business/sms-logs?businessId=${businessId}`).then(r => r.json()).then(setLogs);
+                         }}
+                         className="text-[10px] text-brand-500 hover:text-brand-600 underline"
+                       >Ponów</button>
+                     )}
+                   </div>
+                 </div>
+                  <p className="text-sm text-zinc-700 whitespace-pre-wrap line-clamp-3">{log.message_body}</p>
+                  {log.status === "failed" && log.error_message && (
+                    <p className="text-[11px] text-red-500 mt-1">{log.error_message}</p>
+                  )}
+                  <p className="text-[10px] text-zinc-400">
+                   {log.sent_at
+                     ? new Date(log.sent_at).toLocaleString("pl-PL")
+                     : new Date(log.created_at).toLocaleString("pl-PL")}
+                 </p>
+               </div>
+             ))}
+           </div>
+         )}
       </div>
     </div>
   );

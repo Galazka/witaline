@@ -16,7 +16,7 @@ type AdminTab =
   | "dashboard" | "leads" | "businesses" | "witaline" | "messages"
   | "feedback" | "conversations" | "live-chat" | "voice"
   | "coupons" | "callbacks" | "sms" | "blocklist"
-  | "security" | "costs" | "porty" | "webhooks" | "email" | "agents" | "support"
+  | "security" | "costs" | "porty" | "webhooks" | "email" | "agents" | "verifications" | "support"
   // Deprecated but still handled in admin page (redirect to relevant tabs)
   | "statystyki" | "kalkulator" | "rodo" | "routing" | "numery" | "pricing";
 
@@ -68,6 +68,7 @@ const sidebarItems = (leadCount: number) => [
       { key: "porty" as AdminTab, label: "Porty", icon: <IconPhoneForward className="w-4 h-4" /> },
       { key: "email" as AdminTab, label: "Emails", icon: <IconMail className="w-4 h-4" /> },
       { key: "agents" as AdminTab, label: "Agenci support", icon: <IconUsers className="w-4 h-4" /> },
+      { key: "verifications" as AdminTab, label: "Weryfikacje", icon: <IconLock className="w-4 h-4" /> },
       { key: "support" as AdminTab, label: "Panel support", icon: <IconMessageSquare className="w-4 h-4" />, href: "/support" },
     ],
   },

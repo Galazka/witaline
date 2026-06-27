@@ -234,15 +234,13 @@ export default function AdminDashboard() {
             <h3 className="text-sm font-semibold text-zinc-900 mb-3">Przychod (szac.)</h3>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-zinc-400">Subskrypcje</p>
-                <p className="text-lg font-bold text-zinc-900">
-                  {stats ? `${(stats.activeSubscriptions * 299).toFixed(0)} zl/mc` : "—"}
-                </p>
-                <p className="text-[10px] text-zinc-400">przy zalozeniu planu Start</p>
+                <p className="text-xs text-zinc-400">Koszt polaczen (7 dni)</p>
+                <p className="text-lg font-bold text-red-500">{stats?.totalCost || "0.00"} zl</p>
+                <p className="text-[10px] text-zinc-400">koszt za uzyte minuty (elastyczny cennik)</p>
               </div>
               <div className="border-t border-zinc-100 pt-2">
-                <p className="text-xs text-zinc-400">Koszt polaczen</p>
-                <p className="text-lg font-bold text-red-500">{stats?.totalCost || "0.00"} zl</p>
+                <p className="text-xs text-zinc-400">Rozmowy (7 dni)</p>
+                <p className="text-lg font-bold text-zinc-900">{stats?.totalCalls || 0}</p>
               </div>
             </div>
           </div>

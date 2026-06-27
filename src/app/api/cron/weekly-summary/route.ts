@@ -15,9 +15,15 @@ function getWeekRange() {
   return { start: monday.toISOString(), end: sunday.toISOString() };
 }
 
+function checkCronAuth(request: Request): boolean {
+  const header = request.headers.get("x-internal-secret");
+  if (header === process.env.CRON_SECRET) return true;
+  const { searchParams } = new URL(request.url);
+  return searchParams.get("key") === process.env.CRON_SECRET;
+}
+
 export async function POST(request: Request) {
-  const auth = request.headers.get("x-internal-secret");
-  if (auth !== process.env.CRON_SECRET) {
+  if (!checkCronAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -67,3 +73,5 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true, sent, errors: errors.length > 0 ? errors : undefined });
 }
+
+export const GET = POST;

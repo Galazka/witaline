@@ -15,6 +15,9 @@ export default function AdminSupportAgents() {
   const [agents, setAgents] = useState<SupportAgent[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [addMode, setAddMode] = useState<"email" | "uuid">("email");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [newUserId, setNewUserId] = useState("");
   const [newRole, setNewRole] = useState<"support" | "admin">("support");
 
@@ -31,13 +34,26 @@ export default function AdminSupportAgents() {
   useEffect(() => { fetchAgents(); }, []);
 
   const handleAdd = async () => {
-    if (!newUserId.trim()) return;
+    const body: Record<string, unknown> = { role: newRole };
+    if (addMode === "email") {
+      if (!newEmail.trim() || !newPassword.trim()) {
+        alert("Email i hasło są wymagane");
+        return;
+      }
+      body.email = newEmail.trim();
+      body.password = newPassword;
+    } else {
+      if (!newUserId.trim()) return;
+      body.user_id = newUserId.trim();
+    }
     const res = await fetch("/api/admin/support-agents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: newUserId.trim(), role: newRole }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
+      setNewEmail("");
+      setNewPassword("");
       setNewUserId("");
       setShowAdd(false);
       fetchAgents();
@@ -72,13 +88,48 @@ export default function AdminSupportAgents() {
 
       {showAdd && (
         <div className="bg-zinc-50 rounded-xl p-4 mb-6 space-y-3">
-          <input
-            type="text"
-            value={newUserId}
-            onChange={e => setNewUserId(e.target.value)}
-            placeholder="UUID użytkownika (auth.users)"
-            className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
-          />
+          <div className="flex gap-2 mb-2">
+            <button
+              type="button"
+              onClick={() => setAddMode("email")}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "email" ? "bg-brand-400 text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
+            >
+              Email + hasło
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddMode("uuid")}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "uuid" ? "bg-brand-400 text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
+            >
+              UUID
+            </button>
+          </div>
+          {addMode === "email" ? (
+            <>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                placeholder="Email agenta"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+              />
+              <input
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Hasło (min 6 znaków)"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+              />
+            </>
+          ) : (
+            <input
+              type="text"
+              value={newUserId}
+              onChange={e => setNewUserId(e.target.value)}
+              placeholder="UUID użytkownika (auth.users)"
+              className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+            />
+          )}
           <select
             value={newRole}
             onChange={e => setNewRole(e.target.value as "support" | "admin")}
@@ -89,7 +140,7 @@ export default function AdminSupportAgents() {
           </select>
           <button
             onClick={handleAdd}
-            disabled={!newUserId.trim()}
+            disabled={(addMode === "email" && (!newEmail.trim() || !newPassword.trim())) || (addMode === "uuid" && !newUserId.trim())}
             className="px-4 py-2 bg-brand-400 text-white rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
           >
             Dodaj

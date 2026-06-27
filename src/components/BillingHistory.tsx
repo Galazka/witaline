@@ -81,9 +81,9 @@ export default function BillingHistory({ businessId }: { businessId: string }) {
               </p>
             </div>
           </div>
-          <a href="/api/stripe/portal" className="mt-4 inline-block text-xs text-brand-500 hover:text-brand-600 transition">
-            Zarządzaj subskrypcją w Stripe →
-          </a>
+<a href={`/api/stripe/portal?businessId=${businessId}`} className="mt-4 inline-block text-xs text-brand-500 hover:text-brand-600 transition">
+             Zarządzaj subskrypcją w Stripe →
+           </a>
         </div>
       )}
 

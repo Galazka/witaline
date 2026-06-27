@@ -1,453 +1,694 @@
-# WitaLine — Design System
+---
+version: alpha
+name: WitaLine-design-system
+description: A B2B SaaS design system for an AI-powered telephone receptionist platform. Built on a warm off-white canvas with a signature brand-green accent, Inter/Inter Tight typography, and glass-morphism surfaces. The system pairs editorial display tiers (Inter Tight at weight 600) with clean Inter body text, and uses a green gradient as its primary depth medium. Buttons are rounded-rectangle (10px), cards sit on white with warm-gray borders, and the dashboard track uses a dark-zinc sidebar shell.
 
-> **Platforma B2B SaaS** — automatyczna recepcja AI dla polskich firm.
-> Główny cel użytkownika: zarządzanie połączeniami, rezerwacjami, opiniami, kalendarzem i subskrypcją w jednym panelu.
-> Platforma: Strona internetowa / SaaS (Next.js 16, App Router).
-> Grupa docelowa: właściciele MŚP (restauracje, salony beauty, gabinety medyczne, kancelarie, kluby fitness).
+colors:
+  primary: "#3CBF4A"
+  primary-gradient: "linear-gradient(135deg, #3CBF4A, #2EA03A)"
+  primary-hover: "#2EA03A"
+  primary-press: "#24802E"
+  primary-soft: "#6EE7B7"
+  primary-bg-subdued: "#ECFDF5"
+  primary-bg-subdued-hover: "#D1FAE5"
+  primary-badge-bg: "#D1FAE5"
+  primary-badge-text: "#1C6323"
+  ink: "#1C1917"
+  ink-secondary: "#78716C"
+  ink-tertiary: "#A8A29E"
+  ink-on-primary: "#FFFFFF"
+  canvas: "#FFFFFF"
+  canvas-soft: "#FAFAF9"
+  canvas-warm: "#F5F5F4"
+  hairline: "#E7E5E4"
+  hairline-soft: "#F0EFEE"
+  hairline-card-hover: "rgba(60,191,74,0.12)"
+  danger: "#EF4444"
+  danger-bg: "#FEE2E2"
+  danger-text: "#991B1B"
+  warning: "#F59E0B"
+  warning-bg: "#FEF3C7"
+  warning-text: "#92400E"
+  success: "#22C55E"
+  success-bg: "#DCFCE7"
+  info: "#3B82F6"
+  info-bg: "#DBEAFE"
+  info-text: "#1E40AF"
+  sidebar-bg: "#18181B"
+  sidebar-text: "#FFFFFF"
+  sidebar-active-bg: "rgba(60,191,74,0.2)"
+  sidebar-active-text: "#6EE7B7"
+  glass-bg: "rgba(255,255,255,0.72)"
+  glass-border: "rgba(255,255,255,0.5)"
+  glass-dark-bg: "rgba(0,0,0,0.35)"
+  glass-dark-border: "rgba(255,255,255,0.08)"
 
+typography:
+  display-xxl:
+    fontFamily: "Inter_Tight, system-ui, sans-serif"
+    fontSize: 48px
+    fontWeight: 600
+    lineHeight: 1.1
+    letterSpacing: -1.2px
+  display-xl:
+    fontFamily: "Inter_Tight, system-ui, sans-serif"
+    fontSize: 40px
+    fontWeight: 600
+    lineHeight: 1.15
+    letterSpacing: -0.8px
+  display-lg:
+    fontFamily: "Inter_Tight, system-ui, sans-serif"
+    fontSize: 32px
+    fontWeight: 600
+    lineHeight: 1.2
+    letterSpacing: -0.64px
+  display-md:
+    fontFamily: "Inter_Tight, system-ui, sans-serif"
+    fontSize: 24px
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: -0.48px
+  heading-lg:
+    fontFamily: "Inter_Tight, system-ui, sans-serif"
+    fontSize: 20px
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: -0.4px
+  heading-md:
+    fontFamily: "Inter_Tight, system-ui, sans-serif"
+    fontSize: 18px
+    fontWeight: 600
+    lineHeight: 1.35
+    letterSpacing: -0.36px
+  heading-sm:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 16px
+    fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: 0
+  body-lg:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.6
+    letterSpacing: 0
+  body-md:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 14px
+    fontWeight: 400
+    lineHeight: 1.5
+    letterSpacing: 0
+  body-sm:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 13px
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: 0
+  caption:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 12px
+    fontWeight: 500
+    lineHeight: 1.4
+    letterSpacing: 0.02em
+  micro:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 11px
+    fontWeight: 400
+    lineHeight: 1.3
+    letterSpacing: 0
+  micro-cap:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: 10px
+    fontWeight: 600
+    lineHeight: 1.15
+    letterSpacing: 0.06em
+  mono:
+    fontFamily: "Geist Mono, monospace"
+    fontSize: 13px
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: 0
+
+rounded:
+  xs: 4px
+  sm: 6px
+  md: 10px
+  lg: 14px
+  xl: 18px
+  xxl: 24px
+  pill: 9999px
+
+spacing:
+  xxs: 2px
+  xs: 4px
+  sm: 8px
+  md: 12px
+  lg: 16px
+  xl: 20px
+  xxl: 24px
+  huge: 32px
+  section-v: 64px
+  section-v-desktop: 80px
+  section-h: 16px
+  section-h-tablet: 24px
+  section-h-desktop: 32px
+
+shadows:
+  xs: "0 1px 2px rgba(0,0,0,0.04)"
+  sm: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)"
+  md: "0 4px 12px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)"
+  lg: "0 8px 24px rgba(0,0,0,0.06), 0 4px 8px rgba(0,0,0,0.03)"
+  xl: "0 16px 40px rgba(0,0,0,0.07), 0 6px 12px rgba(0,0,0,0.03)"
+  glow: "0 0 40px rgba(60,191,74,0.12), 0 0 80px rgba(60,191,74,0.06)"
+  glow-lg: "0 0 60px rgba(60,191,74,0.15), 0 0 120px rgba(60,191,74,0.05)"
+  cta: "0 2px 8px rgba(60,191,74,0.25), inset 0 1px 0 rgba(255,255,255,0.15)"
+  cta-hover: "0 6px 20px rgba(60,191,74,0.35)"
+
+animations:
+  fadeIn: "fadeIn 0.4s ease-out"
+  fadeInUp: "fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1)"
+  fadeInDown: "fadeInDown 0.5s cubic-bezier(0.16,1,0.3,1)"
+  slideInRight: "slideInRight 0.35s cubic-bezier(0.16,1,0.3,1)"
+  scaleIn: "scaleIn 0.3s cubic-bezier(0.16,1,0.3,1)"
+  pulseSoft: "pulseSoft 2s ease-in-out infinite"
+  shimmer: "shimmer 2s linear infinite"
+  transition-fast: "all 0.2s cubic-bezier(0.4,0,0.2,1)"
+  transition-base: "all 0.35s cubic-bezier(0.4,0,0.2,1)"
+
+components:
+  button-primary:
+    background: "{colors.primary-gradient}"
+    textColor: "{colors.ink-on-primary}"
+    typography: "{typography.body-md}"
+    fontWeight: 500
+    rounded: "{rounded.md}"
+    padding: 10px 20px
+    shadow: "{shadows.cta}"
+    hover:
+      shadow: "{shadows.cta-hover}"
+      transform: "translateY(-1px)"
+  button-ghost:
+    background: transparent
+    textColor: "{colors.ink-secondary}"
+    typography: "{typography.body-md}"
+    fontWeight: 500
+    rounded: "{rounded.md}"
+    padding: 10px 20px
+    hover:
+      background: "rgba(0,0,0,0.04)"
+      textColor: "{colors.ink}"
+  button-outline:
+    background: transparent
+    textColor: "{colors.primary-press}"
+    border: "1px solid rgba(60,191,74,0.2)"
+    typography: "{typography.body-md}"
+    fontWeight: 500
+    rounded: "{rounded.md}"
+    padding: 10px 20px
+    hover:
+      background: "{colors.primary-bg-subdued}"
+      borderColor: "{colors.primary-soft}"
+  button-danger:
+    background: "{colors.danger}"
+    textColor: "{colors.ink-on-primary}"
+    typography: "{typography.body-md}"
+    fontWeight: 500
+    rounded: "{rounded.md}"
+    padding: 10px 20px
+    hover:
+      background: "#DC2626"
+  button-sm:
+    fontWeight: 500
+    fontSize: 13px
+    padding: 6px 14px
+    rounded: 8px
+  card-default:
+    background: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.xl}"
+    padding: 24px
+    border: "1px solid {colors.hairline}"
+    shadow: "{shadows.xs}"
+    hover:
+      shadow: "{shadows.md}"
+      borderColor: "{colors.hairline-card-hover}"
+  card-kpi:
+    background: "{colors.canvas}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.xl}"
+    padding: 20px
+    border: "1px solid {colors.hairline}"
+    shadow: "{shadows.xs}"
+    decoration: "linear-gradient(135deg, rgba(60,191,74,0.04), transparent 50%)"
+    hover:
+      shadow: "{shadows.md}"
+      transform: "translateY(-2px)"
+  card-glass:
+    background: "{colors.glass-bg}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.xl}"
+    padding: 24px
+    border: "1px solid {colors.glass-border}"
+    backdropFilter: "blur(16px) saturate(180%)"
+    hover:
+      transform: "translateY(-4px)"
+      shadow: "{shadows.lg}"
+  text-input:
+    background: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.md}"
+    padding: 10px 14px
+    border: "1px solid {colors.hairline}"
+    placeholder: "{colors.ink-tertiary}"
+    focus:
+      borderColor: "{colors.primary}"
+      shadow: "0 0 0 3px rgba(60,191,74,0.1)"
+  badge-green:
+    background: "{colors.primary-badge-bg}"
+    textColor: "{colors.primary-badge-text}"
+    typography: "{typography.micro}"
+    fontWeight: 500
+    rounded: "{rounded.pill}"
+    padding: 2px 10px
+  badge-amber:
+    background: "{colors.warning-bg}"
+    textColor: "{colors.warning-text}"
+    fontWeight: 500
+    rounded: "{rounded.pill}"
+    padding: 2px 10px
+  badge-red:
+    background: "{colors.danger-bg}"
+    textColor: "{colors.danger-text}"
+    fontWeight: 500
+    rounded: "{rounded.pill}"
+    padding: 2px 10px
+  badge-blue:
+    background: "{colors.info-bg}"
+    textColor: "{colors.info-text}"
+    fontWeight: 500
+    rounded: "{rounded.pill}"
+    padding: 2px 10px
+  badge-gray:
+    background: "{colors.canvas-warm}"
+    textColor: "#57534E"
+    fontWeight: 500
+    rounded: "{rounded.pill}"
+    padding: 2px 10px
+  nav-sidebar-item:
+    background: transparent
+    textColor: "{colors.sidebar-text}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.md}"
+    padding: 10px 16px
+    hover:
+      background: "rgba(255,255,255,0.06)"
+    active:
+      background: "{colors.sidebar-active-bg}"
+      textColor: "{colors.sidebar-active-text}"
+      fontWeight: 600
+  table-header:
+    background: "{colors.canvas-warm}"
+    textColor: "{colors.ink-tertiary}"
+    typography: "{typography.micro-cap}"
+    padding: 10px 12px
+  table-row:
+    background: "{colors.canvas}"
+    textColor: "{colors.ink-secondary}"
+    typography: "{typography.body-sm}"
+    padding: 10px 12px
+    borderBottom: "1px solid {colors.hairline-soft}"
+    hover:
+      background: "rgba(60,191,74,0.03)"
+  modal-overlay:
+    background: "rgba(0,0,0,0.3)"
+    backdropFilter: "blur(4px)"
+  modal-content:
+    background: "{colors.canvas}"
+    rounded: "{rounded.xxl}"
+    padding: 24px
+    shadow: "{shadows.xl}"
+    animation: "{animations.fadeInUp}"
+  tab-pill:
+    background: transparent
+    textColor: "{colors.ink-secondary}"
+    typography: "{typography.body-sm}"
+    fontWeight: 500
+    rounded: "{rounded.md}"
+    padding: 6px 14px
+    active:
+      background: "{colors.canvas}"
+      textColor: "{colors.ink}"
+      shadow: "{shadows.sm}"
+  divider:
+    height: 1px
+    background: "{colors.hairline}"
+  divider-gradient:
+    height: 1px
+    background: "linear-gradient(90deg, transparent, {colors.hairline}, transparent)"
 ---
 
-## 1. Brand Identity
+## Overview
 
-### Logo
+WitaLine's design language opens with the green gradient. A smooth linear gradient from `#3CBF4A` through `#2EA03A` to `#1C6323` defines the brand's primary CTA surface — buttons, active tabs, and key interactive elements use this treatment. Type and product UI float above a warm off-white canvas (`#FAFAF9`) on white cards (`#FFFFFF`) with warm-gray borders (`#E7E5E4`). The system pairs Inter Tight (weight 600, negative tracking) for display tiers with Inter (weight 400) for body copy, and uses Geist Mono for technical content like phone numbers, timestamps, and API endpoints.
 
-- **Symbol**: Minimalistyczny okrąg — lewa strona (wzór słuchawki telefonicznej w linii) + prawa strona (półkole fali głosowej z dwóch kół modernistycznych okrążających koncentrycznie), kontur czarny #000000, wypełnienie zielenią #72B176.
-- **Logotyp**: "WitaLine" w bardzo pogrubionej geometriicznej bezszeryfowej czcionce (Inter Tight waga 900), krok liter ~0.04em, czarny #000000.
-- **Marka pod logo** (tagline): "Tak, słucham" — waga Regular/Medium, mniejszy rozmiar, zieleń #72B176.
-- **Wariant jasny** (na tła ciemne): biały zielony symbol + biały napis + zielony tagline.
-- **Wariant ciemny** (na tła jasne): zielony symbol + czarny napis + zielony tagline.
-- **Favicon**: Sam symbol (słuchawka + fala) w zielonym #72B176 na przezroczystym tle, 32×32px.
+The color system has two primary roles. **Green** (`#3CBF4A`) is the signature CTA color — one gradient button per section. **Warm gray** (zinc family) is the universal surface and text color, providing a soft, approachable B2B feel. Status colors (red, amber, blue, green) are reserved for badges and semantic indicators.
 
-### Brand Voice
+**Key Characteristics:**
+- Warm off-white page background distinguishes the brand from cold #fff-only SaaS.
+- Green gradient on primary buttons — the brand's signature interactive treatment, always with an inset highlight and glow shadow.
+- Two-type-family hierarchy: Inter Tight (600) for headlines, Inter (400) for body.
+- Glass-morphism cards (`rgba(255,255,255,0.72)` with `backdrop-filter: blur(16px) saturate(180%)`) for premium surfaces.
+- Dark-zinc sidebar (`#18181B`) with green-active items — the dashboard's distinctive navigation shell.
+- Subtle shadows by default (`xs`/`sm`), scaling to `lg`/`xl` for modals and lifted states.
+- KPI cards with a diagonal green-tinted gradient overlay.
+- Staggered fadeInUp animation sequence for lists and card grids.
+- Polish-language marketing pages with English i18n capability.
 
-- Język: **polski**, bezpośredni, pomocny, profesjonalny.
-- Ton: pewny, ale nie nachalny; wspierający, ale nie protekcjonalny.
-- Zwroty: "Twoja firma nie przegapia już żadnych połączeń", "automatyczna recepcja 24/7", "Tak, słucham".
-- Unikane: żargon techniczny, anglicyzmy w treściach głównych, infantylne zwroty.
+## Colors
 
-### Słowa kluczowe wizualne
+### Brand & Accent
+- **Green Primary** (`#3CBF4A`): The brand's signature CTA color. Used for filled buttons, active states, link emphasis, and as the start of the gradient.
+- **Green Hover** (`#2EA03A`): Button hover state, secondary brand text.
+- **Green Press** (`#24802E`): Pressed state, outline variant.
+- **Green Soft** (`#6EE7B7`): Soft brand element, lighter accents.
+- **Green BG Subdued** (`#ECFDF5`): Hover backgrounds, tab active bg.
+- **Green BG Subdued Hover** (`#D1FAE5`): Badge backgrounds, tint fills.
+- **Green Badge Text** (`#1C6323`): Text on green badge backgrounds.
 
-`dynamiczny` &middot; `zaufany` &middot; `nowoczesny` &middot; `techniczny` &middot; `minimalistyczny`
+### Surface
+- **Canvas** (`#FFFFFF`): Card backgrounds, modals, primary surfaces.
+- **Canvas Soft** (`#FAFAF9`): Default page/app background — warm off-white, the brand's signature surface.
+- **Canvas Warm** (`#F5F5F4`): Secondary surfaces, table headers, soft backgrounds.
+- **Sidebar BG** (`#18181B`): Dashboard sidebar fill (zinc-900).
+- **Hairline** (`#E7E5E4`): 1px borders on cards, tables, dividers.
+- **Hairline Soft** (`#F0EFEE`): Subtle row dividers, lighter borders.
+- **Glass BG** (`rgba(255,255,255,0.72)`): Glass-morphism card backgrounds.
+- **Glass Dark BG** (`rgba(0,0,0,0.35)`): Dark glass-morphism backgrounds.
 
----
+### Text
+- **Ink** (`#1C1917`): Headings and primary body text. Warm almost-black.
+- **Ink Secondary** (`#78716C`): Body text, secondary information, table cell text.
+- **Ink Tertiary** (`#A8A29E`): Placeholder text, captions, helper text.
+- **Ink on Primary** (`#FFFFFF`): Text on green and dark surfaces.
 
-## 2. Typography
+### Semantic
+- **Danger** (`#EF4444`): Errors, destructive actions, failed badge.
+- **Danger BG** (`#FEE2E2`): Danger badge background.
+- **Danger Text** (`#991B1B`): Danger badge text.
+- **Warning** (`#F59E0B`): Pending states, warnings.
+- **Warning BG** (`#FEF3C7`): Warning badge background.
+- **Warning Text** (`#92400E`): Warning badge text.
+- **Success** (`#22C55E`): Success indicators.
+- **Success BG** (`#DCFCE7`): Success badge background.
+- **Info** (`#3B82F6`): Informational elements.
+- **Info BG** (`#DBEAFE`): Info badge background.
+- **Info Text** (`#1E40AF`): Info badge text.
 
-System fontów oparty na **Geist** (sans) i **Geist Mono** — wbudowane w framework poprzez `next/font/google`. Dla logo używa się **Inter Tight w wadze 900** (załadowana z `next/font/google`) oraz **Inter Regular/Medium** dla tagline'u.
+## Typography
 
-| Styl | Font | Waga | Rozmiar | Line-height | Tracking | Użycie |
+### Font Family
+
+The brand uses a two-family system:
+- **Inter Tight** (Google Fonts, weight 600) — display and heading tiers. A condensed sans-serif with tight letter-spacing that gives headings their editorial character.
+- **Inter** (Google Fonts, weights 400, 500, 600) — body text, UI labels, buttons, all reading-sized content. Clean, highly legible at small sizes.
+- **Geist Mono** (Google Fonts, weight 400) — technical content: phone numbers, call durations, API endpoints, timestamps, code.
+
+Fonts are loaded via `next/font/google` and exposed as CSS variables (`--font-inter`, `--font-inter-tight`, `--font-geist-mono`).
+
+### Hierarchy
+
+| Token | Size | Weight | Line H | Letter Spacing | Family | Use |
 |---|---|---|---|---|---|---|
-| **H1** | Inter Tight | 900 (Black) | 2.5rem (40px) | 1.1 | 0.02em | Nagłówek strony landingowej |
-| **H2** | Inter Tight | 800 (ExtraBold) | 2rem (32px) | 1.15 | 0.01em | Nagłówki sekcji |
-| **H3** | Inter | 600 (Semibold) | 1.25rem (20px) | 1.4 | normal | Nagłówki kart / sekcji dashboardu |
-| **Body** | Inter | 400 (Regular) | 1rem (16px) | 1.6 | normal | Tekst podstawowy, paragrafy |
-| **Body Small** | Inter | 400 (Regular) | 0.875rem (14px) | 1.5 | normal | Tekst pomocniczy, etykiety, inputy |
-| **Caption** | Inter | 500 (Medium) | 0.75rem (12px) | 1.4 | 0.02em | Timestampy, tagi, metryki pomocnicze |
-| **Mono** | Geist Mono | 400 (Regular) | 0.875rem (14px) | 1.6 | normal | JSON, system prompt preview, cennik (numery) |
+| `display-xxl` | 48px | 600 | 1.1 | -1.2px | Inter Tight | Hero headline |
+| `display-xl` | 40px | 600 | 1.15 | -0.8px | Inter Tight | Section opener |
+| `display-lg` | 32px | 600 | 1.2 | -0.64px | Inter Tight | Feature section title |
+| `display-md` | 24px | 600 | 1.25 | -0.48px | Inter Tight | Card title, modal header |
+| `heading-lg` | 20px | 600 | 1.3 | -0.4px | Inter Tight | Pricing tier name |
+| `heading-md` | 18px | 600 | 1.35 | -0.36px | Inter Tight | Sub-heading |
+| `heading-sm` | 16px | 600 | 1.4 | 0 | Inter | Section label, sidebar header |
+| `body-lg` | 16px | 400 | 1.6 | 0 | Inter | Marketing body lead |
+| `body-md` | 14px | 400 | 1.5 | 0 | Inter | Default UI body, button label |
+| `body-sm` | 13px | 400 | 1.4 | 0 | Inter | Table cells, card body |
+| `caption` | 12px | 500 | 1.4 | 0.02em | Inter | Table header, helper text |
+| `micro` | 11px | 400 | 1.3 | 0 | Inter | Badge text, fine print |
+| `micro-cap` | 10px | 600 | 1.15 | 0.06em | Inter | Uppercase eyebrow label |
+| `mono` | 13px | 400 | 1.4 | 0 | Geist Mono | Phone, time, API, code |
 
-### Hierarchia w dashboardzie
+### Principles
+- **Inter Tight at 600 is the brand voice for headings.** Display tiers always use `font-semibold` with negative tracking. The condensed letterforms give the brand its clean, modern editorial feel.
+- **Inter at 400 for body.** Reading comfort at small sizes. Leading at 1.5–1.6x for readability.
+- **Captions at 500 weight + tracking.** Table headers and small labels get a subtle uppercase tracking to distinguish them from body text.
+- **Monospace for technical data.** Phone numbers (`+48 732 125 752`), call durations, timestamps, and API values always use `font-mono` (Geist Mono).
+- **No serif.** The brand is exclusively sans-serif.
 
-```
-┌──────────────────────────────────────────────────┐
-│  H1: "Panel zarządzania"                         │
-│                                                   │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐     │
-│  │ H2: Stat. │  │ H2: Ostat│  │ H2: Paki. │     │
-│  │ Body Lg   │  │ Body Lg   │  │ Body Lg   │     │
-│  └───────────┘  └───────────┘  └───────────┘     │
-│  ┌──────────────────────────────────────────┐    │
-│  │ H3: "Połączenia"                         │    │
-│  │ Body Medium — wiersze tabeli             │    │
-│  │ Caption — "2 godz. temu"                 │    │
-│  └──────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────┘
-```
+## Layout
 
----
+### Spacing System
+- **Base unit**: 8px.
+- **Section vertical**: 64px mobile, 80px desktop.
+- **Section horizontal**: 16px mobile, 24px tablet, 32px desktop.
+- **Card internal padding**: 24px (default), 20px (KPI/compact), 32px (premium/feature).
+- **Grid gaps**: 16px (default), 24px (feature grids).
 
-## 3. Color Palette
+### Container Widths
 
-### Brand — Zielony (Primary)
-
-Token Tailwind v4: `--color-brand-*`
-
-| Rola | Token | HEX | Przykład użycia |
-|---|---|---|---|
-| **Primary** | `brand-600` | `#72B176` | Przyciski CTA, linki, aktywny tab, logo symbol |
-| **Primary hover** | `brand-700` | `#5A9A5F` | Hover na przyciskach CTA |
-| **Primary light** | `brand-50` | `#F0F7F1` | Tło sekcji z akcentem, aktywny stan kafelka, success bg |
-| **Primary border** | `brand-200` | `#B8D9BA` | Outline focus, krawędzie aktywnego elementu |
-| **Primary text** | `brand-800` | `#3D6B42` | Tekst na jasnym tle z zielonym akcentem |
-
-### Neutral — Czarny/Biały (Secondary + Neutrals)
-
-| Rola | Token | HEX | Przykład użycia |
-|---|---|---|---|
-| **Text primary** | `zinc-900` | `#18181b` | Nagłówki, body text, logo napis |
-| **Text secondary** | `zinc-500` | `#71717a` | Etykiety, placeholder, caption |
-| **Background** | `zinc-50` | `#fafafa` | Tło strony / dashboardu |
-| **Surface** | `white` | `#ffffff` | Karty, moduły, tabele |
-| **Surface border** | `zinc-200` | `#e4e4e7` | Krawędzie kart, separatorów |
-| **Text disabled** | `zinc-300` | `#d4d4d8` | Wyłączone przyciski, nieaktywne elementy |
-| **Hover** | `zinc-100` | `#f4f4f5` | Hover na wierszach tabeli |
-
-### Status
-
-| Rola | HEX | Token | Użycie |
-|---|---|---|---|
-| **Success** | `#72B176` | `brand-500` | Aktywny, opłacony, completed |
-| **Error** | `#dc2626` | `red-600` | Błąd, suspended, payment_failed |
-| **Warning** | `#d97706` | `amber-600` | Ostrzeżenie, pending, trial kończący się |
-| **Info** | `#2563eb` | `blue-600` | Informacja, nowa funkcja, pomoc |
-
-### Wariant Light / Dark (docelowo)
-
-Na MVP wystarcza wariant **Light** (background: `#fafafa`, surface: `#ffffff`). Dark mode jako przyszłe zadanie.
-
----
-
-## 4. Spacing & Layout Grid
-
-### System spacing
-
-Oparty na Tailwind v4 scale: `{4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64}` (w px: 1rem = 16px).
-
-- **Container max-width**: `max-w-7xl` (1280px) dla dashboardu, `max-w-2xl` dla formularzy (onboarding).
-- **Padding strony**: `px-4 py-8` / `md:px-8 md:py-12`.
-- **Karty (Cards)**: `p-6` wewnątrz, odstęp między kartami `gap-6`.
-- **Gap między sekcjami**: `space-y-8` / `mb-10`.
-
-### Responsywność
-
-| Breakpoint | Min-width | Layout |
+| Container | Max-Width | Used In |
 |---|---|---|
-| Mobile | 0–639px | 1 kolumna, bottom nav (jeśli PWA) |
-| Tablet | 640–1023px | 2 kolumny grid |
-| Desktop | 1024px+ | 3+ kolumny / sidebar + content |
+| Full page | 1280px (`max-w-7xl`) | Admin, dashboard |
+| Feature section | 1152px (`max-w-6xl`) | Marketing sections |
+| Pricing | 1024px (`max-w-5xl`) | Pricing section |
+| Forms | 768px (`max-w-3xl`) | Settings, editors |
+| Auth | 672px (`max-w-2xl`) | Register, login |
+| Modals | 512px (`max-w-lg`) | Dialogs |
+| Chat | 320px / 82% | Widget bubbles |
 
----
+### Grid
+- Default: `grid gap-4 grid-cols-1`
+- Tablet: `sm:grid-cols-2`
+- Desktop: `lg:grid-cols-3`
 
-## 5. Component Library
+### Whitespace Philosophy
+The warm off-white canvas (`#FAFAF9`) provides the breathing room. Content sits on white cards with subtle borders — the card IS the layout unit. Section gaps are generous (64–80px) with content tightening to 16–24px inside cards. The brand avoids dense, wall-to-wall layouts.
 
-### 5.1 Buttons
+## Elevation & Depth
 
-| Wariant | CSS | Użycie |
+| Level | Treatment | Use |
 |---|---|---|
-| **Primary Filled** | `bg-teal-700 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-teal-800 transition disabled:opacity-50` | Główne CTA: "Zapisz", "Dodaj", "Aktywuj" |
-| **Secondary Outlined** | `border border-zinc-300 text-zinc-700 px-5 py-2.5 rounded-lg font-medium hover:bg-zinc-50 transition` | "Anuluj", "Wstecz", akcje drugorzędne |
-| **Ghost** | `text-zinc-500 px-3 py-2 rounded-lg hover:bg-zinc-100 transition` | "Edytuj", "Usuń" w tabelach, ikonowe akcje |
-| **Danger** | `bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition` | "Usuń konto", "Zawieś", destrukcyjne akcje |
-| **Small** | `px-3 py-1.5 text-xs rounded-md` | Akcje inline w tabeli |
+| 0 | Flat `shadow-xs` | Card default |
+| 1 | `shadow-sm` | Hover card default |
+| 2 | `shadow-md` | Card hover, active tab |
+| 3 | `shadow-lg` | Dropdowns, highlighted elements |
+| 4 | `shadow-xl` | Modals, floating panels |
+| G | `shadow-glow` | Premium CTA glow |
+| G+ | `shadow-glow-lg` | Enhanced glow effect |
 
-Wszystkie przyciski mają `cursor-pointer`, `transition` i `disabled:opacity-50 disabled:cursor-not-allowed`.
+### Decorative Depth
+The primary depth medium is the **green gradient** on CTAs and the **glass backdrop blur** on premium cards. Shadow is deliberately restrained — the brand communicates clarity and approachability, not weight or opacity.
 
-### 5.2 Cards
+## Shapes
 
-```css
-.bg-white rounded-xl border border-zinc-200 p-6
-```
+### Border Radius Scale
 
-- **Shadow**: Brak domyślnego cienia (płaski, nowoczesny wygląd). Dopuszczalny `shadow-sm` na hover dla kart klikalnych.
-- **Border radius**: `rounded-xl` (12px) dla kart, `rounded-lg` (8px) dla inputów/pól.
-- **Wariant podświetlony** (active/selected): `ring-2 ring-teal-500` lub `border-teal-700 bg-teal-50`.
-- **Wariant statystyczny** (KPI tile): ikona + liczba + etykieta, wyśrodkowane, `p-6 bg-white rounded-xl border border-zinc-200`.
+| Token | Value | Use |
+|---|---|---|
+| `xs` | 4px | Small tags, table chrome |
+| `sm` | 6px | Form inputs (focus ring) |
+| `md` | 10px | Buttons, inputs, tab pills, compact cards |
+| `lg` | 14px | Standard cards, pricing cards |
+| `xl` | 18px | Feature cards, admin cards, modals |
+| `xxl` | 24px | Hero cards, prominent containers |
+| `pill` | 9999px | Badges, avatars, toggles |
 
-### 5.3 Form Fields (Inputs)
+### Key Relationships
+- Cards are always `rounded-xl` (18px) or `rounded-2xl` (24px).
+- Buttons are always `rounded-md` (10px) or `rounded-xl` (18px) for large CTAs.
+- Badges are always `rounded-full` (pill).
+- Modals are always `rounded-2xl` (24px).
 
-Material Design 3 — styl "Outlined":
+## Components
 
-```css
-/* Standard */
-w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm
-focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600
-placeholder:text-zinc-400 transition
+### Buttons
 
-/* Error */
-border-red-400 focus:ring-red-500/30 focus:border-red-500
+**`button-primary`** — the dominant CTA system-wide.
+- Background: green gradient `linear-gradient(135deg, #3CBF4A, #2EA03A)`, text `#FFFFFF`, type `Inter 14px/500`, padding `10px 20px`, rounded `10px`, shadow `0 2px 8px rgba(60,191,74,0.25)` with inset white highlight.
+- Hover: deeper shadow `0 6px 20px rgba(60,191,74,0.35)`, translateY(-1px).
 
-/* Disabled */
-bg-zinc-50 text-zinc-400 cursor-not-allowed
+**`button-ghost`** — transparent alternative.
+- Background transparent, text `#78716C`, same geometry.
+- Hover: `background: rgba(0,0,0,0.04)`, text turns `#1C1917`.
 
-/* Label */
-block text-sm font-medium text-zinc-700 mb-1.5
+**`button-outline`** — bordered alternative.
+- Background transparent, text `#24802E`, 1px solid green border at 20% opacity.
+- Hover: fills with `#ECFDF5`, border brightens to `#6EE7B7`.
 
-/* Error message */
-text-xs text-red-600 mt-1
-```
+**`button-danger`** — destructive action.
+- Background `#EF4444`, text `#FFFFFF`, same geometry.
 
-**Select** (dropdown): Taki sam styl jak input. Używać natywnego `<select>` lub prostego wrappera.
+**Small variant**: `padding: 6px 14px, font-size: 13px, border-radius: 8px`.
 
-**Checkbox** / **Toggle**:
-- Checkbox: `w-4 h-4 rounded border-zinc-300 text-teal-700 focus:ring-teal-500`.
-- Toggle (switch): `relative inline-flex h-6 w-11 items-center rounded-full bg-zinc-300 data-[checked]:bg-teal-700 transition`.
+### Cards & Containers
 
-### 5.4 Tables
+**`card-default`** — the workhorse UI container.
+- Background `#FFFFFF`, text `#1C1917`, padding `24px`, rounded `18px`, 1px `#E7E5E4` border, `shadow-xs`.
+- Hover: `shadow-md`, border shifts to `rgba(60,191,74,0.12)`.
 
-```css
-/* Container */
-bg-white rounded-xl border border-zinc-200 overflow-hidden
+**`card-kpi`** — metric/KPI display.
+- Same as default card with a subtle diagonal green overlay (`linear-gradient(135deg, rgba(60,191,74,0.04), transparent 50%)`).
+- Hover: lifts 2px.
 
-/* Header */
-bg-zinc-50 text-xs font-semibold text-zinc-500 uppercase tracking-wider
+**`card-glass`** — premium glass morphism.
+- Background `rgba(255,255,255,0.72)`, backdrop blur `16px saturate(180%)`, thin white border.
+- Used for premium feature highlights, onboarding.
+- Hover: lifts 4px with `shadow-lg`.
 
-/* Row */
-border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50 transition
+### Navigation
 
-/* Cell */
-px-4 py-3 text-sm text-zinc-700
+**Sidebar** — the dashboard identity element.
+- Fixed left, width `16rem` (w-64), background `#18181B`.
+- Items: `10px 16px`, rounded `10px`, text `#FFFFFF`.
+- Hover: `background: rgba(255,255,255,0.06)`.
+- Active: `background: rgba(60,191,74,0.2)`, text `#6EE7B7`, font-weight 600.
+- Hidden on mobile, visible at `lg:` breakpoint.
 
-/* Expandable row */
-bg-zinc-50/50 px-4 py-4 border-t border-zinc-100
-```
+**Top Navigation** — utility bar.
+- Background `#FFFFFF`, bottom border `1px solid #E7E5E4`, height `4rem`.
 
-### 5.5 Tabs (Dashboard navigation)
+### Inputs & Forms
 
-```css
-/* Container */
-flex gap-1 bg-zinc-100 p-1 rounded-lg
+**`text-input`** — standard form field.
+- Background `#FFFFFF`, text `#1C1917`, type `Inter 14px`, padding `10px 14px`, rounded `10px`, 1px `#E7E5E4` border.
+- Focus: border to `#3CBF4A`, ring `0 0 0 3px rgba(60,191,74,0.1)`.
+- Placeholder: `#A8A29E`.
 
-/* Active tab */
-bg-white text-zinc-900 shadow-sm rounded-md px-4 py-2 text-sm font-medium
+### Badges
 
-/* Inactive tab */
-text-zinc-500 hover:text-zinc-700 px-4 py-2 text-sm font-medium rounded-md transition
-```
+Standard collection — `rounded-full`, `2px 10px`, weight 500, size 11px:
 
-### 5.6 Badges / Status Tags
-
-```css
-/* Ogólny */
-inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium
-
-/* Success (active/completed) */
-bg-green-100 text-green-800
-
-/* Warning (pending/trial) */
-bg-amber-100 text-amber-800
-
-/* Error (suspended/failed) */
-bg-red-100 text-red-800
-
-/* Neutral (inactive/draft) */
-bg-zinc-100 text-zinc-600
-
-/* Info */
-bg-blue-100 text-blue-800
-```
-
-### 5.7 Modal / Overlay
-
-```css
-/* Overlay */
-fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4
-
-/* Modal card */
-bg-white rounded-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6 shadow-xl
-
-/* Header */
-flex items-center justify-between mb-4
-
-/* Close button */
-text-zinc-400 hover:text-zinc-600 transition
-```
-
-### 5.8 Navigation
-
-**Dashboard (Web)**: **Tab Bar** poziomy (zakładki) — opisany w 5.5.
-
-**Landing page**: **Top navigation** — `flex justify-between items-center px-6 py-4`, logo po lewej, `Auth UI` + CTA "Rozpocznij" po prawej.
-
-**Admin panel**: **Sidebar** — `w-64 min-h-screen bg-white border-r border-zinc-200 p-4`, logo u góry, linki nawigacji pionowej.
-
----
-
-## 6. Iconography
-
-- **Zestaw**: **Material Symbols Outlined** (Google Fonts) — ładowane przez CDN lub jako komponenty SVG.
-- **Rozmiary**: `w-5 h-5` (20px) w przyciskach, `w-4 h-4` (16px) inline, `w-6 h-6` (24px) w nawigacji.
-- **Kolor**: `text-zinc-500` domyślnie, `text-teal-700` dla akcentu, `text-white` na ciemnym tle.
-- **Waga stroke**: 300 (Outlined) — delikatne, nowoczesne.
-
-### Kluczowe ikony dla dashboardu
-
-| Ikona | Użycie |
-|---|---|
-| `call` | Zakładka "Połączenia" |
-| `calendar_month` | Zakładka "Kalendarz" / "Rezerwacje" |
-| `star` | Zakładka "Opinie" |
-| `bar_chart` | Zakładka "Statystyki" |
-| `settings` | "Integracje" / "Ustawienia" |
-| `widgets` | "Widget" / "Osadź" |
-| `dictionary` | "Baza wiedzy" |
-| `credit_card` | "Pakiet i płatności" |
-| `play_circle` | Odtwarzacz nagrań |
-| `check_circle` | Sukces / completed |
-| `warning` | Ostrzeżenie / pending |
-| `error` | Błąd / suspended |
-| `content_copy` | Kopiuj (embed code) |
-| `open_in_new` | Link zewnętrzny |
-| `more_vert` | Menu kontekstowe w tabeli |
-| `add` | Dodaj nowy element |
-| `edit` | Edytuj |
-| `delete` | Usuń |
-| `search` | Szukaj |
-
----
-
-## 7. Illustrations
-
-- **Styl**: **Minimalist vector** — płaskie, 2-kolorowe ilustracje (teal + zinc), bez cieni, z zaokrąglonymi kształtami.
-- **Zastosowanie**: Empty states w dashboardzie (brak połączeń, brak rezerwacji, brak opinii).
-
-### Empty State — 3 grafiki koncepcyjne
-
-1. **Brak połączeń** — Pusta słuchawka telefonu z falą dźwiękową, obok napis "Jeszcze żadne połączenie nie zostało odebrane. Twój asystent AI czeka na pierwszy telefon."
-2. **Brak rezerwacji** — Pusty kalendarz z zaznaczoną dzisiejszą datą, napis "Brak rezerwacji na najbliższy czas. Rezerwacje pojawią się tutaj automatycznie po rozmowach."
-3. **Brak opinii** — Pusta gwiazdka (outline) z dymkiem, napis "Opinie klientów zbierane są automatycznie po każdej rozmowie."
-
-Każda grafika: maksymalnie 2 kolory (teal-500 + zinc-300), wyśrodkowana, ~160×120px.
-
----
-
-## 8. Screen Designs
-
-### 8.1 Landing Page (publiczna)
-
-**Struktura** (od góry do dołu):
-
-1. **Top nav** — logo, linki (Jak działa? / Cennik / Kontakt), Auth UI (Zaloguj), CTA "Rozpocznij bezpłatnie".
-2. **Hero section** — H1 "Automatyczna recepcja AI dla Twojej firmy. 24/7.", Body Large opis, podwójny CTA ("Sprawdź plany" / "Zobacz demo").
-3. **3-feature grid** (3 karty w rzędzie) — Automatyczne odbieranie, Rezerwacje i zamówienia, Dashboard.
-4. **Pricing section** — 3 kolumny (Start / Pro / Enterprise), każda z `features[]` listą, ceną, CTA.
-5. **CTA bottom** — "Gotowy na automatyzację? Zacznij w 5 minut."
-6. **Footer** — logo, linki, kontakt, regulamin.
-
-### 8.2 Dashboard (główny ekran po zalogowaniu)
-
-**Struktura**:
-
-1. **DashboardHeader** — pasek z progressem (minuty wykorzystane / limit), obliczone oszczędności, przycisk "Dodaj środki".
-2. **Tab bar** (poziomy, opisany w 5.5):
-   - Połączenia | Rezerwacje | Kalendarz | Opinie | Statystyki | Pakiet | Baza wiedzy | Widget | Integracje
-3. **Content area** — zmienia się w zależności od aktywnego taba:
-   - **Połączenia** → CallTable (expandable rows: transcription, recording player)
-   - **Rezerwacje** → ReservationsTable + NewReservationForm (modal)
-   - **Kalendarz** → CalendarView (siatka miesięczna) + CalendarEditor + ServicesEditor
-   - **Opinie** → FeedbackPanel (gwiazdki, dystrybucja, kategorie, lista)
-   - **Statystyki** → KPI tiles (łączne połączenia, średnia ocena, rezerwacje, oszczędności)
-   - **Pakiet** → PlanUpgrade (aktualny plan, progres, przycisk zmiany)
-   - **Baza wiedzy** → KnowledgeEditor (textarea prompt + JSON catalog)
-   - **Widget** → WidgetSettings (embed code, preview, instrukcja)
-   - **Integracje** → IntegrationsSettings (Google Calendar, SMS test)
-
-### 8.3 Onboarding / Register (self-service, 5 kroków)
-
-Każdy krok: max-w-2xl wyśrodkowany, progress indicator u góry.
-
-1. **Wybierz plan** — 3 karty planów (Start / Pro / Enterprise) z cenami i cechami.
-2. **Załóż konto** — Supabase Auth UI (email + hasło).
-3. **Dane firmy** — Industry template grid (6 przycisków: Gastronomia, Beauty, Medycyna, Prawo, Fitness, Inna) + nazwa firmy, www, telefon, zgody.
-4. **AI skanuje** — Spinner / progress bar "Skanowanie strony i generowanie asystenta..."
-5. **Recenzja i aktywacja** — Podgląd wygenerowanego promptu (textarea do edycji), przycisk "Aktywuj konto".
-
-Po aktywacji: przekierowanie do `/dashboard` z komunikatem sukcesu.
-
-### 8.4 Admin Panel (dla administratora platformy)
-
-**Sidebar** (lewa kolumna):
-- Dashboard (statystyki platformy)
-- Firmy (lista wszystkich businesses)
-- Leadzi (zapytania sprzedażowe)
-
-**Content**:
-- **Dashboard**: 6 KPI tiles (aktywne firmy, leady, łączne połączenia, średnia ocena, przychód, zawieszone)
-- **Firmy**: tabela z kolumnami: Nazwa, Plan, Status, Połączenia, Ostatnia aktywność, Akcje (Zawieś / Aktywuj)
-- **Leadzi**: karty (AdminLeadCard) z system promptem + przycisk "Aktywuj"
-
-### 8.5 Reseller Panel
-
-`/reseller` — prosty dashboard dla partnerów:
-
-- Statystyki (liczba klientów, łączne połączenia, przychód z markup)
-- Tabela klientów (nazwa, plan, status, markup)
-- Link partnerski do udostępnienia
-
----
-
-## 9. Responsive Behavior
-
-| Ekran | Zachowanie |
-|---|---|
-| Mobile < 640px | Dashboard tabs → dropdown / scroll. Karty w 1 kolumnie. Tabela → lista kart (każdy wiersz jako osobna karta). |
-| Tablet 640–1023px | 2-kolumnowy grid kart. Tabela standardowa z h-scroll. |
-| Desktop 1024px+ | 3-kolumnowy grid. Full-width tabela. Sidebar w admin panelu. |
-
----
-
-## 10. Motion & Interaction
-
-| Element | Zachowanie | Czas | Easing |
+| Variant | BG | Text | Use |
 |---|---|---|---|
-| Button hover | background color | 150ms | ease-in-out |
-| Card hover | shadow-sm | 200ms | ease-out |
-| Tab switch | natychmiast (brak opóźnienia) | 0 | — |
-| Modal open | fade in overlay + scale up card | 200ms | ease-out |
-| Row expand | slide down | 200ms | ease-in-out |
-| Toast | slide in z góry, fade out po 3s | 300ms | ease-out |
-| Progress bar | animate width | 500ms | ease-in-out |
+| Green | `#D1FAE5` | `#1C6323` | Active, success, completed |
+| Amber | `#FEF3C7` | `#92400E` | Pending, warning |
+| Red | `#FEE2E2` | `#991B1B` | Error, failed, blocked |
+| Blue | `#DBEAFE` | `#1E40AF` | Info, in-progress |
+| Gray | `#F5F5F4` | `#57534E` | Default, neutral |
 
-Wszystkie transitiony: `transition` klasa Tailwind.
+### Tables
 
----
+- Wrapper: `bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm`.
+- Header: `bg-zinc-50`, text `12px/600 uppercase tracking-wider text-zinc-400`.
+- Rows: `13px/400`, `border-b border-zinc-50`, hover `bg-brand-50/50`.
+- Standard for admin and dashboard views.
 
-## 11. Tailwind v4 Theme Configuration
+### Modals
 
-Poniższa konfiguracja jest już zdefiniowana w `src/app/globals.css` i stanowi źródło prawdy:
+- Overlay: `fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center`.
+- Content: `bg-white rounded-2xl p-6 max-w-lg shadow-xl animate-fade-in-up`.
 
-```css
-@import "tailwindcss";
+### Tab Pills
 
-@theme inline {
-  --color-background: #ffffff;
-  --color-foreground: #171717;
-  --color-teal-50: #f0fdfa;
-  --color-teal-100: #ccfbf1;
-  --color-teal-200: #99f6e4;
-  --color-teal-300: #5eead4;
-  --color-teal-400: #2dd4bf;
-  --color-teal-500: #14b8a6;
-  --color-teal-600: #0d9488;
-  --color-teal-700: #0f766e;
-  --color-teal-800: #115e59;
-  --color-teal-900: #134e4a;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+```
+px-4 py-1.5 text-sm font-medium rounded-md transition
+Inactive: bg-transparent text-zinc-500 hover:text-zinc-700
+Active: bg-white text-zinc-900 shadow-sm
 ```
 
-**Semantyczne mapowanie dla komponentów** (do użycia w klasach):
+### Dividers
 
-| Semantycznie | Token Tailwind |
-|---|---|
-| `--primary` | `teal-700` |
-| `--primary-hover` | `teal-800` |
-| `--primary-light` | `teal-50` |
-| `--bg-page` | `zinc-50` |
-| `--bg-surface` | `white` |
-| `--border-subtle` | `zinc-200` |
-| `--text-default` | `zinc-900` |
-| `--text-muted` | `zinc-500` |
+Two styles:
+- Solid: `border-t border-zinc-200`
+- Gradient: `h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent`
 
----
+## Animations
 
-## 12. Accessibility
+### Easing Curve
+The primary easing for all transitions: `cubic-bezier(0.4, 0, 0.2, 1)` (Tailwind default ease).
+Enter animations use: `cubic-bezier(0.16, 1, 0.3, 1)` — snappy "overshoot-lite."
 
-- **Kontrast**: wszystkie pary tekst/tło spełniają WCAG AA (min. 4.5:1 dla body, 3:1 dla large text).
-- **Focus**: wszystkie interaktywne elementy mają widoczny focus ring (`focus:ring-2 focus:ring-teal-500/30`).
-- **Etykiety**: każdy input ma `<label>` z `htmlFor`.
-- **ARIA**: przyciski ikonowe mają `aria-label`, expandery mają `aria-expanded`.
-- **Ruch**: preferuje `prefers-reduced-motion: reduce` — wyłącza animacje.
+### Named Animations
+- `fadeIn` — simple opacity 0→1 (0.4s)
+- `fadeInUp` — opacity + translateY(16px) → 0 (0.5s) — **most common enter animation**
+- `fadeInDown` — opacity + translateY(-12px) → 0 (0.5s) — dropdowns
+- `slideInRight` — opacity + translateX(8px) → 0 (0.35s) — mobile sidebar
+- `scaleIn` — opacity + scale(0.96) → 1 (0.3s) — modal entrance
+- `pulseSoft` — opacity pulse 1→0.65→1 (2s) — live indicators
+- `shimmer` — background-position slide (2s) — loading skeletons
 
----
+### Stagger Pattern
+For card grids and lists — each child animates `fadeInUp` with incremental delay (80ms steps, up to 6 children). Applied via the `.stagger` CSS class.
 
-*Ten dokument stanowi źródło prawdy dla wszystkich komponentów UI w projekcie WitaLine. Wszystkie zmiany w wyglądzie muszą być zgodne z powyższymi regułami.*
+### Loading
+Spinner: `w-8 h-8 border-2 border-brand-400 border-t-transparent rounded-full animate-spin`
+Skeleton: shimmer animation on a `bg-zinc-100` block with `rounded-md`.
+
+## Do's and Don'ts
+
+### Do
+- Reserve brand green for primary CTAs and interactive states — one gradient button per section.
+- Use `#FAFAF9` as the default page background, not pure white.
+- Use Inter Tight (semibold) for all display/heading tiers — the condensed weight is the brand's typographic signature.
+- Use monospace (Geist Mono) for phone numbers, durations, timestamps, and API values.
+- Apply `rounded-xl` (18px) to cards and `rounded-md` (10px) to buttons.
+- Pair every card with a subtle border and shadow — bare cards feel unfinished.
+- Use the stagger fadeInUp pattern for lists and card grids.
+- Keep all marketing page text in Polish.
+
+### Don't
+- Don't bump display weight above 600 — at 700+ the brand's clean editorial feel collapses.
+- Don't use pure `#fff` as the page background — always use `#FAFAF9`.
+- Don't use brand green as a body text color — it's for CTAs and interactive elements only.
+- Don't replace the rounded-rectangle button shape with pill-shaped buttons.
+- Don't add heavy shadows — the brand is approachable, not weighty.
+- Don't use serif fonts anywhere.
+- Don't use emojis in the UI.
+- Don't add inline styles — use Tailwind utility classes.
+
+## Responsive Behavior
+
+### Breakpoints
+
+| Name | Width | Key Changes |
+|---|---|---|
+| Wide | ≥ 1280px | Full sidebar, 3+ column grids, max container |
+| Desktop | 1024–1280px | Sidebar visible, 3-column feature grids |
+| Tablet | 640–1024px | 2-column grids, sidebar hidden (hamburger) |
+| Mobile | < 640px | Single column, stacked cards, bottom sheet nav |
+
+### Sidebar Collapsing
+- `lg:` and above: sidebar visible as fixed left panel, content offset `lg:ml-64`.
+- Below `lg:`: sidebar hidden, accessed via hamburger menu overlay at `z-50`.
+
+### Typography Scaling
+- Display tiers stair-step: 48 → 40 → 32 → 24px through breakpoints.
+- Body text stays at 14px / 16px regardless of viewport.
+
+### Touch Targets
+- All interactive elements: minimum 40px touch target.
+- Cards: tap-to-navigate, hover states don't apply on touch.
+
+### Collapsing Strategy
+- Pricing tiers: 3-up → 2-up → 1-up.
+- Feature grids: 3 columns → 2 → 1.
+- Tables: horizontal scroll on mobile, key columns only on very small screens.
+- Widget chat: bottom-sheet on mobile, floating panel on desktop.
+
+## Agent Prompt Guide
+
+- **Primary color**: green-400 `#3CBF4A` (brand). Use `bg-brand-400` / `text-brand-400` / `border-brand-400`.
+- **Background**: `bg-[#FAFAF9]` (warm off-white) for pages, `bg-white` for cards.
+- **Borders**: `border-zinc-200` (default), `border-zinc-100` (subtle).
+- **Text**: `text-zinc-900` (headings), `text-zinc-500` (body), `text-zinc-400` (muted).
+- **Heading font**: `font-display` (Inter Tight, `font-semibold`).
+- **Body font**: `font-sans` (Inter).
+- **Card**: `bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm`.
+- **Button primary**: `bg-brand-400 text-white px-5 py-2.5 rounded-xl hover:bg-brand-500 transition shadow-lg shadow-brand-500/20`.
+- **Button ghost**: `bg-transparent text-zinc-600 px-3 py-2 rounded-lg hover:bg-brand-50 transition`.
+- **Input**: `w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200`.
+- **Badge**: `text-xs px-2.5 py-1 rounded-full font-medium` with color variant (`bg-brand-50 text-zinc-500`, etc).
+- **Table**: wrapper `bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm`.
+- **Modal**: overlay `fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center`, content `bg-white rounded-2xl p-6 max-w-lg shadow-xl animate-fade-in-up`.
+- **Mutted de-emphasis**: use `text-zinc-400 text-xs`.
+- **All marketing text**: Polish language.
+- **Animation**: use `animate-fade-in-up` for enter animations, `transition-all duration-200` for hovers.
+- **Shadow**: `shadow-sm` (default), `shadow-md` (elevated), `shadow-lg` (CTA), `shadow-xl` (modal).

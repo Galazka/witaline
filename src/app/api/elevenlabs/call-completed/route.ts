@@ -32,9 +32,9 @@ function classifyCall(summary: string, transcript: string): Classification {
 }
 
 const OFFER_SMS_TEXTS: Record<string, string> = {
-  elastic: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta ELASTYCZNA: 0 zł/mies, płacisz tylko za użycie, 1,00 zł/min. Sprawdź: https://witaline.pl/cennik`,
-  pro: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta PRO: 249 zł/mies, 300 minut wliczone. Sprawdź: https://witaline.pl/cennik`,
-  lux: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta LUX: 599 zł/mies, 800 minut wliczone. Sprawdź: https://witaline.pl/cennik`,
+  elastic: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta elastyczna: 0 zł/mies, płacisz tylko za minuty. Sprawdź widełki cenowe: https://witaline.pl/oferta-indywidualna`,
+  pro: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta elastyczna: 0 zł/mies, płacisz tylko za minuty. Sprawdź widełki cenowe: https://witaline.pl/oferta-indywidualna`,
+  lux: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta elastyczna: 0 zł/mies, płacisz tylko za minuty. Sprawdź widełki cenowe: https://witaline.pl/oferta-indywidualna`,
 };
 
 function extractReservation(data: Record<string, unknown>) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { WITALINE_INTEGRACJE_EMAIL } from "@/lib/constants";
 import WidgetSettings from "./WidgetSettings";
 import WebhookApiSettings from "./WebhookApiSettings";
@@ -42,7 +42,7 @@ const API_ENDPOINTS = [
   { method: "GET", path: "/api/v1/calls", desc: "Lista połączeń (call_logs)" },
   { method: "GET", path: "/api/v1/calls/:id", desc: "Szczegóły połączenia" },
   { method: "GET", path: "/api/v1/leads", desc: "Lista leadów" },
-  { method: "POST", path: "/api/v1/leads", desc: "Utwórz lead" },
+  { method: "GET", path: "/api/v1/reservations", desc: "Lista rezerwacji" },
   { method: "GET", path: "/api/v1/business", desc: "Profil firmy i statystyki" },
   { method: "POST", path: "/api/v1/sms", desc: "Wyślij SMS" },
   { method: "POST", path: "/api/v1/trigger-call", desc: "Zainicjuj rozmowę AI" },
@@ -70,6 +70,36 @@ const WEBHOOK_EVENTS = [
 export default function IntegrationsDashboard({ businessId }: Props) {
   const [activeSection, setActiveSection] = useState<string>("bot");
   const [integrationFilter, setIntegrationFilter] = useState("all");
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiKeyRevealed, setApiKeyRevealed] = useState(false);
+  const [apiKeyLoading, setApiKeyLoading] = useState(false);
+  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+
+  const fetchApiKey = useCallback(async () => {
+    const res = await fetch(`/api/business/api-key?businessId=${businessId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setApiKey(data.apiKey);
+    }
+  }, [businessId]);
+
+  useEffect(() => { fetchApiKey(); }, [fetchApiKey]);
+
+  async function regenerateApiKey() {
+    if (!confirm("Wygenerowanie nowego klucza unieważni stary. Kontynuować?")) return;
+    setApiKeyLoading(true);
+    const res = await fetch("/api/business/api-key", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessId }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setApiKey(data.apiKey);
+      setApiKeyRevealed(true);
+    }
+    setApiKeyLoading(false);
+  }
 
   const sections = [
     { key: "bot", label: "Jak działa bot" },
@@ -170,9 +200,37 @@ export default function IntegrationsDashboard({ businessId }: Props) {
           <div>
             <h2 className="text-lg font-semibold text-zinc-900">REST API v1</h2>
             <p className="text-sm text-zinc-500 mt-1">
-              Programistyczny dostęp do danych WitaLine. Użyj klucza API z sekcji webhook poniżej.
-              Wszystkie zapytania wymagają nagłówka <code className="text-brand-500 bg-brand-50 px-1 rounded">Authorization: Bearer {`<klucz>`}</code>
+              Programistyczny dostęp do danych WitaLine. Wszystkie zapytania wymagają nagłówka <code className="text-brand-500 bg-brand-50 px-1 rounded">Authorization: Bearer {"{klucz}"}</code>
             </p>
+          </div>
+
+          {/* API Key management */}
+          <div className="bg-white rounded-xl border border-zinc-200 p-5">
+            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Klucz API</h3>
+            <div className="flex items-center gap-3">
+              <code className="flex-1 text-xs font-mono bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-700 truncate">
+                {apiKey ? (apiKeyRevealed ? apiKey : "wl_••••••••••••••••••••••••••••••••••••••") : "Brak klucza"}
+              </code>
+              {apiKey && (
+                <button
+                  onClick={() => { setApiKeyRevealed(!apiKeyRevealed); }}
+                  className="text-xs text-zinc-500 hover:text-zinc-700 shrink-0"
+                >
+                  {apiKeyRevealed ? "Ukryj" : "Pokaż"}
+                </button>
+              )}
+              {apiKey && (
+                <button
+                  onClick={async () => { await navigator.clipboard.writeText(apiKey); setApiKeyCopied(true); setTimeout(() => setApiKeyCopied(false), 2000); }}
+                  className="text-xs text-brand-500 hover:text-brand-600 shrink-0"
+                >
+                  {apiKeyCopied ? "Skopiowano!" : "Kopiuj"}
+                </button>
+              )}
+              <button onClick={regenerateApiKey} disabled={apiKeyLoading} className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition shrink-0 disabled:opacity-50">
+                {apiKeyLoading ? "Generowanie..." : apiKey ? "Generuj nowy" : "Wygeneruj klucz"}
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
@@ -202,15 +260,8 @@ export default function IntegrationsDashboard({ businessId }: Props) {
 
           <div className="bg-zinc-50 rounded-xl p-4">
             <p className="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wider">Przykład</p>
-            <pre className="text-xs font-mono text-zinc-700 overflow-x-auto">{`curl -H "Authorization: Bearer wl_twój_klucz" \\
+            <pre className="text-xs font-mono text-zinc-700 overflow-x-auto">{`curl -H "Authorization: Bearer ${apiKey || "wl_twój_klucz"}" \\
   ${origin}/api/v1/calls?limit=10`}</pre>
-          </div>
-
-          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-            <p className="text-xs text-amber-800">
-              <strong>Uwaga:</strong> API jest w fazie rozwojowej. Endpointy i format odpowiedzi mogą się zmieniać.
-              Sugerujemy użycie webhooków do otrzymywania danych w czasie rzeczywistym.
-            </p>
           </div>
         </div>
       )}

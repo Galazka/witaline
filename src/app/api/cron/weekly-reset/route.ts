@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-export async function GET() {
-  const auth = process.env.CRON_SECRET;
-  if (auth && auth !== "dev") {
+function checkCronAuth(request: Request): boolean {
+  const header = request.headers.get("x-internal-secret");
+  if (header === process.env.CRON_SECRET) return true;
+  const { searchParams } = new URL(request.url);
+  return searchParams.get("key") === process.env.CRON_SECRET;
+}
+
+export async function GET(request: Request) {
+  if (!checkCronAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,3 +27,5 @@ export async function GET() {
   console.log(`[cron/weekly-reset] reset ${data?.length || 0} businesses`);
   return NextResponse.json({ ok: true, reset: data?.length || 0 });
 }
+
+export const POST = GET;

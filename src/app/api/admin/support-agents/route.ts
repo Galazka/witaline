@@ -26,16 +26,38 @@ export async function POST(req: NextRequest) {
   if (error) return error;
 
   const body = await req.json();
-  const { user_id, role } = body;
+  const { email, password, user_id, role } = body;
 
-  if (!user_id) {
-    return NextResponse.json({ error: "user_id is required" }, { status: 400 });
+  let targetUserId = user_id;
+
+  if (email && password) {
+    // Check if user already exists in auth.users
+    const { data: existingUser } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+
+    if (existingUser?.user) {
+      targetUserId = existingUser.user.id;
+    } else {
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+
+      if (createErr) {
+        return NextResponse.json({ error: createErr.message }, { status: 500 });
+      }
+      targetUserId = created.user?.id;
+    }
+  }
+
+  if (!targetUserId) {
+    return NextResponse.json({ error: "user_id or email+password is required" }, { status: 400 });
   }
 
   const { data, error: dbError } = await supabaseAdmin
     .from("support_agents")
     .insert({
-      user_id,
+      user_id: targetUserId,
       role: role || "support",
       is_active: true,
     })
@@ -43,6 +65,9 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (dbError) {
+    if (dbError.message.includes("duplicate")) {
+      return NextResponse.json({ error: "User is already a support agent" }, { status: 400 });
+    }
     return NextResponse.json({ error: dbError.message }, { status: 500 });
   }
 

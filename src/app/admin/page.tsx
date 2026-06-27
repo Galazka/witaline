@@ -31,6 +31,7 @@ import AdminWebhookLogs from "@/components/AdminWebhookLogs";
 import AdminEmailConfigurator from "@/components/AdminEmailConfigurator";
 import AdminLiveChat from "@/components/AdminLiveChat";
 import AdminSupportAgents from "@/components/AdminSupportAgents";
+import AdminVerificationManager from "@/components/AdminVerificationManager";
 import { useAdminTab } from "@/components/layout/AdminLayout";
 
 export default function AdminPage() {
@@ -237,8 +238,9 @@ export default function AdminPage() {
       {tab === "numery" && <AdminPhoneStats />}
       {tab === "pricing" && <AdminPricingSimulator />}
       {tab === "email" && <AdminEmailConfigurator />}
-      {tab === "agents" && <AdminSupportAgents />}
-      </div>
+{tab === "agents" && <AdminSupportAgents />}
+       {tab === "verifications" && <AdminVerificationManager />}
+       </div>
     </div>
   );
 
