@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type JSX, useState } from "react";
+import { type JSX, useState, useEffect } from "react";
 import { IconChevronDown, IconChevronLeft } from "./icons";
 
 export interface SidebarItem {
@@ -28,6 +28,19 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const router = useRouter();
+
+  // Auto-expand parent menu if activeKey is a child
+  useEffect(() => {
+    const newExpanded = new Set(expandedMenus);
+    items.forEach(item => {
+      if (item.children?.some(c => c.key === activeKey)) {
+        newExpanded.add(item.key);
+      }
+    });
+    if (newExpanded.size !== expandedMenus.size) {
+      setExpandedMenus(newExpanded);
+    }
+  }, [activeKey, items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When mobileOpen prop is provided, use it (true = open, false = closed)
   const collapsed = mobileOpen !== undefined ? !mobileOpen : internalCollapsed;
