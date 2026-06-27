@@ -12,11 +12,11 @@
   "cron": {
     "auto-topup": {
       "schedule": "*/5 * * * *",
-      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://witaline.railway.app/api/cron/auto-topup"
+      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://www.witaline.pl/api/cron/auto-topup"
     },
     "process-jobs": {
       "schedule": "* * * * *",
-      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://witaline.railway.app/api/cron/process-jobs"
+      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://www.witaline.pl/api/cron/process-jobs"
     }
   }
 }
