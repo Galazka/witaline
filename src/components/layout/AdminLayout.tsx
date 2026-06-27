@@ -142,7 +142,7 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
-        <MobileBottomNav activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} />
+        <MobileBottomNav activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} context="admin" />
       </div>
     </AdminTabContext.Provider>
   );

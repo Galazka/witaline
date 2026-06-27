@@ -6,16 +6,18 @@ import { IconHome, IconPhone, IconMessage, IconSettings } from "./icons";
 interface Props {
   activeKey: string;
   onNavigate: (key: string) => void;
+  context?: "dashboard" | "admin";
 }
 
-export default function MobileBottomNav({ activeKey, onNavigate }: Props) {
+export default function MobileBottomNav({ activeKey, onNavigate, context = "dashboard" }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const getActiveKey = () => {
-    if (pathname.startsWith("/dashboard/calls")) return "calls";
-    if (pathname.startsWith("/dashboard/chats") || pathname.startsWith("/dashboard/conversations")) return "chats";
-    if (pathname.startsWith("/dashboard/config") || pathname.startsWith("/dashboard/security") || pathname.startsWith("/dashboard/account") || pathname.startsWith("/dashboard/integrations") || pathname.startsWith("/dashboard/team")) return "settings";
+const getActiveKey = () => {
+    const base = context === "admin" ? "/admin" : "/dashboard";
+    if (pathname.startsWith(`${base}/calls`)) return "calls";
+    if (pathname.startsWith(`${base}/chats`) || pathname.startsWith(`${base}/conversations`)) return "chats";
+    if (pathname.startsWith(`${base}/config`) || pathname.startsWith(`${base}/security`) || pathname.startsWith(`${base}/account`) || pathname.startsWith(`${base}/integrations`) || pathname.startsWith(`${base}/team`)) return "settings";
     return "dashboard";
   };
 
@@ -28,11 +30,12 @@ export default function MobileBottomNav({ activeKey, onNavigate }: Props) {
 
   const handleClick = (key: string) => {
     onNavigate(key);
+    const base = context === "admin" ? "/admin" : "/dashboard";
     const routes: Record<string, string> = {
-      dashboard: "/dashboard",
-      calls: "/dashboard/calls",
-      chats: "/dashboard/chats",
-      settings: "/dashboard/config",
+      dashboard: base,
+      calls: `${base}/calls`,
+      chats: `${base}/chats`,
+      settings: `${base}/config`,
     };
     if (routes[key]) router.push(routes[key]);
   };
