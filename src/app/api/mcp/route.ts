@@ -35,7 +35,7 @@ const TOOLS = [
   { name: "create_reservation", description: "Utworz rezerwacje/spotkanie. Jesli termin jest zajety, Narzedzie zwroci conflicts i nextSlots — wtedy zapytaj klienta o inny termin z propozycji.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
   { name: "get_services", description: "Pobierz liste uslug firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
   { name: "get_business_hours", description: "Pobierz godziny otwarcia firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
-  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta. Po udanym przekazaniu agent musi sie pozegnac i zakonczyc rozmowe.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id"] } },
+  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta. Gdy firma NIE ma konsultanta, zwraca informacje że agent ma kontynuować rozmowę. W przeciwnym razie agent musi się pożegnać i zakończyć rozmowę.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id"] } },
   { name: "create_checkout", description: "Utworz sesje platnosci Stripe", inputSchema: { type: "object", properties: { plan: { type: "string", description: "Nazwa planu: start/growth/enterprise" }, business_id: { type: "string" } }, required: ["plan", "business_id"] } }
 ];
 
@@ -162,65 +162,73 @@ export async function POST(request: NextRequest) {
         }
       }
 else if (toolName === "transfer_to_human") {
-         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
-         const callerPhone = args.caller_phone || "";
-         const toNumber = args.to_number || "";
-         let callSid = args.call_sid || "";
+          const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+          const callerPhone = args.caller_phone || "";
+          const toNumber = args.to_number || "";
+          let callSid = args.call_sid || "";
 
-         if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
-           const allSids = await getActiveCallSids(bizId);
-           callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
-         }
+          if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
+            const allSids = await getActiveCallSids(bizId);
+            callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
+          }
 
-         // Pobierz informacje o firmie i konsultantach
-         const { data: biz } = await supabaseAdmin
-           .from("businesses")
-           .select("name, twilio_number, phone, system_prompt")
-           .eq("id", bizId)
-           .maybeSingle();
+          // Pobierz informacje o firmie i konsultantach
+          const { data: biz } = await supabaseAdmin
+            .from("businesses")
+            .select("name, twilio_number, phone, system_prompt")
+            .eq("id", bizId)
+            .maybeSingle();
 
-         const { data: consultants } = await supabaseAdmin
-           .from("business_consultants")
-           .select("phone")
-           .eq("business_id", bizId)
-           .order("sort_order", { ascending: true });
+          const { data: consultants } = await supabaseAdmin
+            .from("business_consultants")
+            .select("phone")
+            .eq("business_id", bizId)
+            .order("sort_order", { ascending: true });
 
-         const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
+          const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
 
-         // Czy firma ma własnych konsultantów?
-         const hasOwnConsultant = consultants && consultants.length > 0;
+          // Czy firma ma własnych konsultantów?
+          const hasOwnConsultant = consultants && consultants.length > 0;
 
-         // Numer docelowy: konsultant firmy lub numer WitaLine jako fallback
-         const targetNumber = hasOwnConsultant
-           ? consultants[0].phone
-           : (biz?.phone || process.env.WITALINE_CONSULTANT_NUMBER || process.env.TWILIO_PHONE_NUMBER || "");
+          // Numer docelowy: konsultant firmy lub numer WitaLine jako fallback
+          const targetNumber = hasOwnConsultant
+            ? consultants[0].phone
+            : (biz?.phone || process.env.WITALINE_CONSULTANT_NUMBER || process.env.TWILIO_PHONE_NUMBER || "");
 
-         if (!targetNumber) {
-           result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
-         } else {
-           // Store pending transfer — transfer-router picks this up when ElevenLabs stream ends
-           await setPendingTransfer(callSid || bizId, {
-             businessId: bizId,
-             targetNumber,
-             callerId,
-             businessName: biz?.name || "WitaLine",
-             fromNumber: callerPhone,
-             toNumber,
-             createdAt: Date.now(),
-           });
+          if (!targetNumber) {
+            result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
+          } else if (!hasOwnConsultant) {
+            // Brak konsultanta - agent kontynuuje rozmowę, nie robimy nic
+            console.log("[MCP transfer_to_human] no human consultant for", bizId, "- agent continues");
+            result = JSON.stringify({
+              ok: true,
+              target: targetNumber,
+              business: biz?.name || "WitaLine",
+              has_human_consultant: false,
+              message: "Brak konsultanta w tej firmie. Agent pozostanie w rozmowie. Przekaż ofertę firmy i spytaj, czy klient ma pytania.",
+            });
+          } else {
+            // Store pending transfer — transfer-router picks this up when ElevenLabs stream ends
+            await setPendingTransfer(callSid || bizId, {
+              businessId: bizId,
+              targetNumber,
+              callerId,
+              businessName: biz?.name || "WitaLine",
+              fromNumber: callerPhone,
+              toNumber,
+              createdAt: Date.now(),
+            });
 
-           console.log("[MCP transfer_to_human] stored for", bizId, "->", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
-           result = JSON.stringify({
-             ok: true,
-             target: targetNumber,
-             business: biz?.name || "WitaLine",
-             has_human_consultant: hasOwnConsultant,
-             message: hasOwnConsultant
-               ? "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie."
-               : "Brak konsultanta w tej firmie. Agent pozostanie w rozmowie. Przekaż ofertę firmy i spytaj, czy klient ma pytania.",
-           });
-         }
-       }
+            console.log("[MCP transfer_to_human] stored for", bizId, "->", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
+            result = JSON.stringify({
+              ok: true,
+              target: targetNumber,
+              business: biz?.name || "WitaLine",
+              has_human_consultant: true,
+              message: "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie.",
+            });
+          }
+        }
       else if (toolName === "create_checkout") {
         const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
         const plan = args.plan || "growth";
