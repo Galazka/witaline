@@ -137,7 +137,7 @@ export default function FloatingWidget() {
           backgroundColor: open ? "#27272a" : "#0d9488",
           boxShadow: open
             ? "0 4px 24px rgba(0,0,0,0.25)"
-            : "0 0 0 6px rgba(60,191,74,0.2), 0 12px 40px rgba(60,191,74,0.35)",
+            : "0 0 0 6px rgba(13,148,136,0.2), 0 12px 40px rgba(13,148,136,0.35)",
         }}
         aria-label={open ? "Zamknij widget" : "Otworz widget WitaLine"}
       >

@@ -14,12 +14,12 @@ const COLOR_CONFIG: Record<
   string,
   { bg: string; glow: string; text: string; ring: string }
 > = {
-  brand: {
-    bg: "bg-[#0d9488]/15",
-    glow: "rgba(60,191,74,0.35)",
-    text: "text-[#0d9488]",
-    ring: "ring-[#0d9488]/30",
-  },
+brand: {
+     bg: "bg-[#0d9488]/15",
+     glow: "rgba(13,148,136,0.35)",
+     text: "text-[#0d9488]",
+     ring: "ring-[#0d9488]/30",
+   },
   amber: {
     bg: "bg-amber-400/15",
     glow: "rgba(245,158,11,0.35)",
