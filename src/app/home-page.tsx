@@ -8,6 +8,7 @@ import DemoAudioPlayer from "@/components/DemoAudioPlayer";
 import SavingsCalculator from "@/components/SavingsCalculator";
 import { WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { IconSun, IconMoon } from "@/components/layout/icons";
 import PricingSection from "@/components/PricingSection";
 import { t, initLocale, getLocale, translations_raw, type Locale } from "@/lib/i18n";
 import { BuildingIcon, PhoneIcon, BankIcon, LightningIcon, StarIcon, HeartIcon, WriteIcon, LinkIcon, BotIcon, MicIcon, BrainIcon, CloudIcon, HeadphonesIcon, EnvelopeIcon, PinIcon, ShieldIcon } from "@/components/ui/Icons";
@@ -123,21 +124,21 @@ function FaqSection({ faqItems: items, locale }: { faqItems: { q: string; a: str
     <div className="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
       <div className="lg:col-span-2 space-y-3">
         {visible.map((item, i) => (
-          <details key={item.q} className="group bg-white border border-zinc-200 rounded-2xl hover:border-brand-200 hover:shadow-sm transition-all open:border-brand-200 open:shadow-sm">
-            <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none text-sm font-medium text-zinc-900 select-none">
+          <details key={item.q} className="group bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl hover:border-brand-200 hover:shadow-sm transition-all open:border-brand-200 open:shadow-sm">
+            <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none text-sm font-medium text-zinc-900 dark:text-zinc-100 select-none">
               <span className="flex items-center gap-3">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-[#0d9488] text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                <span className="w-6 h-6 rounded-lg bg-brand-50 dark:bg-brand-900 text-[#0d9488] text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
                 {item.q}
               </span>
-              <svg className="w-5 h-5 text-zinc-400 group-open:rotate-180 transition-transform shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              <svg className="w-5 h-5 text-zinc-400 dark:text-zinc-500 group-open:rotate-180 transition-transform shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </summary>
-            <div className="px-5 pb-4 pt-3 text-sm text-zinc-500 leading-relaxed border-t border-zinc-100">{item.a}</div>
+            <div className="px-5 pb-4 pt-3 text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-brand-800">{item.a}</div>
           </details>
         ))}
         {items.length > 6 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className="w-full text-center py-3 text-sm font-medium text-[#0d9488] hover:text-[#0d9488] bg-white border border-dashed border-zinc-200 rounded-2xl hover:border-brand-200 transition-all"
+            className="w-full text-center py-3 text-sm font-medium text-[#0d9488] hover:text-[#0d9488] bg-white dark:bg-brand-900 border border-dashed border-zinc-200 dark:border-brand-700 rounded-2xl hover:border-brand-200 transition-all"
           >
             {showAll
               ? (locale === "en" ? "Show less ↑" : "Pokaż mniej ↑")
@@ -147,14 +148,14 @@ function FaqSection({ faqItems: items, locale }: { faqItems: { q: string; a: str
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-24">
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 text-center">
-          <div className="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+        <div className="bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 text-center">
+          <div className="w-12 h-12 bg-brand-50 dark:bg-brand-900 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <svg className="w-6 h-6 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
           </div>
-          <p className="font-semibold text-zinc-900 mb-1">{locale === "en" ? "Still have questions?" : "Masz więcej pytań?"}</p>
-          <p className="text-xs text-zinc-500 mb-4">{locale === "en" ? "We reply within 15 minutes" : "Oddzwonimy w 15 minut"}</p>
+          <p className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{locale === "en" ? "Still have questions?" : "Masz więcej pytań?"}</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">{locale === "en" ? "We reply within 15 minutes" : "Oddzwonimy w 15 minut"}</p>
           <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="block w-full bg-[#0d9488] text-white py-2.5 rounded-xl font-medium text-sm hover:bg-[#0f766e] transition mb-2">{WITALINE_PHONE_DISPLAY}</a>
           <a href="#kontakt" className="block w-full text-zinc-600 py-2.5 rounded-xl font-medium text-sm border border-zinc-200 hover:border-zinc-300 hover:bg-[#f0fdfa] transition">{locale === "en" ? "Write to us" : "Napisz do nas"}</a>
         </div>
@@ -295,7 +296,7 @@ export default function HomePage() {
               className="p-2 rounded-lg hover:bg-white/5 text-white/50 hover:text-white/80 transition-colors"
               aria-label={darkMode ? 'Tryb jasny' : 'Tryb ciemny'}
             >
-              {darkMode ? '☀️' : '🌙'}
+              {darkMode ? <IconSun className="w-4 h-4" /> : <IconMoon className="w-4 h-4" />}
             </button>
             <LanguageSwitcher />
             <Link href="/login" className="hidden sm:inline-flex text-sm text-zinc-300 hover:text-white transition-colors font-medium px-3 py-2">Zaloguj</Link>
@@ -371,14 +372,14 @@ export default function HomePage() {
 
         {/* Dashboard screenshot mockup */}
         <AnimatedDiv delay={400} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative">
-          <div className="card-lift bg-white rounded-2xl border border-zinc-200/60 shadow-xl shadow-zinc-200/40 overflow-hidden glow-lg">
-            <div className="bg-zinc-50/90 border-b border-zinc-200/50 px-4 py-2.5 flex items-center gap-2">
+          <div className="card-lift bg-white dark:bg-brand-900 rounded-2xl border border-zinc-200/60 dark:border-brand-700/60 shadow-xl dark:shadow-brand-950/40 overflow-hidden glow-lg">
+            <div className="bg-zinc-50/90 dark:bg-brand-950/50 border-b border-zinc-200/50 dark:border-brand-700/50 px-4 py-2.5 flex items-center gap-2">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-400/80" />
                 <div className="w-3 h-3 rounded-full bg-amber-400/80" />
                 <div className="w-3 h-3 rounded-full bg-green-400/80" />
               </div>
-              <span className="text-[10px] text-zinc-400 font-mono ml-2 tracking-wide">Panel WitaLine — statystyki</span>
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono ml-2 tracking-wide">Panel WitaLine — statystyki</span>
             </div>
             <div className="p-4 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
@@ -387,10 +388,10 @@ export default function HomePage() {
                 ["Rozpoznanych intencji", "94.2%", "wzrost o 5.1%", "text-green-600"],
                 ["Oszczędności", "~4,200 zł", "vs koszt etatu", "text-[#0d9488]"],
               ].map(([label, value, sub, color]) => (
-                <div key={label} className="bg-zinc-50 rounded-xl p-3 md:p-4 hover:bg-[#0d9488]/5 transition-colors">
-                  <p className="text-[10px] text-zinc-400 uppercase tracking-wider">{label}</p>
+                <div key={label} className="bg-zinc-50 dark:bg-brand-950 rounded-xl p-3 md:p-4 hover:bg-[#0d9488]/5 dark:hover:bg-brand-800 transition-colors">
+                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{label}</p>
                   <p className={`text-xl md:text-2xl font-bold ${color} font-display mt-1`}>{value}</p>
-                  <p className="text-[10px] text-zinc-400">{sub}</p>
+                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{sub}</p>
                 </div>
               ))}
             </div>
@@ -399,7 +400,7 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === TRUST BAR === */}
-      <AnimatedSection className="bg-gradient-to-r from-white via-brand-50/10 to-white border-b border-zinc-100 py-8 overflow-hidden">
+      <AnimatedSection className="bg-gradient-to-r from-white dark:from-brand-950 via-brand-50/10 dark:via-white/[0.03] to-white dark:to-brand-950 border-b border-zinc-100 dark:border-brand-700 py-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-zinc-400 stagger">
             <span className="text-zinc-500 font-semibold text-xs uppercase tracking-widest">Zaufany przez</span>
@@ -420,13 +421,13 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === JAK DZIAŁA === */}
-      <AnimatedSection id="jak-dziala" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
+      <AnimatedSection id="jak-dziala" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-50/20 rounded-full blur-3xl" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12 md:mb-16">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Jak działa</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Twój asystent w <span className="gradient-text">3 krokach</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Ustaw przekierowanie nieodebranych — asystent głosowy robi resztę</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Twój asystent w <span className="gradient-text">3 krokach</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Ustaw przekierowanie nieodebranych — asystent głosowy robi resztę</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 mb-16 stagger">
               {[
@@ -434,34 +435,34 @@ export default function HomePage() {
                 { step: "2", title: "Przekieruj połączenia", desc: "Ustaw przekierowanie nieodebranych na numer WitaLine. Zajmuje 30 sekund u operatora.", icon: "link" },
                 { step: "3", title: "Asystent odbiera 24/7", desc: "Asystent rozmawia z klientami, zbiera leady, przyjmuje zamówienia. Raport na email każdego ranka.", icon: "bot" },
               ].map((item) => (
-                <div key={item.step} className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg hover:shadow-[#0d9488]/10 transition-all">
-                  <span className="text-[#0d9488] mb-4 block">{item.icon === "write" ? <WriteIcon className="w-7 h-7" /> : item.icon === "link" ? <LinkIcon className="w-7 h-7" /> : <BotIcon className="w-7 h-7" />}</span>
-                <div className="w-8 h-8 gradient-brand-soft rounded-xl flex items-center justify-center text-[#0d9488] font-bold text-sm mb-3">{item.step}</div>
-                <h3 className="font-semibold text-zinc-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
-              </div>
+                <div key={item.step} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg hover:shadow-[#0d9488]/10 transition-all">
+          <span className="text-[#0d9488] mb-4 block">{item.icon === "write" ? <WriteIcon className="w-7 h-7" /> : item.icon === "link" ? <LinkIcon className="w-7 h-7" /> : <BotIcon className="w-7 h-7" />}</span>
+        <div className="w-8 h-8 gradient-brand-soft rounded-xl flex items-center justify-center text-[#0d9488] font-bold text-sm mb-3">{item.step}</div>
+        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{item.title}</h3>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
+      </div>
             ))}
           </div>
 
           {/* Problem stat boxes */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto stagger">
-            {[
-              ["3 na 10", "klientów nie zostawia", "głosówki po godzinach"],
-              ["~5600 zł", "kosztuje etat recepcjonisty", "z składkami ZUS"],
-              ["<15 min", "średni czas oddzwonienia", "klient już u konkurencji"],
-            ].map(([num, title, desc]) => (
-              <div key={title} className="card-lift bg-gradient-to-br from-white to-red-50/20 border border-zinc-200 rounded-2xl p-6 text-center hover:border-red-200 hover:shadow-sm transition-all">
-                <p className="text-3xl md:text-4xl font-bold text-red-500 mb-2 font-display">{num}</p>
-                <p className="text-sm font-semibold text-zinc-900 mb-1">{title}</p>
-                <p className="text-xs text-zinc-400">{desc}</p>
-              </div>
-            ))}
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto stagger">
+              {[
+                ["3 na 10", "klientów nie zostawia", "głosówki po godzinach"],
+                ["~5600 zł", "kosztuje etat recepcjonisty", "z składkami ZUS"],
+                ["<15 min", "średni czas oddzwonienia", "klient już u konkurencji"],
+              ].map(([num, title, desc]) => (
+                <div key={title} className="card-lift bg-gradient-to-br from-white dark:from-brand-900 to-red-50/20 dark:to-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 text-center hover:border-red-200 hover:shadow-sm transition-all">
+                  <p className="text-3xl md:text-4xl font-bold text-red-500 mb-2 font-display">{num}</p>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{title}</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">{desc}</p>
+                </div>
+              ))}
+            </div>
         </div>
       </AnimatedSection>
 
       {/* === DEMO AUDIO === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white relative">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 relative">
         <div className="max-w-3xl mx-auto text-center">
           <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Posłuchaj</span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Jak brzmi <span className="gradient-text">WitaLine</span>?</h2>
@@ -471,20 +472,20 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === TECHNOLOGIA === */}
-      <AnimatedSection id="technologia" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 border-y border-zinc-100 relative overflow-hidden">
+      <AnimatedSection id="technologia" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-y border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-brand-100/10 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12 md:mb-16">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Technologia</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Najlepsza technologia pod <span className="gradient-text">jednym numerem</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Łączymy najlepsze technologie, aby asystent brzmiał i rozumiał jak człowiek</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Najlepsza technologia pod <span className="gradient-text">jednym numerem</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Łączymy najlepsze technologie, aby asystent brzmiał i rozumiał jak człowiek</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-12 stagger">
-            <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
               <span className="text-[#0d9488] mb-3 block"><MicIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 mb-3">Synteza mowy nowej generacji</h3>
-              <ul className="space-y-2 text-sm text-zinc-600">
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Synteza mowy nowej generacji</h3>
+              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
                 {[
                   "Ponad 10 000 naturalnie brzmiących głosów",
                   "Latencja odpowiedzi poniżej 100 ms",
@@ -501,10 +502,10 @@ export default function HomePage() {
               </ul>
             </div>
 
-            <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
               <span className="text-[#0d9488] mb-3 block"><BrainIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 mb-3">Model językowy — inteligencja rozmowy</h3>
-              <ul className="space-y-2 text-sm text-zinc-600">
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Model językowy — inteligencja rozmowy</h3>
+              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
                 {[
                   "Elastyczny wybór modelu konwersacji dopasowany do zadania",
                   "Rozumienie intencji, emocji i kontekstu rozmowy",
@@ -521,10 +522,10 @@ export default function HomePage() {
               </ul>
             </div>
 
-            <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
               <span className="text-[#0d9488] mb-3 block"><PhoneIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 mb-3">Niezawodna infrastruktura telefoniczna</h3>
-              <ul className="space-y-2 text-sm text-zinc-600">
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Niezawodna infrastruktura telefoniczna</h3>
+              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
                 {[
                   "Globalna sieć telekomunikacyjna (SIP, PSTN)",
                   "Numery stacjonarne i komórkowe (+48)",
@@ -541,10 +542,10 @@ export default function HomePage() {
               </ul>
             </div>
 
-            <div className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
               <span className="text-[#0d9488] mb-3 block"><CloudIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 mb-3">Bezpieczeństwo i skalowanie</h3>
-              <ul className="space-y-2 text-sm text-zinc-600">
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Bezpieczeństwo i skalowanie</h3>
+              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
                 {[
                   "Serwery w UE (region Frankfurt)",
                   "Pełna zgodność z RODO i polskim prawem",
@@ -563,8 +564,8 @@ export default function HomePage() {
           </div>
 
           {/* Tech stack visual */}
-          <div className="bg-gradient-to-r from-brand-50 to-white border border-brand-100 rounded-2xl p-6 md:p-8 glow-brand">
-            <p className="text-sm font-semibold text-zinc-700 mb-4 text-center">Jak przebiega rozmowa — krok po kroku</p>
+          <div className="bg-gradient-to-r from-brand-50 dark:from-brand-900 to-white dark:to-brand-900 border border-brand-100 dark:border-brand-700 rounded-2xl p-6 md:p-8 glow-brand">
+            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-4 text-center">Jak przebiega rozmowa — krok po kroku</p>
             <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
               {[
                 { icon: <PhoneIcon className="w-4 h-4" />, label: "Klient dzwoni", sub: "PSTN / VoIP" },
@@ -574,11 +575,11 @@ export default function HomePage() {
                 { icon: <PhoneIcon className="w-4 h-4" />, label: "Klient słyszy", sub: "<2 sekundy" },
               ].map((step, i) => (
                 <div key={step.label} className="flex items-center gap-2">
-                  <div className="bg-white border border-brand-100 rounded-xl px-4 py-2.5 text-center shadow-sm hover:shadow-md transition-shadow">
-                    <p className="text-xs font-semibold text-brand-700 whitespace-nowrap flex items-center gap-1.5 justify-center">{step.icon}{step.label}</p>
-                    <p className="text-[10px] text-[#0d9488]/70">{step.sub}</p>
+                  <div className="bg-white dark:bg-brand-900 border border-brand-100 dark:border-brand-700 rounded-xl px-4 py-2.5 text-center shadow-sm hover:shadow-md transition-shadow">
+                    <p className="text-xs font-semibold text-brand-700 dark:text-brand-300 whitespace-nowrap flex items-center gap-1.5 justify-center">{step.icon}{step.label}</p>
+                    <p className="text-[10px] text-[#0d9488]/70 dark:text-brand-400">{step.sub}</p>
                   </div>
-                  {i < 4 && <span className="text-brand-200 text-lg hidden sm:inline">→</span>}
+                  {i < 4 && <span className="text-brand-200 dark:text-brand-600 text-lg hidden sm:inline">→</span>}
                 </div>
               ))}
             </div>
@@ -587,24 +588,24 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === KALKULATOR OSZCZEDNOSCI === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 border-t border-zinc-100 relative overflow-hidden">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="max-w-4xl mx-auto relative">
           <div className="text-center mb-10">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Kalkulator</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Ile <span className="gradient-text">oszczędzasz</span>?</h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Porównaj koszt recepcjonisty z automatyczną recepcją WitaLine</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Ile <span className="gradient-text">oszczędzasz</span>?</h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Porównaj koszt recepcjonisty z automatyczną recepcją WitaLine</p>
           </div>
           <SavingsCalculator />
         </div>
       </AnimatedSection>
 
       {/* === PRZENOSZENIE NUMERU === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-zinc-100 relative overflow-hidden">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Przenoszenie</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Przenieś swój numer <span className="gradient-text">w 5 dni</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Zachowaj dotychczasowy numer — proces przenoszenia jest prosty i bezstresowy</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Przenieś swój numer <span className="gradient-text">w 5 dni</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Zachowaj dotychczasowy numer — proces przenoszenia jest prosty i bezstresowy</p>
           </div>
           <div className="grid md:grid-cols-4 gap-4 md:gap-6 stagger">
             {[
@@ -613,30 +614,30 @@ export default function HomePage() {
               { step: "3", title: "Proces u operatora", desc: "Operator rozpoczyna procedurę przeniesienia. Trwa do 5 dni roboczych. My monitorujemy postęp.", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
               { step: "4", title: "Gotowe", desc: "Numer aktywny na WitaLine. Wszystkie rozmowy obsługiwane przez asystenta AI 24/7.", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
             ].map((item) => (
-              <div key={item.step} className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
+              <div key={item.step} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
                 <div className="w-12 h-12 gradient-brand-soft rounded-2xl flex items-center justify-center text-[#0d9488] mx-auto mb-3">{item.icon}</div>
                 <div className="w-7 h-7 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">{item.step}</div>
-                <h3 className="font-semibold text-zinc-900 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-zinc-400 text-center mt-6">Nie masz jeszcze własnego numeru? Otrzymasz nowy numer +48 w pakiecie — aktywacja w 15 minut.</p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center mt-6">Nie masz jeszcze własnego numeru? Otrzymasz nowy numer +48 w pakiecie — aktywacja w 15 minut.</p>
         </div>
       </AnimatedSection>
 
       {/* === POROWNANIE === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 border-t border-zinc-100 relative overflow-hidden">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Porównanie</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">WitaLine vs <span className="gradient-text">tradycyjne rozwiązania</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Zobacz jak wypadamy na tle alternatyw</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">WitaLine vs <span className="gradient-text">tradycyjne rozwiązania</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Zobacz jak wypadamy na tle alternatyw</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-zinc-200">
+                <tr className="border-b-2 border-zinc-200 dark:border-brand-700">
                   <th className="text-left py-3 pr-4 text-zinc-500 font-medium">Funkcja</th>
                   <th className="text-center py-3 px-3 bg-[#ccfbf1] text-[#065f46] font-semibold rounded-t-xl">WitaLine</th>
                   <th className="text-center py-3 px-3 text-zinc-500 font-medium">Tradycyjne IVR</th>
@@ -657,58 +658,58 @@ export default function HomePage() {
                   ["SMS", "Tak", "Nie", "Nie", "Tak (dodatkowo)"],
                   ["Własny prompt AI", "Tak", "Nie", "Nie", "Nie"],
                 ].map(([feature, witaline, ivr, rec, ct]) => (
-                  <tr key={feature} className="border-b border-zinc-100 hover:bg-zinc-50/50 transition">
-                    <td className="py-2.5 pr-4 text-zinc-700 font-medium">{feature}</td>
+                  <tr key={feature} className="border-b border-zinc-100 dark:border-brand-800 hover:bg-zinc-50/50 dark:hover:bg-brand-900/50 transition">
+                    <td className="py-2.5 pr-4 text-zinc-700 dark:text-zinc-300 font-medium">{feature}</td>
                     <td className="text-center py-2.5 px-3 text-[#0d9488] font-semibold">{witaline}</td>
-                    <td className="text-center py-2.5 px-3 text-zinc-500">{ivr}</td>
-                    <td className="text-center py-2.5 px-3 text-zinc-500">{rec}</td>
-                    <td className="text-center py-2.5 pl-3 text-zinc-500">{ct}</td>
+                    <td className="text-center py-2.5 px-3 text-zinc-500 dark:text-zinc-400">{ivr}</td>
+                    <td className="text-center py-2.5 px-3 text-zinc-500 dark:text-zinc-400">{rec}</td>
+                    <td className="text-center py-2.5 pl-3 text-zinc-500 dark:text-zinc-400">{ct}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-zinc-400 text-center mt-4">Ceny orientacyjne, mogą się różnić w zależności od dostawcy i konfiguracji.</p>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center mt-4">Ceny orientacyjne, mogą się różnić w zależności od dostawcy i konfiguracji.</p>
         </div>
       </AnimatedSection>
 
       {/* === CASE STUDIES === */}
-      <AnimatedSection id="case-studies" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden">
+      <AnimatedSection id="case-studies" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 relative overflow-hidden">
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-brand-50/30 rounded-full blur-3xl" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12 md:mb-16">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Wdrożenia</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Sprawdzone <span className="gradient-text">w biznesie</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Realne przypadki, konkretne liczby — jak WitaLine zmienia obsługę klienta</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Sprawdzone <span className="gradient-text">w biznesie</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Realne przypadki, konkretne liczby — jak WitaLine zmienia obsługę klienta</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 stagger">
             {caseStudies.map((cs) => (
-              <div key={cs.title} className="card-lift bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:border-brand-200 hover:shadow-lg transition-all group">
+              <div key={cs.title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl overflow-hidden hover:border-brand-200 hover:shadow-lg transition-all group">
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-[#0d9488]">{cs.icon === "building" ? <BuildingIcon className="w-6 h-6" /> : cs.icon === "phone" ? <PhoneIcon className="w-6 h-6" /> : <BankIcon className="w-6 h-6" />}</span>
                     <div>
-                      <h3 className="font-bold text-zinc-900">{cs.title}</h3>
-                      <p className="text-xs text-zinc-400">{cs.domain}</p>
+                      <h3 className="font-bold text-zinc-900 dark:text-zinc-100">{cs.title}</h3>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500">{cs.domain}</p>
                     </div>
                   </div>
                   <details className="group/cs">
-                    <summary className="text-sm text-zinc-500 leading-relaxed cursor-pointer list-none marker:content-none">
-                      <span className="text-zinc-400 text-xs font-semibold uppercase tracking-wider block mb-1">Wyzwanie</span>
+                    <summary className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed cursor-pointer list-none marker:content-none">
+                      <span className="text-zinc-400 dark:text-zinc-500 text-xs font-semibold uppercase tracking-wider block mb-1">Wyzwanie</span>
                       {cs.challenge}
                     </summary>
-                    <div className="mt-3 space-y-3 pt-3 border-t border-zinc-100">
+                    <div className="mt-3 space-y-3 pt-3 border-t border-zinc-100 dark:border-brand-800">
                       <div>
-                        <span className="text-zinc-400 text-xs font-semibold uppercase tracking-wider block mb-1">Rozwiązanie</span>
-                        <p className="text-sm text-zinc-500">{cs.solution}</p>
+                        <span className="text-zinc-400 dark:text-zinc-500 text-xs font-semibold uppercase tracking-wider block mb-1">Rozwiązanie</span>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">{cs.solution}</p>
                       </div>
                       <div>
-                        <span className="text-green-600 text-xs font-semibold uppercase tracking-wider block mb-1">Efekty</span>
+                        <span className="text-green-600 dark:text-green-400 text-xs font-semibold uppercase tracking-wider block mb-1">Efekty</span>
                         <ul className="space-y-1">
                           {cs.results.map((r) => (
-                            <li key={r} className="text-sm text-green-700 flex items-start gap-1.5">
-                              <span className="text-green-500 mt-0.5">✓</span>
+                            <li key={r} className="text-sm text-green-700 dark:text-green-400 flex items-start gap-1.5">
+                              <span className="text-green-500 dark:text-green-400 mt-0.5">✓</span>
                               {r}
                             </li>
                           ))}
@@ -731,16 +732,16 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === CO ZYSKUJESZ === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 relative overflow-hidden">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-72 h-72 bg-brand-100/20 rounded-full blur-3xl" />
         <div className="max-w-5xl mx-auto relative">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-zinc-900 mb-4 font-display tracking-tight">{tr.benefits.title}</h2>
-          <p className="text-center text-zinc-500 mb-12 md:mb-16 max-w-2xl mx-auto">{tr.benefits.subtitle}</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">{tr.benefits.title}</h2>
+          <p className="text-center text-zinc-500 dark:text-zinc-400 mb-12 md:mb-16 max-w-2xl mx-auto">{tr.benefits.subtitle}</p>
           <div className="grid sm:grid-cols-2 gap-4 md:gap-6 stagger">
             {tr.benefits.items.map(([title, desc]) => (
-              <div key={title} className="card-lift bg-white border border-zinc-200 rounded-2xl p-5 md:p-6 flex gap-4 items-start hover:border-brand-200 hover:shadow-sm transition-all">
+              <div key={title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-5 md:p-6 flex gap-4 items-start hover:border-brand-200 hover:shadow-sm transition-all">
                 <div className="w-10 h-10 gradient-brand-soft rounded-xl flex items-center justify-center shrink-0"><CheckIcon /></div>
-                <div><h3 className="font-semibold text-zinc-900 mb-1 text-sm md:text-base">{title}</h3><p className="text-sm text-zinc-500 leading-relaxed">{desc}</p></div>
+                <div><h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 text-sm md:text-base">{title}</h3><p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{desc}</p></div>
               </div>
             ))}
           </div>
@@ -748,13 +749,13 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === BEZPIECZEŃSTWO I RODO === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-zinc-100 relative overflow-hidden">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-72 h-72 bg-brand-50/30 rounded-full blur-3xl" />
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12 md:mb-16">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Bezpieczeństwo</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Twoje dane są <span className="gradient-text">bezpieczne</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">Pełna zgodność z RODO, europejskie serwery i szyfrowanie na każdym etapie</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Twoje dane są <span className="gradient-text">bezpieczne</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Pełna zgodność z RODO, europejskie serwery i szyfrowanie na każdym etapie</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 stagger">
             {[
@@ -765,10 +766,10 @@ export default function HomePage() {
               { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, title: "Backup i DR", desc: "Automatyczne kopie zapasowe co 6 godzin. Plan disaster recovery z RTO poniżej 15 minut." },
               { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>, title: "Kontrola dostępu", desc: "Dostęp na zasadzie least privilege. Logowanie dwuskładnikowe (2FA) dla wszystkich kont administracyjnych." },
             ].map((item) => (
-              <div key={item.title} className="card-lift bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg transition-all">
+              <div key={item.title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg transition-all">
                 <div className="w-12 h-12 gradient-brand-soft rounded-2xl flex items-center justify-center text-[#0d9488] mb-4">{item.icon}</div>
-                <h3 className="font-semibold text-zinc-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{item.title}</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -776,13 +777,13 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === INTEGRACJE === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 border-t border-zinc-100 relative overflow-hidden">
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-brand-100/20 rounded-full blur-3xl" />
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12 md:mb-16">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Integracje</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Łączy się z Twoimi <span className="gradient-text">narzędziami</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">WitaLine integruje się z popularnymi CRM, kalendarzami i systemami, których używasz na co dzień</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Łączy się z Twoimi <span className="gradient-text">narzędziami</span></h2>
+            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">WitaLine integruje się z popularnymi CRM, kalendarzami i systemami, których używasz na co dzień</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 stagger">
             {[
@@ -795,10 +796,10 @@ export default function HomePage() {
               { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>, title: "Zapier / Make", desc: "Konfiguruj automatyzacje bez kodowania — setki gotowych integracji" },
               { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>, title: "Własny CRM", desc: "Integracja z dowolnym CRM przez API — dedykowane wdrożenie dla Enterprise" },
             ].map((item) => (
-              <div key={item.title} className="card-lift bg-white border border-zinc-200 rounded-2xl p-5 md:p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
+              <div key={item.title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-5 md:p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
                 <div className="w-14 h-14 gradient-brand-soft rounded-2xl flex items-center justify-center text-[#0d9488] mx-auto mb-3">{item.icon}</div>
-                <h3 className="font-semibold text-zinc-900 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -848,38 +849,41 @@ export default function HomePage() {
         <PricingSection tr={tr.pricing} locale={localeState} />
       </AnimatedSection>
 
-      {/* === BLOG === */}
-      <AnimatedSection id="blog" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-zinc-100 relative overflow-hidden">
+{/* === BLOG === */}
+      <AnimatedSection id="blog" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50/30 rounded-full blur-3xl" />
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12">
             <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Blog</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 font-display tracking-tight">Wiedza o <span className="gradient-text">automatycznej recepcji</span></h2>
-            <p className="text-zinc-500 mt-3 max-w-xl mx-auto">Technologia, case studies, analizy i porady — wszystko o automatyzacji obsługi telefonicznej</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-zinc-100 font-display tracking-tight">Wiedza o <span className="gradient-text">automatycznej recepcji</span></h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-3 max-w-xl mx-auto">Technologia, case studies, analizy i porady — wszystko o automatyzacji obsługi telefonicznej</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 stagger">
             {blogPosts.map((post) => (
-              <a key={post.title} href={post.href} className="card-lift group bg-white border border-zinc-200 rounded-2xl p-6 hover:border-brand-200 hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 text-[10px] text-zinc-400 uppercase tracking-wider mb-3">
-                  <span className="bg-brand-50 px-2 py-1 rounded-md">{post.date}</span>
+              <a key={post.title} href={post.href} className="card-lift group bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 hover:border-brand-200 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3 text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
+                  <span className="bg-brand-50 dark:bg-brand-900 px-2 py-1 rounded-md">{post.date}</span>
                   <span>{post.readTime}</span>
                 </div>
-                <h3 className="font-bold text-zinc-900 mb-2 group-hover:text-[#0d9488] transition-colors text-sm leading-snug">{post.title}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed">{post.desc}</p>
+                <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-2 group-hover:text-[#0d9488] transition-colors text-sm leading-snug">{post.title}</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{post.desc}</p>
                 <span className="inline-block mt-4 text-xs font-medium text-[#0d9488] group-hover:text-[#0d9488] transition-colors">Czytaj więcej →</span>
               </a>
             ))}
           </div>
-          <div className="text-center mt-8">
-            <div className="text-center mt-8">
-              <a href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-[#0d9488] hover:text-[#0d9488] transition">
-                Zobacz wszystkie artykuły
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </a>
-            </div>
+        </div>
+      </AnimatedSection>
+
+      {/* === FAQ === */}
+      <AnimatedSection id="faq" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-brand-50/40 rounded-full blur-3xl" />
+        <div className="max-w-6xl mx-auto relative">
+          <div className="text-center mb-12">
+            <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-[#0d9488] bg-brand-100 dark:bg-brand-900 px-3 py-1 rounded-full mb-3">{tr.faq.overline}</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-zinc-100 font-display tracking-tight">{tr.faq.title}</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-3 max-w-xl mx-auto">Wszystko co musisz wiedzieć zanim zaczniesz</p>
           </div>
+          <FaqSection faqItems={faqItems} locale={localeState} />
         </div>
       </AnimatedSection>
 

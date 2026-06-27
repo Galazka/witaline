@@ -1,7 +1,7 @@
 "use client";
 
-import { type JSX } from "react";
-import { IconMenu, IconUser, IconLogout } from "./icons";
+import { useState, useEffect, type JSX } from "react";
+import { IconMenu, IconUser, IconLogout, IconSun, IconMoon } from "./icons";
 import NotificationDropdown from "@/components/NotificationDropdown";
 
 interface Props {
@@ -16,6 +16,16 @@ interface Props {
 }
 
 export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLogout, actions, notificationContext, notificationBusinessId }: Props) {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
     <header className="h-16 bg-[#0c1929] border-b border-white/5 sticky top-0 z-40">
       <div className="h-full px-4 lg:px-6 flex items-center justify-between gap-4">
@@ -32,6 +42,13 @@ export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLog
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
+            aria-label={darkMode ? 'Tryb jasny' : 'Tryb ciemny'}
+          >
+            {darkMode ? <IconSun className="w-4 h-4" /> : <IconMoon className="w-4 h-4" />}
+          </button>
           {actions}
           {notificationContext && (
             <NotificationDropdown context={notificationContext} businessId={notificationBusinessId} />
