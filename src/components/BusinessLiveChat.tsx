@@ -26,6 +26,7 @@ interface Message {
   role: "user" | "assistant" | "human" | "system";
   content: string;
   created_at: string;
+  conversation_id?: string;
 }
 
 function timeAgo(dateStr: string): string {
@@ -63,14 +64,15 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
           const newMsg = payload.new as Message;
           setMessages((prev) => {
             if (prev.some((m) => m.id === newMsg.id)) return prev;
-            if (selected && newMsg.role !== "human") return [...prev, newMsg];
+            if (selected && newMsg.conversation_id === selected.id) return [...prev, newMsg];
             return prev;
           });
+          fetchConversations();
         }
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [businessId]);
+  }, [businessId, selected?.id]);
 
   useEffect(() => { fetchConversations(); }, [businessId, filters]);
 
@@ -293,22 +295,31 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
               </div>
 
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-                {messages.map((msg) => (
-                  <div key={msg.id}
-                    className={`flex ${msg.role === "user" || msg.role === "human" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === "user" ? "bg-[#0d9488] text-white rounded-br-md" :
-                      msg.role === "human" ? "bg-brand-200 text-zinc-800 rounded-br-md" :
-                      "bg-brand-50 text-zinc-800 rounded-bl-md"
-                    }`}>
-                      {msg.role === "human" && <div className="text-[10px] font-semibold text-brand-700 mb-0.5">Konsultant</div>}
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
-                      <div className={`text-[10px] mt-1 ${msg.role === "user" ? "text-white/60" : "text-zinc-400"}`}>
-                        {new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}
+                {messages.map((msg, idx) => {
+                  const showDate = idx === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[idx - 1].created_at).toDateString();
+                  return (
+                  <div key={msg.id}>
+                    {showDate && (
+                      <div className="text-center text-[10px] text-zinc-400 mb-2 mt-1">
+                        {new Date(msg.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
+                      </div>
+                    )}
+                    <div className={`flex ${msg.role === "user" || msg.role === "human" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
+                        msg.role === "user" ? "bg-[#0d9488] text-white rounded-br-md" :
+                        msg.role === "human" ? "bg-brand-200 text-zinc-800 rounded-br-md" :
+                        "bg-brand-50 text-zinc-800 rounded-bl-md"
+                      }`}>
+                        {msg.role === "human" && <div className="text-[10px] font-semibold text-brand-700 mb-0.5">Konsultant</div>}
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                        <div className={`text-[10px] mt-1 ${msg.role === "user" ? "text-white/60" : "text-zinc-400"}`}>
+                          {new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 <div ref={bottomRef} />
               </div>
 

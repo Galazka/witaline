@@ -97,20 +97,26 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
 export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfigucji. Prosimy spróbować później.</Say><Hangup/>`);
-  // Store callSid for MCP handler to find if agent doesn't pass it
   await setActiveCallSid(businessId, callSid);
   try {
     const xml = await registerCall(fromNumber, toNumber, businessId, callSid, trialMinutesRemaining, prepaidMinutesRemaining);
+    console.log("[connectToAgent] ElevenLabs response XML (first 500):", xml.substring(0, 500));
     const convIdMatch = xml.match(/name="conversation_id"\s+value="([^"]+)"/);
     if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
-    // Store conversation_id in memory for in-flight transfer
     const conversationId = convIdMatch[1];
     setConversationForCall(callSid, conversationId, businessId);
-    // Add fallback redirect — fires ONLY if REST API redirect doesn't happen (timout protection)
     const baseUrl = baseUrlOverride || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const cleanUrl = baseUrl.replace(/\/+$/, "");
     const redirectUrl = `${cleanUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
-    const wrapper = xml.replace("</Connect>", `</Connect><Redirect method="POST">${escapeXml(redirectUrl)}</Redirect>`);
+    // Inject <Redirect> immediately after </Connect> so it fires when stream ends
+    let wrapper = xml;
+    if (wrapper.includes("</Connect>")) {
+      wrapper = wrapper.replace("</Connect>", `</Connect><Redirect method="POST">${escapeXml(redirectUrl)}</Redirect>`);
+    } else {
+      // Fallback: inject before </Response> (last resort)
+      console.warn("[connectToAgent] </Connect> not found in ElevenLabs response - using fallback injection");
+      wrapper = wrapper.replace("</Response>", `<Redirect method="POST">${escapeXml(redirectUrl)}</Redirect></Response>`);
+    }
     return new NextResponse(wrapper, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) { console.error("[connectToAgent] register-call failed:", err instanceof Error ? err.message : String(err)); }
   return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z połączeniem. Proszę spróbować później.</Say><Hangup/>`);

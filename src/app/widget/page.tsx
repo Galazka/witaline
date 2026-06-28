@@ -109,7 +109,7 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
         pollRef.current.lastId = lastServerId;
         const updated: Message[] = incoming.map((m: any) => ({
           role: m.role === "user" ? "user" as const : "bot" as const,
-          text: `${m.role === "human" ? "👤 Konsultant: " : ""}${m.content}`,
+          text: m.role === "human" ? `👤 Konsultant: ${m.content}` : m.content,
           timestamp: new Date(m.created_at).getTime(),
         }));
         setMessages(updated);
@@ -250,7 +250,7 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
           {/* Messages */}
           <div ref={chatRef} className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-4">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={msg.timestamp ? `${msg.role}-${msg.timestamp}` : i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] sm:max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "user"
                     ? "bg-[#0d9488] text-white rounded-2xl rounded-br-md"

@@ -281,7 +281,7 @@ export default function HomePage() {
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#0d9488]/20 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/"><Logo size="sm" withTagline={false} /></Link>
+            <Link href="/"><Logo size="sm" withTagline={false} inverted /></Link>
             <div className="hidden lg:flex items-center gap-1 text-sm">
               {["Jak działa", "Technologia", "Wdrożenia", "Cennik", "FAQ", "Blog", "Kontakt"].map((label, i) => (
                 <a key={label} href={`#${["jak-dziala","technologia","case-studies","cennik","faq","blog","kontakt"][i]}`} className="px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/5 transition-all font-medium">
@@ -301,7 +301,7 @@ export default function HomePage() {
             <LanguageSwitcher />
             <Link href="/login" className="hidden sm:inline-flex text-sm text-zinc-300 hover:text-white transition-colors font-medium px-3 py-2">Zaloguj</Link>
             <Link href="/register" className="btn-primary text-sm px-4 py-2">Startowy 7 dni</Link>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-lg hover:bg-white/5 text-zinc-400 transition-colors" aria-label="Menu">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-lg hover:bg-white/5 text-zinc-300 transition-colors" aria-label="Menu">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />}
               </svg>
@@ -361,9 +361,9 @@ export default function HomePage() {
               </div>
             </AnimatedDiv>
             <AnimatedDiv delay={320}>
-              <div className="mt-4 text-xs text-zinc-500 flex items-center justify-center gap-4">
+              <div className="mt-4 text-xs text-white/50 flex items-center justify-center gap-4">
                 <span>Połączenie wg taryfy operatora</span>
-                <span className="w-1 h-1 rounded-full bg-zinc-500" />
+                <span className="w-1 h-1 rounded-full bg-white/20" />
                 <span>Bez dodatkowych opłat</span>
               </div>
             </AnimatedDiv>
@@ -400,10 +400,10 @@ export default function HomePage() {
       </AnimatedSection>
 
       {/* === TRUST BAR === */}
-      <AnimatedSection className="bg-gradient-to-r from-white dark:from-brand-950 via-brand-50/10 dark:via-white/[0.03] to-white dark:to-brand-950 border-b border-zinc-100 dark:border-brand-700 py-8 overflow-hidden">
+      <AnimatedSection className="bg-white dark:bg-brand-950 border-b border-zinc-100 dark:border-brand-700 py-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-zinc-400 stagger">
-            <span className="text-zinc-500 font-semibold text-xs uppercase tracking-widest">Zaufany przez</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-zinc-400 dark:text-zinc-300 stagger">
+            <span className="text-zinc-500 dark:text-zinc-300 font-semibold text-xs uppercase tracking-widest">Zaufany przez</span>
             {[
               ["building", "200+ firm"],
               ["phone", "15 000+ rozmów/mies"],
@@ -411,8 +411,8 @@ export default function HomePage() {
               ["star", "5.0 średnia"],
               ["heart", "Autoryzowany partner"],
             ].map(([icon, text]) => (
-              <span key={text} className="flex items-center gap-2 text-zinc-500">
-                <span className="text-zinc-400">{icon === "building" ? <BuildingIcon className="w-4 h-4" /> : icon === "phone" ? <PhoneIcon className="w-4 h-4" /> : icon === "lightning" ? <LightningIcon className="w-4 h-4" /> : icon === "star" ? <StarIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}</span>
+              <span key={text} className="flex items-center gap-2 text-zinc-500 dark:text-zinc-300">
+                <span className="text-zinc-400 dark:text-zinc-400">{icon === "building" ? <BuildingIcon className="w-4 h-4" /> : icon === "phone" ? <PhoneIcon className="w-4 h-4" /> : icon === "lightning" ? <LightningIcon className="w-4 h-4" /> : icon === "star" ? <StarIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}</span>
                 <span className="font-medium">{text}</span>
               </span>
             ))}
@@ -451,7 +451,7 @@ export default function HomePage() {
                 ["~5600 zł", "kosztuje etat recepcjonisty", "z składkami ZUS"],
                 ["<15 min", "średni czas oddzwonienia", "klient już u konkurencji"],
               ].map(([num, title, desc]) => (
-                <div key={title} className="card-lift bg-gradient-to-br from-white dark:from-brand-900 to-red-50/20 dark:to-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 text-center hover:border-red-200 hover:shadow-sm transition-all">
+                <div key={title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 text-center hover:border-red-200 hover:shadow-sm transition-all">
                   <p className="text-3xl md:text-4xl font-bold text-red-500 mb-2 font-display">{num}</p>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{title}</p>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">{desc}</p>
@@ -639,7 +639,7 @@ export default function HomePage() {
               <thead>
                 <tr className="border-b-2 border-zinc-200 dark:border-brand-700">
                   <th className="text-left py-3 pr-4 text-zinc-500 font-medium">Funkcja</th>
-                  <th className="text-center py-3 px-3 bg-[#ccfbf1] text-[#065f46] font-semibold rounded-t-xl">WitaLine</th>
+                  <th className="text-center py-3 px-3 bg-[#ccfbf1] dark:bg-brand-800 text-[#065f46] dark:text-brand-200 font-semibold rounded-t-xl">WitaLine</th>
                   <th className="text-center py-3 px-3 text-zinc-500 font-medium">Tradycyjne IVR</th>
                   <th className="text-center py-3 px-3 text-zinc-500 font-medium">Recepcjonista</th>
                   <th className="text-center py-3 pl-3 text-zinc-500 font-medium">CloudTalk</th>
