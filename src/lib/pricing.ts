@@ -84,9 +84,9 @@ export function calculateElasticPrice(minutes: number): ElasticPriceBreakdown {
   return { ratePerMin, monthlyNetto, monthlyBrutto, costTotal, profitTotal, profitPerMin, marginPercent };
 }
 
-export function calculateCost(durationSeconds: number, planKey: string): number {
+export function calculateCost(durationSeconds: number, planKey: string, totalMonthlyMinutes?: number): number {
   const minutes = durationSeconds / 60;
-  if (planKey.startsWith("elastic")) return minutes * getElasticRate(minutes);
+  if (planKey.startsWith("elastic")) return minutes * getElasticRate(totalMonthlyMinutes ?? minutes);
   const config = plans[planKey];
   return config ? minutes * (config.price / (config.minutes || 1)) : minutes * ELASTIC_TIERS[0].rate;
 }

@@ -117,7 +117,14 @@ export async function POST() {
         costPln = Math.round(tokens * 0.00038 * 100) / 100;
       } else {
         const { data: biz } = await supabaseAdmin.from("businesses").select("current_plan").eq("id", businessId).single();
-        costPln = biz ? calculateCost(duration, biz.current_plan as PlanKey) : 0;
+        let totalMonthlyMinutes: number | undefined;
+        if (biz?.current_plan?.startsWith("elastic")) {
+          const monthStart = new Date();
+          monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+          const { data: monthlyLogs } = await supabaseAdmin.from("call_logs").select("duration_seconds").eq("business_id", businessId).gte("created_at", monthStart.toISOString());
+          totalMonthlyMinutes = ((monthlyLogs || []).reduce((s, l) => s + (l.duration_seconds || 0), 0) + (duration || 0)) / 60;
+        }
+        costPln = biz ? calculateCost(duration, biz.current_plan as PlanKey, totalMonthlyMinutes) : 0;
       }
 
       const { data: callLog } = await supabaseAdmin

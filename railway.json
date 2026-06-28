@@ -17,6 +17,10 @@
     "process-jobs": {
       "schedule": "* * * * *",
       "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://witaline.pl/api/cron/process-jobs"
+    },
+    "diagnostics": {
+      "schedule": "0 */6 * * *",
+      "command": "curl -H 'x-diagnostics-key: ${CRON_SECRET}' https://witaline.pl/api/diagnostics"
     }
   }
 }

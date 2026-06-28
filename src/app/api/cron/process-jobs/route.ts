@@ -103,7 +103,7 @@ async function handleJobClient(p: Record<string, unknown>): Promise<void> {
   const currentPlan = String(p.currentPlan || "start_100");
   const minutesUsed = Number(p.minutesUsed || 0);
 
-  const costPln = calculateCost(durationSeconds, currentPlan);
+  const costPln = calculateCost(durationSeconds, currentPlan, minutesUsed);
   const internalCostPln = Math.round(estimatedTokens * 0.00065 * 100) / 100;
 
   const { data: callLog } = await supabaseAdmin

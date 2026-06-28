@@ -174,7 +174,7 @@ export default function AdminProfitability() {
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">€{(plan.pricePLN / usdPlnRate * eurUsdRate).toFixed(0)}</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">${(plan.pricePLN / usdPlnRate).toFixed(0)}</td>
                     <td className="px-4 py-3 font-mono">{plan.includedMinutes}</td>
-                    <td className="px-4 py-3 font-mono">{revenuePerMin.toFixed(4)} zł</td>
+                    <td className="px-4 py-3 font-mono">{plan.includedMinutes > 0 ? revenuePerMin.toFixed(4) : "—"} zł</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">{fmtUSD(totalCostPerMinUSD)} / {fmtEUR(totalCostPerMinUSD)} / {fmtPLN(totalCostPerMinUSD)}</td>
                     <td className={`px-4 py-3 font-mono font-semibold ${isProfitable ? "text-[#0d9488]" : "text-red-500"}`}>
                       {profitPerMonth.toFixed(2)} zł

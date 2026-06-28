@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   SMS_PACKAGES,
-  TWILIO_SMS_COST_PLN, formatSmsCost
+  TWILIO_SMS_COST_PLN, formatSmsCost, VAT_MULTIPLIER
 } from "@/lib/sms-pricing";
 
 interface BizSmsUsage {
@@ -273,8 +273,8 @@ export default function AdminSmsManagement() {
               </div>
               <div className="bg-brand-50 rounded-xl p-4 text-center">
                 <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Cena klienta/SMS</p>
-                <p className="text-2xl font-bold text-[#0d9488]">0,50 zł</p>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">zysk: 0,25 zł/SMS</p>
+                <p className="text-2xl font-bold text-[#0d9488]">{SMS_PACKAGES[0].clientPricePLN.toFixed(2).replace(".", ",")} zł</p>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">brutto | zysk: {SMS_PACKAGES[0].marginPLN.toFixed(2).replace(".", ",")} zł/SMS</p>
               </div>
             </div>
           </div>

@@ -291,7 +291,18 @@ export async function POST(request: Request) {
     }
   }
 
-  const costPln = calculateCost(durationSeconds, business.current_plan);
+  // Get total monthly minutes for correct elastic tier rate
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0,0,0,0);
+  const { data: monthlyLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("duration_seconds")
+    .eq("business_id", businessId)
+    .gte("created_at", monthStart.toISOString());
+  const totalMonthlyMinutes = (monthlyLogs || []).reduce((sum, l) => sum + (l.duration_seconds || 0), 0) / 60 + (durationSeconds / 60);
+
+  const costPln = calculateCost(durationSeconds, business.current_plan, totalMonthlyMinutes);
   const internalCostPln = Math.round(estimatedTokens * 0.00065 * 100) / 100;
   const classification = classifyCall(summary || "", transcript || "");
 

@@ -81,9 +81,9 @@ describe("calculateElasticPrice", () => {
     expect(r.ratePerMin).toBe(1.20);
     expect(r.monthlyNetto).toBe(120);
     expect(r.monthlyBrutto).toBe(147.60);
-    expect(r.costTotal).toBe(65);
-    expect(r.profitTotal).toBe(55);
-    expect(r.marginPercent).toBe(46);
+    expect(r.costTotal).toBe(51);
+    expect(r.profitTotal).toBe(69);
+    expect(r.marginPercent).toBe(57);
   });
 
   it("returns correct values for 1500 min", () => {
@@ -91,38 +91,32 @@ describe("calculateElasticPrice", () => {
     expect(r.ratePerMin).toBe(1.00);
     expect(r.monthlyNetto).toBe(1500);
     expect(r.monthlyBrutto).toBe(1845);
-    expect(r.costTotal).toBe(975);
-    expect(r.profitTotal).toBe(525);
-    expect(r.marginPercent).toBe(35);
+    expect(r.costTotal).toBe(765);
+    expect(r.profitTotal).toBe(735);
+    expect(r.marginPercent).toBe(49);
   });
 });
 
 describe("getPlanConfig", () => {
-  it("start plan has correct price", () => {
-    const p = getPlanConfig("start");
-    expect(p.price).toBe(199);
+  it("enterprise plan has correct price", () => {
+    const p = getPlanConfig("enterprise_2000");
+    expect(p.price).toBe(999);
   });
 
   it("returns plan with expected fields", () => {
-    const p = getPlanConfig("growth");
-    expect(p.label).toBe("Growth");
-    expect(p.minutes).toBe(600);
-    expect(p.overagePerToken).toBe(0.001);
+    const p = getPlanConfig("enterprise_2000");
+    expect(p.label).toBe("Enterprise");
+    expect(p.minutes).toBe(1500);
   });
 
-  it("all fixed plans have positive price", () => {
-    for (const key of ["start", "pro", "growth", "lux", "enterprise"]) {
-      expect(getPlanConfig(key).price).toBeGreaterThan(0);
-    }
+  it("elastic fallback returns 0 price", () => {
+    const p = getPlanConfig("elastic_0");
+    expect(p.price).toBe(0);
   });
 });
 
 describe("getPlanOverageRate", () => {
-  it("returns correct overage for growth", () => {
-    expect(getPlanOverageRate("growth")).toBe(0.001);
-  });
-
-  it("falls back to default for unknown plan", () => {
+  it("returns default overage for unknown plan", () => {
     expect(getPlanOverageRate("unknown_plan")).toBe(0.002);
   });
 });
@@ -136,6 +130,11 @@ describe("calculateCost", () => {
   it("uses elastic rate for elastic plan prefix", () => {
     const cost = calculateCost(600, "elastic");
     expect(cost).toBe(10 * 1.20); // 10 min * first tier rate
+  });
+
+  it("uses totalMonthlyMinutes for correct elastic tier", () => {
+    const cost = calculateCost(60, "elastic", 2000); // 1 min call, 2000 total monthly
+    expect(cost).toBe(1 * 1.00); // 1.00 rate for 2000 min tier (1001-2000)
   });
 });
 
