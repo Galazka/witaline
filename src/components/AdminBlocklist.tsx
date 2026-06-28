@@ -81,7 +81,7 @@ export default function AdminBlocklist() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border border-zinc-200 p-6">
-        <h3 className="text-lg font-bold text-zinc-900 mb-4">Dodaj numer do blokady</h3>
+        <h3 className="text-lg font-bold dark:text-zinc-100 mb-4">Dodaj numer do blokady</h3>
         <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -114,7 +114,7 @@ export default function AdminBlocklist() {
       <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-12 text-center">
-            <p className="text-sm text-zinc-400">Ładowanie...</p>
+            <p className="text-sm dark:text-zinc-500">Ładowanie...</p>
           </div>
         ) : items.length === 0 ? (
           <div className="p-12 text-center">
