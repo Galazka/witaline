@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import FloatingWidget from "@/components/FloatingWidget";
 import DemoAudioPlayer from "@/components/DemoAudioPlayer";
 import SavingsCalculator from "@/components/SavingsCalculator";
+import FloatingWidget from "@/components/FloatingWidget";
 import { WITALINE_PHONE_NUMBER, WITALINE_PHONE_DISPLAY } from "@/lib/constants";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { IconSun, IconMoon } from "@/components/layout/icons";
 import PricingSection from "@/components/PricingSection";
 import { t, initLocale, getLocale, translations_raw, type Locale } from "@/lib/i18n";
-import { BuildingIcon, PhoneIcon, BankIcon, LightningIcon, StarIcon, HeartIcon, WriteIcon, LinkIcon, BotIcon, MicIcon, BrainIcon, CloudIcon, HeadphonesIcon, EnvelopeIcon, PinIcon, ShieldIcon } from "@/components/ui/Icons";
+import { BuildingIcon, PhoneIcon, BankIcon, LightningIcon, StarIcon, HeartIcon, WriteIcon, LinkIcon, BotIcon, EnvelopeIcon, PinIcon, ShieldIcon } from "@/components/ui/Icons";
 
 function CheckIcon() {
   return (
@@ -78,42 +78,16 @@ const caseStudies = [
   },
 ];
 
-import { blogPosts as blogPostsData } from "@/lib/blog";
-
-const blogPosts = blogPostsData.map((p) => ({
-  title: p.title,
-  desc: p.excerpt,
-  date: p.date,
-  readTime: p.readTime,
-  href: `/blog/${p.slug}`,
-}));
-
-function useInView(ref: React.RefObject<HTMLElement | null>, threshold = 0.15) {
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } }, { threshold });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [ref, threshold]);
-  return inView;
-}
-
 function AnimatedSection({ children, className, id }: { children: React.ReactNode; className?: string; id?: string }) {
-  const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref);
   return (
-    <section ref={ref} id={id} className={`transition-all duration-700 ease-out ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className ?? ""}`}>
+    <section id={id} className={className}>
       {children}
     </section>
   );
 }
 
-const AnimatedDiv = ({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => (
-  <div className={`transition-all duration-600 ease-out ${className ?? ""}`} style={{ opacity: 0, animation: `fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms forwards` }}>
-    {children}
-  </div>
+const AnimatedDiv = ({ children, className }: { children: React.ReactNode; className?: string; delay?: number }) => (
+  <div className={className}>{children}</div>
 );
 
 function FaqSection({ faqItems: items, locale }: { faqItems: { q: string; a: string }[]; locale: Locale }) {
@@ -279,15 +253,34 @@ export default function HomePage() {
       {/* === TOP BAR === */}
       <nav className="sticky top-0 z-50 bg-[#0c1929] border-b border-white/5">
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#0d9488]/20 to-transparent" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-10">
             <Link href="/"><Logo size="sm" withTagline={false} inverted /></Link>
-            <div className="hidden lg:flex items-center gap-1 text-sm">
-              {["Jak działa", "Technologia", "Wdrożenia", "Cennik", "FAQ", "Blog", "Kontakt"].map((label, i) => (
-                <a key={label} href={`#${["jak-dziala","technologia","case-studies","cennik","faq","blog","kontakt"][i]}`} className="px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+            <div className="hidden lg:flex items-center gap-1">
+              {["Jak działa", "Wdrożenia", "Cennik", "FAQ", "Kontakt"].map((label, i) => (
+                <a key={label} href={`#${["jak-dziala","case-studies","cennik","faq","kontakt"][i]}`} className="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/5 transition-all font-medium text-sm">
                   {label}
                 </a>
               ))}
+              <div className="relative group">
+                <button className="px-4 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all font-medium text-sm flex items-center gap-1">
+                  Więcej
+                  <svg className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="absolute top-full left-0 mt-1.5 bg-[#0c1929] border border-white/10 rounded-xl p-1.5 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all min-w-[200px] z-50">
+                  {[
+                    ["#technologia", "Technologia"],
+                    ["/blog", "Blog"],
+                    ["/oferta-indywidualna", "Przenoszenie numeru"],
+                    ["/oferta-indywidualna", "Integracje"],
+                    ["/oferta-indywidualna", "Bezpieczeństwo"],
+                  ].map(([href, label]) => (
+                    <a key={label} href={href} className="block px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors">{label}</a>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -299,9 +292,9 @@ export default function HomePage() {
               {darkMode ? <IconSun className="w-4 h-4" /> : <IconMoon className="w-4 h-4" />}
             </button>
             <LanguageSwitcher />
-            <Link href="/login" className="hidden sm:inline-flex text-sm text-zinc-300 hover:text-white transition-colors font-medium px-3 py-2">Zaloguj</Link>
+            <Link href="/login" className="hidden sm:inline-flex text-sm text-white/70 hover:text-white transition-colors font-medium px-3 py-2">Zaloguj</Link>
             <Link href="/register" className="btn-primary text-sm px-4 py-2">Startowy 7 dni</Link>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-lg hover:bg-white/5 text-zinc-300 transition-colors" aria-label="Menu">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2 rounded-lg hover:bg-white/5 text-white/70 transition-colors" aria-label="Menu">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />}
               </svg>
@@ -310,11 +303,11 @@ export default function HomePage() {
         </div>
         {mobileOpen && (
           <div className="lg:hidden border-t border-white/5 bg-[#0c1929]/95 backdrop-blur-xl px-4 py-4 space-y-1 text-sm animate-fade-in-down">
-            {[["#jak-dziala", "Jak działa"], ["#technologia", "Technologia"], ["#case-studies", "Wdrożenia"], ["#cennik", "Cennik"], ["#faq", "FAQ"], ["#blog", "Blog"], ["#kontakt", "Kontakt"]].map(([href, label]) => (
-              <a key={href} href={href} onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-zinc-300 hover:bg-white/5 hover:text-white font-medium transition-colors">{label}</a>
+            {[["#jak-dziala", "Jak działa"], ["#case-studies", "Wdrożenia"], ["#cennik", "Cennik"], ["#faq", "FAQ"], ["#kontakt", "Kontakt"]].map(([href, label]) => (
+              <a key={href} href={href} onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white font-medium transition-colors">{label}</a>
             ))}
             <div className="h-px bg-white/10 my-2" />
-            <Link href="/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-zinc-300 font-medium hover:bg-white/5 sm:hidden">Zaloguj</Link>
+            <Link href="/login" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-lg text-white/70 font-medium hover:bg-white/5 sm:hidden">Zaloguj</Link>
           </div>
         )}
       </nav>
@@ -341,7 +334,7 @@ export default function HomePage() {
               </h1>
             </AnimatedDiv>
             <AnimatedDiv delay={160}>
-              <p className="text-base sm:text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
                 Twój asystent głosowy odbiera połączenia, odpowiada na pytania, przyjmuje zamówienia i rezerwacje.
                 <br className="hidden sm:block" /> Konfiguracja w 3 minuty, zero ryzyka.
               </p>
@@ -351,7 +344,7 @@ export default function HomePage() {
                 <Link href="/register" className="btn-primary text-base px-8 py-3.5 shadow-lg shadow-[#0d9488]/20 hover:shadow-xl hover:shadow-[#0d9488]/25 transition-all duration-300">
                   Rozpocznij 7-dniowy trial
                 </Link>
-                <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="inline-flex items-center gap-2.5 border border-zinc-500 text-zinc-300 hover:border-[#0d9488]/30 hover:text-[#14b8a6] hover:bg-[#0d9488]/5 rounded-xl px-6 py-3.5 transition-all group">
+                <a href={`tel:${WITALINE_PHONE_NUMBER}`} className="inline-flex items-center gap-2.5 border border-white/20 text-white/70 hover:border-[#0d9488]/30 hover:text-[#14b8a6] hover:bg-[#0d9488]/5 rounded-xl px-6 py-3.5 transition-all group">
                   <span className="relative flex w-2.5 h-2.5">
                     <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-40" />
                     <span className="relative rounded-full bg-green-500 w-2.5 h-2.5" />
@@ -461,215 +454,41 @@ export default function HomePage() {
         </div>
       </AnimatedSection>
 
-      {/* === DEMO AUDIO === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 relative">
-        <div className="max-w-3xl mx-auto text-center">
-          <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Posłuchaj</span>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 mb-4 font-display tracking-tight">Jak brzmi <span className="gradient-text">WitaLine</span>?</h2>
-          <p className="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto mb-8">Posłuchaj przykładowej rozmowy z asystentem — naturalny głos, płynna konwersacja, zero robotów.</p>
-          <DemoAudioPlayer />
-        </div>
-      </AnimatedSection>
-
-      {/* === TECHNOLOGIA === */}
-      <AnimatedSection id="technologia" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-y border-zinc-100 dark:border-brand-800 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-brand-100/10 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-6xl mx-auto relative">
-          <div className="text-center mb-12 md:mb-16">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Technologia</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Najlepsza technologia pod <span className="gradient-text">jednym numerem</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Łączymy najlepsze technologie, aby asystent brzmiał i rozumiał jak człowiek</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-12 stagger">
-            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-[#0d9488] mb-3 block"><MicIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Synteza mowy nowej generacji</h3>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
-                {[
-                  "Ponad 10 000 naturalnie brzmiących głosów",
-                  "Latencja odpowiedzi poniżej 100 ms",
-                  "Pełny cykl mowa → tekst → analiza → mowa w poniżej 2 sekund",
-                  "Automatyczne wykrywanie języka rozmówcy",
-                  "Klonowanie głosu z 30 minut nagrania",
-                  "Wsparcie 32 języków (polski + angielski natywnie)",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <CheckIcon />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-[#0d9488] mb-3 block"><BrainIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Model językowy — inteligencja rozmowy</h3>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
-                {[
-                  "Elastyczny wybór modelu konwersacji dopasowany do zadania",
-                  "Rozumienie intencji, emocji i kontekstu rozmowy",
-                  "Baza wiedzy RAG — bot czyta Twoje dokumenty i cenniki",
-                  "Dynamiczne scenariusze — nie sztywne drzewko IVR",
-                  "Wykrywanie nastroju klienta (sentiment analysis)",
-                  "Płynna eskalacja do konsultanta gdy trzeba",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <CheckIcon />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-[#0d9488] mb-3 block"><PhoneIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Niezawodna infrastruktura telefoniczna</h3>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
-                {[
-                  "Globalna sieć telekomunikacyjna (SIP, PSTN)",
-                  "Numery stacjonarne i komórkowe (+48)",
-                  "Przekierowanie sekwencyjne do konsultantów",
-                  "DTMF — klient może wybrać opcję na klawiaturze",
-                  "Komunikacja SMS po rozmowie",
-                  "Nagrywanie, transkrypcje, webhooki w czasie rzeczywistym",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <CheckIcon />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200/40">
-              <span className="text-[#0d9488] mb-3 block"><CloudIcon className="w-7 h-7" /></span>
-              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-3">Bezpieczeństwo i skalowanie</h3>
-              <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
-                {[
-                  "Serwery w UE (region Frankfurt)",
-                  "Pełna zgodność z RODO i polskim prawem",
-                  "Szyfrowanie E2E dla nagrań i transkrypcji",
-                  "Automatyczne skalowanie — tysiące rozmów równocześnie",
-                  "Dashboard z analityką w czasie rzeczywistym",
-                  "99.9% SLA dla planu Enterprise",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <CheckIcon />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Tech stack visual */}
-          <div className="bg-gradient-to-r from-brand-50 dark:from-brand-900 to-white dark:to-brand-900 border border-brand-100 dark:border-brand-700 rounded-2xl p-6 md:p-8 glow-brand">
-            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-4 text-center">Jak przebiega rozmowa — krok po kroku</p>
-            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
-              {[
-                { icon: <PhoneIcon className="w-4 h-4" />, label: "Klient dzwoni", sub: "PSTN / VoIP" },
-                { icon: <MicIcon className="w-4 h-4" />, label: "Zamiana mowy na tekst", sub: "STT w czasie rzeczywistym" },
-                { icon: <BrainIcon className="w-4 h-4" />, label: "Analiza konwersacji", sub: "Model językowy + baza wiedzy" },
-                { icon: <HeadphonesIcon className="w-4 h-4" />, label: "Synteza mowy", sub: "TTS < 100ms latencji" },
-                { icon: <PhoneIcon className="w-4 h-4" />, label: "Klient słyszy", sub: "<2 sekundy" },
-              ].map((step, i) => (
-                <div key={step.label} className="flex items-center gap-2">
-                  <div className="bg-white dark:bg-brand-900 border border-brand-100 dark:border-brand-700 rounded-xl px-4 py-2.5 text-center shadow-sm hover:shadow-md transition-shadow">
-                    <p className="text-xs font-semibold text-brand-700 dark:text-brand-300 whitespace-nowrap flex items-center gap-1.5 justify-center">{step.icon}{step.label}</p>
-                    <p className="text-[10px] text-[#0d9488]/70 dark:text-brand-400">{step.sub}</p>
-                  </div>
-                  {i < 4 && <span className="text-brand-200 dark:text-brand-600 text-lg hidden sm:inline">→</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </AnimatedSection>
-
-      {/* === KALKULATOR OSZCZEDNOSCI === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto relative">
-          <div className="text-center mb-10">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Kalkulator</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Ile <span className="gradient-text">oszczędzasz</span>?</h2>
-            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Porównaj koszt recepcjonisty z automatyczną recepcją WitaLine</p>
-          </div>
-          <SavingsCalculator />
-        </div>
-      </AnimatedSection>
-
-      {/* === PRZENOSZENIE NUMERU === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
+      {/* === STATYSTYKI / SOCIAL PROOF === */}
+      <AnimatedSection className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[#0c1929] via-[#0f1f33] to-[#14283e] border-t border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0d9488]/5 via-transparent to-transparent" />
         <div className="max-w-5xl mx-auto relative">
-          <div className="text-center mb-12">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Przenoszenie</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Przenieś swój numer <span className="gradient-text">w 5 dni</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Zachowaj dotychczasowy numer — proces przenoszenia jest prosty i bezstresowy</p>
-          </div>
-          <div className="grid md:grid-cols-4 gap-4 md:gap-6 stagger">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
-              { step: "1", title: "Zgłoś chęć", desc: "Wypełnij formularz przeniesienia numeru w panelu administracyjnym. Podaj numer i dane abonenta.", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-              { step: "2", title: "Autoryzacja", desc: "Potwierdź tożsamość u operatora — wyślemy Ci instrukcję wraz z kodem autoryzacyjnym.", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> },
-              { step: "3", title: "Proces u operatora", desc: "Operator rozpoczyna procedurę przeniesienia. Trwa do 5 dni roboczych. My monitorujemy postęp.", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
-              { step: "4", title: "Gotowe", desc: "Numer aktywny na WitaLine. Wszystkie rozmowy obsługiwane przez asystenta AI 24/7.", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
-            ].map((item) => (
-              <div key={item.step} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
-                <div className="w-12 h-12 gradient-brand-soft rounded-2xl flex items-center justify-center text-[#0d9488] mx-auto mb-3">{item.icon}</div>
-                <div className="w-7 h-7 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3">{item.step}</div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
+              { value: "200+", label: "aktywnych firm", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> },
+              { value: "15 000+", label: "rozmów miesięcznie", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> },
+              { value: "5.0", label: "średnia ocen", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
+              { value: "99.9%", label: "dostępności SLA", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="w-14 h-14 bg-white/[0.06] border border-white/10 rounded-2xl flex items-center justify-center text-white/40 mx-auto mb-3">{stat.icon}</div>
+                <p className="text-3xl md:text-4xl font-bold text-white font-display tracking-tight">{stat.value}</p>
+                <p className="text-sm text-white/60 mt-1">{stat.label}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center mt-6">Nie masz jeszcze własnego numeru? Otrzymasz nowy numer +48 w pakiecie — aktywacja w 15 minut.</p>
         </div>
       </AnimatedSection>
 
-      {/* === POROWNANIE === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
+      {/* === CO ZYSKUJESZ === */}
+      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-950 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-brand-100/20 rounded-full blur-3xl" />
         <div className="max-w-5xl mx-auto relative">
-          <div className="text-center mb-12">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Porównanie</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">WitaLine vs <span className="gradient-text">tradycyjne rozwiązania</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Zobacz jak wypadamy na tle alternatyw</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">{tr.benefits.title}</h2>
+          <p className="text-center text-zinc-500 dark:text-zinc-400 mb-12 md:mb-16 max-w-2xl mx-auto">{tr.benefits.subtitle}</p>
+          <div className="grid sm:grid-cols-2 gap-4 md:gap-6 stagger">
+            {tr.benefits.items.map(([title, desc]) => (
+              <div key={title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-5 md:p-6 flex gap-4 items-start hover:border-brand-200 hover:shadow-sm transition-all">
+                <div className="w-10 h-10 gradient-brand-soft rounded-xl flex items-center justify-center shrink-0"><CheckIcon /></div>
+                <div><h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 text-sm md:text-base">{title}</h3><p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{desc}</p></div>
+              </div>
+            ))}
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b-2 border-zinc-200 dark:border-brand-700">
-                  <th className="text-left py-3 pr-4 text-zinc-500 font-medium">Funkcja</th>
-                  <th className="text-center py-3 px-3 bg-[#ccfbf1] dark:bg-brand-800 text-[#065f46] dark:text-brand-200 font-semibold rounded-t-xl">WitaLine</th>
-                  <th className="text-center py-3 px-3 text-zinc-500 font-medium">Tradycyjne IVR</th>
-                  <th className="text-center py-3 px-3 text-zinc-500 font-medium">Recepcjonista</th>
-                  <th className="text-center py-3 pl-3 text-zinc-500 font-medium">CloudTalk</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["Obsługa 24/7", "Tak", "Tak", "Nie (po godzinach)", "Tylko z agentem AI"],
-                  ["Sztuczna inteligencja", "Tak", "Nie (drzewka IVR)", "Nie", "Tak (dodatkowo płatne)"],
-                  ["Naturalna rozmowa", "Tak", "Nie (przyciski DTMF)", "Tak", "Nie (scoring, nie rozmowa)"],
-                  ["Cena za 1000 min", "1,20 zł/min", "~800-1500 PLN", "~5600 PLN (etat)", "~1200-2000 PLN"],
-                  ["Konfiguracja", "15 minut", "2-3 dni", "1 miesiąc (rekrutacja)", "1-2 dni"],
-                  ["Integracje", "Google, HubSpot, Pipedrive, Livespace, API", "Brak", "Zależne od osoby", "100+ integracji"],
-                  ["Przeniesienie numeru", "Tak (do 5 dni)", "Tak", "Nie dotyczy", "Tak"],
-                  ["RODO / UE", "Tak (serwery Frankfurt)", "Zależne", "Tak", "Tak"],
-                  ["SMS", "Tak", "Nie", "Nie", "Tak (dodatkowo)"],
-                  ["Własny prompt AI", "Tak", "Nie", "Nie", "Nie"],
-                ].map(([feature, witaline, ivr, rec, ct]) => (
-                  <tr key={feature} className="border-b border-zinc-100 dark:border-brand-800 hover:bg-zinc-50/50 dark:hover:bg-brand-900/50 transition">
-                    <td className="py-2.5 pr-4 text-zinc-700 dark:text-zinc-300 font-medium">{feature}</td>
-                    <td className="text-center py-2.5 px-3 text-[#0d9488] font-semibold">{witaline}</td>
-                    <td className="text-center py-2.5 px-3 text-zinc-500 dark:text-zinc-400">{ivr}</td>
-                    <td className="text-center py-2.5 px-3 text-zinc-500 dark:text-zinc-400">{rec}</td>
-                    <td className="text-center py-2.5 pl-3 text-zinc-500 dark:text-zinc-400">{ct}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center mt-4">Ceny orientacyjne, mogą się różnić w zależności od dostawcy i konfiguracji.</p>
         </div>
       </AnimatedSection>
 
@@ -682,7 +501,6 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Sprawdzone <span className="gradient-text">w biznesie</span></h2>
             <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Realne przypadki, konkretne liczby — jak WitaLine zmienia obsługę klienta</p>
           </div>
-
           <div className="grid md:grid-cols-3 gap-6 stagger">
             {caseStudies.map((cs) => (
               <div key={cs.title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl overflow-hidden hover:border-brand-200 hover:shadow-lg transition-all group">
@@ -721,110 +539,12 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-
           <div className="text-center mt-8">
             <p className="text-sm text-zinc-400">
               Chcesz poznać case study dla swojej branży?{" "}
               <a href="#kontakt" className="text-[#0d9488] hover:text-[#0d9488] font-medium">Skontaktuj się z nami</a>
             </p>
           </div>
-        </div>
-      </AnimatedSection>
-
-      {/* === CO ZYSKUJESZ === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-brand-100/20 rounded-full blur-3xl" />
-        <div className="max-w-5xl mx-auto relative">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">{tr.benefits.title}</h2>
-          <p className="text-center text-zinc-500 dark:text-zinc-400 mb-12 md:mb-16 max-w-2xl mx-auto">{tr.benefits.subtitle}</p>
-          <div className="grid sm:grid-cols-2 gap-4 md:gap-6 stagger">
-            {tr.benefits.items.map(([title, desc]) => (
-              <div key={title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-5 md:p-6 flex gap-4 items-start hover:border-brand-200 hover:shadow-sm transition-all">
-                <div className="w-10 h-10 gradient-brand-soft rounded-xl flex items-center justify-center shrink-0"><CheckIcon /></div>
-                <div><h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 text-sm md:text-base">{title}</h3><p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{desc}</p></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      {/* === BEZPIECZEŃSTWO I RODO === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-brand-50/30 rounded-full blur-3xl" />
-        <div className="max-w-5xl mx-auto relative">
-          <div className="text-center mb-12 md:mb-16">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Bezpieczeństwo</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Twoje dane są <span className="gradient-text">bezpieczne</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">Pełna zgodność z RODO, europejskie serwery i szyfrowanie na każdym etapie</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 stagger">
-            {[
-              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: "Serwery w UE", desc: "Wszystkie dane przechowywane w regionie Frankfurt (Google Cloud). Żadnych danych poza Europą." },
-              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1010 10V4h-8.5"/></svg>, title: "Zgodność z RODO", desc: "Pełna zgodność z europejskim rozporządzeniem o ochronie danych. Umowa powierzenia dla klientów Enterprise." },
-              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>, title: "Szyfrowanie E2E", desc: "Nagrania i transkrypcje szyfrowane端到端. Klucze szyfrowania rotowane regularnie." },
-              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><circle cx="12" cy="12" r="3"/></svg>, title: "Regularne audyty", desc: "Niezależne audyty bezpieczeństwa co kwartał. Raporty dostępne dla klientów Enterprise na żądanie." },
-              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>, title: "Backup i DR", desc: "Automatyczne kopie zapasowe co 6 godzin. Plan disaster recovery z RTO poniżej 15 minut." },
-              { icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>, title: "Kontrola dostępu", desc: "Dostęp na zasadzie least privilege. Logowanie dwuskładnikowe (2FA) dla wszystkich kont administracyjnych." },
-            ].map((item) => (
-              <div key={item.title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 md:p-8 hover:border-brand-200 hover:shadow-lg transition-all">
-                <div className="w-12 h-12 gradient-brand-soft rounded-2xl flex items-center justify-center text-[#0d9488] mb-4">{item.icon}</div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{item.title}</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      {/* === INTEGRACJE === */}
-      <AnimatedSection className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
-        <div className="absolute bottom-0 right-0 w-72 h-72 bg-brand-100/20 rounded-full blur-3xl" />
-        <div className="max-w-5xl mx-auto relative">
-          <div className="text-center mb-12 md:mb-16">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Integracje</span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-display tracking-tight">Łączy się z Twoimi <span className="gradient-text">narzędziami</span></h2>
-            <p className="text-base md:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto">WitaLine integruje się z popularnymi CRM, kalendarzami i systemami, których używasz na co dzień</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 stagger">
-            {[
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, title: "Google Calendar", desc: "Sprawdzaj dostępność i twórz wydarzenia bezpośrednio z rozmowy" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>, title: "HubSpot", desc: "Zapisuj kontakty, loguj rozmowy i aktualizuj deal w czasie rzeczywistym" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>, title: "Pipedrive", desc: "Twórz deal, dodawaj notatki i aktualizuj etapy sprzedaży głosem" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>, title: "Livespace", desc: "Synchronizuj rozmowy z systemem CRM — kontakty, deal i aktywności" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>, title: "Slack", desc: "Powiadomienia o nowych leadach i połączeniach w czasie rzeczywistym" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title: "API & Webhooki", desc: "Własne integracje przez REST API i webhooki zdarzeń w czasie rzeczywistym" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>, title: "Zapier / Make", desc: "Konfiguruj automatyzacje bez kodowania — setki gotowych integracji" },
-              { icon: <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>, title: "Własny CRM", desc: "Integracja z dowolnym CRM przez API — dedykowane wdrożenie dla Enterprise" },
-            ].map((item) => (
-              <div key={item.title} className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-5 md:p-6 text-center hover:border-brand-200 hover:shadow-md transition-all">
-                <div className="w-14 h-14 gradient-brand-soft rounded-2xl flex items-center justify-center text-[#0d9488] mx-auto mb-3">{item.icon}</div>
-                <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      {/* === STATYSTYKI / SOCIAL PROOF === */}
-      <AnimatedSection className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[#0c1929] via-[#0f1f33] to-[#14283e] border-t border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0d9488]/5 via-transparent to-transparent" />
-        <div className="max-w-5xl mx-auto relative">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {[
-              { value: "200+", label: "aktywnych firm", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> },
-              { value: "15 000+", label: "rozmów miesięcznie", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg> },
-              { value: "5.0", label: "średnia ocen", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
-              { value: "99.9%", label: "dostępności SLA", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="w-14 h-14 bg-white/[0.06] border border-white/10 rounded-2xl flex items-center justify-center text-white/40 mx-auto mb-3">{stat.icon}</div>
-                <p className="text-3xl md:text-4xl font-bold text-white font-display tracking-tight">{stat.value}</p>
-                <p className="text-sm text-white/60 mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-
         </div>
       </AnimatedSection>
 
@@ -849,31 +569,6 @@ export default function HomePage() {
         <PricingSection tr={tr.pricing} locale={localeState} />
       </AnimatedSection>
 
-{/* === BLOG === */}
-      <AnimatedSection id="blog" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50/30 rounded-full blur-3xl" />
-        <div className="max-w-5xl mx-auto relative">
-          <div className="text-center mb-12">
-            <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Blog</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-zinc-100 font-display tracking-tight">Wiedza o <span className="gradient-text">automatycznej recepcji</span></h2>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-3 max-w-xl mx-auto">Technologia, case studies, analizy i porady — wszystko o automatyzacji obsługi telefonicznej</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 stagger">
-            {blogPosts.map((post) => (
-              <a key={post.title} href={post.href} className="card-lift group bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 hover:border-brand-200 hover:shadow-lg transition-all">
-                <div className="flex items-center gap-3 text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
-                  <span className="bg-brand-50 dark:bg-brand-900 px-2 py-1 rounded-md">{post.date}</span>
-                  <span>{post.readTime}</span>
-                </div>
-                <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-2 group-hover:text-[#0d9488] transition-colors text-sm leading-snug">{post.title}</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{post.desc}</p>
-                <span className="inline-block mt-4 text-xs font-medium text-[#0d9488] group-hover:text-[#0d9488] transition-colors">Czytaj więcej →</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
       {/* === FAQ === */}
       <AnimatedSection id="faq" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-brand-950 border-t border-zinc-100 dark:border-brand-800 relative overflow-hidden">
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-brand-50/40 rounded-full blur-3xl" />
@@ -882,19 +577,6 @@ export default function HomePage() {
             <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-[#0d9488] bg-brand-100 dark:bg-brand-900 px-3 py-1 rounded-full mb-3">{tr.faq.overline}</span>
             <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-zinc-100 font-display tracking-tight">{tr.faq.title}</h2>
             <p className="text-zinc-500 dark:text-zinc-400 mt-3 max-w-xl mx-auto">Wszystko co musisz wiedzieć zanim zaczniesz</p>
-          </div>
-          <FaqSection faqItems={faqItems} locale={localeState} />
-        </div>
-      </AnimatedSection>
-
-      {/* === FAQ === */}
-      <AnimatedSection id="faq" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50 border-t border-zinc-100 relative overflow-hidden">
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-brand-50/40 rounded-full blur-3xl" />
-        <div className="max-w-6xl mx-auto relative">
-          <div className="text-center mb-12">
-            <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-[#0d9488] bg-brand-100 px-3 py-1 rounded-full mb-3">{tr.faq.overline}</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 font-display tracking-tight">{tr.faq.title}</h2>
-            <p className="text-zinc-500 mt-3 max-w-xl mx-auto">Wszystko co musisz wiedzieć zanim zaczniesz</p>
           </div>
           <FaqSection faqItems={faqItems} locale={localeState} />
         </div>
