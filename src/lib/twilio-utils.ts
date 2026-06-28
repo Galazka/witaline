@@ -105,7 +105,7 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
     if (!convIdMatch) throw new Error("No conversation_id in ElevenLabs response");
     const conversationId = convIdMatch[1];
     setConversationForCall(callSid, conversationId, businessId);
-    const baseUrl = baseUrlOverride || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || "http://localhost:3000";
     const cleanUrl = baseUrl.replace(/\/+$/, "");
     const redirectUrl = `${cleanUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
     // Inject <Redirect> immediately after </Connect> so it fires when stream ends
@@ -204,7 +204,7 @@ export function humanHandoffHuntTwiML(targetNumber: string, callerId: string, bu
   const safeTarget = escapeXml(targetNumber);
   const safeCallerId = escapeXml(callerId);
   const safeBusiness = escapeXml(businessName);
-  const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+  const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || "http://localhost:3000").replace(/\/+$/, "");
   const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${businessId}&idx=${idx}`;
   const reasonText = idx === 0 ? "Klient poprosił o konsultanta." : "";
   return `<Say language="pl-PL">${reasonText ? reasonText + " " : ""}Proszę czekać.</Say><Dial callerId="${safeCallerId}" timeout="20" action="${actionUrl}" method="POST"><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
@@ -213,7 +213,7 @@ export function humanHandoffHuntTwiML(targetNumber: string, callerId: string, bu
 export function humanHandoffNextTwiML(targetNumber: string, callerId: string, businessId: string, idx: number, baseUrlOverride?: string): string {
   const safeTarget = escapeXml(targetNumber);
   const safeCallerId = escapeXml(callerId);
-  const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+  const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || "http://localhost:3000").replace(/\/+$/, "");
   const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${businessId}&idx=${idx}`;
   return `<Dial callerId="${safeCallerId}" timeout="20" action="${actionUrl}" method="POST"><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
 }
