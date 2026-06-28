@@ -66,10 +66,10 @@ export default function DashboardHeader({
             <p className="text-xs font-medium text-[#0d9488] uppercase tracking-wider mb-1">
               Twoja firma na WitaLine
             </p>
-            <p className="text-lg font-bold text-zinc-900">
+            <p className="text-lg font-bold dark:text-zinc-200">
               {businessName || "Firma"}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               Klient może zadzwonić pod główny numer WitaLine i wpisać # [kod] *
               aby połączyć się bezpośrednio z Tobą
             </p>
