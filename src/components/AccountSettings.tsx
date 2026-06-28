@@ -82,8 +82,8 @@ export default function AccountSettings({ businessId, balance }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-lg font-bold text-zinc-900 mb-1">Konto zostało usunięte</h3>
-        <p className="text-sm text-zinc-500">Wszystkie dane zostały trwale usunięte. Za chwilę nastąpi przekierowanie.</p>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">Konto zostało usunięte</h3>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Wszystkie dane zostały trwale usunięte. Za chwilę nastąpi przekierowanie.</p>
         <button onClick={() => window.location.href = "/"} className="mt-4 text-sm text-[#0d9488] hover:underline">Wróć do strony głównej</button>
       </div>
     );
@@ -92,26 +92,26 @@ export default function AccountSettings({ businessId, balance }: Props) {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-1">Ustawienia konta</h3>
-        <p className="text-sm text-zinc-500">Zarządzaj swoim kontem, saldem, głosem i danymi osobowymi.</p>
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Ustawienia konta</h3>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Zarządzaj swoim kontem, saldem, głosem i danymi osobowymi.</p>
       </div>
 
       {/* Balance */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
-        <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Saldo prepaid</p>
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
+        <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Saldo prepaid</p>
         <p className="text-2xl font-bold text-[#0d9488]">{(balance || 0).toFixed(2)} PLN</p>
-        <p className="text-xs text-zinc-400 mt-1">Koszt numeru: 30 PLN | Minuty: wg planu</p>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Koszt numeru: 30 PLN | Minuty: wg planu</p>
       </div>
 
       {/* Voice selection */}
       {voices.length > 0 && (
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
-          <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3">Głos asystenta</p>
-          <p className="text-xs text-zinc-500 mb-4">Wybierz głos, którym będzie mówił Twój asystent na stronie i przez telefon.</p>
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
+          <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Głos asystenta</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mb-4">Wybierz głos, którym będzie mówił Twój asystent na stronie i przez telefon.</p>
 
           {femaleVoices.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-semibold text-zinc-700 mb-2">👩 Głosy żeńskie — przedstawia się jako Maja</p>
+              <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">👩 Głosy żeńskie — przedstawia się jako Maja</p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {femaleVoices.map(v => (
                   <button
@@ -119,11 +119,11 @@ export default function AccountSettings({ businessId, balance }: Props) {
                     onClick={() => handleVoiceChange(v.id)}
                     disabled={savingVoice}
                     className={`p-3 rounded-xl border-2 text-left transition ${
-                      currentVoiceId === v.id ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20" : "border-zinc-200 hover:border-zinc-300"
+                      currentVoiceId === v.id ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20" : "border-zinc-200 dark:border-brand-700 hover:border-zinc-300"
                     }`}
                   >
-                    <p className="text-sm font-medium text-zinc-900">{v.display_name}</p>
-                    <p className="text-[10px] text-zinc-400">{v.min_plan === "start_100" ? "START" : v.min_plan === "pro_500" ? "GROWTH" : v.min_plan === "pro_249" ? "PRO" : v.min_plan === "lux_599" ? "LUX" : v.min_plan === "elastic_0" ? "ELASTIC" : "ENTERPRISE"}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{v.display_name}</p>
+                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{v.min_plan === "start_100" ? "START" : v.min_plan === "pro_500" ? "GROWTH" : v.min_plan === "pro_249" ? "PRO" : v.min_plan === "lux_599" ? "LUX" : v.min_plan === "elastic_0" ? "ELASTIC" : "ENTERPRISE"}</p>
                   </button>
                 ))}
               </div>
@@ -132,7 +132,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
 
           {maleVoices.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-zinc-700 mb-2">👨 Głosy męskie — przedstawia się jako Tomasz</p>
+              <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">👨 Głosy męskie — przedstawia się jako Tomasz</p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {maleVoices.map(v => (
                   <button
@@ -140,11 +140,11 @@ export default function AccountSettings({ businessId, balance }: Props) {
                     onClick={() => handleVoiceChange(v.id)}
                     disabled={savingVoice}
                     className={`p-3 rounded-xl border-2 text-left transition ${
-                      currentVoiceId === v.id ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20" : "border-zinc-200 hover:border-zinc-300"
+                      currentVoiceId === v.id ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20" : "border-zinc-200 dark:border-brand-700 hover:border-zinc-300"
                     }`}
                   >
-                    <p className="text-sm font-medium text-zinc-900">{v.display_name}</p>
-                    <p className="text-[10px] text-zinc-400">{v.min_plan === "start_100" ? "START" : v.min_plan === "pro_500" ? "GROWTH" : v.min_plan === "pro_249" ? "PRO" : v.min_plan === "lux_599" ? "LUX" : v.min_plan === "elastic_0" ? "ELASTIC" : "ENTERPRISE"}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{v.display_name}</p>
+                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500">{v.min_plan === "start_100" ? "START" : v.min_plan === "pro_500" ? "GROWTH" : v.min_plan === "pro_249" ? "PRO" : v.min_plan === "lux_599" ? "LUX" : v.min_plan === "elastic_0" ? "ELASTIC" : "ENTERPRISE"}</p>
                   </button>
                 ))}
               </div>
@@ -156,13 +156,13 @@ export default function AccountSettings({ businessId, balance }: Props) {
       )}
 
       {/* Account info */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
-        <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Informacje o koncie</p>
-        <p className="text-xs text-zinc-500">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
+        <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Informacje o koncie</p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
           Twoje dane są przechowywane zgodnie z <a href="/polityka-prywatnosci" className="text-[#0d9488] hover:underline">Polityką prywatności</a>.
           Nagrania i transkrypcje są automatycznie usuwane po 30 dniach.
         </p>
-        <p className="text-xs text-zinc-500 mt-2">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-2">
           Masz prawo do bycia zapomnianym — administrator może usunąć wszystkie dane powiązane z numerem telefonu.
           Skontaktuj się z <a href={`mailto:${WITALINE_RODO_EMAIL}`} className="text-[#0d9488] hover:underline">{WITALINE_RODO_EMAIL}</a>.
         </p>
@@ -185,7 +185,7 @@ export default function AccountSettings({ businessId, balance }: Props) {
             value={confirmText}
             onChange={e => setConfirmText(e.target.value)}
             placeholder="Wpisz USUŃ KONTO aby potwierdzić"
-            className="flex-1 border border-red-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400/30 bg-white"
+            className="flex-1 border border-red-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400/30 bg-white dark:bg-brand-900"
           />
           <button
             onClick={handleDelete}

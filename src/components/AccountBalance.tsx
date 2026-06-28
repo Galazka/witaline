@@ -122,13 +122,13 @@ export default function AccountBalance({
   ];
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm space-y-5">
+    <div className="bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6 shadow-sm space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-900">Stan konta</h3>
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Stan konta</h3>
         <button
           onClick={fetchData}
-          className="text-xs text-zinc-400 hover:text-zinc-600 transition"
+          className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 transition"
         >
           Odśwież
         </button>
@@ -144,15 +144,15 @@ export default function AccountBalance({
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-zinc-50 p-1 rounded-lg">
+      <div className="flex gap-1 bg-zinc-50 dark:bg-brand-800 p-1 rounded-lg">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex-1 px-3 py-2 text-xs font-medium rounded-md transition ${
               tab === t.key
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300"
             }`}
           >
             {t.label}
@@ -171,10 +171,10 @@ export default function AccountBalance({
             </a>
           </div>
           <div className="flex gap-4">
-            <span className="text-xs px-2 py-0.5 bg-white text-brand-700 rounded-full">
+            <span className="text-xs px-2 py-0.5 bg-white dark:bg-brand-900 text-brand-700 rounded-full">
               🎙️ {Math.min(trialMinutesUsed, FREE_TRIAL_MINUTES)}/{FREE_TRIAL_MINUTES} min
             </span>
-            <span className="text-xs px-2 py-0.5 bg-white text-brand-700 rounded-full">
+            <span className="text-xs px-2 py-0.5 bg-white dark:bg-brand-900 text-brand-700 rounded-full">
               ✉️ {Math.min(trialSmsUsed, FREE_TRIAL_SMS)}/{FREE_TRIAL_SMS} SMS
             </span>
           </div>
@@ -206,21 +206,21 @@ export default function AccountBalance({
       {tab === "minutes" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
-            <span className="text-sm text-zinc-600">Dostępne minuty</span>
+            <span className="text-sm text-zinc-600 dark:text-zinc-400">Dostępne minuty</span>
             <span className={`text-xl font-bold ${balance < 0 ? "text-red-500" : "text-[#0d9488]"}`}>
               {loading ? "..." : balance.toFixed(0)}
             </span>
           </div>
 
-          <hr className="border-zinc-100" />
+          <hr className="border-zinc-100 dark:border-brand-800" />
 
           <div>
-            <h4 className="text-sm font-semibold text-zinc-900 mb-3">Dokup pakiet minut</h4>
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Dokup pakiet minut</h4>
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-zinc-600">{minutes} min</span>
-                  <span className="font-medium text-zinc-900">{totalNetto.toFixed(2).replace(".", ",")} zł netto</span>
+                  <span className="text-zinc-600 dark:text-zinc-400">{minutes} min</span>
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">{totalNetto.toFixed(2).replace(".", ",")} zł netto</span>
                 </div>
                 <input
                   type="range"
@@ -231,23 +231,23 @@ export default function AccountBalance({
                   onChange={e => setMinutes(parseInt(e.target.value))}
                   className="w-full accent-[#0d9488]"
                 />
-                <div className="flex justify-between text-xs text-zinc-400 mt-1">
+                <div className="flex justify-between text-xs text-zinc-400 dark:text-zinc-500 mt-1">
                   <span>50 min</span>
                   <span>5000 min</span>
                 </div>
               </div>
 
-              <div className="bg-zinc-50 rounded-xl p-3 space-y-1 text-sm">
+              <div className="bg-zinc-50 dark:bg-brand-800 rounded-xl p-3 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Stawka</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Stawka</span>
                   <span className="font-medium">{rate.toFixed(2).replace(".", ",")} PLN/min</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Netto</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Netto</span>
                   <span>{totalNetto.toFixed(2).replace(".", ",")} zł</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Brutto (23% VAT)</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Brutto (23% VAT)</span>
                   <span>{totalBrutto.toFixed(2).replace(".", ",")} zł</span>
                 </div>
                 {nextTier && (
@@ -274,8 +274,8 @@ export default function AccountBalance({
         <div className="space-y-4">
           <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
             <div>
-              <span className="text-sm text-zinc-600">Dostępne SMS</span>
-              <p className="text-[10px] text-zinc-400 mt-0.5">
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">Dostępne SMS</span>
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                 Limit: {smsData.limit} + dodatkowe: {smsData.extra}
               </p>
             </div>
@@ -283,14 +283,14 @@ export default function AccountBalance({
               <span className="text-xl font-bold text-[#0d9488]">
                 {loading ? "..." : smsData.remaining}
               </span>
-              <span className="text-xs text-zinc-400 ml-1">/ {smsData.limit + smsData.extra}</span>
-              <p className="text-[10px] text-zinc-400">użyto: {smsData.used}</p>
+              <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-1">/ {smsData.limit + smsData.extra}</span>
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500">użyto: {smsData.used}</p>
             </div>
           </div>
 
           {/* Usage bar */}
           {smsData.limit + smsData.extra > 0 && (
-            <div className="bg-zinc-50 rounded-full h-2.5 overflow-hidden">
+            <div className="bg-zinc-50 dark:bg-brand-800 rounded-full h-2.5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
                   smsData.remaining < 10 ? "bg-red-500" : smsData.remaining < (smsData.limit + smsData.extra) * 0.25 ? "bg-amber-500" : "bg-[#0d9488]"
@@ -300,11 +300,11 @@ export default function AccountBalance({
             </div>
           )}
 
-          <hr className="border-zinc-100" />
+          <hr className="border-zinc-100 dark:border-brand-800" />
 
           {/* SMS packages */}
           <div>
-            <h4 className="text-sm font-semibold text-zinc-900 mb-3">Dokup pakiety SMS</h4>
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Dokup pakiety SMS</h4>
             <div className="space-y-3">
               <div className="grid grid-cols-5 gap-2">
                 {SMS_PACKAGES.map((p) => (
@@ -314,11 +314,11 @@ export default function AccountBalance({
                     className={`px-2 py-2 rounded-xl border text-center transition ${
                       smsCount === p.smsCount
                         ? "border-[#0d9488] bg-brand-50"
-                        : "border-zinc-200 hover:border-[#0d9488]/20"
+                        : "border-zinc-200 dark:border-brand-700 hover:border-[#0d9488]/20"
                     }`}
                   >
-                    <div className="text-lg font-bold text-zinc-800">{p.smsCount}</div>
-                    <div className="text-[10px] text-zinc-400">SMS</div>
+                    <div className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{p.smsCount}</div>
+                    <div className="text-[10px] text-zinc-400 dark:text-zinc-500">SMS</div>
                     <div className="text-xs font-semibold text-[#0d9488] mt-1">{p.clientPricePLN} zł</div>
                   </button>
                 ))}
@@ -327,8 +327,8 @@ export default function AccountBalance({
               {/* Custom slider for SMS count */}
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-zinc-600">{smsCount} SMS</span>
-                  <span className="font-medium text-zinc-900">{smsPricePLN.toFixed(2).replace(".", ",")} zł</span>
+                  <span className="text-zinc-600 dark:text-zinc-400">{smsCount} SMS</span>
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">{smsPricePLN.toFixed(2).replace(".", ",")} zł</span>
                 </div>
                 <input
                   type="range"
@@ -339,19 +339,19 @@ export default function AccountBalance({
                   onChange={e => setSmsCount(parseInt(e.target.value))}
                   className="w-full accent-[#0d9488]"
                 />
-                <div className="flex justify-between text-xs text-zinc-400 mt-1">
+                <div className="flex justify-between text-xs text-zinc-400 dark:text-zinc-500 mt-1">
                   <span>10 SMS</span>
                   <span>1000 SMS</span>
                 </div>
               </div>
 
-              <div className="bg-zinc-50 rounded-xl p-3 space-y-1 text-sm">
+              <div className="bg-zinc-50 dark:bg-brand-800 rounded-xl p-3 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Cena za SMS</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Cena za SMS</span>
                   <span className="font-medium">{smsPricePerSms.toFixed(2).replace(".", ",")} zł/SMS</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Całość (brutto)</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Całość (brutto)</span>
                   <span className="font-medium">{smsPricePLN.toFixed(2).replace(".", ",")} zł</span>
                 </div>
               </div>
@@ -369,13 +369,13 @@ export default function AccountBalance({
       )}
 
       {/* Auto top-up toggle */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
-        <h3 className="text-sm font-semibold text-zinc-900 mb-3">Automatyczne doładowanie</h3>
-        <p className="text-xs text-zinc-500 mb-4">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Automatyczne doładowanie</h3>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mb-4">
           Gdy saldo spadnie poniżej progu, automatycznie doładujemy konto pakietem minut za Ciebie.
         </p>
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-zinc-700">Włączone</span>
+          <span className="text-sm text-zinc-700 dark:text-zinc-300">Włączone</span>
           <button
             onClick={async () => {
               const newVal = !autoTopup;
@@ -392,15 +392,15 @@ export default function AccountBalance({
             }}
             className={`relative w-12 h-6 rounded-full transition-colors ${autoTopup ? "bg-[#0d9488]" : "bg-zinc-200"}`}
           >
-            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${autoTopup ? "translate-x-6" : ""}`} />
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-brand-900 rounded-full shadow transition-transform ${autoTopup ? "translate-x-6" : ""}`} />
           </button>
         </div>
         {autoTopup && (
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-zinc-600">Próg minut</span>
-                <span className="text-xs font-medium text-zinc-900">{autoTopupThreshold} min</span>
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Próg minut</span>
+                <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">{autoTopupThreshold} min</span>
               </div>
               <input
                 type="range"
@@ -422,8 +422,8 @@ export default function AccountBalance({
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-zinc-600">Pakiet minut</span>
-                <span className="text-xs font-medium text-zinc-900">{autoTopupPackSize} min</span>
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Pakiet minut</span>
+                <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">{autoTopupPackSize} min</span>
               </div>
               <input
                 type="range"
@@ -442,7 +442,7 @@ export default function AccountBalance({
                 }}
                 className="w-full accent-[#0d9488]"
               />
-              <p className="text-xs text-zinc-400 mt-2">
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
                 Doładowanie {autoTopupPackSize} min automatycznie przy saldo &lt; {autoTopupThreshold} min
               </p>
             </div>
@@ -451,14 +451,14 @@ export default function AccountBalance({
       </div>
 
       {/* Summary footer */}
-      <div className="bg-zinc-50 rounded-xl px-4 py-3 text-xs text-zinc-500 space-y-1">
+      <div className="bg-zinc-50 dark:bg-brand-800 rounded-xl px-4 py-3 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 space-y-1">
         <div className="flex justify-between">
           <span>Minuty głosowe</span>
-          <span className={`font-medium ${balance < 0 ? "text-red-500" : "text-zinc-700"}`}>{balance.toFixed(0)} min</span>
+          <span className={`font-medium ${balance < 0 ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}`}>{balance.toFixed(0)} min</span>
         </div>
         <div className="flex justify-between">
           <span>SMS</span>
-          <span className="font-medium text-zinc-700">
+          <span className="font-medium text-zinc-700 dark:text-zinc-300">
             {smsData.remaining} / {smsData.limit + smsData.extra}
           </span>
         </div>

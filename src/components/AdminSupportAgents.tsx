@@ -72,12 +72,12 @@ export default function AdminSupportAgents() {
     fetchAgents();
   };
 
-  if (loading) return <div className="p-6 text-sm text-zinc-500">Loading...</div>;
+  if (loading) return <div className="p-6 text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Loading...</div>;
 
   return (
     <div className="p-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-zinc-800">Agenci wsparcia</h2>
+        <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Agenci wsparcia</h2>
         <button
           onClick={() => setShowAdd(!showAdd)}
           className="px-4 py-2 bg-[#0d9488] text-white rounded-xl text-sm font-medium hover:bg-[#0f766e] transition"
@@ -87,19 +87,19 @@ export default function AdminSupportAgents() {
       </div>
 
       {showAdd && (
-        <div className="bg-zinc-50 rounded-xl p-4 mb-6 space-y-3">
+        <div className="bg-zinc-50 dark:bg-brand-800 rounded-xl p-4 mb-6 space-y-3">
           <div className="flex gap-2 mb-2">
             <button
               type="button"
               onClick={() => setAddMode("email")}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "email" ? "bg-[#0d9488] text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "email" ? "bg-[#0d9488] text-white" : "bg-white dark:bg-brand-900 text-zinc-600 dark:text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-brand-700"}`}
             >
               Email + hasło
             </button>
             <button
               type="button"
               onClick={() => setAddMode("uuid")}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "uuid" ? "bg-[#0d9488] text-white" : "bg-white text-zinc-600 border border-zinc-200"}`}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${addMode === "uuid" ? "bg-[#0d9488] text-white" : "bg-white dark:bg-brand-900 text-zinc-600 dark:text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-brand-700"}`}
             >
               UUID
             </button>
@@ -111,14 +111,14 @@ export default function AdminSupportAgents() {
                 value={newEmail}
                 onChange={e => setNewEmail(e.target.value)}
                 placeholder="Email agenta"
-                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-brand-700 text-sm"
               />
               <input
                 type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 placeholder="Hasło (min 6 znaków)"
-                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-brand-700 text-sm"
               />
             </>
           ) : (
@@ -127,13 +127,13 @@ export default function AdminSupportAgents() {
               value={newUserId}
               onChange={e => setNewUserId(e.target.value)}
               placeholder="UUID użytkownika (auth.users)"
-              className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-brand-700 text-sm"
             />
           )}
           <select
             value={newRole}
             onChange={e => setNewRole(e.target.value as "support" | "admin")}
-            className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm"
+            className="w-full px-3 py-2 rounded-lg border border-zinc-200 dark:border-brand-700 text-sm"
           >
             <option value="support">Support</option>
             <option value="admin">Admin</option>
@@ -150,12 +150,12 @@ export default function AdminSupportAgents() {
 
       <div className="space-y-2">
         {agents.length === 0 ? (
-          <p className="text-sm text-zinc-400">Brak agentów wsparcia</p>
+          <p className="text-sm text-zinc-400 dark:text-zinc-500">Brak agentów wsparcia</p>
         ) : (
           agents.map((agent) => (
-            <div key={agent.id} className="flex items-center justify-between bg-white border border-zinc-200 rounded-xl px-4 py-3">
+            <div key={agent.id} className="flex items-center justify-between bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-xl px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-zinc-800">{agent.user?.email || agent.user_id}</p>
+                <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{agent.user?.email || agent.user_id}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-medium ${
                     agent.role === "admin" ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"
@@ -163,7 +163,7 @@ export default function AdminSupportAgents() {
                     {agent.role}
                   </span>
                   <span className={`px-1.5 py-0.5 text-[10px] rounded-full font-medium ${
-                    agent.is_active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
+                    agent.is_active ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500 dark:text-zinc-400 dark:text-zinc-500"
                   }`}>
                     {agent.is_active ? "aktywny" : "nieaktywny"}
                   </span>

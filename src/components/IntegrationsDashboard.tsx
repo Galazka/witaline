@@ -122,8 +122,8 @@ export default function IntegrationsDashboard({ businessId }: Props) {
             onClick={() => setActiveSection(s.key)}
             className={`px-3 py-2 text-xs font-medium rounded-lg transition ${
               activeSection === s.key
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 dark:text-zinc-400"
             }`}
           >
             {s.label}
@@ -135,8 +135,8 @@ export default function IntegrationsDashboard({ businessId }: Props) {
       {activeSection === "bot" && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Jak działa WitaLine Bot</h2>
-            <p className="text-sm text-zinc-500 mt-1">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Jak działa WitaLine Bot</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-1">
               WitaLine to automatyczna recepcja AI, która odbiera połączenia za Ciebie 24/7.
               Twój klient dzwoni — asystentka Maja (głos Maja) prowadzi rozmowę, odpowiada na pytania,
               umawia wizyty, zbiera leady i przekazuje do konsultanta gdy trzeba.
@@ -145,12 +145,12 @@ export default function IntegrationsDashboard({ businessId }: Props) {
 
           <div className="grid sm:grid-cols-2 gap-3">
             {BOT_CAPABILITIES.map((cap) => (
-              <div key={cap.title} className="bg-white rounded-xl border border-zinc-200 p-4 hover:border-[#0d9488]/20 transition">
+              <div key={cap.title} className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4 hover:border-[#0d9488]/20 transition">
                 <div className="flex items-start gap-3">
                   <span className="text-xl shrink-0">{cap.icon}</span>
                   <div>
-                    <h4 className="text-sm font-semibold text-zinc-900">{cap.title}</h4>
-                    <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{cap.desc}</p>
+                    <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{cap.title}</h4>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-0.5 leading-relaxed">{cap.desc}</p>
                   </div>
                 </div>
               </div>
@@ -158,8 +158,8 @@ export default function IntegrationsDashboard({ businessId }: Props) {
           </div>
 
           <div className="bg-brand-50 rounded-xl p-5">
-            <h4 className="text-sm font-semibold text-zinc-900 mb-2">Jak to działa krok po kroku?</h4>
-            <ol className="space-y-2 text-sm text-zinc-600">
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Jak to działa krok po kroku?</h4>
+            <ol className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
               <li className="flex items-start gap-2">
                 <span className="w-5 h-5 bg-[#0d9488] text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
                 <span>Klient dzwoni na Twój numer — Maja odbiera automatycznie</span>
@@ -198,23 +198,23 @@ export default function IntegrationsDashboard({ businessId }: Props) {
       {activeSection === "api" && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">REST API v1</h2>
-            <p className="text-sm text-zinc-500 mt-1">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">REST API v1</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-1">
               Programistyczny dostęp do danych WitaLine. Wszystkie zapytania wymagają nagłówka <code className="text-[#0d9488] bg-brand-50 px-1 rounded">Authorization: Bearer {"{klucz}"}</code>
             </p>
           </div>
 
           {/* API Key management */}
-          <div className="bg-white rounded-xl border border-zinc-200 p-5">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Klucz API</h3>
+          <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Klucz API</h3>
             <div className="flex items-center gap-3">
-              <code className="flex-1 text-xs font-mono bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-zinc-700 truncate">
+              <code className="flex-1 text-xs font-mono bg-zinc-50 dark:bg-brand-800 border border-zinc-200 dark:border-brand-700 rounded-lg px-3 py-2 text-zinc-700 dark:text-zinc-300 dark:text-zinc-400 truncate">
                 {apiKey ? (apiKeyRevealed ? apiKey : "wl_••••••••••••••••••••••••••••••••••••••") : "Brak klucza"}
               </code>
               {apiKey && (
                 <button
                   onClick={() => { setApiKeyRevealed(!apiKeyRevealed); }}
-                  className="text-xs text-zinc-500 hover:text-zinc-700 shrink-0"
+                  className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 dark:text-zinc-400 shrink-0"
                 >
                   {apiKeyRevealed ? "Ukryj" : "Pokaż"}
                 </button>
@@ -233,11 +233,11 @@ export default function IntegrationsDashboard({ businessId }: Props) {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-            <div className="p-4 bg-zinc-50 border-b border-zinc-200">
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Endpointy</p>
+          <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
+            <div className="p-4 bg-zinc-50 dark:bg-brand-800 border-b border-zinc-200 dark:border-brand-700">
+              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Endpointy</p>
             </div>
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-zinc-100 dark:divide-brand-800">
               {API_ENDPOINTS.map((ep) => (
                 <div key={ep.path} className="flex items-start gap-4 px-4 py-3 hover:bg-[#f0fdfa]/50 transition">
                   <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded ${
@@ -250,17 +250,17 @@ export default function IntegrationsDashboard({ businessId }: Props) {
                     {ep.method}
                   </span>
                   <div className="min-w-0">
-                    <code className="text-xs font-mono text-zinc-800">{ep.path}</code>
-                    <p className="text-xs text-zinc-400 mt-0.5">{ep.desc}</p>
+                    <code className="text-xs font-mono text-zinc-800 dark:text-zinc-200">{ep.path}</code>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{ep.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-zinc-50 rounded-xl p-4">
-            <p className="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wider">Przykład</p>
-            <pre className="text-xs font-mono text-zinc-700 overflow-x-auto">{`curl -H "Authorization: Bearer ${apiKey || "wl_twój_klucz"}" \\
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-xl p-4">
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mb-2 uppercase tracking-wider">Przykład</p>
+            <pre className="text-xs font-mono text-zinc-700 dark:text-zinc-300 dark:text-zinc-400 overflow-x-auto">{`curl -H "Authorization: Bearer ${apiKey || "wl_twój_klucz"}" \\
   ${origin}/api/v1/calls?limit=10`}</pre>
           </div>
         </div>
@@ -270,22 +270,22 @@ export default function IntegrationsDashboard({ businessId }: Props) {
       {activeSection === "webhooks" && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Webhooki (wychodzące)</h2>
-            <p className="text-sm text-zinc-500 mt-1">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Webhooki (wychodzące)</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-1">
               Dla klientów Enterprise — wysyłamy zdarzenia na Twój serwer HTTP w czasie rzeczywistym.
               Skonfiguruj URL webhooka w sekcji poniżej.
             </p>
           </div>
 
-          <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-            <div className="p-4 bg-zinc-50 border-b border-zinc-200">
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Zdarzenia</p>
+          <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
+            <div className="p-4 bg-zinc-50 dark:bg-brand-800 border-b border-zinc-200 dark:border-brand-700">
+              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Zdarzenia</p>
             </div>
-            <div className="divide-y divide-zinc-100">
+            <div className="divide-y divide-zinc-100 dark:divide-brand-800">
               {WEBHOOK_EVENTS.map((ev) => (
                 <div key={ev.event} className="flex items-start gap-3 px-4 py-3">
                   <code className="shrink-0 text-[10px] font-mono bg-brand-50 text-brand-700 px-2 py-0.5 rounded font-medium">{ev.event}</code>
-                  <p className="text-xs text-zinc-500">{ev.desc}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">{ev.desc}</p>
                 </div>
               ))}
             </div>
@@ -299,8 +299,8 @@ export default function IntegrationsDashboard({ businessId }: Props) {
       {activeSection === "crm" && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Integracje CRM</h2>
-            <p className="text-sm text-zinc-500 mt-1">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Integracje CRM</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-1">
               Podłącz swój CRM aby automatycznie logować rozmowy, aktualizować kontakty i tworzyć deale.
               W planie Enterprise konfigurujemy integrację za Ciebie.
             </p>
@@ -308,24 +308,24 @@ export default function IntegrationsDashboard({ businessId }: Props) {
 
           <div className="grid gap-4">
             {CRM_LIST.map((crm) => (
-              <div key={crm.id} className="bg-white rounded-xl border border-zinc-200 p-5">
+              <div key={crm.id} className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-semibold text-zinc-900">{crm.name}</h3>
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{crm.name}</h3>
                       {crm.status === "aktywne" ? (
                         <span className="text-[10px] bg-green-100 text-green-700 rounded-full px-2 py-0.5 font-medium">Aktywne</span>
                       ) : (
                         <span className="text-[10px] bg-amber-100 text-amber-700 rounded-full px-2 py-0.5 font-medium">Planowane</span>
                       )}
                     </div>
-                    <p className="text-xs text-zinc-500">{crm.desc}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">{crm.desc}</p>
                   </div>
                   <div className="shrink-0">
                     {crm.status === "aktywne" ? (
                       <button className="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">Rozłącz</button>
                     ) : (
-                      <span className="text-xs px-3 py-1.5 bg-zinc-100 text-zinc-400 rounded-lg">Wkrótce</span>
+                      <span className="text-xs px-3 py-1.5 bg-zinc-100 text-zinc-400 dark:text-zinc-500 rounded-lg">Wkrótce</span>
                     )}
                   </div>
                 </div>
@@ -334,9 +334,9 @@ export default function IntegrationsDashboard({ businessId }: Props) {
                     className="text-[#0d9488] hover:text-[#0f766e] font-medium">
                     Dokumentacja →
                   </a>
-                  <span className="text-zinc-300">|</span>
-                  <span className="text-zinc-400">
-                    Webhook: <code className="font-mono text-zinc-500">{origin}{crm.webhookUrl}</code>
+                  <span className="text-zinc-300 dark:text-zinc-400">|</span>
+                  <span className="text-zinc-400 dark:text-zinc-500">
+                    Webhook: <code className="font-mono text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">{origin}{crm.webhookUrl}</code>
                   </span>
                 </div>
               </div>
@@ -344,12 +344,12 @@ export default function IntegrationsDashboard({ businessId }: Props) {
           </div>
 
           <div className="bg-brand-50 rounded-xl p-5">
-            <h4 className="text-sm font-semibold text-zinc-900 mb-2">Potrzebujesz innej integracji?</h4>
-            <p className="text-xs text-zinc-500 mb-3">
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Potrzebujesz innej integracji?</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mb-3">
               Mamy API które pozwala zintegrować WitaLine z dowolnym systemem.
               Dla klientów Enterprise budujemy dedykowane integracje.
             </p>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">
               Skontaktuj się: <a href={`mailto:${WITALINE_INTEGRACJE_EMAIL}`} className="text-[#0d9488] hover:text-[#0f766e]">{WITALINE_INTEGRACJE_EMAIL}</a>
             </p>
           </div>
@@ -360,8 +360,8 @@ export default function IntegrationsDashboard({ businessId }: Props) {
       {activeSection === "settings" && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Ustawienia integracji</h2>
-            <p className="text-sm text-zinc-500 mt-1">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Ustawienia integracji</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-1">
               Skonfiguruj wszystkie połączenia z zewnętrznymi usługami w jednym miejscu.
             </p>
           </div>

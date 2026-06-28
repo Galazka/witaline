@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useMemo, type ReactNode, type JSX } from "react";
 import { createClient } from "@/lib/supabase";
-import Sidebar from "./Sidebar";
+import Sidebar, { type SidebarGroup } from "./Sidebar";
 import TopNav from "./TopNav";
 import MobileBottomNav from "./MobileBottomNav";
 import {
@@ -46,22 +46,39 @@ export const DashboardPermContext = createContext<PermContextValue>(defaultPerms
 export function useDashboardTab() { return useContext(DashboardTabContext); }
 export function useDashboardPerms() { return useContext(DashboardPermContext); }
 
-const sidebarItems: { key: DashboardTab; label: string; icon: JSX.Element }[] = [
-  { key: "overview", label: "Przegląd", icon: <IconHome className="w-5 h-5" /> },
-  { key: "chats", label: "Czaty", icon: <IconMessage className="w-5 h-5" /> },
-  { key: "calls", label: "Połączenia", icon: <IconPhone className="w-5 h-5" /> },
-  { key: "costs", label: "Koszty", icon: <IconChart className="w-5 h-5" /> },
-  { key: "reservations", label: "Rezerwacje", icon: <IconCalendar className="w-5 h-5" /> },
-  { key: "sms", label: "SMS", icon: <IconMessage className="w-5 h-5" /> },
-  { key: "leads", label: "Leady", icon: <IconUsers className="w-5 h-5" /> },
-  { key: "config", label: "Konfiguracja", icon: <IconSettings className="w-5 h-5" /> },
-  { key: "voice", label: "Voice", icon: <IconStar className="w-5 h-5" /> },
-  { key: "billing", label: "Płatności", icon: <IconDollar className="w-5 h-5" /> },
-  { key: "upgrade", label: "Plan", icon: <IconDollar className="w-5 h-5" /> },
-  { key: "team", label: "Zespół", icon: <IconUsers className="w-5 h-5" /> },
-  { key: "security", label: "Bezpieczeństwo", icon: <IconShield className="w-5 h-5" /> },
-  { key: "integrations", label: "Integracje & API", icon: <IconSettings className="w-5 h-5" /> },
-  { key: "account", label: "Konto", icon: <IconUser className="w-5 h-5" /> },
+const sidebarGroups: { label?: string; items: { key: DashboardTab; label: string; icon: JSX.Element }[] }[] = [
+  {
+    items: [{ key: "overview", label: "Przegląd", icon: <IconHome className="w-5 h-5" /> }],
+  },
+  {
+    label: "Komunikacja",
+    items: [
+      { key: "chats", label: "Czaty", icon: <IconMessage className="w-5 h-5" /> },
+      { key: "calls", label: "Połączenia", icon: <IconPhone className="w-5 h-5" /> },
+      { key: "sms", label: "SMS", icon: <IconMessage className="w-5 h-5" /> },
+    ],
+  },
+  {
+    label: "Operacyjne",
+    items: [
+      { key: "costs", label: "Koszty", icon: <IconChart className="w-5 h-5" /> },
+      { key: "reservations", label: "Rezerwacje", icon: <IconCalendar className="w-5 h-5" /> },
+      { key: "leads", label: "Leady", icon: <IconUsers className="w-5 h-5" /> },
+      { key: "voice", label: "Voice", icon: <IconStar className="w-5 h-5" /> },
+    ],
+  },
+  {
+    label: "Ustawienia",
+    items: [
+      { key: "config", label: "Konfiguracja", icon: <IconSettings className="w-5 h-5" /> },
+      { key: "billing", label: "Płatności", icon: <IconDollar className="w-5 h-5" /> },
+      { key: "upgrade", label: "Plan", icon: <IconDollar className="w-5 h-5" /> },
+      { key: "team", label: "Zespół", icon: <IconUsers className="w-5 h-5" /> },
+      { key: "security", label: "Bezpieczeństwo", icon: <IconShield className="w-5 h-5" /> },
+      { key: "integrations", label: "Integracje & API", icon: <IconSettings className="w-5 h-5" /> },
+      { key: "account", label: "Konto", icon: <IconUser className="w-5 h-5" /> },
+    ],
+  },
 ];
 
 // Tabs per role: admin sees all; others see filtered set
@@ -101,9 +118,12 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
     },
   }), [role, isOwner, isSuperAdmin, explicitPerms]);
 
+  const allTabKeys = sidebarGroups.flatMap(g => g.items.map(i => i.key));
   const effectiveRole = role || (isOwner ? "admin" : null);
-  const visibleTabs = effectiveRole ? ROLE_VISIBLE_TABS[effectiveRole] || sidebarItems.map(i => i.key) : sidebarItems.map(i => i.key);
-  const filteredSidebar = sidebarItems.filter(i => visibleTabs.includes(i.key));
+  const visibleTabs = effectiveRole ? ROLE_VISIBLE_TABS[effectiveRole] || allTabKeys : allTabKeys;
+  const filteredGroups = sidebarGroups
+    .map(g => ({ ...g, items: g.items.filter(i => visibleTabs.includes(i.key)) }))
+    .filter(g => g.items.length > 0);
 
   // Redirect if current tab is not visible
   if (effectiveRole && tab !== "overview" && !visibleTabs.includes(tab)) {
@@ -138,7 +158,7 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
     <DashboardPermContext.Provider value={permCtx}>
     <DashboardTabContext.Provider value={{ tab, setTab }}>
       <div className="flex min-h-screen bg-zinc-50 dark:bg-brand-950">
-        <Sidebar items={filteredSidebar} activeKey={tab} onNavigate={(key) => setTab(key as DashboardTab)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <Sidebar items={filteredGroups.flatMap(g => g.items)} activeKey={tab} onNavigate={(key) => setTab(key as DashboardTab)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} groups={filteredGroups} />
         <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pb-16 lg:pb-0">
           <TopNav
             title="Dashboard"

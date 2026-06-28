@@ -52,10 +52,10 @@ export default function KnowledgeEditor({
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-1">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
           System Prompt (instrukcja dla bota)
         </h3>
-        <p className="text-sm text-zinc-500 mb-3">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
           To jest instrukcja, którą bot głosowy otrzymuje na starcie każdej
           rozmowy. Określa jak bot się zachowuje, co mówi i jak przyjmuje
           zamówienia.
@@ -63,23 +63,23 @@ export default function KnowledgeEditor({
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] h-48 resize-none"
+          className="w-full px-4 py-2.5 border border-zinc-200 dark:border-brand-700 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] h-48 resize-none"
           placeholder="Jesteś recepcjonistą AI..."
         />
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-1">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
           Baza wiedzy (JSON)
         </h3>
-        <p className="text-sm text-zinc-500 mb-3">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
           Cennik, menu, godziny otwarcia, adres — wszystko co bot musi wiedzieć
           o firmie. Format JSON.
         </p>
         <textarea
           value={hours}
           onChange={(e) => setHours(e.target.value)}
-          className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] h-48 resize-none"
+          className="w-full px-4 py-2.5 border border-zinc-200 dark:border-brand-700 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] h-48 resize-none"
         />
       </div>
 

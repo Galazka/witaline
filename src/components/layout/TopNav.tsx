@@ -27,7 +27,7 @@ export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLog
   }, [darkMode]);
 
   return (
-    <header className="h-16 bg-[#0c1929] border-b border-white/5 sticky top-0 z-40">
+    <header className="h-[4.5rem] bg-[#0c1929] border-b border-white/5 sticky top-0 z-40">
       <div className="h-full px-4 lg:px-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           {onMenuToggle && (

@@ -23,9 +23,9 @@ export default function DashboardError({
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-zinc-900 mb-1">Błąd panelu</h2>
-        <p className="text-sm text-zinc-500 mb-2">Nie udało się załadować dashboardu.</p>
-        <p className="text-xs text-zinc-400 mb-6">Spróbuj odświeżyć stronę. Jeśli problem będzie się powtarzał, skontaktuj się z supportem.</p>
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">Błąd panelu</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mb-2">Nie udało się załadować dashboardu.</p>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-6">Spróbuj odświeżyć stronę. Jeśli problem będzie się powtarzał, skontaktuj się z supportem.</p>
         
         <div className="flex flex-col gap-2">
           <button
@@ -36,7 +36,7 @@ export default function DashboardError({
           </button>
           <a
             href="/dashboard"
-            className="w-full px-5 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-sm font-medium hover:border-[#0d9488]/20 hover:text-[#0f766e] transition-colors"
+            className="w-full px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-brand-700 text-zinc-600 dark:text-zinc-400 text-sm font-medium hover:border-[#0d9488]/20 hover:text-[#0f766e] transition-colors"
           >
             Odśwież stronę
           </a>
@@ -44,7 +44,7 @@ export default function DashboardError({
 
         <button
           onClick={() => setShowDetail(!showDetail)}
-          className="mt-6 text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+          className="mt-6 text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 transition-colors"
         >
           {showDetail ? "Schowaj szczegóły" : "Pokaż szczegóły błędu"}
         </button>

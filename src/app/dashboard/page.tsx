@@ -135,7 +135,7 @@ export default function DashboardPage() {
     <div className="flex-1 flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-zinc-400">Ładowanie...</p>
+        <p className="text-sm text-zinc-400 dark:text-zinc-500">Ładowanie...</p>
       </div>
     </div>
   );
@@ -146,8 +146,8 @@ export default function DashboardPage() {
         <div className="w-20 h-20 bg-gradient-to-br from-[#f0fdfa] to-[#ccfbf1] rounded-full flex items-center justify-center mx-auto shadow-sm">
           <svg className="w-10 h-10 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
         </div>
-        <h2 className="text-xl font-bold text-zinc-900">Nie masz jeszcze firmy</h2>
-        <p className="text-sm text-zinc-500 max-w-xs mx-auto">Aby korzystać z dashboardu, musisz najpierw skonfigurować profil firmy.</p>
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 dark:text-zinc-100">Nie masz jeszcze firmy</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 max-w-xs mx-auto">Aby korzystać z dashboardu, musisz najpierw skonfigurować profil firmy.</p>
         <a href="/register" className="inline-flex items-center gap-2 bg-[#0d9488] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#0f766e] transition shadow-lg shadow-[#0d9488]/20">Skonfiguruj firmę <span>→</span></a>
       </div>
     </div>
@@ -222,17 +222,17 @@ export default function DashboardPage() {
 
           <AccountBalance businessId={business.id} sessionUserUid={business.owner_uid} />
 
-          <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
+          <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900">Kalkulator kosztów</h3>
-              <span className="text-xs text-zinc-400">koszty od początku okresu</span>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Kalkulator kosztów</h3>
+              <span className="text-xs text-zinc-400 dark:text-zinc-500">koszty od początku okresu</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Wszystkie rozmowy</p><p className="text-xl font-bold text-zinc-900">{callLogs.length}</p></div>
-              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Średni czas</p><p className="text-xl font-bold text-zinc-900">{Math.floor(avgDuration / 60)}m {avgDuration % 60}s</p></div>
-              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Pozytywnych</p><p className="text-xl font-bold text-zinc-900">{callLogs.length > 0 ? Math.round((helpfulCount / callLogs.length) * 100) : 0}%</p></div>
-              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Koszt całkowity</p><p className="text-xl font-bold text-zinc-900">{totalCost.toFixed(2)} PLN</p></div>
-              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Zamówienia</p><p className="text-xl font-bold text-zinc-900">{ordersCount}</p></div>
+              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Wszystkie rozmowy</p><p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{callLogs.length}</p></div>
+              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Średni czas</p><p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{Math.floor(avgDuration / 60)}m {avgDuration % 60}s</p></div>
+              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Pozytywnych</p><p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{callLogs.length > 0 ? Math.round((helpfulCount / callLogs.length) * 100) : 0}%</p></div>
+              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Koszt całkowity</p><p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{totalCost.toFixed(2)} PLN</p></div>
+              <div><p className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Zamówienia</p><p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{ordersCount}</p></div>
             </div>
           </div>
 
@@ -246,12 +246,12 @@ export default function DashboardPage() {
 
       {/* Tab content with subscription block */}
       {tabBlocked ? (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-10 text-center">
-          <div className="w-16 h-16 bg-zinc-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+        <div className="bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-10 text-center">
+          <div className="w-16 h-16 bg-zinc-50 dark:bg-brand-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-zinc-300 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
           </div>
-          <h3 className="text-lg font-semibold text-zinc-900 mb-2">Ta sekcja jest zablokowana</h3>
-          <p className="text-sm text-zinc-500 max-w-sm mx-auto mb-6">Po wygaśnięciu okresu próbnego funkcje takie jak rozmowy, czaty, SMS-y i leady są niedostępne. Wybierz plan, aby kontynuować.</p>
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Ta sekcja jest zablokowana</h3>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-6">Po wygaśnięciu okresu próbnego funkcje takie jak rozmowy, czaty, SMS-y i leady są niedostępne. Wybierz plan, aby kontynuować.</p>
           <button onClick={() => setTab("upgrade")} className="bg-[#0d9488] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[#0f766e] transition shadow-sm">Wybierz plan</button>
         </div>
       ) : (<>
@@ -377,80 +377,48 @@ export default function DashboardPage() {
 
       {tab === "costs" && business && (
         <div className="space-y-6">
-          {/* Monthly usage summary */}
-          <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-            <h3 className="text-sm font-semibold text-zinc-900">Podsumowanie okresu rozliczeniowego</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Plan</p>
-                <p className="text-lg font-bold text-zinc-900">{getPlanConfig(business.current_plan as PlanKey).label}</p>
-                <p className="text-xs text-zinc-400">{formatPLN(getPlanConfig(business.current_plan as PlanKey).pricePLN)}/mc</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Minuty w planie</p>
-                <p className="text-lg font-bold text-zinc-900">{getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Wykorzystano</p>
-                <p className="text-lg font-bold text-zinc-900">{Math.floor(totalSeconds / 60)} min</p>
-                <p className="text-xs text-zinc-400">{callLogs.length} rozmów</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-zinc-400 mb-1">Średni koszt/min</p>
-                <p className="text-lg font-bold text-zinc-900">{totalSeconds > 0 ? formatPLN(totalCost / (totalSeconds / 60)) : formatPLN(0)}</p>
-                <p className="text-xs text-zinc-400">{getPlanConfig(business.current_plan as PlanKey).label === "Elastyczny" ? "stawka zmienna" : "średnia ważona"}</p>
-              </div>
-            </div>
-            <div className="w-full bg-zinc-100 rounded-full h-2">
-              <div className="bg-[#0d9488] h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (totalSeconds / 60) / getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes * 100)}%` }} />
-            </div>
-            <p className="text-xs text-zinc-400">{getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes > 0
-              ? `${Math.round((totalSeconds / 60) / getPlanConfig(business.current_plan as PlanKey).monthlyVoiceMinutes * 100)}% wykorzystanego limitu`
-              : "Brak limitu — płacisz za użycie"}</p>
-          </div>
-
-          {/* Detailed cost breakdown */}
+          {/* Cost breakdown */}
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-zinc-900">Koszty połączeń</h3>
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-xl p-5 space-y-3">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Koszty połączeń</h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Koszt całkowity</span>
-                  <span className="font-semibold text-zinc-900">{formatPLN(totalCost)}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Koszt całkowity</span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">{formatPLN(totalCost)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Liczba rozmów</span>
-                  <span className="font-semibold text-zinc-900">{callLogs.length}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Liczba rozmów</span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">{callLogs.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Średni koszt rozmowy</span>
-                  <span className="font-semibold text-zinc-900">{callLogs.length > 0 ? formatPLN(totalCost / callLogs.length) : formatPLN(0)}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Średni koszt rozmowy</span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">{callLogs.length > 0 ? formatPLN(totalCost / callLogs.length) : formatPLN(0)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Całkowity czas</span>
-                  <span className="font-semibold text-zinc-900">{Math.floor(totalSeconds / 3600)}h {Math.floor((totalSeconds % 3600) / 60)}m</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Całkowity czas</span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">{Math.floor(totalSeconds / 3600)}h {Math.floor((totalSeconds % 3600) / 60)}m</span>
                 </div>
               </div>
             </div>
 
-            <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-zinc-900">Oszczędności</h3>
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-xl p-5 space-y-3">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Oszczędności</h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Koszt sekretarki (etat)</span>
-                  <span className="font-semibold text-zinc-900">{formatPLN((totalSeconds / 3600) * 35)}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Koszt sekretarki (etat)</span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">{formatPLN((totalSeconds / 3600) * 35)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Twój koszt z WitaLine</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Twój koszt z WitaLine</span>
                   <span className="font-semibold text-[#0d9488]">{formatPLN(totalCost)}</span>
                 </div>
-                <div className="border-t border-zinc-100 pt-2 flex justify-between text-sm">
-                  <span className="text-zinc-700 font-medium">Oszczędność</span>
+                <div className="border-t border-zinc-100 dark:border-brand-800 pt-2 flex justify-between text-sm">
+                  <span className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-400 font-medium">Oszczędność</span>
                   <span className="font-bold text-green-600">{formatPLN(Math.max(0, (totalSeconds / 3600) * 35 - totalCost))}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Oszczędność czasu</span>
-                  <span className="font-semibold text-zinc-900">{Math.floor(totalSeconds / 3600)}h {Math.floor((totalSeconds % 3600) / 60)}m</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">Oszczędność czasu</span>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">{Math.floor(totalSeconds / 3600)}h {Math.floor((totalSeconds % 3600) / 60)}m</span>
                 </div>
               </div>
             </div>
@@ -458,12 +426,12 @@ export default function DashboardPage() {
 
           {/* Per-call cost list */}
           {callLogs.length > 0 && (
-            <div className="card-lift bg-white border border-zinc-200 rounded-xl p-5 space-y-3">
-              <h3 className="text-sm font-semibold text-zinc-900">Szczegóły kosztów</h3>
+            <div className="card-lift bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-xl p-5 space-y-3">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Szczegóły kosztów</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-zinc-400 text-[10px] uppercase tracking-wider">
+                    <tr className="text-left text-zinc-400 dark:text-zinc-500 text-[10px] uppercase tracking-wider">
                       <th className="pb-2 pr-2">Rozmowa</th>
                       <th className="pb-2 pr-2">Czas</th>
                       <th className="pb-2 pr-2">Koszt</th>
@@ -471,10 +439,10 @@ export default function DashboardPage() {
                       <th className="pb-2">Klasyfikacja</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100">
+                  <tbody className="divide-y divide-zinc-100 dark:divide-brand-800">
                     {callLogs.slice(0, 20).map((log) => (
-                      <tr key={log.id} className="text-zinc-700">
-                        <td className="py-2 pr-2 text-zinc-400 font-mono text-xs">{log.caller_id?.slice(0, 12)}</td>
+                      <tr key={log.id} className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-400">
+                        <td className="py-2 pr-2 text-zinc-400 dark:text-zinc-500 font-mono text-xs">{log.caller_id?.slice(0, 12)}</td>
                         <td className="py-2 pr-2">{Math.floor((log.duration_seconds || 0) / 60)}m {(log.duration_seconds || 0) % 60}s</td>
                         <td className="py-2 pr-2 font-medium">{formatPLN(log.cost_pln)}</td>
                         <td className="py-2 pr-2">{(log.duration_seconds || 0) > 0 ? formatPLN(log.cost_pln / ((log.duration_seconds || 0) / 60)) : formatPLN(0)}</td>
@@ -487,7 +455,7 @@ export default function DashboardPage() {
               {callLogs.length > 20 && (
                 <button onClick={() => setTab("calls")} className="text-xs text-[#0d9488] hover:text-[#0f766e] transition">Zobacz wszystkie {callLogs.length} rozmów →</button>
               )}
-              <p className="text-[10px] text-zinc-400 pt-2">* Koszty naliczane zgodnie z cennikiem planu {getPlanConfig(business.current_plan as PlanKey).label}. Stawka za dodatkowe minuty: {formatPLN(getPlanConfig(business.current_plan as PlanKey).overagePerToken * 1000)}/min.</p>
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 pt-2">* Koszty naliczane zgodnie z cennikiem planu {getPlanConfig(business.current_plan as PlanKey).label}. Stawka za dodatkowe minuty: {formatPLN(getPlanConfig(business.current_plan as PlanKey).overagePerToken * 1000)}/min.</p>
             </div>
           )}
         </div>

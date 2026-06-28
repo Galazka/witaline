@@ -24,7 +24,23 @@ interface Props {
   onMobileClose?: () => void;
 }
 
-export default function Sidebar({ items, activeKey, onNavigate, logo, bottomContent, mobileOpen, onMobileClose }: Props) {
+export interface SidebarGroup {
+  label?: string;
+  items: SidebarItem[];
+}
+
+interface Props {
+  items: SidebarItem[];
+  activeKey: string;
+  onNavigate: (key: string) => void;
+  logo?: JSX.Element;
+  bottomContent?: JSX.Element;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+  groups?: SidebarGroup[];
+}
+
+export default function Sidebar({ items, activeKey, onNavigate, logo, bottomContent, mobileOpen, onMobileClose, groups }: Props) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const [isDesktop, setIsDesktop] = useState(true);
@@ -157,7 +173,7 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
               : "-translate-x-full w-64"
         }`}
       >
-        <div className="h-16 flex items-center px-4 border-b border-white/5">
+        <div className="h-[4.5rem] flex items-center px-4 border-b border-white/5">
           {logo || (
             <Link href="/" className="flex items-center gap-3">
               <div className="w-8 h-8 bg-[#0d9488] rounded-xl flex items-center justify-center shrink-0">
@@ -182,9 +198,18 @@ export default function Sidebar({ items, activeKey, onNavigate, logo, bottomCont
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5 scrollbar-thin">
-          {items.map((item) => (
-            <NavItem key={item.key} item={item} />
+        <nav className="flex-1 overflow-y-auto py-4 px-2.5 scrollbar-thin">
+          {(groups || [{ items }]).map((group, gi) => (
+            <div key={gi} className={gi > 0 ? "mt-4" : ""}>
+              {group.label && !collapsed && (
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/20">{group.label}</p>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavItem key={item.key} item={item} />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
