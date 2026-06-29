@@ -59,6 +59,7 @@ export async function POST(request: Request) {
   const { count } = await supabaseAdmin
     .from("call_logs")
     .select("*", { count: "exact", head: true })
+    .is("deleted_at", null)
     .eq("caller_id", caller)
     .gte("created_at", since);
 

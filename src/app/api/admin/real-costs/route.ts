@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
-
-const WITALINE_MAIN_ID = "00000000-0000-0000-0000-000000000001";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 import { getPlanConfig } from "@/lib/pricing";
 function getPlanRevenue(planKey: string): number {
@@ -68,6 +67,7 @@ export async function GET(request: Request) {
     let pq = supabaseAdmin
       .from("call_logs")
       .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, from_number, caller_id, twilio_call_sid, created_at")
+      .is("deleted_at", null)
       .gte("created_at", prevFromStr)
       .lte("created_at", prevToStr + "T23:59:59");
     if (businessId) pq = pq.eq("business_id", businessId);
@@ -175,7 +175,7 @@ function buildCallMap(logs: typeof callLogs) {
     const prevCostFromLogs = prevCallData.costPln;
     const prevTotalCost = prevCostFromLogs > 0 ? prevCostFromLogs : Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
 
-    const isWitaLine = bid === WITALINE_MAIN_ID;
+    const isWitaLine = bid === WITALINE_MAIN_BUSINESS_ID;
     const monthlyRevenue = isWitaLine ? 0 : (bizInfo.customRevenue ?? getPlanRevenue(bizInfo.plan));
     const revenue = Math.round((monthlyRevenue / 30) * daysInRange * 100) / 100;
 
@@ -211,7 +211,7 @@ function buildCallMap(logs: typeof callLogs) {
   const callLogDetails = (callLogs || []).map((log) => {
     const bizId = log.business_id || "";
     const planInfo = bizMap.get(bizId) || { name: "Nieznana", plan: "start", status: "", customRevenue: null };
-    const monthlyRevenue = bizId === WITALINE_MAIN_ID ? 0 : (planInfo.customRevenue ?? getPlanRevenue(planInfo.plan));
+    const monthlyRevenue = bizId === WITALINE_MAIN_BUSINESS_ID ? 0 : (planInfo.customRevenue ?? getPlanRevenue(planInfo.plan));
     const daysInRange = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
     const dailyRevenue = monthlyRevenue > 0 ? monthlyRevenue / 30 : 0;
     return {

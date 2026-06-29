@@ -263,6 +263,7 @@ export async function POST(request: Request) {
   const { count: existingCallCount } = await supabaseAdmin
     .from("call_logs")
     .select("*", { count: "exact", head: true })
+    .is("deleted_at", null)
     .eq("business_id", businessId);
 
   const isFirstCall = existingCallCount === 0 || (existingCallCount === 1 && metadata.twilio_call_sid);
@@ -298,6 +299,7 @@ export async function POST(request: Request) {
   const { data: monthlyLogs } = await supabaseAdmin
     .from("call_logs")
     .select("duration_seconds")
+    .is("deleted_at", null)
     .eq("business_id", businessId)
     .gte("created_at", monthStart.toISOString());
   const totalMonthlyMinutes = (monthlyLogs || []).reduce((sum, l) => sum + (l.duration_seconds || 0), 0) / 60 + (durationSeconds / 60);

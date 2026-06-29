@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { escapeXml } from "@/lib/twilio-utils";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     console.log("[human-handoff/next] dialCallStatus:", dialCallStatus, "queueResult:", queueResult, "from:", from);
 
     const url = new URL(request.url);
-    const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
+    const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
     const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
 

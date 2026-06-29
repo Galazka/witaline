@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -10,7 +11,7 @@ function twiml(body: string): NextResponse {
 
 export async function POST(request: Request) {
   const url = new URL(request.url);
-  const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
+  const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
   const idx = parseInt(url.searchParams.get("idx") || "0", 10);
 
   const { data: consultants } = await supabaseAdmin

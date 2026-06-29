@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { setPendingTransfer } from "@/lib/transfer-store";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 /** Szukasz konsultanta lub numeru dla danej firmy. */
 async function resolveTargetNumber(businessId: string): Promise<{ number: string; businessName: string; callerId: string; hasHumanConsultant: boolean; consultants: { phone: string }[] } | null> {
@@ -61,12 +62,11 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     console.log("[transfer-human] received:", JSON.stringify(body).slice(0, 300));
 
-    const WITALINE_MAIN_BUSINESS = "00000000-0000-0000-0000-000000000001";
     let businessId = body.business_id || body.dynamic_vars?.business_id || "";
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!UUID_RE.test(businessId)) {
       console.log("[transfer-human] invalid businessId, falling back to main:", businessId);
-      businessId = WITALINE_MAIN_BUSINESS;
+      businessId = WITALINE_MAIN_BUSINESS_ID;
     }
     const callerPhone = body.caller_phone || body.dynamic_vars?.caller_phone || "";
     const toNumber = body.to_number || body.dynamic_vars?.to_number || "";

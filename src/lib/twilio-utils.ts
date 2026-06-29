@@ -4,6 +4,7 @@ import { setActiveCallSid } from "@/lib/active-call-store";
 import { setConversationForCall } from "@/lib/conversation-store";
 import { getTwilioCredentials, getTwilioAuthFromCreds } from "@/lib/twilio-credentials";
 import type { TwilioCredentials } from "@/lib/twilio-credentials";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 export function escapeXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
@@ -44,7 +45,7 @@ function twilioApiRequest(method: "GET" | "POST", path: string, creds: TwilioCre
 
 export function registerCall(fromNumber: string, toNumber: string, businessId?: string, callSid?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    const dynVars: Record<string, string | undefined> = { business_id: businessId || "00000000-0000-0000-0000-000000000001", caller_number: fromNumber, call_sid: callSid || "" };
+    const dynVars: Record<string, string | undefined> = { business_id: businessId || WITALINE_MAIN_BUSINESS_ID, caller_number: fromNumber, call_sid: callSid || "" };
     if (trialMinutesRemaining !== undefined && trialMinutesRemaining >= 0) {
       dynVars.trial_minutes_remaining = String(trialMinutesRemaining);
     }
@@ -57,7 +58,7 @@ export function registerCall(fromNumber: string, toNumber: string, businessId?: 
       dynamic_vars: businessId ? { business_id: businessId, call_sid: callSid || undefined, caller_phone: fromNumber || undefined, to_number: toNumber || undefined, trial_minutes_remaining: trialMinutesRemaining !== undefined ? String(trialMinutesRemaining) : undefined, minutes_remaining: prepaidMinutesRemaining !== undefined ? String(prepaidMinutesRemaining) : undefined } : undefined,
       conversation_initiation_client_data: { dynamic_variables: dynVars }
     });
-    const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY! } }, (res) => {
+    const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
       let d = "";
       res.on("data", (chunk) => (d += chunk));
       res.on("end", () => { if (res.statusCode !== 200) reject(new Error(`${res.statusCode}: ${d}`)); else resolve(d); });
@@ -85,7 +86,7 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
         }
       }
     });
-    const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY! } }, (res) => {
+    const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
       let d = "";
       res.on("data", (chunk) => (d += chunk));
       res.on("end", () => { if (res.statusCode !== 200) reject(new Error(`${res.statusCode}: ${d}`)); else resolve(d); });

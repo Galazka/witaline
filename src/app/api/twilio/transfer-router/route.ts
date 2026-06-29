@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPendingTransfer, deletePendingTransfer, findPendingTransferByBusinessId } from "@/lib/transfer-store";
 import { escapeXml, dialConsultantToQueue } from "@/lib/twilio-utils";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -20,7 +21,7 @@ function getBaseUrl(request: Request): string {
 export async function POST(request: Request) {
   const url = new URL(request.url);
   const callSid = url.searchParams.get("callSid") || "";
-  const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
+  const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
   const fromNumber = url.searchParams.get("fromNumber") || "";
   const toNumber = url.searchParams.get("toNumber") || "";
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     if (byBiz) pending = byBiz.data;
   }
   if (!pending) {
-    const byMainBiz = await findPendingTransferByBusinessId("00000000-0000-0000-0000-000000000001");
+    const byMainBiz = await findPendingTransferByBusinessId(WITALINE_MAIN_BUSINESS_ID);
     if (byMainBiz) pending = byMainBiz.data;
   }
 

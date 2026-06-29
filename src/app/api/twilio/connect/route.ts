@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToAgent } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const DEFAULT_CONFIG = {
   internalCostPerMin: 0.65,
@@ -156,7 +157,7 @@ export async function POST(request: Request) {
   const pricing = await getActivePricing();
   const pricingBlock = buildPricingSection(pricing);
 
-  const isMainLine = businessId === "00000000-0000-0000-0000-000000000001";
+  const isMainLine = businessId === WITALINE_MAIN_BUSINESS_ID;
 
   if (isMainLine) {
     const mainPrompt = `Jesteś ${voiceName}, recepcjonistka WitaLine (wymowa: witalajn) — polskiej platformy automatycznej recepcji AI dla firm. Twoim zadaniem jest odbieranie telefonów od klientów zainteresowanych ofertą, prezentowanie pakietów i umawianie demo.

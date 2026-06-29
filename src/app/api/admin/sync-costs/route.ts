@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import { USD_TO_PLN, TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN, AI_CALL_COST_PER_MIN_PLN } from "@/lib/cost-rates";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -156,7 +157,7 @@ export async function POST() {
         }
 
         // Set revenue_pln = cost_pln for non-main-line businesses (what client was charged)
-        const isMainLine = log.business_id === "00000000-0000-0000-0000-000000000001";
+        const isMainLine = log.business_id === WITALINE_MAIN_BUSINESS_ID;
         const currentRevenue = Number(log.revenue_pln) || 0;
         if (currentRevenue === 0 && !isMainLine) {
           const chargedPln = Number(log.cost_pln) || 0;

@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       const { count } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", biz.id)
         .gte("created_at", sevenDaysAgo);
 
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
       const { count: totalCalls } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", biz.id);
 
       if (!totalCalls || totalCalls === 0) continue;

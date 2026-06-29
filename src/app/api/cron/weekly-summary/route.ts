@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       if (!owner?.email) continue;
 
       const [calls, leads, sms] = await Promise.all([
-        supabaseAdmin.from("call_logs").select("duration_seconds").eq("business_id", biz.id).gte("created_at", week.start).lte("created_at", week.end),
+        supabaseAdmin.from("call_logs").select("duration_seconds").is("deleted_at", null).eq("business_id", biz.id).gte("created_at", week.start).lte("created_at", week.end),
         supabaseAdmin.from("leads").select("id", { count: "exact", head: true }).eq("business_id", biz.id).gte("created_at", week.start).lte("created_at", week.end),
         supabaseAdmin.from("sms_logs").select("id", { count: "exact", head: true }).eq("business_id", biz.id).gte("created_at", week.start).lte("created_at", week.end),
       ]);

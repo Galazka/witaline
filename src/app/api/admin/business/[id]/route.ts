@@ -28,6 +28,7 @@ export async function GET(
   const { data: callLogs } = await supabaseAdmin
     .from("call_logs")
     .select("*")
+    .is("deleted_at", null)
     .eq("business_id", id)
     .order("created_at", { ascending: false })
     .limit(500);

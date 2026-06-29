@@ -3,9 +3,9 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import { calculateCost, getPlanConfig } from "@/lib/pricing";
 import type { PlanKey } from "@/types/database";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const ELEVENLABS_API = "https://api.elevenlabs.io/v1/convai";
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 type Classification = "spam" | "offer" | "order" | "question" | "booking" | "unknown";
 
@@ -50,7 +50,8 @@ export async function POST() {
   // Collect existing ElevenLabs conversation IDs for dedup
   const { data: existingLogs, error: dbError } = await supabaseAdmin
     .from("call_logs")
-    .select("elevenlabs_conversation_id");
+    .select("elevenlabs_conversation_id")
+    .is("deleted_at", null);
 
   if (dbError) {
     return NextResponse.json({ error: "Błąd bazy danych: " + dbError.message }, { status: 500 });
@@ -135,7 +136,7 @@ export async function POST() {
         if (biz?.current_plan?.startsWith("elastic")) {
           const monthStart = new Date();
           monthStart.setDate(1); monthStart.setHours(0,0,0,0);
-          const { data: monthlyLogs } = await supabaseAdmin.from("call_logs").select("duration_seconds").eq("business_id", businessId).gte("created_at", monthStart.toISOString());
+          const { data: monthlyLogs } = await supabaseAdmin.from("call_logs").select("duration_seconds").is("deleted_at", null).eq("business_id", businessId).gte("created_at", monthStart.toISOString());
           totalMonthlyMinutes = ((monthlyLogs || []).reduce((s, l) => s + (l.duration_seconds || 0), 0) + (duration || 0)) / 60;
         }
         costPln = biz ? calculateCost(duration, biz.current_plan as PlanKey, totalMonthlyMinutes) : 0;
