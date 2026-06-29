@@ -108,10 +108,8 @@ export async function POST(request: Request) {
     }
 
     // === NATYCHMIASTOWY REDIRECT AKTYWNEGO POŁĄCZENIA ===
-    // Zamiast czekać na koniec streamu ElevenLabs, przekierowujemy
-    // aktywne połączenie Twilio do human-handoff natychmiast.
-    // To zastępuje ElevenLabs stream muzyką hold + Dial konsultanta.
-    if (callSid && target.hasHumanConsultant) {
+    // Gdy target.number istnieje (konsultant lub fallback), zawsze redirect
+    if (callSid && target.number) {
       const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
       const queueName = `handoff_${callSid}`;
       const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
@@ -125,7 +123,7 @@ export async function POST(request: Request) {
 </Enqueue>
 <Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`;
 
-      console.log("[transfer-human] redirecting active call", callSid, "→ queue", queueName);
+      console.log("[transfer-human] redirecting active call", callSid, "→ queue", queueName, "target:", target.number);
       const redirectResult = await redirectActiveCallToHumanHandoff(callSid, redirectTwiml, businessId);
 
       if (redirectResult.ok) {
@@ -141,43 +139,34 @@ export async function POST(request: Request) {
           ok: true,
           target: target.number,
           business: target.businessName,
-          has_human_consultant: true,
+          has_human_consultant: target.hasHumanConsultant,
           redirected: true,
           message: `Przekazuję do konsultanta ${target.number}. Połączenie zostało przekierowane.`,
         });
       } else {
         console.error("[transfer-human] redirect failed:", redirectResult.message);
-        // Fallback: zwróć informację agentowi, żeby pożegnał się i zakończył
+        // Fallback: agent kończy rozmowę, transfer-router przejmie po zakończeniu streamu
         return NextResponse.json({
           ok: true,
           target: target.number,
           business: target.businessName,
-          has_human_consultant: true,
+          has_human_consultant: target.hasHumanConsultant,
           redirected: false,
           message: `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę — system przekieruje połączenie.`,
         });
       }
     }
 
-    // Brak prawdziwych konsultantów → Maja informuje i proponuje pomoc
-    if (!target.hasHumanConsultant) {
-      return NextResponse.json({
-        ok: true,
-        target: target.number,
-        business: target.businessName,
-        has_human_consultant: false,
-        message: `Brak konsultanta w tej firmie. Powiedz klientowi: "Niestety, nasi konsultanci są teraz niedostępni. Mogę pomóc osobiście — w czym mogę pomóc?"`,
-      });
-    }
-
-    // hasHumanConsultant=true ale brak callSid — fallback
+    // Brak callSid — nie można zrobić REST API redirect
     return NextResponse.json({
       ok: true,
       target: target.number,
       business: target.businessName,
-      has_human_consultant: true,
+      has_human_consultant: target.hasHumanConsultant,
       redirected: false,
-      message: `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę.`,
+      message: target.hasHumanConsultant
+        ? `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę.`
+        : `Przekazuję do konsultanta ${target.number}. Nie znam tego numeru, ale system go wybierze po zakończeniu rozmowy.`,
     });
 
   } catch (err) {

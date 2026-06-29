@@ -211,7 +211,8 @@ else if (toolName === "transfer_to_human") {
             });
 
             // === NATYCHMIASTOWY REDIRECT AKTYWNEGO POŁĄCZENIA ===
-            if (callSid && hasOwnConsultant) {
+            // Redirect zawsze gdy jest numer docelowy i callSid, niezależnie czy to własny konsultant czy fallback
+            if (callSid && targetNumber) {
               const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
               const queueName = `handoff_${callSid}`;
               const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
@@ -225,7 +226,7 @@ else if (toolName === "transfer_to_human") {
 </Enqueue>
 <Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`;
 
-              console.log("[MCP transfer_to_human] redirecting call", callSid, "→ queue", queueName);
+              console.log("[MCP transfer_to_human] redirecting call", callSid, "→ queue", queueName, "target:", targetNumber);
               const { redirectActiveCallToHumanHandoff, dialConsultantToQueue } = await import("@/lib/twilio-utils");
               const redirectResult = await redirectActiveCallToHumanHandoff(callSid, redirectTwiml, bizId);
 
@@ -239,7 +240,7 @@ else if (toolName === "transfer_to_human") {
                   ok: true,
                   target: targetNumber,
                   business: biz?.name || "WitaLine",
-                  has_human_consultant: true,
+                  has_human_consultant: hasOwnConsultant,
                   redirected: true,
                   message: "Przekazuję do konsultanta. Połączenie zostało przekierowane.",
                 });
@@ -249,27 +250,18 @@ else if (toolName === "transfer_to_human") {
                   ok: true,
                   target: targetNumber,
                   business: biz?.name || "WitaLine",
-                  has_human_consultant: true,
+                  has_human_consultant: hasOwnConsultant,
                   redirected: false,
                   message: "Transfer rozpoczął się. Pożegnaj się z klientem — system przekieruje połączenie.",
                 });
               }
-            } else if (!hasOwnConsultant) {
-              // Brak konsultantów — Maja kontynuuje
+            } else if (!callSid) {
+              // Brak callSid — nie można zrobić REST API redirect
               result = JSON.stringify({
                 ok: true,
                 target: targetNumber,
                 business: biz?.name || "WitaLine",
-                has_human_consultant: false,
-                message: "Brak konsultanta w tej firmie. Powiedz klientowi: Niestety, nasi konsultanci są teraz niedostępni. Mogę pomóc osobiście — w czym mogę pomóc?",
-              });
-            } else {
-              // hasOwnConsultant=true ale brak callSid
-              result = JSON.stringify({
-                ok: true,
-                target: targetNumber,
-                business: biz?.name || "WitaLine",
-                has_human_consultant: true,
+                has_human_consultant: hasOwnConsultant,
                 redirected: false,
                 message: "Transfer rozpoczął się. Pożegnaj się z klientem.",
               });
