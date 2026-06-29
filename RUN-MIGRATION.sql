@@ -175,6 +175,57 @@ CREATE INDEX IF NOT EXISTS idx_call_logs_handoff_target ON call_logs(handoff_tar
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS trial_minutes_used DECIMAL(10,2) DEFAULT 0;
 ALTER TABLE businesses ADD COLUMN IF NOT EXISTS trial_sms_used INTEGER DEFAULT 0;
 
+-- 043-scale-500: active_calls, pending_transfers, job_queue, missing indexes
+CREATE TABLE IF NOT EXISTS active_calls (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  call_sid TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT now() + interval '2 hours'
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_active_calls_call_sid ON active_calls(call_sid);
+CREATE INDEX IF NOT EXISTS idx_active_calls_business_id ON active_calls(business_id);
+CREATE INDEX IF NOT EXISTS idx_active_calls_expires_at ON active_calls(expires_at);
+
+CREATE OR REPLACE FUNCTION cleanup_expired_active_calls()
+RETURNS void AS $$
+BEGIN
+  DELETE FROM active_calls WHERE expires_at < now();
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TABLE IF NOT EXISTS job_queue (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
+  priority INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 3,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_error TEXT,
+  scheduled_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_job_queue_status ON job_queue(status, priority, scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_job_queue_type ON job_queue(type);
+CREATE INDEX IF NOT EXISTS idx_job_queue_scheduled ON job_queue(scheduled_at) WHERE status = 'pending';
+
+CREATE TABLE IF NOT EXISTS pending_transfers (
+  call_sid TEXT PRIMARY KEY,
+  business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  target_number TEXT NOT NULL,
+  caller_id TEXT NOT NULL DEFAULT '',
+  business_name TEXT NOT NULL DEFAULT '',
+  from_number TEXT NOT NULL DEFAULT '',
+  to_number TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT now() + interval '30 minutes'
+);
+CREATE INDEX IF NOT EXISTS idx_pending_transfers_business_id ON pending_transfers(business_id);
+CREATE INDEX IF NOT EXISTS idx_pending_transfers_expires_at ON pending_transfers(expires_at);
+
 -- ================================================================
 -- Verify migrations
 -- ================================================================

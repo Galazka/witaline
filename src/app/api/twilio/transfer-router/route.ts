@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { getPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
-import { escapeXml, dialConsultantToQueue, registerCall } from "@/lib/twilio-utils";
+import { getPendingTransfer, deletePendingTransfer, findPendingTransferByBusinessId } from "@/lib/transfer-store";
+import { escapeXml, dialConsultantToQueue } from "@/lib/twilio-utils";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -26,7 +26,18 @@ export async function POST(request: Request) {
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
-  let pending = await getPendingTransfer(businessId) || await getPendingTransfer(callSid);
+  // Szukaj pending transfer po callSid, businessId (jeśli store użył bizId jako klucza), i po business_id w tabeli
+  let pending = await getPendingTransfer(callSid);
+  if (!pending) pending = await getPendingTransfer(businessId);
+  if (!pending) {
+    const byBiz = await findPendingTransferByBusinessId(businessId);
+    if (byBiz) pending = byBiz.data;
+  }
+  if (!pending) {
+    // Próba dla WitaLine main business jako ostateczność
+    const byMainBiz = await findPendingTransferByBusinessId("00000000-0000-0000-0000-000000000001");
+    if (byMainBiz) pending = byMainBiz.data;
+  }
 
   if (pending) {
     console.log("[transfer-router] pending transfer found →", pending.targetNumber);
