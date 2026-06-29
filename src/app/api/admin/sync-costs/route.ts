@@ -36,12 +36,17 @@ export async function POST() {
     } catch { /* use PLN fallback */ }
   }
 
-  // Sync records missing real costs or where total_cost isn't set
+  // Find records where individual costs haven't been synced from APIs.
+  // Query: total_cost missing/zero OR ElevenLabs cost not fetched OR Twilio cost not fetched.
+  // Scope to last 90 days to avoid re-processing ancient records.
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   const { data: callLogs } = await supabaseAdmin
     .from("call_logs")
     .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, consultant_transfer_cost_pln")
-    .or("total_cost.is.null,total_cost.eq.0")
+    .or("total_cost.is.null,total_cost.eq.0,cost_elevenlabs.is.null,cost_elevenlabs.eq.0,cost_twilio.is.null,cost_twilio.eq.0")
     .is("deleted_at", null)
+    .gte("created_at", ninetyDaysAgo.toISOString())
     .order("created_at", { ascending: false })
     .limit(500);
 

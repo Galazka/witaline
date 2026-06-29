@@ -159,7 +159,13 @@ export default function AdminDailyCosts() {
     try {
       const r1 = await fetch("/api/admin/sync-calls", { method: "POST" });
       const d1 = await r1.json();
-      setSyncMsg("Synchronizowanie kosztów...");
+      if (!r1.ok) {
+        setSyncMsg(`Błąd sync-calls: ${(d1 as any).error || r1.status}`);
+        setSyncing(false);
+        setTimeout(() => setSyncMsg(""), 8000);
+        return;
+      }
+      setSyncMsg(`Sync-calls: ${(d1 as any).saved || 0} nowych, ${(d1 as any).skipped || 0} pominięto. Synchronizowanie kosztów...`);
       const r2 = await fetch("/api/admin/sync-costs", { method: "POST" });
       const d2 = await r2.json();
       setSyncMsg((d2 as any).message || "OK");
@@ -168,7 +174,7 @@ export default function AdminDailyCosts() {
       setSyncMsg("Błąd synchronizacji");
     }
     setSyncing(false);
-    setTimeout(() => setSyncMsg(""), 8000);
+    setTimeout(() => setSyncMsg(""), 10000);
   }
 
   // Group by day
