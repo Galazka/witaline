@@ -129,7 +129,7 @@ export async function dialConsultantToQueue(targetNumber: string, callerId: stri
 
   const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
   const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Queue>${escapeXml(queueName)}</Queue></Dial></Response>`;
-  const statusCallback = `${baseUrl}/api/twilio/transfer-status?queue=${encodeURIComponent(queueName)}&callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+  const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&queue=${encodeURIComponent(queueName)}&businessId=${encodeURIComponent(businessId)}`;
 
   const body = new URLSearchParams({
     To: targetNumber,
@@ -143,7 +143,10 @@ export async function dialConsultantToQueue(targetNumber: string, callerId: stri
   const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${creds.accountSid}/Calls.json`, creds, body);
   if (res.status >= 200 && res.status < 300) {
     const data = res.data as { sid?: string; status?: string };
-    console.log("[dialConsultantToQueue] call created:", data?.sid, "status:", data?.status, "to:", targetNumber);
+    console.log("[dialConsultantToQueue] call created:", data?.sid, "status:", data?.status, "target:", targetNumber);
+    if (!["queued", "in-progress", "ringing"].includes((data?.status || "").toLowerCase())) {
+      console.warn("[dialConsultantToQueue] Unexpected Twilio call status:", data?.status, "target:", targetNumber);
+    }
     return { ok: true, sid: data?.sid, message: "Consultant dialed to queue" };
   }
   console.error("[dialConsultantToQueue] failed:", res.status, typeof res.data === "string" ? res.data.slice(0, 200) : JSON.stringify(res.data).slice(0, 200));
