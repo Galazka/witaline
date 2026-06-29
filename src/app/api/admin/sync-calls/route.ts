@@ -81,7 +81,7 @@ export async function POST() {
       break;
     }
 
-    const conversations: Array<Record<string, unknown>> = data.conversations || [];
+    const conversations = (data.conversations || []) as Array<Record<string, unknown>>;
     if (conversations.length === 0) break;
 
     for (const conv of conversations) {
