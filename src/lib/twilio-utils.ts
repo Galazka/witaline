@@ -156,26 +156,26 @@ export async function dialConsultantToConference(targetNumber: string, callerId:
 }
 
 export async function redirectCallWithTransferTwiML(callSid: string, targetNumber: string, callerId: string, baseUrl: string, businessId: string, idx: number): Promise<{ ok: boolean; status?: number; message: string }> {
-  const cleanUrl = baseUrl.replace(/\/+$/, "");
-  const queueName = `handoff_${callSid}`;
-  const holdUrl = `${cleanUrl}/api/twilio/hold-music`;
-  const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
+   const cleanUrl = baseUrl.replace(/\/+$/, "");
+   const conferenceName = `handoff_${callSid}`;
+   const holdUrl = `${cleanUrl}/api/twilio/hold-music`;
+   const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
-  const twimlBody = `
-<Enqueue waitUrl="${escapeXml(holdUrl)}" action="${escapeXml(actionUrl)}" method="POST">
-  ${escapeXml(queueName)}
-</Enqueue>
+   const twimlBody = `
+<Conference waitUrl="${escapeXml(holdUrl)}" action="${escapeXml(actionUrl)}" method="POST" startAt="answered" endConferenceOnExit="true">
+  <Conference>${escapeXml(conferenceName)}</Conference>
+</Conference>
 <Redirect method="POST">${escapeXml(`${cleanUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}</Redirect>
 <Hangup/>`;
 
-  const result = await redirectActiveCallToHumanHandoff(callSid, twimlBody, businessId);
+   const result = await redirectActiveCallToHumanHandoff(callSid, twimlBody, businessId);
 
-  if (result.ok) {
-    dialConsultantToQueue(targetNumber, callerId, queueName, cleanUrl, businessId, callSid)
-      .catch(err => console.error("[redirectCallWithTransferTwiML] dial consultant failed:", err));
-  }
+   if (result.ok) {
+     dialConsultantToConference(targetNumber, callerId, conferenceName, cleanUrl, businessId, callSid)
+       .catch(err => console.error("[redirectCallWithTransferTwiML] dial consultant failed:", err));
+   }
 
-  return result;
+   return result;
 }
 
 export async function redirectCallToVoicemail(callSid: string, businessId: string, baseUrl: string): Promise<{ ok: boolean; status?: number; message: string }> {
