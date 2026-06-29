@@ -128,7 +128,7 @@ export async function dialConsultantToQueue(targetNumber: string, callerId: stri
   try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
 
   const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
-  const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}" method="POST"><Queue>${escapeXml(queueName)}</Queue></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
+  const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Queue>${escapeXml(queueName)}</Queue></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
   const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&queue=${encodeURIComponent(queueName)}&businessId=${encodeURIComponent(businessId)}`;
 
   console.log("[dialConsultantToQueue] Preparing to dial consultant:", targetNumber, "queueName:", queueName, "callSid:", callSid, "callerId:", callerId);
