@@ -51,7 +51,18 @@ export async function POST() {
     .limit(500);
 
   if (!callLogs || callLogs.length === 0) {
-    return NextResponse.json({ message: "Brak rozmów do synchronizacji", stats });
+    // Diagnostic: total call_logs count for user feedback
+    const { count: totalCount } = await supabaseAdmin
+      .from("call_logs")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null);
+    return NextResponse.json({
+      message: totalCount && totalCount > 0
+        ? `Brak rozmów do synchronizacji (w bazie ${totalCount} rozmów — wszystkie mają już pobrane koszty)`
+        : `Brak rozmów do synchronizacji (baza call_logs jest pusta — uruchom Sync rozmów)`,
+      stats,
+      db_total: totalCount ?? 0,
+    });
   }
 
   stats.total = callLogs.length;

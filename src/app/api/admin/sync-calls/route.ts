@@ -44,13 +44,17 @@ export async function POST() {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!apiKey || !agentId) {
-    return NextResponse.json({ error: "ELEVENLABS_API_KEY or AGENT_ID not configured" }, { status: 500 });
+    return NextResponse.json({ error: "ELEVENLABS_API_KEY lub AGENT_ID nie skonfigurowane" }, { status: 500 });
   }
 
   // Collect existing ElevenLabs conversation IDs for dedup
-  const { data: existingLogs } = await supabaseAdmin
+  const { data: existingLogs, error: dbError } = await supabaseAdmin
     .from("call_logs")
     .select("elevenlabs_conversation_id");
+
+  if (dbError) {
+    return NextResponse.json({ error: "Błąd bazy danych: " + dbError.message }, { status: 500 });
+  }
 
   const existingConvIds = new Set(
     (existingLogs || [])
@@ -58,14 +62,24 @@ export async function POST() {
       .filter(Boolean)
   );
 
+  console.log(`[sync-calls] Starting. Agent: ${agentId}, existing convs in DB: ${existingConvIds.size}`);
+
   let cursor: string | undefined;
   let page = 0;
   let saved = 0;
   let skipped = 0;
+  let apiErrors = 0;
 
   while (page < 10) {
     page++;
-    const data = await fetchConversationsPage(apiKey, agentId, cursor);
+    let data: Record<string, unknown>;
+    try {
+      data = await fetchConversationsPage(apiKey, agentId, cursor);
+    } catch (e) {
+      console.error(`[sync-calls] ElevenLabs API error on page ${page}:`, e);
+      apiErrors++;
+      break;
+    }
 
     const conversations: Array<Record<string, unknown>> = data.conversations || [];
     if (conversations.length === 0) break;
@@ -180,5 +194,5 @@ export async function POST() {
     if (!cursor || !data.has_more) break;
   }
 
-  return NextResponse.json({ saved, skipped, pages: page });
+  return NextResponse.json({ saved, skipped, pages: page, api_errors: apiErrors, db_count: existingConvIds.size });
 }

@@ -236,6 +236,12 @@ function buildCallMap(logs: typeof callLogs) {
 
   const smsTotal = smsLogs?.length || 0;
 
+  // Total call_logs count (unfiltered by date) for diagnostics
+  const { count: totalCallLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("id", { count: "exact", head: true })
+    .is("deleted_at", null);
+
   return NextResponse.json({
     businesses: result,
     own_costs: ownCostsSummary,
@@ -243,6 +249,7 @@ function buildCallMap(logs: typeof callLogs) {
     call_logs: callLogDetails,
     sms_total: smsTotal,
     cost_sms_total: Math.round(smsTotal * TWILIO_SMS_COST_PER_SEGMENT_PLN * 100) / 100,
+    total_call_logs: totalCallLogs ?? 0,
   });
 }
 

@@ -143,6 +143,10 @@ export default function AdminDailyCosts() {
         setCallLogs(logs);
         setSmsTotal(json.sms_total || 0);
         setCostSmsTotal(json.cost_sms_total || 0);
+        setDiagnostics({
+          totalCallLogs: (json as any).total_call_logs ?? -1,
+          totalBusinesses: json.businesses?.length ?? 0,
+        });
       }
     } catch (e) {
       setFetchError("Nie udało się połączyć z API");
@@ -215,6 +219,7 @@ export default function AdminDailyCosts() {
   // SMS summary from API
   const [smsTotal, setSmsTotal] = useState(0);
   const [costSmsTotal, setCostSmsTotal] = useState(0);
+  const [diagnostics, setDiagnostics] = useState<{ totalCallLogs: number; totalBusinesses: number } | null>(null);
 
   // Projections
   const avgProfitPerDay = daysElapsed > 0 ? totalProfit / daysElapsed : 0;
@@ -266,6 +271,16 @@ export default function AdminDailyCosts() {
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-700 flex items-center justify-between">
           <span>{fetchError}</span>
           <button onClick={fetchData} className="text-red-600 font-medium hover:text-red-800 underline ml-2">Spróbuj ponownie</button>
+        </div>
+      )}
+
+      {diagnostics && callLogs.length === 0 && !loading && !fetchError && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 flex items-center justify-between">
+          <span>
+            W bazie: <strong>{diagnostics.totalCallLogs}</strong> call_logs, <strong>{diagnostics.totalBusinesses}</strong> biznesów.
+            Brak rozmów w wybranym zakresie dat ({from} – {to}).
+            Jeśli oczekujesz rozmów, uruchom najpierw Sync rozmów (pobiera z ElevenLabs API).
+          </span>
         </div>
       )}
 
