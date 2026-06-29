@@ -208,15 +208,15 @@ export function humanHandoffTwiMLString(targetNumber: string, callerId: string, 
   return `<Say language="pl-PL">Przekazuję połączenie do konsultanta firmy ${safeBusiness}. ${reasonText} Proszę czekać.</Say><Say language="pl-PL">Rozmowa z konsultantem może być nagrywana i analizowana w celu poprawy jakości obsługi.</Say><Dial callerId="${safeCallerId}" timeout="25" record="record-from-answer" statusCallback="${statusCallback}" statusCallbackEvent="completed"><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Konsultant obecnie nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
 }
 
-export function humanHandoffHuntTwiML(targetNumber: string, callerId: string, businessName: string, businessId: string, idx: number, total: number, baseUrlOverride?: string, statusCallback?: boolean): string {
+export function humanHandoffHuntTwiML(targetNumber: string, callerId: string, businessName: string, businessId: string, idx: number, total: number, baseUrlOverride?: string, includeStatusCallback?: boolean): string {
   const safeTarget = escapeXml(targetNumber);
   const safeCallerId = escapeXml(callerId);
   const safeBusiness = escapeXml(businessName);
   const baseUrl = (baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || "http://localhost:3000").replace(/\/+$/, "");
-  const statusCallback = statusCallback ? `${baseUrl}/api/twilio/human-handoff-status` : "";
+  const statusCallbackUrl = includeStatusCallback ? `${baseUrl}/api/twilio/human-handoff-status` : "";
   const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${businessId}&idx=${idx}`;
   const reasonText = idx === 0 ? "Klient poprosił o konsultanta." : "";
-  return `<Say language="pl-PL">${reasonText ? reasonText + " " : ""}Proszę czekać.</Say><Dial callerId="${safeCallerId}" timeout="20" action="${actionUrl}" method="POST"${statusCallback ? ' statusCallback="' + statusCallback + '" statusCallbackEvent="answered"' : ''}><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
+  return `<Say language="pl-PL">${reasonText ? reasonText + " " : ""}Proszę czekać.</Say><Dial callerId="${safeCallerId}" timeout="20" action="${actionUrl}" method="POST"${statusCallbackUrl ? ' statusCallback="' + statusCallbackUrl + '" statusCallbackEvent="answered"' : ''}><Number>${safeTarget}</Number></Dial><Say language="pl-PL">Przepraszamy, nikt nie odbiera. Oddzwonimy z podsumowaniem rozmowy.</Say><Hangup/>`;
 }
 
 export function humanHandoffNextTwiML(targetNumber: string, callerId: string, businessId: string, idx: number, baseUrlOverride?: string): string {
