@@ -34,9 +34,11 @@ export async function POST(request: Request) {
 
     // Called from <Enqueue> action — bridge with consultant succeeded
     if (queueResult === "bridged") {
+      console.log("[human-handoff/next] BRIDGE SUCCESS - returning empty response");
       return twiml("");
     }
     if (queueResult) {
+      console.log("[human-handoff/next] QueueResult exists but not bridged:", queueResult);
       return twiml("<Hangup/>");
     }
 
