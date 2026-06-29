@@ -7,6 +7,7 @@ import { withCache } from "@/lib/cache";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
 import { createBooking, checkAvailability } from "@/lib/calendar";
 import { WITALINE_MAIN_BUSINESS_ID as WITALINE_MAIN_BUSINESS } from "@/lib/constants";
+import { escapeXml } from "@/lib/twilio-utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,7 +36,7 @@ const TOOLS = [
   { name: "create_reservation", description: "Utworz rezerwacje/spotkanie. Jesli termin jest zajety, Narzedzie zwroci conflicts i nextSlots — wtedy zapytaj klienta o inny termin z propozycji.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
   { name: "get_services", description: "Pobierz liste uslug firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
   { name: "get_business_hours", description: "Pobierz godziny otwarcia firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
-  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta. Gdy firma NIE ma konsultanta, zwraca informacje że agent ma kontynuować rozmowę. W przeciwnym razie agent musi się pożegnać i zakończyć rozmowę.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id"] } },
+  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta. Po wywolaniu polaczenie zostanie NATYCHMIAST przekierowane do konsultanta. NIE koncz rozmowy — system technicznie zastapi strumien polaczeniem z konsultantem. Powiedz klientowi 'Prosze chwile poczekac, lacze z konsultantem' i czekaj.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id"] } },
   { name: "create_checkout", description: "Utworz sesje platnosci Stripe", inputSchema: { type: "object", properties: { plan: { type: "string", description: "Nazwa planu: start/growth/enterprise" }, business_id: { type: "string" } }, required: ["plan", "business_id"] } }
 ];
 
@@ -198,9 +199,7 @@ else if (toolName === "transfer_to_human") {
           if (!targetNumber) {
             result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
           } else {
-            // Store pending transfer — transfer-router picks this up when ElevenLabs stream ends
-            // gdy hasOwnConsultant=false, targetNumber=TWOJ_NUMER (+48790824762) - WitaLine centrala
-            // gdy hasOwnConsultant=true, targetNumber=numer konsultanta firmy
+            // Zapisz pending transfer
             await setPendingTransfer(callSid || bizId, {
               businessId: bizId,
               targetNumber,
@@ -211,16 +210,70 @@ else if (toolName === "transfer_to_human") {
               createdAt: Date.now(),
             });
 
-            console.log("[MCP transfer_to_human] stored for", bizId, "->", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
-            result = JSON.stringify({
-              ok: true,
-              target: targetNumber,
-              business: biz?.name || "WitaLine",
-              has_human_consultant: hasOwnConsultant,
-              message: hasOwnConsultant
-                ? "Transfer rozpoczęty. Pożegnaj się i zakończ rozmowę — konsultant przejmie połączenie."
-                : "Brak konsultanta w tej firmie. Transfer do centrali WitaLine. Pożegnaj się i zakończ rozmowę.",
-            });
+            // === NATYCHMIASTOWY REDIRECT AKTYWNEGO POŁĄCZENIA ===
+            if (callSid && hasOwnConsultant) {
+              const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
+              const queueName = `handoff_${callSid}`;
+              const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+              const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(bizId)}&callSid=${encodeURIComponent(callSid)}`;
+              const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(bizId)}`;
+
+              const redirectTwiml = `
+<Say language="pl-PL">Proszę chwilę poczekać. Łączę z konsultantem.</Say>
+<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST">
+  ${escapeXml(queueName)}
+</Enqueue>
+<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`;
+
+              console.log("[MCP transfer_to_human] redirecting call", callSid, "→ queue", queueName);
+              const { redirectActiveCallToHumanHandoff, dialConsultantToQueue } = await import("@/lib/twilio-utils");
+              const redirectResult = await redirectActiveCallToHumanHandoff(callSid, redirectTwiml, bizId);
+
+              if (redirectResult.ok) {
+                // Wydzwonij konsultanta (asynchronicznie)
+                dialConsultantToQueue(targetNumber, callerId, queueName, baseUrl, bizId, callSid)
+                  .then(r => console.log("[MCP transfer_to_human] consultant dial:", r))
+                  .catch(err => console.error("[MCP transfer_to_human] dial failed:", err));
+
+                result = JSON.stringify({
+                  ok: true,
+                  target: targetNumber,
+                  business: biz?.name || "WitaLine",
+                  has_human_consultant: true,
+                  redirected: true,
+                  message: "Przekazuję do konsultanta. Połączenie zostało przekierowane.",
+                });
+              } else {
+                console.error("[MCP transfer_to_human] redirect failed:", redirectResult.message);
+                result = JSON.stringify({
+                  ok: true,
+                  target: targetNumber,
+                  business: biz?.name || "WitaLine",
+                  has_human_consultant: true,
+                  redirected: false,
+                  message: "Transfer rozpoczął się. Pożegnaj się z klientem — system przekieruje połączenie.",
+                });
+              }
+            } else if (!hasOwnConsultant) {
+              // Brak konsultantów — Maja kontynuuje
+              result = JSON.stringify({
+                ok: true,
+                target: targetNumber,
+                business: biz?.name || "WitaLine",
+                has_human_consultant: false,
+                message: "Brak konsultanta w tej firmie. Powiedz klientowi: Niestety, nasi konsultanci są teraz niedostępni. Mogę pomóc osobiście — w czym mogę pomóc?",
+              });
+            } else {
+              // hasOwnConsultant=true ale brak callSid
+              result = JSON.stringify({
+                ok: true,
+                target: targetNumber,
+                business: biz?.name || "WitaLine",
+                has_human_consultant: true,
+                redirected: false,
+                message: "Transfer rozpoczął się. Pożegnaj się z klientem.",
+              });
+            }
           }
         }
       else if (toolName === "create_checkout") {

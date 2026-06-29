@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { registerTransferFallback } from "@/lib/twilio-utils";
+import { registerTransferFallback, escapeXml } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { escapeXml } from "@/lib/twilio-utils";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -22,14 +21,19 @@ export async function POST(request: Request) {
     console.log("[transfer-fallback] consultant didn't answer, restarting Maja for", from);
 
     // Zapisz notyfikację o nieudanym transferze
-    await supabaseAdmin.from("notifications").insert({
-      business_id: businessId,
-      type: "call",
-      title: "Konsultant nie odebra\u0142",
-      message: `Klient ${from || "nieznany"} czeka\u0142 na konsultanta, ale nikt nie odebra\u0142. Maja wr\u00f3ci do rozmowy.`,
-    }).maybeSingle();
+    try {
+      await supabaseAdmin.from("notifications").insert({
+        business_id: businessId,
+        type: "call",
+        title: "Konsultant nie odebrał",
+        message: `Klient ${from || "nieznany"} czekał na konsultanta, ale nikt nie odebrał. Maja wróci do rozmowy.`,
+      });
+    } catch (e) {
+      console.warn("[transfer-fallback] notification insert failed:", e);
+    }
 
-    // Rozpocznij nową sesję ElevenLabs z informacją o nieudanym transferze
+    // Uruchom ponownie Maje z informacją o nieudanym transferze
+    // Maja powie: "Przepraszam, konsultant jest teraz niedostępny. Czy mogę w czymś pomóc? Mogę też zapisać wiadomość."
     const xml = await registerTransferFallback(from, to, businessId);
 
     return new NextResponse(xml, {
@@ -40,8 +44,10 @@ export async function POST(request: Request) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[transfer-fallback] failed:", msg);
 
-    // Maja nie wrocila — zaproponuj voicemail jako fallback
-    const voicemailUrl = `/api/twilio/voicemail?businessId=${encodeURIComponent(new URL(request.url).searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001")}`;
+    // Ostateczny fallback — voicemail
+    const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
+    const businessId = new URL(request.url).searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
+    const voicemailUrl = `${baseUrl}/api/twilio/voicemail?businessId=${encodeURIComponent(businessId)}`;
     return twiml(`
       <Say language="pl-PL">Przepraszamy, konsultant jest obecnie niedostępny.</Say>
       <Gather numDigits="1" action="${escapeXml(voicemailUrl)}" method="POST">

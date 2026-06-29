@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { setPendingTransfer } from "@/lib/transfer-store";
+import { redirectActiveCallToHumanHandoff, escapeXml } from "@/lib/twilio-utils";
 
-/** Szukasz konsultanta lub numeru dla danej firmy.
- *  Jeśli firma NIE ma skonfigurowanego numeru konsultanta:
- *  - Zwraca numer WitaLine (main line) → agent Rob/Maja poda się jako konsultant wewnętrzny
- *  - Następnie agent pokaże wiedzę o tej konkretnej firmie (prompt, usługi, ceny) */
-async function resolveTargetNumber(businessId: string): Promise<{ number: string; businessName: string; callerId: string; hasHumanConsultant: boolean } | null> {
+/** Szukasz konsultanta lub numeru dla danej firmy. */
+async function resolveTargetNumber(businessId: string): Promise<{ number: string; businessName: string; callerId: string; hasHumanConsultant: boolean; consultants: { phone: string }[] } | null> {
   const { data: business } = await supabaseAdmin
     .from("businesses")
     .select("id, name, phone, twilio_number")
@@ -21,17 +19,18 @@ async function resolveTargetNumber(businessId: string): Promise<{ number: string
     .eq("business_id", businessId)
     .order("sort_order", { ascending: true });
 
-  // Jeśli firma ma własnych konsultantów → użyj ich numeru
-  if (consultants && consultants.length > 0) {
+  const consultantList = consultants || [];
+
+  if (consultantList.length > 0) {
     return {
-      number: consultants[0].phone,
+      number: consultantList[0].phone,
       businessName: business.name || "WitaLine",
       callerId: business.twilio_number || process.env.TWILIO_PHONE_NUMBER || "",
       hasHumanConsultant: true,
+      consultants: consultantList,
     };
   }
 
-  // Brak konsultanta → numer WitaLine, ale to nie jest prawdziwy transfer
   const defaultNumber = process.env.WITALINE_CONSULTANT_NUMBER || process.env.TWILIO_PHONE_NUMBER || "";
   if (!defaultNumber) return null;
 
@@ -40,10 +39,11 @@ async function resolveTargetNumber(businessId: string): Promise<{ number: string
     businessName: business.name || "WitaLine",
     callerId: business.twilio_number || process.env.TWILIO_PHONE_NUMBER || "",
     hasHumanConsultant: false,
+    consultants: [],
   };
 }
 
-/* Obsługa GET — dla ElevenLabs system tool transfer_to_number (webhook) */
+/* GET — dla ElevenLabs system tool transfer_to_number */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const businessId = searchParams.get("business_id") || searchParams.get("businessId") || "";
@@ -82,9 +82,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ number: target.number });
     }
 
-    // Zawsze zapisuj pending transfer - transfer-router obsłuży różnicę
-    // gdy hasHumanConsultant=false, transfer-router po prostu zakończy rozmowę po streamie
-    // ale Maja może najpierw zaoferować pomoc jako konsultant WitaLine
+    // Zapisz pending transfer (dla fallbacku i tracking)
     const storeKey = callSid || businessId;
     await setPendingTransfer(storeKey, {
       businessId,
@@ -96,9 +94,7 @@ export async function POST(request: Request) {
       createdAt: Date.now(),
     });
 
-    console.log("[transfer-human] transfer stored for", storeKey, "→", target.number, "hasHumanConsultant:", target.hasHumanConsultant);
-
-    // Create support conversation
+    // Utwórz support conversation
     try {
       await supabaseAdmin.from("support_conversations").insert({
         business_id: businessId,
@@ -107,19 +103,81 @@ export async function POST(request: Request) {
         source: "transfer",
         status: "open",
       });
-      console.log("[transfer-human] support conversation created");
     } catch (convErr) {
       console.warn("[transfer-human] failed to create support conversation:", convErr);
     }
 
+    // === NATYCHMIASTOWY REDIRECT AKTYWNEGO POŁĄCZENIA ===
+    // Zamiast czekać na koniec streamu ElevenLabs, przekierowujemy
+    // aktywne połączenie Twilio do human-handoff natychmiast.
+    // To zastępuje ElevenLabs stream muzyką hold + Dial konsultanta.
+    if (callSid && target.hasHumanConsultant) {
+      const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
+      const queueName = `handoff_${callSid}`;
+      const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+      const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
+      const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
+
+      const redirectTwiml = `
+<Say language="pl-PL">Proszę chwilę poczekać. Łączę z konsultantem.</Say>
+<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST">
+  ${escapeXml(queueName)}
+</Enqueue>
+<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`;
+
+      console.log("[transfer-human] redirecting active call", callSid, "→ queue", queueName);
+      const redirectResult = await redirectActiveCallToHumanHandoff(callSid, redirectTwiml, businessId);
+
+      if (redirectResult.ok) {
+        console.log("[transfer-human] redirect OK, dialling consultant");
+
+        // Wydzwonij konsultanta do kolejki (asynchronicznie)
+        const { dialConsultantToQueue } = await import("@/lib/twilio-utils");
+        dialConsultantToQueue(target.number, target.callerId, queueName, baseUrl, businessId, callSid)
+          .then(r => console.log("[transfer-human] consultant dial result:", r))
+          .catch(err => console.error("[transfer-human] consultant dial failed:", err));
+
+        return NextResponse.json({
+          ok: true,
+          target: target.number,
+          business: target.businessName,
+          has_human_consultant: true,
+          redirected: true,
+          message: `Przekazuję do konsultanta ${target.number}. Połączenie zostało przekierowane.`,
+        });
+      } else {
+        console.error("[transfer-human] redirect failed:", redirectResult.message);
+        // Fallback: zwróć informację agentowi, żeby pożegnał się i zakończył
+        return NextResponse.json({
+          ok: true,
+          target: target.number,
+          business: target.businessName,
+          has_human_consultant: true,
+          redirected: false,
+          message: `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę — system przekieruje połączenie.`,
+        });
+      }
+    }
+
+    // Brak prawdziwych konsultantów → Maja informuje i proponuje pomoc
+    if (!target.hasHumanConsultant) {
+      return NextResponse.json({
+        ok: true,
+        target: target.number,
+        business: target.businessName,
+        has_human_consultant: false,
+        message: `Brak konsultanta w tej firmie. Powiedz klientowi: "Niestety, nasi konsultanci są teraz niedostępni. Mogę pomóc osobiście — w czym mogę pomóc?"`,
+      });
+    }
+
+    // hasHumanConsultant=true ale brak callSid — fallback
     return NextResponse.json({
       ok: true,
       target: target.number,
       business: target.businessName,
-      has_human_consultant: target.hasHumanConsultant,
-      message: target.hasHumanConsultant
-        ? `Transfer initiated to ${target.number}. Caller will be connected when Stream ends.`
-        : `Brak konsultanta w tej firmie. Transfer do centrali WitaLine: ${target.number}. Pożegnaj się i zakończ rozmowę.`,
+      has_human_consultant: true,
+      redirected: false,
+      message: `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę.`,
     });
 
   } catch (err) {
