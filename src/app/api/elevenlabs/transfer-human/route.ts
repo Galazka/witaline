@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { setPendingTransfer } from "@/lib/transfer-store";
-import { redirectActiveCallToHumanHandoff, escapeXml } from "@/lib/twilio-utils";
 
 /** Szukasz konsultanta lub numeru dla danej firmy. */
 async function resolveTargetNumber(businessId: string): Promise<{ number: string; businessName: string; callerId: string; hasHumanConsultant: boolean; consultants: { phone: string }[] } | null> {
@@ -82,9 +81,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ number: target.number });
     }
 
-    // Zapisz pending transfer (dla fallbacku i tracking)
+    // Zapisz pending transfer — transfer-router przejmie po zakończeniu streamu ElevenLabs
+    // Stream kończy się gdy agent (Maja) zakończy rozmowę po wywołaniu tego narzędzia
     const storeKey = callSid || businessId;
-    await setPendingTransfer(storeKey, {
+    const pending = {
       businessId,
       targetNumber: target.number,
       callerId: target.callerId,
@@ -92,7 +92,9 @@ export async function POST(request: Request) {
       fromNumber: callerPhone,
       toNumber,
       createdAt: Date.now(),
-    });
+    };
+    await setPendingTransfer(storeKey, pending);
+    console.log("[transfer-human] saved pending transfer:", pending.targetNumber);
 
     // Utwórz support conversation
     try {
@@ -107,66 +109,15 @@ export async function POST(request: Request) {
       console.warn("[transfer-human] failed to create support conversation:", convErr);
     }
 
-    // === NATYCHMIASTOWY REDIRECT AKTYWNEGO POŁĄCZENIA ===
-    // Gdy target.number istnieje (konsultant lub fallback), zawsze redirect
-    if (callSid && target.number) {
-      const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
-      const queueName = `handoff_${callSid}`;
-      const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
-      const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
-      const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
-
-      const redirectTwiml = `
-<Say language="pl-PL">Proszę chwilę poczekać. Łączę z konsultantem.</Say>
-<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST">
-  ${escapeXml(queueName)}
-</Enqueue>
-<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`;
-
-      console.log("[transfer-human] redirecting active call", callSid, "→ queue", queueName, "target:", target.number);
-      const redirectResult = await redirectActiveCallToHumanHandoff(callSid, redirectTwiml, businessId);
-
-      if (redirectResult.ok) {
-        console.log("[transfer-human] redirect OK, dialling consultant");
-
-        // Wydzwonij konsultanta do kolejki (asynchronicznie)
-        const { dialConsultantToQueue } = await import("@/lib/twilio-utils");
-        dialConsultantToQueue(target.number, target.callerId, queueName, baseUrl, businessId, callSid)
-          .then(r => console.log("[transfer-human] consultant dial result:", r))
-          .catch(err => console.error("[transfer-human] consultant dial failed:", err));
-
-        return NextResponse.json({
-          ok: true,
-          target: target.number,
-          business: target.businessName,
-          has_human_consultant: target.hasHumanConsultant,
-          redirected: true,
-          message: `Przekazuję do konsultanta ${target.number}. Połączenie zostało przekierowane.`,
-        });
-      } else {
-        console.error("[transfer-human] redirect failed:", redirectResult.message);
-        // Fallback: agent kończy rozmowę, transfer-router przejmie po zakończeniu streamu
-        return NextResponse.json({
-          ok: true,
-          target: target.number,
-          business: target.businessName,
-          has_human_consultant: target.hasHumanConsultant,
-          redirected: false,
-          message: `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę — system przekieruje połączenie.`,
-        });
-      }
-    }
-
-    // Brak callSid — nie można zrobić REST API redirect
+    // Nie próbujemy redirectu REST API — ElevenLabs <Connect> nie pozwala na
+    // przerwanie strumienia. Agent musi zakończyć rozmowę, wtedy <Redirect>
+    // wstrzyknięty w connectToAgent przekaże do transfer-router.
     return NextResponse.json({
       ok: true,
       target: target.number,
       business: target.businessName,
       has_human_consultant: target.hasHumanConsultant,
-      redirected: false,
-      message: target.hasHumanConsultant
-        ? `Transfer do ${target.number}. Pożegnaj się i zakończ rozmowę.`
-        : `Przekazuję do konsultanta ${target.number}. Nie znam tego numeru, ale system go wybierze po zakończeniu rozmowy.`,
+      message: `Transfer do ${target.number}. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call) — system przekieruje połączenie automatycznie.`,
     });
 
   } catch (err) {

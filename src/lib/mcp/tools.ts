@@ -69,7 +69,7 @@ export const TOOL_DEFINITIONS: ToolDef[] = [
   {
     name: "transfer_to_human",
     description:
-      "Przekazuje polaczenie do czlowieka/konsultanta firmy. Po wywolaniu tego narzędzia, polaczenie zostanie NATYCHMIAST przekierowane do konsultanta. NIE koncz rozmowy - system technicznie zastapi strumien ElevenLabs polaczeniem z konsultantem. Powiedz klientowi 'Proszę chwilę poczekać, łączę z konsultantem' i czekaj.",
+      "Przekazuje polaczenie do czlowieka/konsultanta firmy. PO SKORZYSTANIU Z TEGO NARZEDZIA KONIECZNIE zakoncz rozmowe (end_call) — system przekieruje polaczenie automatycznie po zakonczeniu strumienia.",
     inputSchema: {
       business_id: z.string().describe("ID firmy z dynamic_vars.business_id"),
       caller_phone: z.string().optional().describe("Automatycznie pobrany z polaczenia - NIE pytaj klienta"),

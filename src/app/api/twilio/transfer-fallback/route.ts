@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { registerTransferFallback, escapeXml } from "@/lib/twilio-utils";
+import { registerTransferFallback } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 function twiml(body: string): NextResponse {
@@ -44,17 +44,6 @@ export async function POST(request: Request) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[transfer-fallback] failed:", msg);
 
-    // Ostateczny fallback — voicemail
-    const baseUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl").replace(/\/+$/, "");
-    const businessId = new URL(request.url).searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
-    const voicemailUrl = `${baseUrl}/api/twilio/voicemail?businessId=${encodeURIComponent(businessId)}`;
-    return twiml(`
-      <Say language="pl-PL">Przepraszamy, konsultant jest obecnie niedostępny.</Say>
-      <Gather numDigits="1" action="${escapeXml(voicemailUrl)}" method="POST">
-        <Say language="pl-PL">Naciśnij 1, aby zostawić wiadomość. Naciśnij 2, aby zakończyć.</Say>
-      </Gather>
-      <Say language="pl-PL">Nie rozpoznano wyboru. Dziękujemy za rozmowę.</Say>
-      <Hangup/>
-    `);
+    return twiml("<Say language=\"pl-PL\">Przepraszamy, konsultant jest obecnie niedostępny. Dziękujemy za rozmowę.</Say><Hangup/>");
   }
 }
