@@ -161,10 +161,17 @@ export async function POST(request: NextRequest) {
         }
       }
 else if (toolName === "transfer_to_human") {
-          const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+          let bizId = args.business_id || "";
           const callerPhone = args.caller_phone || "";
           const toNumber = args.to_number || "";
           const callSid = args.call_sid || "";
+
+          // Walidacja UUID — ElevenLabs może przysłać "witaline" zamiast prawdziwego UUID
+          const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (!UUID_RE.test(bizId)) {
+            console.log("[MCP transfer_to_human] invalid bizId, falling back to main business:", bizId);
+            bizId = WITALINE_MAIN_BUSINESS;
+          }
 
           console.log("[MCP transfer_to_human] args:", JSON.stringify({ bizId, callerPhone, toNumber, callSid: callSid ? callSid.substring(0, 20) : "(empty)" }));
 

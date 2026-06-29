@@ -61,7 +61,13 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     console.log("[transfer-human] received:", JSON.stringify(body).slice(0, 300));
 
-    const businessId = body.business_id || body.dynamic_vars?.business_id;
+    const WITALINE_MAIN_BUSINESS = "00000000-0000-0000-0000-000000000001";
+    let businessId = body.business_id || body.dynamic_vars?.business_id || "";
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(businessId)) {
+      console.log("[transfer-human] invalid businessId, falling back to main:", businessId);
+      businessId = WITALINE_MAIN_BUSINESS;
+    }
     const callerPhone = body.caller_phone || body.dynamic_vars?.caller_phone || "";
     const toNumber = body.to_number || body.dynamic_vars?.to_number || "";
     const callSid = body.call_sid || body.dynamic_vars?.call_sid || "";
