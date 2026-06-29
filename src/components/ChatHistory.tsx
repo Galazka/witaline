@@ -9,6 +9,16 @@ interface Props {
   businessPlan?: string;
 }
 
+function formatDateHeader(dateStr: string): string {
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "Dzisiaj";
+  if (d.toDateString() === yesterday.toDateString()) return "Wczoraj";
+  return d.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
 const TAG_COLORS: Record<string, string> = {
   skarga: "bg-red-100 text-red-700 border-red-200",
   zamówienie: "bg-green-100 text-green-700 border-green-200",
@@ -297,7 +307,15 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
             ) : messages.length === 0 ? (
               <div className="text-center text-sm text-zinc-400 py-8">Brak wiadomości</div>
             ) : (
-              messages.map(msg => (
+              messages.map((msg, idx) => (
+                <>
+                {idx === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[idx - 1].created_at).toDateString() ? (
+                  <div className="text-center my-4">
+                    <span className="text-[10px] font-medium text-zinc-400 bg-zinc-100 px-3 py-1 rounded-full">
+                      {formatDateHeader(msg.created_at)}
+                    </span>
+                  </div>
+                ) : null}
                 <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
                     msg.role === "user" ? "bg-[#0d9488] text-white rounded-br-md" : "bg-brand-50 text-zinc-800 rounded-bl-md"
@@ -308,6 +326,7 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
                     </p>
                   </div>
                 </div>
+                </>
               ))
             )}
           </div>

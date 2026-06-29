@@ -175,6 +175,14 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
     fetchConversations();
   }
 
+  async function deleteMessage(msgId: string) {
+    if (!confirm("Usunąć tę wiadomość?")) return;
+    try {
+      await fetch(`/api/business/chats/${selected!.id}/messages/${msgId}`, { method: "DELETE" });
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+    } catch (e) { console.error("[BusinessLiveChat] delete error:", e); }
+  }
+
   async function handleExport() {
     try {
       const res = await fetch("/api/business/conversations/export", {
@@ -304,7 +312,7 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
                         {new Date(msg.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
                       </div>
                     )}
-                    <div className={`flex ${msg.role === "user" || msg.role === "human" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex group ${msg.role === "user" || msg.role === "human" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${
                         msg.role === "user" ? "bg-[#0d9488] text-white rounded-br-md" :
                         msg.role === "human" ? "bg-brand-200 text-zinc-800 rounded-br-md" :
@@ -316,6 +324,13 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
                           {new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}
                         </div>
                       </div>
+                      <button onClick={() => deleteMessage(msg.id)}
+                        className="opacity-0 group-hover:opacity-100 transition self-start mt-2 ml-1 text-zinc-400 hover:text-red-500 shrink-0 p-0.5 rounded"
+                        title="Usuń wiadomość">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                   );

@@ -3,6 +3,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 
+function formatDateHeader(dateStr: string): string {
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "Dzisiaj";
+  if (d.toDateString() === yesterday.toDateString()) return "Wczoraj";
+  return d.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
 interface AdminConversation {
   id: string;
   business_id: string;
@@ -129,6 +139,14 @@ export default function AdminLiveChat() {
     } catch { /* silent */ }
     setSending(false);
   };
+
+  async function deleteMessage(msgId: string) {
+    if (!confirm("Usunąć tę wiadomość?")) return;
+    try {
+      await fetch(`/api/admin/live-chat/${selectedId}/messages/${msgId}`, { method: "DELETE" });
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+    } catch { /* silent */ }
+  }
 
   const selected = conversations.find((c) => c.id === selectedId);
 
@@ -272,10 +290,18 @@ export default function AdminLiveChat() {
               ) : messages.length === 0 ? (
                 <p className="text-xs text-zinc-400 text-center py-8">Brak wiadomości</p>
               ) : (
-                messages.map((msg) => (
+                messages.map((msg, idx) => (
+                  <>
+                  {idx === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[idx - 1].created_at).toDateString() ? (
+                    <div className="text-center my-4">
+                      <span className="text-[10px] font-medium text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-3 py-1 rounded-full">
+                        {formatDateHeader(msg.created_at)}
+                      </span>
+                    </div>
+                  ) : null}
                   <div
                     key={msg.id}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex group ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap rounded-2xl ${
@@ -291,7 +317,15 @@ export default function AdminLiveChat() {
                       </p>
                       {msg.content}
                     </div>
+                    <button onClick={() => deleteMessage(msg.id)}
+                      className="opacity-0 group-hover:opacity-100 transition self-start mt-2 ml-1 text-zinc-400 hover:text-red-500 shrink-0 p-0.5 rounded"
+                      title="Usuń wiadomość">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
+                  </>
                 ))
               )}
               <div ref={messagesEndRef} />

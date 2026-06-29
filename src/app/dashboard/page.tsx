@@ -33,6 +33,7 @@ import PromptConfigurator from "@/components/PromptConfigurator";
 import KnowledgeManager from "@/components/KnowledgeManager";
 import WidgetSettings from "@/components/WidgetSettings";
 import MajaPromptEditor from "@/components/MajaPromptEditor";
+import QuickReplyEditor from "@/components/QuickReplyEditor";
 import ServicesEditor from "@/components/ServicesEditor";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import WeeklyReport from "@/components/WeeklyReport";
@@ -378,6 +379,15 @@ export default function DashboardPage() {
             </div>
             <div className="p-5">
               <KnowledgeManager businessId={business.id} />
+            </div>
+          </div>
+          <div className="bg-white/55 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-zinc-100">
+              <h3 className="font-semibold text-zinc-900">⚡ Szybkie odpowiedzi</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Przyciski szybkich pytań widoczne dla klientów w widgetcie czatu</p>
+            </div>
+            <div className="p-5">
+              <QuickReplyEditor businessId={business.id} />
             </div>
           </div>
           <MajaPromptEditor />

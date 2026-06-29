@@ -9,6 +9,16 @@ const VoiceAgent = dynamic(() => import("@/components/VoiceAgent"), {
   loading: () => <div className="text-xs text-zinc-400 dark:text-zinc-500">Loading...</div>,
 });
 
+function formatDateHeader(dateStr: string): string {
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "Dzisiaj";
+  if (d.toDateString() === yesterday.toDateString()) return "Wczoraj";
+  return d.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
 interface Message {
   role: "bot" | "user";
   text: string;
@@ -38,6 +48,7 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
   const [callActive, setCallActive] = useState(false);
   const [transferRequested, setTransferRequested] = useState(false);
   const [transferring, setTransferring] = useState(false);
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const chatRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -46,6 +57,12 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
       setLoading(false);
       return;
     }
+    // Load quick replies
+    fetch(`/api/business/quick-replies?businessId=${businessId}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setQuickReplies(data.map((qr: any) => qr.text)))
+      .catch(() => {});
+
     const stored = localStorage.getItem(STORAGE_KEY(businessId));
     const initialConvId = stored || null;
     if (initialConvId) setConversationId(initialConvId);
@@ -250,6 +267,14 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
           {/* Messages */}
           <div ref={chatRef} className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-4">
             {messages.map((msg, i) => (
+              <>
+              {i === 0 || new Date(msg.timestamp).toDateString() !== new Date(messages[i - 1].timestamp).toDateString() ? (
+                <div className="text-center my-4">
+                  <span className="text-[10px] font-medium text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-3 py-1 rounded-full">
+                    {formatDateHeader(new Date(msg.timestamp).toISOString())}
+                  </span>
+                </div>
+              ) : null}
               <div key={msg.timestamp ? `${msg.role}-${msg.timestamp}` : i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] sm:max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "user"
@@ -259,6 +284,7 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
                   {msg.text}
                 </div>
               </div>
+            </>
             ))}
             {isTyping && (
               <div className="flex justify-start">
@@ -291,6 +317,21 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
               <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2.5 sm:py-2 text-center">
                 Prośba o konsultanta została wysłana. Konsultant odpowie tutaj.
               </div>
+            </div>
+          )}
+
+          {/* Quick replies */}
+          {quickReplies.length > 0 && messages.length > 0 && (
+            <div className="px-3 sm:px-4 py-2 flex flex-wrap gap-1.5 shrink-0">
+              {quickReplies.map((text, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSend(text)}
+                  className="text-xs px-3 py-1.5 bg-[#f0fdfa] dark:bg-zinc-800 text-[#0d9488] dark:text-[#0d9488] rounded-full border border-[#0d9488]/20 dark:border-[#0d9488]/30 hover:bg-[#0d9488] hover:text-white transition"
+                >
+                  {text}
+                </button>
+              ))}
             </div>
           )}
 

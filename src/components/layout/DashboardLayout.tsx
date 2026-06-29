@@ -106,6 +106,24 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
     });
   }, [supabase]);
 
+  const [chatUnread, setChatUnread] = useState(0);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("chat-notifications-dash")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: "role=eq.user" },
+        () => { setChatUnread(prev => prev + 1); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (tab === "chats") setChatUnread(0);
+  }, [tab]);
+
   const permCtx = useMemo(() => ({
     role, isOwner, isSuperAdmin,
     hasPerm: (perm: Permission) => {
@@ -167,6 +185,8 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
             userEmail={userEmail}
             onLogout={async () => { await supabase.auth.signOut(); window.location.href = "/login"; }}
             notificationContext="dashboard"
+            chatUnreadCount={chatUnread}
+            onChatClick={() => setTab("chats")}
           />
           <main className="flex-1 p-4 lg:p-6">
             <div className="max-w-7xl mx-auto">{children}</div>

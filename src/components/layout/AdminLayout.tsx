@@ -83,6 +83,24 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
+  const [chatUnread, setChatUnread] = useState(0);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("chat-notifications-admin")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: "role=eq.user" },
+        () => { setChatUnread(prev => prev + 1); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (tab === "live-chat") setChatUnread(0);
+  }, [tab]);
+
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/dashboard");
@@ -137,6 +155,8 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
             userEmail={userEmail}
             onLogout={async () => { await supabase.auth.signOut(); window.location.href = "/login"; }}
             notificationContext="admin"
+            chatUnreadCount={chatUnread}
+            onChatClick={() => setTab("live-chat")}
           />
           <main className="flex-1 p-4 lg:p-6">
             {children}

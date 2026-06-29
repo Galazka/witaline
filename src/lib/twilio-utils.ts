@@ -150,7 +150,7 @@ export async function dialConsultantToQueue(targetNumber: string, callerId: stri
 export async function redirectCallWithTransferTwiML(callSid: string, targetNumber: string, callerId: string, baseUrl: string, businessId: string, idx: number): Promise<{ ok: boolean; status?: number; message: string }> {
   const cleanUrl = baseUrl.replace(/\/+$/, "");
   const queueName = `handoff_${callSid}`;
-  const holdUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+  const holdUrl = `${cleanUrl}/api/twilio/hold-music`;
   const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
   const twimlBody = `

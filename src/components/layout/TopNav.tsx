@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, type JSX } from "react";
-import { IconMenu, IconUser, IconLogout, IconSun, IconMoon } from "./icons";
+import { IconMenu, IconUser, IconLogout, IconSun, IconMoon, IconMessage } from "./icons";
 import NotificationDropdown from "@/components/NotificationDropdown";
 
 interface Props {
@@ -13,9 +13,11 @@ interface Props {
   actions?: JSX.Element;
   notificationContext?: "admin" | "dashboard";
   notificationBusinessId?: string;
+  chatUnreadCount?: number;
+  onChatClick?: () => void;
 }
 
-export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLogout, actions, notificationContext, notificationBusinessId }: Props) {
+export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLogout, actions, notificationContext, notificationBusinessId, chatUnreadCount, onChatClick }: Props) {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -52,6 +54,20 @@ export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLog
           {actions}
           {notificationContext && (
             <NotificationDropdown context={notificationContext} businessId={notificationBusinessId} />
+          )}
+          {typeof chatUnreadCount !== 'undefined' && (
+            <button
+              onClick={onChatClick}
+              className="relative p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
+              aria-label="Czaty"
+            >
+              <IconMessage className="w-5 h-5" />
+              {chatUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+                </span>
+              )}
+            </button>
           )}
           {userEmail && onLogout && (
             <div className="flex items-center gap-2 pl-3 border-l border-white/10">

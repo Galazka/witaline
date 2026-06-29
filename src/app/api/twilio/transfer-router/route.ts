@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     // Real consultant exists - use queue flow
     const queueName = `handoff_${callSid || "fallback"}`;
-    const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+    const holdMusicUrl = `${baseUrl}/api/twilio/hold-music`;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
     const responseTwiml = twiml(`
