@@ -72,7 +72,7 @@ export default function RecentCallsPreview({ callLogs = [], onClick }: Props) {
               </div>
               {call.was_helpful && <span className="text-xs text-green-500 shrink-0">✅ Pomocne</span>}
               {call.has_human_handoff && <span className="text-[10px] text-brand-700 bg-brand-100 rounded-full px-2 py-0.5 font-medium shrink-0">🔀 Konsultant</span>}
-              <span className="text-[10px] text-zinc-400 shrink-0">{new Date(call.created_at).toLocaleDateString("pl-PL")}</span>
+              <span className="text-[10px] text-zinc-400 shrink-0 whitespace-nowrap">{new Date(call.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
             </div>
           ))
         )}

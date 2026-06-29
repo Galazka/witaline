@@ -315,7 +315,10 @@ export default function AdminLiveChat() {
                       <p className="text-[10px] opacity-60 mb-1">
                         {msg.role === "user" ? "Klient" : msg.role === "human" ? "Admin" : "Asystent AI"}
                       </p>
-                      {msg.content}
+                      <div>{msg.content}</div>
+                      <div className={`text-[10px] mt-1 ${msg.role === "user" ? "text-white/60" : "text-zinc-400 dark:text-zinc-500"}`}>
+                        {new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}
+                      </div>
                     </div>
                     <button onClick={() => deleteMessage(msg.id)}
                       className="opacity-0 group-hover:opacity-100 transition self-start mt-2 ml-1 text-zinc-400 hover:text-red-500 shrink-0 p-0.5 rounded"

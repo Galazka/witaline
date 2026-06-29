@@ -113,7 +113,7 @@ export default function AdminFeedback() {
                   </span>
                   <span className="text-[10px] text-zinc-400 uppercase">{item.source}</span>
                 </div>
-                <span className="text-[10px] text-zinc-400">{new Date(item.created_at).toLocaleDateString("pl-PL")}</span>
+                <span className="text-[10px] text-zinc-400 whitespace-nowrap">{new Date(item.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
               </div>
               {item.conversations?.summary && (
                 <p className="text-xs text-zinc-600 line-clamp-2">{item.conversations.summary}</p>

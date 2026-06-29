@@ -288,7 +288,7 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
                     {selected.flagged && <span className="ml-1.5" title="Oflagowane">🚩</span>}
                   </p>
                   <p className="text-xs text-zinc-400">
-                    {selected.channel === "widget" ? "🔗 Widget" : "💬 Web"} · {new Date(selected.created_at).toLocaleDateString("pl-PL")}
+                    {selected.channel === "widget" ? "🔗 Widget" : "💬 Web"} · {new Date(selected.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
                 <div className="flex gap-2">

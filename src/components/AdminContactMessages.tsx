@@ -150,7 +150,7 @@ export default function AdminContactMessages() {
                         <p className="text-sm font-semibold text-zinc-900 truncate">{msg.company}</p>
                         <p className="text-xs text-zinc-500 truncate">{msg.contact}</p>
                       </div>
-                      <span className="text-[10px] text-zinc-400 shrink-0">{new Date(msg.created_at).toLocaleDateString("pl-PL")}</span>
+                      <span className="text-[10px] text-zinc-400 shrink-0 whitespace-nowrap">{new Date(msg.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                     <p className="text-xs text-zinc-600 mt-2 line-clamp-2">{msg.message}</p>
                   </button>

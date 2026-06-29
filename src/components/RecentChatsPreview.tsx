@@ -58,7 +58,7 @@ export default function RecentChatsPreview({ businessId, onClick }: Props) {
                   <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full border border-zinc-200 text-zinc-500">#{tag}</span>
                 ))}
               </div>
-              <span className="text-[10px] text-zinc-400 shrink-0">{new Date(conv.created_at).toLocaleDateString("pl-PL")}</span>
+              <span className="text-[10px] text-zinc-400 shrink-0 whitespace-nowrap">{new Date(conv.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
             </div>
           ))
         )}

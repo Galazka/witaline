@@ -32,7 +32,7 @@ export default function LeadsView({ businessId }: Props) {
         <div key={lead.id} className="px-4 py-3 hover:bg-[#f0fdfa] transition">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-zinc-900">{lead.company_name}</p>
-            <span className="text-xs text-zinc-400">{new Date(lead.created_at).toLocaleDateString("pl-PL")}</span>
+            <span className="text-xs text-zinc-400 whitespace-nowrap">{new Date(lead.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
           </div>
           <div className="flex gap-3 text-xs text-zinc-500 mt-1">
             {lead.phone && <span>📞 {lead.phone}</span>}

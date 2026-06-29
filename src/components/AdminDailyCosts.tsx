@@ -32,9 +32,10 @@ function todayStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function firstOfMonth(): string {
+function ninetyDaysBack(): string {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  d.setDate(d.getDate() - 90);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function daysInMonth(d = new Date()): number {
@@ -90,7 +91,7 @@ interface DailyGroup {
 
 export default function AdminDailyCosts() {
   type ViewCurrency = "PLN" | "EUR" | "USD";
-  const [from, setFrom] = useState(firstOfMonth);
+  const [from, setFrom] = useState(ninetyDaysBack);
   const [to, setTo] = useState(todayStr);
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [loading, setLoading] = useState(true);
