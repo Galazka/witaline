@@ -32,6 +32,7 @@ import DashboardWidgets from "@/components/DashboardWidgets";
 import PromptConfigurator from "@/components/PromptConfigurator";
 import KnowledgeManager from "@/components/KnowledgeManager";
 import WidgetSettings from "@/components/WidgetSettings";
+import MajaPromptEditor from "@/components/MajaPromptEditor";
 import ServicesEditor from "@/components/ServicesEditor";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import WeeklyReport from "@/components/WeeklyReport";
@@ -365,6 +366,21 @@ export default function DashboardPage() {
             currentVoiceId={business.voice_id || undefined}
           />
           <CrmPipeline businessId={business.id} callLogs={callLogs} onNavigate={(key) => { if (key === "chats" || key === "calls" || key === "overview") setTab(key); }} />
+        </div>
+      )}
+
+      {tab === "knowledge" && business && (
+        <div className="space-y-6">
+          <div className="bg-white/55 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-zinc-100">
+              <h3 className="font-semibold text-zinc-900">📚 Baza wiedzy firmy</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Dodaj informacje, które Maja ma znać o Twojej firmie</p>
+            </div>
+            <div className="p-5">
+              <KnowledgeManager businessId={business.id} />
+            </div>
+          </div>
+          <MajaPromptEditor />
         </div>
       )}
 

@@ -16,7 +16,7 @@ import { ROLE_PERMISSIONS } from "@/types/database";
 export type DashboardTab =
   | "overview" | "chats" | "calls" | "costs" | "reservations" | "sms"
   | "leads" | "config" | "upgrade" | "security" | "account" | "voice" | "billing"
-  | "integrations" | "team";
+  | "integrations" | "team" | "knowledge";
 
 interface DashboardTabContextValue {
   tab: DashboardTab;
@@ -65,6 +65,7 @@ const sidebarGroups: { label?: string; items: { key: DashboardTab; label: string
       { key: "reservations", label: "Rezerwacje", icon: <IconCalendar className="w-5 h-5" /> },
       { key: "leads", label: "Leady", icon: <IconUsers className="w-5 h-5" /> },
       { key: "voice", label: "Voice", icon: <IconStar className="w-5 h-5" /> },
+      { key: "knowledge", label: "Wiedza AI", icon: <IconMessage className="w-5 h-5" /> },
     ],
   },
   {
@@ -83,7 +84,7 @@ const sidebarGroups: { label?: string; items: { key: DashboardTab; label: string
 
 // Tabs per role: admin sees all; others see filtered set
 const ROLE_VISIBLE_TABS: Record<string, DashboardTab[]> = {
-  admin: ["overview", "chats", "calls", "costs", "reservations", "sms", "leads", "config", "voice", "billing", "upgrade", "team", "security", "account", "integrations"],
+  admin: ["overview", "chats", "calls", "costs", "reservations", "sms", "leads", "config", "voice", "knowledge", "billing", "upgrade", "team", "security", "account", "integrations"],
   manager: ["overview", "chats", "calls", "costs", "reservations", "sms", "leads", "billing", "upgrade", "account"],
   receptionist: ["overview", "chats", "calls", "reservations", "costs", "account"],
   viewer: ["overview", "calls", "reservations", "costs", "account"],
