@@ -123,36 +123,36 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
   return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z połączeniem. Proszę spróbować później.</Say><Hangup/>`);
 }
 
-export async function dialConsultantToQueue(targetNumber: string, callerId: string, queueName: string, baseUrl: string, businessId: string, callSid: string): Promise<{ ok: boolean; sid?: string; message: string }> {
-  let creds: TwilioCredentials;
-  try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
+export async function dialConsultantToConference(targetNumber: string, callerId: string, conferenceName: string, baseUrl: string, businessId: string, callSid: string): Promise<{ ok: boolean; sid?: string; message: string }> {
+   let creds: TwilioCredentials;
+   try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
 
-  const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
-  const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Queue>${escapeXml(queueName)}</Queue></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
-  const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&queue=${encodeURIComponent(queueName)}&businessId=${encodeURIComponent(businessId)}`;
+   const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+   const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Conference>${escapeXml(conferenceName)}</Conference></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
+   const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&conference=${encodeURIComponent(conferenceName)}&businessId=${encodeURIComponent(businessId)}`;
 
-  console.log("[dialConsultantToQueue] Preparing to dial consultant:", targetNumber, "queueName:", queueName, "callSid:", callSid, "callerId:", callerId);
+   console.log("[dialConsultantToConference] Preparing to dial consultant:", targetNumber, "conferenceName:", conferenceName, "callSid:", callSid, "callerId:", callerId);
 
-  const body = new URLSearchParams({
-    To: targetNumber,
-    From: callerId,
-    Twiml: consulTwiml,
-    Timeout: "25",
-    StatusCallback: statusCallback,
-    StatusCallbackEvent: "initiated+ringing+answered+completed",
-  });
+   const body = new URLSearchParams({
+     To: targetNumber,
+     From: callerId,
+     Twiml: consulTwiml,
+     Timeout: "25",
+     StatusCallback: statusCallback,
+     StatusCallbackEvent: "initiated+ringing+answered+completed",
+   });
 
-  const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${creds.accountSid}/Calls.json`, creds, body);
-  if (res.status >= 200 && res.status < 300) {
-    const data = res.data as { sid?: string; status?: string };
-    console.log("[dialConsultantToQueue] call created:", data?.sid, "status:", data?.status, "target:", targetNumber, "queueName:", queueName);
-    if (!["queued", "in-progress", "ringing"].includes((data?.status || "").toLowerCase())) {
-      console.warn("[dialConsultantToQueue] Unexpected Twilio call status:", data?.status, "target:", targetNumber);
-    }
-    return { ok: true, sid: data?.sid, message: "Consultant dialed to queue" };
-  }
-  console.error("[dialConsultantToQueue] failed:", res.status, typeof res.data === "string" ? res.data.slice(0, 200) : JSON.stringify(res.data).slice(0, 200));
-  return { ok: false, message: typeof res.data === "string" ? res.data : res.data?.message || "Dial failed" };
+   const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${creds.accountSid}/Calls.json`, creds, body);
+   if (res.status >= 200 && res.status < 300) {
+     const data = res.data as { sid?: string; status?: string };
+     console.log("[dialConsultantToConference] call created:", data?.sid, "status:", data?.status, "target:", targetNumber, "conferenceName:", conferenceName);
+     if (!["queued", "in-progress", "ringing"].includes((data?.status || "").toLowerCase())) {
+       console.warn("[dialConsultantToConference] Unexpected Twilio call status:", data?.status, "target:", targetNumber);
+     }
+     return { ok: true, sid: data?.sid, message: "Consultant dialed to conference" };
+   }
+   console.error("[dialConsultantToConference] failed:", res.status, typeof res.data === "string" ? res.data.slice(0, 200) : JSON.stringify(res.data).slice(0, 200));
+   return { ok: false, message: typeof res.data === "string" ? res.data : res.data?.message || "Dial failed" };
 }
 
 export async function redirectCallWithTransferTwiML(callSid: string, targetNumber: string, callerId: string, baseUrl: string, businessId: string, idx: number): Promise<{ ok: boolean; status?: number; message: string }> {

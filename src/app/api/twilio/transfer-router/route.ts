@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPendingTransfer, deletePendingTransfer, findPendingTransferByBusinessId } from "@/lib/transfer-store";
-import { escapeXml, dialConsultantToQueue } from "@/lib/twilio-utils";
+import { escapeXml, dialConsultantToConference } from "@/lib/twilio-utils";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
