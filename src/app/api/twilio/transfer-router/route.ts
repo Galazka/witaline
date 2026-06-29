@@ -70,7 +70,8 @@ export async function POST(request: Request) {
 `);
 
     dialConsultantToQueue(targetPhone, callerId, queueName, baseUrl, pending.businessId, callSid)
-      .catch(err => console.error("[transfer-router] dial consultant failed:", err));
+      .then(result => { if (!result.ok) console.error("[transfer-router] dial consultant failed:", result.message); else console.log("[transfer-router] dial consultant ok, sid:", result.sid); })
+      .catch(err => console.error("[transfer-router] dial consultant exception:", err));
 
     return responseTwiml;
   }

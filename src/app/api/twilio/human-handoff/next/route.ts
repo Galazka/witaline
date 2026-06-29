@@ -25,16 +25,16 @@ export async function POST(request: Request) {
     const from = String(formData.get("From") || "");
     const to = String(formData.get("To") || "");
 
-    console.log("[human-handoff/next] dialCallStatus:", dialCallStatus, "queueResult:", queueResult, "from:", from);
+    console.log("[human-handoff/next] dialCallStatus:", dialCallStatus, "queueResult:", queueResult, "from:", from, "to:", to);
 
     const url = new URL(request.url);
     const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
     const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
 
-    // Called from <Enqueue> action — bridge with consultant ended
+    // Called from <Enqueue> action — bridge with consultant succeeded
     if (queueResult === "bridged") {
-      return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
+      return twiml("");
     }
     if (queueResult) {
       return twiml("<Hangup/>");

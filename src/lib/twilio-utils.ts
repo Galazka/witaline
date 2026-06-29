@@ -142,9 +142,11 @@ export async function dialConsultantToQueue(targetNumber: string, callerId: stri
 
   const res = await twilioApiRequest("POST", `/2010-04-01/Accounts/${creds.accountSid}/Calls.json`, creds, body);
   if (res.status >= 200 && res.status < 300) {
-    const data = res.data as { sid?: string };
+    const data = res.data as { sid?: string; status?: string };
+    console.log("[dialConsultantToQueue] call created:", data?.sid, "status:", data?.status, "to:", targetNumber);
     return { ok: true, sid: data?.sid, message: "Consultant dialed to queue" };
   }
+  console.error("[dialConsultantToQueue] failed:", res.status, typeof res.data === "string" ? res.data.slice(0, 200) : JSON.stringify(res.data).slice(0, 200));
   return { ok: false, message: typeof res.data === "string" ? res.data : res.data?.message || "Dial failed" };
 }
 
