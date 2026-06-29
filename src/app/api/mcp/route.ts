@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 import { setPendingTransfer } from "@/lib/transfer-store";
-import { getActiveCallSids } from "@/lib/active-call-store";
 import { withCache } from "@/lib/cache";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
 import { createBooking, checkAvailability } from "@/lib/calendar";
@@ -165,17 +164,14 @@ else if (toolName === "transfer_to_human") {
           const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
           const callerPhone = args.caller_phone || "";
           const toNumber = args.to_number || "";
-          let callSid = args.call_sid || "";
+          const callSid = args.call_sid || "";
 
-          if (!callSid || callSid === "unknown" || !callSid.startsWith("CA")) {
-            const allSids = await getActiveCallSids(bizId);
-            callSid = allSids.length > 0 ? allSids[allSids.length - 1] : "";
-          }
+          console.log("[MCP transfer_to_human] args:", JSON.stringify({ bizId, callerPhone, toNumber, callSid: callSid ? callSid.substring(0, 20) : "(empty)" }));
 
           // Pobierz informacje o firmie i konsultantach
           const { data: biz } = await supabaseAdmin
             .from("businesses")
-            .select("name, twilio_number, phone, system_prompt")
+            .select("name, twilio_number, phone")
             .eq("id", bizId)
             .maybeSingle();
 
@@ -186,11 +182,7 @@ else if (toolName === "transfer_to_human") {
             .order("sort_order", { ascending: true });
 
           const callerId = biz?.twilio_number || process.env.TWILIO_PHONE_NUMBER || "";
-
-          // Czy firma ma własnych konsultantów?
           const hasOwnConsultant = consultants && consultants.length > 0;
-
-          // Numer docelowy: konsultant firmy lub numer WitaLine jako fallback
           const targetNumber = hasOwnConsultant
             ? consultants[0].phone
             : (biz?.phone || process.env.WITALINE_CONSULTANT_NUMBER || process.env.TWILIO_PHONE_NUMBER || "");
@@ -198,8 +190,8 @@ else if (toolName === "transfer_to_human") {
           if (!targetNumber) {
             result = JSON.stringify({ ok: false, error: "Brak skonfigurowanego numeru konsultanta" });
           } else {
-            // Zapisz pending transfer — transfer-router przejmie po zakończeniu streamu ElevenLabs
-            await setPendingTransfer(callSid || bizId, {
+            // ZAWSZE używaj businessId jako klucza — call_sid może nie być dostępne
+            await setPendingTransfer(bizId, {
               businessId: bizId,
               targetNumber,
               callerId,

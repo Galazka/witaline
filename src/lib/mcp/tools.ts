@@ -74,6 +74,7 @@ export const TOOL_DEFINITIONS: ToolDef[] = [
       business_id: z.string().describe("ID firmy z dynamic_vars.business_id"),
       caller_phone: z.string().optional().describe("Automatycznie pobrany z polaczenia - NIE pytaj klienta"),
       to_number: z.string().optional().describe("Numer Twilio na ktory klient dzwonil (opcjonalny)"),
+      call_sid: z.string().optional().describe("Twilio Call SID — automatycznie z dynamic_vars.call_sid"),
       reason: z.string().optional().describe("Powod przekazania"),
     },
   },

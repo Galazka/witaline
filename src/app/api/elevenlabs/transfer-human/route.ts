@@ -81,9 +81,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ number: target.number });
     }
 
-    // Zapisz pending transfer — transfer-router przejmie po zakończeniu streamu ElevenLabs
-    // Stream kończy się gdy agent (Maja) zakończy rozmowę po wywołaniu tego narzędzia
-    const storeKey = callSid || businessId;
+    // ZAWSZE używaj businessId jako klucza — call_sid może nie być dostępne
     const pending = {
       businessId,
       targetNumber: target.number,
@@ -93,8 +91,8 @@ export async function POST(request: Request) {
       toNumber,
       createdAt: Date.now(),
     };
-    await setPendingTransfer(storeKey, pending);
-    console.log("[transfer-human] saved pending transfer:", pending.targetNumber);
+    await setPendingTransfer(businessId, pending);
+    console.log("[transfer-human] saved pending transfer for", businessId, "→", pending.targetNumber);
 
     // Utwórz support conversation
     try {

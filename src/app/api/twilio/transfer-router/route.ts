@@ -26,23 +26,22 @@ export async function POST(request: Request) {
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
-  // Szukaj pending transfer po callSid, businessId (jeśli store użył bizId jako klucza), i po business_id w tabeli
-  let pending = await getPendingTransfer(callSid);
-  if (!pending) pending = await getPendingTransfer(businessId);
+  // Szukaj pending transfer: najpierw po businessId (call_sid kolumna), potem po callSid, potem po business_id w tabeli
+  let pending = await getPendingTransfer(businessId);
+  if (!pending) pending = await getPendingTransfer(callSid);
   if (!pending) {
     const byBiz = await findPendingTransferByBusinessId(businessId);
     if (byBiz) pending = byBiz.data;
   }
   if (!pending) {
-    // Próba dla WitaLine main business jako ostateczność
     const byMainBiz = await findPendingTransferByBusinessId("00000000-0000-0000-0000-000000000001");
     if (byMainBiz) pending = byMainBiz.data;
   }
 
+  console.log("[transfer-router] pending found:", !!pending);
+
   if (pending) {
-    console.log("[transfer-router] pending transfer found →", pending.targetNumber);
-    await deletePendingTransfer(businessId);
-    await deletePendingTransfer(callSid);
+    await deletePendingTransfer(businessId).catch(e => console.error("[transfer-router] deletePendingTransfer error:", e));
 
     const { data: consultants } = await supabaseAdmin
       .from("business_consultants")
@@ -63,8 +62,8 @@ export async function POST(request: Request) {
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
     const responseTwiml = twiml(`
-<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST">
-  ${escapeXml(queueName)}
+<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST" waitUrlMethod="POST">
+  <Queue>${escapeXml(queueName)}</Queue>
 </Enqueue>
 <Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
 `);
