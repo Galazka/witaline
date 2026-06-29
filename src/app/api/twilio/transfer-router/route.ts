@@ -58,18 +58,18 @@ export async function POST(request: Request) {
     const targetPhone = hasRealConsultants ? consultants[0].phone : pending.targetNumber;
 
     // Real consultant exists - use queue flow
-    const queueName = `handoff_${callSid || "fallback"}`;
+    const conferenceName = `handoff_${callSid || "fallback"}`;
     const holdMusicUrl = `${baseUrl}/api/twilio/hold-music`;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
     const responseTwiml = twiml(`
-<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST" waitUrlMethod="POST">
-  <Queue>${escapeXml(queueName)}</Queue>
-</Enqueue>
+<Conference waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST" waitUrlMethod="POST" startAt="answered" endConferenceOnExit="true">
+  <Conference>${escapeXml(conferenceName)}</Conference>
+</Conference>
 <Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
 `);
 
-    dialConsultantToQueue(targetPhone, callerId, queueName, baseUrl, pending.businessId, callSid)
+    dialConsultantToConference(targetPhone, callerId, conferenceName, baseUrl, pending.businessId, callSid)
       .then(result => {
         if (!result.ok) {
           console.error("[transfer-router] dial consultant failed:", result.message);
