@@ -63,7 +63,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
   async function toggleWidget(widgetType: string) {
     if (!config) return;
 
-    const widgets = config.layout.widgets.map(w =>
+    const widgets = (config.layout?.widgets || []).map(w =>
       w.type === widgetType ? { ...w, enabled: !w.enabled } : w
     );
 
@@ -93,7 +93,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
   async function moveWidget(widgetType: string, direction: "up" | "down") {
     if (!config) return;
 
-    const widgets = [...config.layout.widgets];
+    const widgets = [...(config.layout?.widgets || [])];
     const idx = widgets.findIndex(w => w.type === widgetType);
     if (idx === -1) return;
 
@@ -125,12 +125,12 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
 
   if (!config) return null;
 
-  const sortedWidgets = [...config.layout.widgets].sort((a, b) => a.order - b.order);
+  const sortedWidgets = [...(config.layout?.widgets || [])].sort((a, b) => a.order - b.order);
 
   return (
     <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
       <div className="px-5 py-4 border-b border-zinc-100">
-        <h3 className="font-semibold text-zinc-900">Widgety dashboardu</h3>
+        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">Widgety dashboardu</h3>
         <p className="text-xs text-zinc-400 mt-0.5">Wybierz które sekcje chcesz widzieć na głównym panelu</p>
       </div>
 
@@ -153,7 +153,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-zinc-900">{meta?.label || widget.type}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{meta?.label || widget.type}</p>
                 <p className="text-xs text-zinc-400">{meta?.description || ""}</p>
               </div>
 

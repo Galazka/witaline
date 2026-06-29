@@ -5,7 +5,7 @@ const APP_URL = "https://witaline.pl";
 const faqEntries = [
   { q: "Czym jest WitaLine?", a: "WitaLine to automatyczna recepcja AI, która odbiera telefony 24/7, przyjmuje zamówienia, umawia wizyty i odpowiada na pytania klientów za pomocą naturalnej rozmowy głosowej." },
   { q: "Jak działa asystent AI?", a: "Asystent AI WitaLine używa zaawansowanych modeli językowych i syntezy mowy ElevenLabs, aby prowadzić naturalne rozmowy telefoniczne z klientami. Rozpoznaje intencje, przyjmuje rezerwacje, zapisuje leady i w razie potrzeby przełącza na konsultanta." },
-  { q: "Ile kosztuje WitaLine?", a: "WitaLine działa w modelu elastycznym — nie ma stałej opłaty miesięcznej. Płacisz tylko za wykorzystane minuty rozmów. Ceny zaczynają się od 1,00 PLN/min brutto i maleją wraz z większym wolumenem." },
+  { q: "Ile kosztuje WitaLine?", a: "WitaLine działa w modelu elastycznym — nie ma stałej opłaty miesięcznej. Płacisz tylko za wykorzystane minuty rozmów. Ceny zaczynają się od 1,20 PLN/min brutto i maleją wraz z większym wolumenem." },
   { q: "Czy potrzebuję własnego numeru telefonu?", a: "Tak, potrzebujesz polskiego numeru telefonu od operatora takiego jak Orange, T-Mobile, Play lub Plus. Możesz też przenieść istniejący numer do nas." },
   { q: "Jakie branże obsługuje WitaLine?", a: "WitaLine sprawdza się w każdej branży, która przyjmuje zamówienia telefoniczne: restauracje, bary, pizzerie, salony beauty, fryzjerskie, medycyna, stomatologia, rehabilitacja, prawnicy, kancelarie, hotele, warsztaty i wiele innych." },
   { q: "Czy mogę przetestować WitaLine za darmo?", a: "Tak, oferujemy 7-dniowy okres próbny z 15 minutami darmowych rozmów i 10 darmowymi SMS-ami. Możesz w pełni przetestować system przed podjęciem decyzji." },

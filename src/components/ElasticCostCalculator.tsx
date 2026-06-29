@@ -14,7 +14,7 @@ export default function ElasticCostCalculator() {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 p-6 space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-zinc-900">Kalkulator kosztów</h3>
+        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Kalkulator kosztów</h3>
         <p className="text-sm text-zinc-500">Przesuń suwak — cena spada z każdym progiem</p>
       </div>
 
@@ -35,15 +35,15 @@ export default function ElasticCostCalculator() {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-[#0d9488] bg-brand-50 p-4 text-center">
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Stawka/min</p>
-          <p className="text-xl font-bold text-zinc-900 mt-1">{price.ratePerMin.toFixed(2).replace(".", ",")} zł</p>
+          <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{price.ratePerMin.toFixed(2).replace(".", ",")} zł</p>
         </div>
         <div className="rounded-xl border border-zinc-200 p-4 text-center">
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Netto/mies</p>
-          <p className="text-xl font-bold text-zinc-900 mt-1">{price.monthlyNetto.toFixed(2).replace(".", ",")} zł</p>
+          <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{price.monthlyNetto.toFixed(2).replace(".", ",")} zł</p>
         </div>
         <div className="rounded-xl border border-zinc-200 p-4 text-center">
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Brutto/mies</p>
-          <p className="text-xl font-bold text-zinc-900 mt-1">{price.monthlyBrutto.toFixed(2).replace(".", ",")} zł</p>
+          <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{price.monthlyBrutto.toFixed(2).replace(".", ",")} zł</p>
         </div>
       </div>
 

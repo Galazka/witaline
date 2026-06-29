@@ -160,7 +160,7 @@ export default function ConsultantListManager({ businessId, label, description, 
     <div className="space-y-4">
       {(label || description) && (
         <div>
-          {label && <h3 className="text-sm font-semibold text-zinc-900">{label}</h3>}
+          {label && <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</h3>}
           {description && <p className="text-xs text-zinc-500 mt-0.5">{description}</p>}
         </div>
       )}
@@ -217,9 +217,9 @@ export default function ConsultantListManager({ businessId, label, description, 
                 </>
               ) : (
                 <>
-                  <span className="flex-1 min-w-0 text-sm text-zinc-900 truncate">{c.name}</span>
+                  <span className="flex-1 min-w-0 text-sm text-zinc-900 dark:text-zinc-100 truncate">{c.name}</span>
                   <span className="w-40 text-sm text-zinc-600 font-mono truncate">{c.phone}</span>
-                  <button onClick={() => startEdit(c)} disabled={saving} className="text-xs text-zinc-400 hover:text-zinc-700 shrink-0">Edytuj</button>
+                  <button onClick={() => startEdit(c)} disabled={saving} className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 shrink-0">Edytuj</button>
                   <button onClick={() => handleDelete(c.id, c.name)} disabled={saving} className="text-xs text-red-400 hover:text-red-600 shrink-0">Usuń</button>
                 </>
               )}

@@ -22,7 +22,7 @@ export const billingModels = [
 ];
 
 export const plans: Record<string, PlanConfig> = {
-  elastic_0: { label: "Elastyczny", value: "elastic_0", price: 0, pricePLN: "od 0,85 PLN/min", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 99, features: [] },
+  elastic_0: { label: "Elastyczny", value: "elastic_0", price: 0, pricePLN: "od 1,20 PLN/min", minutes: 0, overagePerToken: 0.002, monthlyTokens: 0, monthlyVoiceMinutes: 0, maxConsultants: 99, features: [] },
   enterprise_2000: { label: "Enterprise", value: "enterprise_2000", price: 999, pricePLN: "999 PLN", minutes: 1500, overagePerToken: 0.0005, monthlyTokens: 1500000, monthlyVoiceMinutes: 1500, maxConsultants: 99, features: [] },
 };
 

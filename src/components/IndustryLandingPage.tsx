@@ -644,9 +644,11 @@ function PricingPreview() {
             <div className="space-y-4">
               {[
                 { min: "0–500", rate: "1,20 zł/min" },
-                { min: "501–1000", rate: "1,10 zł/min" },
-                { min: "1001–2000", rate: "1,00 zł/min" },
-                { min: "2001+", rate: "od 0,85 zł/min" },
+                { min: "501–1 000", rate: "1,10 zł/min" },
+                { min: "1 001–2 000", rate: "1,00 zł/min" },
+                { min: "2 001–3 000", rate: "0,95 zł/min" },
+                { min: "3 001–5 000", rate: "0,90 zł/min" },
+                { min: "5 001+", rate: "0,85 zł/min" },
               ].map((tier) => (
                 <div key={tier.min} className="flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-50 hover:bg-green-50 transition-colors">
                   <span className="text-sm text-zinc-600">{tier.min} min</span>

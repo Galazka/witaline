@@ -38,7 +38,7 @@ export default function AccountBalance({
     try {
       const { data, error } = await supabase
         .from("businesses")
-        .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, subscription_status, trial_ends_at, trial_minutes_used, trial_sms_used, created_at, auto_topup_enabled, auto_topup_minutes_threshold, auto_topup_pack_size")
+        .select("*")
         .eq("id", businessId)
         .maybeSingle();
       if (data && !error) {

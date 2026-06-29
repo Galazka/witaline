@@ -46,7 +46,7 @@ export default function RecentChatsPreview({ businessId, onClick }: Props) {
             <div key={conv.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[#f0fdfa] transition cursor-pointer" onClick={onClick}>
               <span className="text-sm">{channelEmoji[conv.channel] || "💬"}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-zinc-900 truncate">{conv.caller_name || conv.caller_id || "Anonimowy"}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{conv.caller_name || conv.caller_id || "Anonimowy"}</p>
                 {conv.summary ? (
                   <p className="text-xs text-zinc-500 truncate">{conv.summary.replace(/[📋👤✅⚠️🏷️💡]\s*/g, "").slice(0, 80)}</p>
                 ) : (

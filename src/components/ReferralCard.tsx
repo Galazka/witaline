@@ -17,9 +17,9 @@ export default function ReferralCard({ businessId }: { businessId: string }) {
 
   useEffect(() => {
     fetch("/api/referral")
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error("Not found"); return r.json(); })
       .then(setInfo)
-      .catch(console.error);
+      .catch(() => setInfo(null));
   }, []);
 
   function copyLink() {
@@ -29,7 +29,7 @@ export default function ReferralCard({ businessId }: { businessId: string }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  if (!info) return <p className="text-sm text-zinc-400">Ładowanie...</p>;
+  if (!info) return <div className="bg-white rounded-xl border border-zinc-200 p-6"><p className="text-sm text-zinc-400">Program poleceń niedostępny</p></div>;
 
   const activeCoupons = info.coupons.filter(c => !c.used && new Date(c.expires_at) > new Date());
 

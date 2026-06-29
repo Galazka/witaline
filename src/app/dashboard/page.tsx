@@ -159,20 +159,6 @@ export default function DashboardPage() {
         <div className="absolute bottom-0 left-0 w-60 h-60 bg-brand-50/10 rounded-full blur-3xl" />
       </div>
 
-      {business && (
-        <DashboardHeader
-          minutesUsed={business.minutes_used_this_week}
-          plan={business.current_plan as PlanKey}
-          totalSavingsMinutes={Math.floor(totalSeconds / 60)}
-          extension={business.extension}
-          businessName={business.name}
-          tokensUsed={business.tokens_used_this_month ?? Math.ceil(Math.floor(totalSeconds / 60) * 1000)}
-          subscriptionStatus={subStatus}
-          trialEndsAt={trialEndsAt}
-          createdAt={business.created_at}
-        />
-      )}
-
       {/* Subscription expired banner */}
       {!subLoading && isBlocked && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4 card-lift">
@@ -208,6 +194,17 @@ export default function DashboardPage() {
 
       {tab === "overview" && business && (
         <div className="space-y-6 stagger">
+          <DashboardHeader
+            minutesUsed={business.minutes_used_this_week}
+            plan={business.current_plan as PlanKey}
+            totalSavingsMinutes={Math.floor(totalSeconds / 60)}
+            extension={business.extension}
+            businessName={business.name}
+            tokensUsed={business.tokens_used_this_month ?? Math.ceil(Math.floor(totalSeconds / 60) * 1000)}
+            subscriptionStatus={subStatus}
+            trialEndsAt={trialEndsAt}
+            createdAt={business.created_at}
+          />
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <TrendKpiCard title="Dzisiaj" value={todayCalls.length} icon={<span>📞</span>} color="brand"
               trend={(() => { const y = new Date(); y.setDate(y.getDate() - 1); const ys = y.toISOString().slice(0, 10); const yCalls = callLogs.filter(l => l.created_at.startsWith(ys)).length; return yCalls > 0 ? Math.round(((todayCalls.length - yCalls) / yCalls) * 100) : 0; })()}

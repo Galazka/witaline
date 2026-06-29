@@ -123,7 +123,7 @@ export default function PlanUpgrade({
       )}
 
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-3">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
           Zmiana modelu współpracy
         </h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -144,7 +144,7 @@ export default function PlanUpgrade({
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">{model.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold text-zinc-900">{model.label}</p>
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{model.label}</p>
                     {isCurrent && <span className="text-[10px] text-[#0d9488] font-medium">Aktualny model</span>}
                   </div>
                 </div>
@@ -164,7 +164,7 @@ export default function PlanUpgrade({
       </div>
 
       <div className="border-t border-zinc-200 pt-6">
-        <h3 className="text-lg font-semibold text-zinc-900 mb-3">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
           Dokup dodatkowe minuty
         </h3>
         <p className="text-sm text-zinc-500 mb-3">
