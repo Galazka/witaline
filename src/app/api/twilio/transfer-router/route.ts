@@ -71,6 +71,6 @@ export async function POST(request: Request) {
     return responseTwiml;
   }
 
-  console.log("[transfer-router] no pending transfer, hanging up");
-  return twiml("<Hangup/>");
+  console.log("[transfer-router] no pending transfer, hanging up", "businessId:", businessId, "callSid:", callSid);
+  return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z przekazaniem rozmowy. Dziękujemy.</Say><Hangup/>`);
 }

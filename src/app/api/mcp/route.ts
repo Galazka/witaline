@@ -213,14 +213,15 @@ else if (toolName === "transfer_to_human") {
             console.log("[MCP transfer_to_human] saved pending transfer for", bizId, "→", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
 
             // Natychmiast przekieruj call do transfer-router przez Twilio REST API
+            const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/+$/, "");
             const actualCallSid = callSid || (await getActiveCallSids(bizId))?.[0] || "";
+            console.log("[MCP transfer_to_human] baseUrl:", baseUrl, "actualCallSid:", actualCallSid ? actualCallSid.substring(0, 20) : "(none)");
             if (actualCallSid) {
-              const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/+$/, "");
               const transferUrl = `${baseUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(actualCallSid)}&businessId=${encodeURIComponent(bizId)}&fromNumber=${encodeURIComponent(callerPhone)}&toNumber=${encodeURIComponent(toNumber || targetNumber)}`;
               const redirectTwiml = `<Response><Redirect method="POST">${escapeXml(transferUrl)}</Redirect></Response>`;
-              // Natychmiast — agent już dostał instrukcję mówić o przekazaniu, przerywamy stream
+              console.log("[MCP transfer_to_human] firing REST redirect to transfer-router");
               redirectActiveCallToHumanHandoff(actualCallSid, redirectTwiml, bizId)
-                .then(res => console.log("[MCP transfer_to_human] REST redirect result:", res))
+                .then(res => console.log("[MCP transfer_to_human] REST redirect result:", JSON.stringify(res)))
                 .catch(err => console.error("[MCP transfer_to_human] REST redirect error:", err));
             } else {
               console.log("[MCP transfer_to_human] no callSid available, will rely on <Redirect> from connectToAgent");
