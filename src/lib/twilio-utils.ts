@@ -146,17 +146,9 @@ export async function connectToAgent(systemPrompt: string | null, name: string, 
     setConversationForCall(callSid, conversationId, businessId);
     const baseUrl = baseUrlOverride || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || "http://localhost:3000";
     const cleanUrl = baseUrl.replace(/\/+$/, "");
-    const redirectUrl = `${cleanUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}&fromNumber=${encodeURIComponent(fromNumber)}&toNumber=${encodeURIComponent(toNumber)}`;
-    // Inject <Redirect> immediately after </Connect> so it fires when stream ends
-    let wrapper = xml;
-    if (wrapper.includes("</Connect>")) {
-      wrapper = wrapper.replace("</Connect>", `</Connect><Redirect method="POST">${escapeXml(redirectUrl)}</Redirect>`);
-    } else {
-      // Fallback: inject before </Response> (last resort)
-      console.warn("[connectToAgent] </Connect> not found in ElevenLabs response - using fallback injection");
-      wrapper = wrapper.replace("</Response>", `<Redirect method="POST">${escapeXml(redirectUrl)}</Redirect></Response>`);
-    }
-    return new NextResponse(wrapper, { status: 200, headers: { "Content-Type": "application/xml" } });
+    // REST API redirect from MCP handler handles transfers instantly.
+    // No <Redirect> after </Connect> needed — it would race with REST API redirect.
+    return new NextResponse(xml, { status: 200, headers: { "Content-Type": "application/xml" } });
   } catch (err) { console.error("[connectToAgent] register-call failed:", err instanceof Error ? err.message : String(err)); }
   return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z połączeniem. Proszę spróbować później.</Say><Hangup/>`);
 }
