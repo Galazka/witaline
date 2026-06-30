@@ -5,6 +5,8 @@ import { setPendingTransfer } from "@/lib/transfer-store";
 import { withCache } from "@/lib/cache";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
 import { createBooking, checkAvailability } from "@/lib/calendar";
+import { escapeXml, redirectActiveCallToHumanHandoff } from "@/lib/twilio-utils";
+import { getActiveCallSids } from "@/lib/active-call-store";
 import { WITALINE_MAIN_BUSINESS_ID as WITALINE_MAIN_BUSINESS } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -34,7 +36,7 @@ const TOOLS = [
   { name: "create_reservation", description: "Utworz rezerwacje/spotkanie. Jesli termin jest zajety, Narzedzie zwroci conflicts i nextSlots — wtedy zapytaj klienta o inny termin z propozycji.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, reserved_at: { type: "string", description: "Data i czas w formacie ISO" }, service_type: { type: "string", description: "Rodzaj uslugi" }, caller_name: { type: "string", description: "Imie klienta" }, caller_phone: { type: "string", description: "Telefon klienta" } }, required: ["business_id", "reserved_at", "service_type", "caller_name"] } },
   { name: "get_services", description: "Pobierz liste uslug firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
   { name: "get_business_hours", description: "Pobierz godziny otwarcia firmy", inputSchema: { type: "object", properties: { business_id: { type: "string" } }, required: ["business_id"] } },
-  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta firmy. PO WYWOLANIU KONIECZNIE zakoncz rozmowe (end_call) — system przekieruje polaczenie automatycznie po zakonczeniu strumienia.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID (z kontekstu dynamic_variables.call_sid)" } }, required: ["business_id"] } },
+  { name: "transfer_to_human", description: "Przekaz rozmowe do konsultanta firmy. call_sid jest dostepny w zmiennych dynamicznych. Uzyj go aby natychmiast przerwac rozmowe z Maja i polaczyc z konsultantem.", inputSchema: { type: "object", properties: { business_id: { type: "string" }, caller_phone: { type: "string", description: "Telefon klienta (opcjonalny)" }, to_number: { type: "string", description: "Numer konsultanta (opcjonalny)" }, call_sid: { type: "string", description: "Twilio Call SID - uzyj z dynamic_variables" } }, required: ["business_id"] } },
   { name: "create_checkout", description: "Utworz sesje platnosci Stripe", inputSchema: { type: "object", properties: { plan: { type: "string", description: "Nazwa planu: start/growth/enterprise" }, business_id: { type: "string" } }, required: ["plan", "business_id"] } }
 ];
 
@@ -209,6 +211,23 @@ else if (toolName === "transfer_to_human") {
             });
 
             console.log("[MCP transfer_to_human] saved pending transfer for", bizId, "→", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
+
+            // Natychmiast przekieruj call do transfer-router przez Twilio REST API
+            const actualCallSid = callSid || (await getActiveCallSids(bizId))?.[0] || "";
+            if (actualCallSid) {
+              const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+              const transferUrl = `${baseUrl}/api/twilio/transfer-router?callSid=${encodeURIComponent(actualCallSid)}&businessId=${encodeURIComponent(bizId)}&fromNumber=${encodeURIComponent(callerPhone)}&toNumber=${encodeURIComponent(toNumber || targetNumber)}`;
+              const redirectTwiml = `<Response><Redirect method="POST">${escapeXml(transferUrl)}</Redirect></Response>`;
+              // Delay 5s aby agent zdążył dokończyć wypowiedź przed przerwaniem strumienia
+              setTimeout(() => {
+                redirectActiveCallToHumanHandoff(actualCallSid, redirectTwiml, bizId)
+                  .then(res => console.log("[MCP transfer_to_human] REST redirect result:", res))
+                  .catch(err => console.error("[MCP transfer_to_human] REST redirect error:", err));
+              }, 5000);
+            } else {
+              console.log("[MCP transfer_to_human] no callSid available, will rely on <Redirect> from connectToAgent");
+            }
+
             result = JSON.stringify({
               ok: true,
               target: targetNumber,
