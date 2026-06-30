@@ -84,7 +84,7 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
           caller_number: fromNumber,
           transfer_failed: "true",
         },
-        override: {
+        conversation_config_override: {
           agent: {
             first_message: "",
           },
@@ -117,7 +117,7 @@ export function registerTransferThanks(fromNumber: string, toNumber: string, bus
           caller_number: fromNumber,
           transfer_thanks: "true",
         },
-        override: {
+        conversation_config_override: {
           agent: {
             first_message: "",
           },
