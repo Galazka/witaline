@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { registerTransferThanks } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
@@ -12,11 +11,9 @@ export async function POST(request: Request) {
      const url = new URL(request.url);
      const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
      const fromNumber = url.searchParams.get("fromNumber") || from;
-     const toNumber = url.searchParams.get("toNumber") || to;
 
      console.log("[after-conference-thanks] consultant ended conversation, sending thanks for", fromNumber);
 
-     // Save notification about conversation end
      try {
        await supabaseAdmin.from("notifications").insert({
          business_id: businessId,
@@ -28,10 +25,7 @@ export async function POST(request: Request) {
        console.warn("[after-conference-thanks] notification insert failed:", e);
      }
 
-     // Register Maja for brief goodbye with post_conversation flag
-     const xml = await registerTransferThanks(fromNumber, toNumber, businessId);
-
-     return new NextResponse(xml, {
+     return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response><Say language="pl-PL">Dziękujemy za rozmowę z konsultantem. Do widzenia.</Say><Hangup/></Response>`, {
        status: 200,
        headers: { "Content-Type": "application/xml" },
      });
