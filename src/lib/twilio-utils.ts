@@ -162,9 +162,9 @@ export async function redirectCallWithTransferTwiML(callSid: string, targetNumbe
    const actionUrl = `${cleanUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
    const twimlBody = `
-<Conference waitUrl="${escapeXml(holdUrl)}" action="${escapeXml(actionUrl)}" method="POST" startAt="answered" endConferenceOnExit="true">
-  <Conference>${escapeXml(conferenceName)}</Conference>
-</Conference>
+<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="30">
+  <Conference startConferenceOnEnter="true" endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
+</Dial>
 <Redirect method="POST">${escapeXml(`${cleanUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`)}</Redirect>
 <Hangup/>`;
 

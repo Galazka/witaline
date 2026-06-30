@@ -63,9 +63,10 @@ export async function POST(request: Request) {
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
     const responseTwiml = twiml(`
-<Conference waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST" waitUrlMethod="POST" startAt="answered" endConferenceOnExit="true">
-  <Conference>${escapeXml(conferenceName)}</Conference>
-</Conference>
+<Say language="pl-PL">Proszę pozostać na linii, łączę z konsultantem.</Say>
+<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="30">
+  <Conference startConferenceOnEnter="true" endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
+</Dial>
 <Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
 `);
 

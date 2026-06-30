@@ -18,61 +18,75 @@ function getBaseUrl(request: Request): string {
 }
 
 export async function POST(request: Request) {
-  try {
-    const formData = await request.formData();
-    const dialCallStatus = String(formData.get("DialCallStatus") || "");
-    const queueResult = String(formData.get("QueueResult") || "");
-    const from = String(formData.get("From") || "");
-    const to = String(formData.get("To") || "");
+   try {
+     const formData = await request.formData();
+     const dialCallStatus = String(formData.get("DialCallStatus") || "");
+     const queueResult = String(formData.get("QueueResult") || "");
+     const from = String(formData.get("From") || "");
+     const to = String(formData.get("To") || "");
 
-    console.log("[human-handoff/next] dialCallStatus:", dialCallStatus, "queueResult:", queueResult, "from:", from, "to:", to);
+     console.log("[human-handoff/next] dialCallStatus:", dialCallStatus, "queueResult:", queueResult, "from:", from, "to:", to);
 
-    const url = new URL(request.url);
-    const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
-    const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
-    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
+     const url = new URL(request.url);
+     const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
+     const callSid = url.searchParams.get("callSid") || "";
+     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
+     const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
 
-    // Called from <Enqueue> action — bridge with consultant succeeded
-    if (queueResult === "bridged") {
-      console.log("[human-handoff/next] BRIDGE SUCCESS - returning empty response");
-      return twiml("");
-    }
-    if (queueResult) {
-      console.log("[human-handoff/next] QueueResult exists but not bridged:", queueResult);
-      return twiml("<Hangup/>");
-    }
+     // Called from <Dial><Conference> action — conference ended normally (bridge was successful)
+     if (dialCallStatus === "completed" && callSid) {
+       console.log("[human-handoff/next] CONFERENCE ENDED - conversation completed, hanging up");
+       return twiml("<Hangup/>");
+     }
 
-    // Called from <Dial> action (backward compat with old flow)
-    if (dialCallStatus === "completed") {
-      return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
-    }
+     // Called from <Dial><Conference> — conference timed out (consultant didn't answer)
+     if (dialCallStatus === "no-answer" && callSid) {
+       console.log("[human-handoff/next] CONFERENCE TIMEOUT - no one joined");
+       return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
+     }
 
-    if (dialCallStatus && dialCallStatus !== "completed") {
-      const idx = parseInt(url.searchParams.get("idx") || "0", 10);
-      const { data: consultants } = await supabaseAdmin
-        .from("business_consultants")
-        .select("phone")
-        .eq("business_id", businessId)
-        .order("sort_order", { ascending: true });
+     // Called from <Enqueue> action — bridge with consultant succeeded (old queue flow)
+     if (queueResult === "bridged") {
+       console.log("[human-handoff/next] BRIDGE SUCCESS - returning empty response");
+       return twiml("");
+     }
+     if (queueResult) {
+       console.log("[human-handoff/next] QueueResult exists but not bridged:", queueResult);
+       return twiml("<Hangup/>");
+     }
 
-      if (consultants && idx < consultants.length) {
-        const nextConsultant = consultants[idx];
-        const callerId = to;
-        const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
-        const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=&businessId=${encodeURIComponent(businessId)}`;
+     // Called from <Dial><Number> action — backward compat with old hunt flow
+     if (dialCallStatus === "completed") {
+       console.log("[human-handoff/next] DIAL COMPLETED - call ended normally");
+       return twiml("<Hangup/>");
+     }
 
-        return twiml(`
-          <Dial callerId="${escapeXml(callerId)}" timeout="20" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
-            <Number>${escapeXml(nextConsultant.phone)}</Number>
-          </Dial>
-        `);
-      }
-    }
+     if (dialCallStatus && dialCallStatus !== "completed") {
+       const idx = parseInt(url.searchParams.get("idx") || "0", 10);
+       const { data: consultants } = await supabaseAdmin
+         .from("business_consultants")
+         .select("phone")
+         .eq("business_id", businessId)
+         .order("sort_order", { ascending: true });
 
-    return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[human-handoff/next] error:", msg);
-    return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił błąd. Dziękujemy za rozmowę.</Say><Hangup/>`);
-  }
-}
+       if (consultants && idx < consultants.length) {
+         const nextConsultant = consultants[idx];
+         const callerId = to;
+         const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&idx=${idx + 1}`;
+         const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=&businessId=${encodeURIComponent(businessId)}`;
+
+         return twiml(`
+           <Dial callerId="${escapeXml(callerId)}" timeout="20" record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed" action="${escapeXml(actionUrl)}" method="POST">
+             <Number>${escapeXml(nextConsultant.phone)}</Number>
+           </Dial>
+         `);
+       }
+     }
+
+     return twiml(`<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
+   } catch (err) {
+     const msg = err instanceof Error ? err.message : String(err);
+     console.error("[human-handoff/next] error:", msg);
+     return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił błąd. Dziękujemy za rozmowę.</Say><Hangup/>`);
+   }
+ }
