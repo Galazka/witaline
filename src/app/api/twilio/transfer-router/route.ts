@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPendingTransfer, deletePendingTransfer, findPendingTransferByBusinessId } from "@/lib/transfer-store";
-import { escapeXml, dialConsultantToConference } from "@/lib/twilio-utils";
+import { escapeXml } from "@/lib/twilio-utils";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
@@ -57,26 +57,16 @@ export async function POST(request: Request) {
     const hasRealConsultants = consultants && consultants.length > 0;
     const targetPhone = hasRealConsultants ? consultants[0].phone : pending.targetNumber;
 
-    // Real consultant exists - put caller in conference, dial consultant
-    const conferenceName = `handoff_${callSid || "fallback"}`;
+    // Dial consultant directly from caller's leg - simple, no race conditions
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
+    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`;
 
     const responseTwiml = twiml(`
 <Say language="pl-PL">Proszę pozostać na linii, łączę z konsultantem.</Say>
-<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="18">
-  <Conference startConferenceOnEnter="true" endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
+<Dial callerId="${escapeXml(callerId)}" timeout="15" action="${escapeXml(actionUrl)}" method="POST" record="record-from-answer">
+  <Number>${escapeXml(targetPhone)}</Number>
 </Dial>
-<Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>`);
-
-    dialConsultantToConference(targetPhone, callerId, conferenceName, baseUrl, pending.businessId, callSid)
-      .then(result => {
-        if (!result.ok) {
-          console.error("[transfer-router] dial consultant failed:", result.message);
-        } else {
-          console.log("[transfer-router] dial consultant ok, sid:", result.sid);
-        }
-      })
-      .catch(err => console.error("[transfer-router] dial consultant exception:", err));
+<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
 
     return responseTwiml;
   }
