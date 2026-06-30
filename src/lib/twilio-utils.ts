@@ -67,32 +67,6 @@ export function registerCall(fromNumber: string, toNumber: string, businessId?: 
   });
 }
 
-export function registerTransferFallback(fromNumber: string, toNumber: string, businessId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
-      agent_id: process.env.ELEVENLABS_AGENT_ID,
-      from_number: fromNumber, to_number: toNumber, direction: "inbound",
-      dynamic_vars: {
-        business_id: businessId,
-        caller_phone: fromNumber,
-        to_number: toNumber,
-        transfer_failed: "true",
-      },
-      conversation_config_override: {
-        agent: {
-          first_message: "Niestety konsultant jest teraz niedostepny. Czy moge w czyms pomoc?",
-        },
-      },
-    });
-    const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
-      let d = "";
-      res.on("data", (chunk) => (d += chunk));
-      res.on("end", () => { if (res.statusCode !== 200) reject(new Error(`${res.statusCode}: ${d}`)); else resolve(d); });
-    });
-    req.on("error", reject); req.write(body); req.end();
-  });
-}
-
 export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfigucji. Prosimy spróbować później.</Say><Hangup/>`);
