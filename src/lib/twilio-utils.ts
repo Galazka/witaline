@@ -86,7 +86,7 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
         },
         conversation_config_override: {
           agent: {
-            first_message: "",
+            first_message: "Niestety konsultant jest teraz niedostepny. Czy moge w czyms pomoc?",
           },
         },
       },
@@ -119,7 +119,7 @@ export function registerTransferThanks(fromNumber: string, toNumber: string, bus
         },
         conversation_config_override: {
           agent: {
-            first_message: "",
+            first_message: "Dziekuje za rozmowe z konsultantem. Zycze milego dnia!",
           },
         },
       },
