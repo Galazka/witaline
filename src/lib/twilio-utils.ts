@@ -83,8 +83,13 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
           business_id: businessId,
           caller_number: fromNumber,
           transfer_failed: "true",
-        }
-      }
+        },
+        override: {
+          agent: {
+            first_message: "",
+          },
+        },
+      },
     });
     const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
       let d = "";
@@ -111,8 +116,13 @@ export function registerTransferThanks(fromNumber: string, toNumber: string, bus
           business_id: businessId,
           caller_number: fromNumber,
           transfer_thanks: "true",
-        }
-      }
+        },
+        override: {
+          agent: {
+            first_message: "",
+          },
+        },
+      },
     });
     const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
       let d = "";
