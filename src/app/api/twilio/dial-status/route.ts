@@ -30,28 +30,16 @@ export async function POST(request: Request) {
        console.error("[dial-status] Failed to save status:", err);
      }
 
-     // Consultant answered → redirect caller from hold music to conference
+     // Consultant answered → caller is already in <Dial><Conference> from transfer-router
+     // No redirect needed — caller and consultant will bridge automatically in the same conference
      if (statusEvent === "answered" || callStatus === "in-progress") {
-       console.log("[dial-status] CONSULTANT ANSWERED - redirecting caller", callSid, "to conference", conferenceName);
-
-       if (callSid && actionUrl) {
-         const conferenceTwiml = `
-<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="30">
-  <Conference endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
-</Dial>
-<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`;
-
-         const result = await redirectActiveCallToHumanHandoff(callSid, conferenceTwiml, businessId);
-         console.log("[dial-status] redirect result:", result.ok, result.message);
-       } else {
-         console.warn("[dial-status] missing callSid or actionUrl, cannot redirect");
-       }
+       console.log("[dial-status] CONSULTANT ANSWERED - caller and consultant will bridge in conference", conferenceName);
      }
 
-     // Consultant didn't answer → redirect caller to fallback (Maja comes back)
-     if (statusEvent === "completed" && callStatus !== "in-progress" && callStatus !== "completed") {
-       const dialResult = String(formData.get("DialCallStatus") || "");
-       if (dialResult === "no-answer" || dialResult === "busy" || dialResult === "failed") {
+     // Consultant didn't answer within 15s timeout → redirect caller to fallback (Maja comes back)
+     if (statusEvent === "completed") {
+       const isNoAnswer = callStatus === "no-answer" || callStatus === "busy" || callStatus === "failed" || callStatus === "canceled";
+       if (isNoAnswer) {
          console.log("[dial-status] CONSULTANT DID NOT ANSWER - redirecting caller to fallback");
 
          if (callSid && fallbackUrl) {

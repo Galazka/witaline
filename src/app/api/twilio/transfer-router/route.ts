@@ -57,15 +57,15 @@ export async function POST(request: Request) {
     const hasRealConsultants = consultants && consultants.length > 0;
     const targetPhone = hasRealConsultants ? consultants[0].phone : pending.targetNumber;
 
-    // Real consultant exists - use queue flow
+    // Real consultant exists - put caller in conference, dial consultant
     const conferenceName = `handoff_${callSid || "fallback"}`;
-    const holdMusicUrl = `${baseUrl}/api/twilio/hold-music`;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
-    // Graj muzykę w pętli do czasu aż konsultant odbierze (dial-status przekieruje do konferencji)
     const responseTwiml = twiml(`
 <Say language="pl-PL">Proszę pozostać na linii, łączę z konsultantem.</Say>
-<Play loop="5">${escapeXml(holdMusicUrl)}</Play>
+<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="18">
+  <Conference startConferenceOnEnter="true" endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
+</Dial>
 <Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>`);
 
     dialConsultantToConference(targetPhone, callerId, conferenceName, baseUrl, pending.businessId, callSid)
