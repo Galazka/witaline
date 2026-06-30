@@ -35,8 +35,8 @@ export async function POST(request: Request) {
 
      // Called from <Dial><Conference> action — conference ended normally (bridge was successful)
      if (dialCallStatus === "completed" && callSid) {
-       console.log("[human-handoff/next] CONFERENCE ENDED - conversation completed, hanging up");
-       return twiml("<Hangup/>");
+       console.log("[human-handoff/next] CONFERENCE ENDED - sending to after-conference-thanks");
+       return twiml(`<Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/after-conference-thanks?businessId=${encodeURIComponent(businessId)}&fromNumber=${escapeXml(from)}&toNumber=${escapeXml(to)}`)}</Redirect>`);
      }
 
      // Called from <Dial><Conference> — conference timed out (consultant didn't answer)

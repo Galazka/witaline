@@ -95,6 +95,34 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
   });
 }
 
+export function registerTransferThanks(fromNumber: string, toNumber: string, businessId: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      agent_id: process.env.ELEVENLABS_AGENT_ID,
+      from_number: fromNumber, to_number: toNumber, direction: "inbound",
+      dynamic_vars: {
+        business_id: businessId,
+        caller_phone: fromNumber,
+        to_number: toNumber,
+        transfer_thanks: "true",
+      },
+      conversation_initiation_client_data: {
+        dynamic_variables: {
+          business_id: businessId,
+          caller_number: fromNumber,
+          transfer_thanks: "true",
+        }
+      }
+    });
+    const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
+      let d = "";
+      res.on("data", (chunk) => (d += chunk));
+      res.on("end", () => { if (res.statusCode !== 200) reject(new Error(`${res.statusCode}: ${d}`)); else resolve(d); });
+    });
+    req.on("error", reject); req.write(body); req.end();
+  });
+}
+
 export async function connectToAgent(systemPrompt: string | null, name: string, businessId: string, callSid: string, fromNumber: string, toNumber: string, voiceId?: string, voiceName?: string, baseUrlOverride?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<Response> {
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!agentId) return twiml(`<Say language="pl-PL">Asystent AI jest w trakcie konfigucji. Prosimy spróbować później.</Say><Hangup/>`);
@@ -128,7 +156,7 @@ export async function dialConsultantToConference(targetNumber: string, callerId:
    try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
 
    const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
-   const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Conference>${escapeXml(conferenceName)}</Conference></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
+    const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Conference endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
    const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&conference=${encodeURIComponent(conferenceName)}&businessId=${encodeURIComponent(businessId)}`;
 
    console.log("[dialConsultantToConference] Preparing to dial consultant:", targetNumber, "conferenceName:", conferenceName, "callSid:", callSid, "callerId:", callerId);
@@ -137,7 +165,7 @@ export async function dialConsultantToConference(targetNumber: string, callerId:
      To: targetNumber,
      From: callerId,
      Twiml: consulTwiml,
-     Timeout: "25",
+      Timeout: "15",
      StatusCallback: statusCallback,
      StatusCallbackEvent: "initiated+ringing+answered+completed",
    });

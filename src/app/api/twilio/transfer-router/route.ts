@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     const responseTwiml = twiml(`
 <Say language="pl-PL">Proszę pozostać na linii, łączę z konsultantem.</Say>
-<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="30">
+<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="18">
   <Conference startConferenceOnEnter="true" endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
 </Dial>
 <Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
