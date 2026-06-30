@@ -3,13 +3,6 @@ import { registerTransferFallback } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
-function twiml(body: string): NextResponse {
-  return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
-    status: 200,
-    headers: { "Content-Type": "application/xml" },
-  });
-}
-
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -21,7 +14,6 @@ export async function POST(request: Request) {
 
     console.log("[transfer-fallback] consultant didn't answer, restarting Maja for", from);
 
-    // Zapisz notyfikację o nieudanym transferze
     try {
       await supabaseAdmin.from("notifications").insert({
         business_id: businessId,
@@ -33,8 +25,6 @@ export async function POST(request: Request) {
       console.warn("[transfer-fallback] notification insert failed:", e);
     }
 
-    // Uruchom ponownie Maje z informacją o nieudanym transferze
-    // Maja powie: "Przepraszam, konsultant jest teraz niedostępny. Czy mogę w czymś pomóc? Mogę też zapisać wiadomość."
     const xml = await registerTransferFallback(from, to, businessId);
 
     return new NextResponse(xml, {
@@ -44,7 +34,9 @@ export async function POST(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[transfer-fallback] failed:", msg);
-
-    return twiml("<Say language=\"pl-PL\">Przepraszamy, konsultant jest obecnie niedostępny. Dziękujemy za rozmowę.</Say><Hangup/>");
+    return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response><Say language="pl-PL">Przepraszamy, konsultant jest obecnie niedostępny. Dziękujemy za rozmowę.</Say><Hangup/></Response>`, {
+      status: 200,
+      headers: { "Content-Type": "application/xml" },
+    });
   }
 }
