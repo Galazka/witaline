@@ -155,9 +155,11 @@ export async function dialConsultantToConference(targetNumber: string, callerId:
    let creds: TwilioCredentials;
    try { creds = await resolveCreds(businessId); } catch { return { ok: false, message: "Twilio credentials not configured" }; }
 
-   const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
+    const recordingCallbackUrl = `${baseUrl}/api/twilio/recording-callback?callSid=${encodeURIComponent(callSid)}&businessId=${encodeURIComponent(businessId)}`;
     const consulTwiml = `<Response><Dial record="record-from-answer-dual" recordingStatusCallback="${escapeXml(recordingCallbackUrl)}" recordingStatusCallbackEvent="completed"><Conference endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference></Dial><Say language="pl-PL">Połączenie z konsultantem nie powiodło się. Przepraszamy.</Say><Hangup/></Response>`;
-   const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&conference=${encodeURIComponent(conferenceName)}&businessId=${encodeURIComponent(businessId)}`;
+    const redirectAction = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(businessId)}&callSid=${encodeURIComponent(callSid)}`;
+    const redirectFallback = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
+    const statusCallback = `${baseUrl}/api/twilio/dial-status?callSid=${encodeURIComponent(callSid)}&conference=${encodeURIComponent(conferenceName)}&businessId=${encodeURIComponent(businessId)}&actionUrl=${encodeURIComponent(redirectAction)}&fallbackUrl=${encodeURIComponent(redirectFallback)}`;
 
    console.log("[dialConsultantToConference] Preparing to dial consultant:", targetNumber, "conferenceName:", conferenceName, "callSid:", callSid, "callerId:", callerId);
 

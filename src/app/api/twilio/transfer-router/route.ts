@@ -62,13 +62,11 @@ export async function POST(request: Request) {
     const holdMusicUrl = `${baseUrl}/api/twilio/hold-music`;
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
 
+    // Graj muzykę w pętli do czasu aż konsultant odbierze (dial-status przekieruje do konferencji)
     const responseTwiml = twiml(`
 <Say language="pl-PL">Proszę pozostać na linii, łączę z konsultantem.</Say>
-<Dial action="${escapeXml(actionUrl)}" method="POST" timeout="18">
-  <Conference startConferenceOnEnter="true" endConferenceOnExit="true">${escapeXml(conferenceName)}</Conference>
-</Dial>
-<Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
-`);
+<Play loop="5">${escapeXml(holdMusicUrl)}</Play>
+<Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>`);
 
     dialConsultantToConference(targetPhone, callerId, conferenceName, baseUrl, pending.businessId, callSid)
       .then(result => {
