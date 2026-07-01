@@ -78,6 +78,18 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
         to_number: toNumber,
         transfer_failed: "true",
       },
+      conversation_initiation_client_data: {
+        dynamic_variables: {
+          business_id: businessId,
+          caller_number: fromNumber,
+          transfer_failed: "true",
+        },
+        conversation_config_override: {
+          agent: {
+            first_message: "Niestety konsultant jest teraz niedostepny. Czy moge w czyms pomoc?",
+          },
+        },
+      },
     });
     const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
       let d = "";
