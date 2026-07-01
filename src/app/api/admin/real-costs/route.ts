@@ -54,7 +54,7 @@ export async function GET(request: Request) {
   // 2. Call logs in period
   let callsQuery = supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, from_number, caller_id, twilio_call_sid, classification, created_at")
+    .select("id, business_id, duration_seconds, cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, from_number, caller_id, twilio_call_sid, classification, created_at")
     .is("deleted_at", null)
     .gte("created_at", fromStr)
     .lte("created_at", toStr + "T23:59:59");
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
   if (includePrev) {
     let pq = supabaseAdmin
       .from("call_logs")
-      .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, from_number, caller_id, twilio_call_sid, created_at")
+      .select("id, business_id, duration_seconds, cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, from_number, caller_id, twilio_call_sid, created_at")
       .is("deleted_at", null)
       .gte("created_at", prevFromStr)
       .lte("created_at", prevToStr + "T23:59:59");
@@ -120,7 +120,7 @@ function buildCallMap(logs: typeof callLogs) {
       const entry = map.get(bid)!;
       const minutes = (log.duration_seconds || 0) / 60;
       entry.calls += 1;
-      entry.costPln += Number(log.internal_cost_pln ?? log.cost_pln) || 0;
+      entry.costPln += Number(log.total_cost ?? log.cost_pln) || 0;
 
       // ElevenLabs — stored in PLN by sync-costs (USD converted at sync time)
       const rawEleven = Number(log.cost_elevenlabs);
@@ -219,7 +219,7 @@ function buildCallMap(logs: typeof callLogs) {
       business_id: bizId,
       duration_seconds: log.duration_seconds,
       cost_pln: Number(log.cost_pln) || 0,
-      internal_cost_pln: Number(log.internal_cost_pln ?? log.cost_pln) || 0,
+      internal_cost_pln: Number(log.total_cost ?? log.cost_pln) || 0,
       cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
       cost_twilio: Number(log.cost_twilio) || 0,
       cost_openrouter: Number(log.cost_openrouter) || 0,

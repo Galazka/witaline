@@ -153,7 +153,6 @@ export async function POST() {
           elevenlabs_conversation_id: convId,
           duration_seconds: duration,
           cost_pln: costPln,
-          internal_cost_pln: costPln,
           caller_id: callNumber || "unknown",
           from_number: callNumber || "",
           twilio_call_sid: (metadata.twilio_call_sid as string) || "",

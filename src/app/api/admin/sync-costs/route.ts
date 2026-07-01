@@ -44,7 +44,7 @@ export async function POST() {
 
   let { data: callLogs } = await supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, from_number")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, duration_seconds, created_at, routed_to_extension, from_number")
     .is("deleted_at", null)
     .gte("created_at", oneYearAgo.toISOString())
     .order("created_at", { ascending: false });
@@ -83,7 +83,7 @@ export async function POST() {
   // Re-query after adding new rows
   const { data: refreshedLogs } = await supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, from_number")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, duration_seconds, created_at, routed_to_extension, from_number")
     .is("deleted_at", null)
     .gte("created_at", oneYearAgo.toISOString())
     .order("created_at", { ascending: false });
@@ -184,7 +184,6 @@ export async function POST() {
         const calcTotalCost = Math.round((currentElevenlabs + currentTwilio + currentOpenrouter + currentConsultant + consultantTransferCost) * 100000) / 100000;
 
         updates.total_cost = calcTotalCost;
-        updates.internal_cost_pln = calcTotalCost;
 
         // Set revenue_pln = cost_pln for non-main-line businesses (what client was charged)
         const isMainLine = log.business_id === WITALINE_MAIN_BUSINESS_ID;
