@@ -236,7 +236,7 @@ else if (toolName === "transfer_to_human") {
 
             console.log("[MCP transfer_to_human] saved pending transfer for", bizId, "→", targetNumber, "hasOwnConsultant:", hasOwnConsultant);
 
-            // Natychmiast przekieruj call do transfer-router przez Twilio REST API
+            // Przekieruj call do transfer-router przez Twilio REST API (jeśli dostępne)
             const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000").replace(/\/+$/, "");
             const actualCallSid = callSid || (await getActiveCallSids(bizId))?.[0] || "";
             console.log("[MCP transfer_to_human] baseUrl:", baseUrl, "actualCallSid:", actualCallSid ? actualCallSid.substring(0, 20) : "(none)");
@@ -247,19 +247,35 @@ else if (toolName === "transfer_to_human") {
               redirectActiveCallToHumanHandoff(actualCallSid, redirectTwiml, bizId)
                 .then(res => console.log("[MCP transfer_to_human] REST redirect result:", JSON.stringify(res)))
                 .catch(err => console.error("[MCP transfer_to_human] REST redirect error:", err));
-            } else {
-              console.log("[MCP transfer_to_human] no callSid available, will rely on <Redirect> from connectToAgent");
-            }
 
-            result = JSON.stringify({
-              ok: true,
-              target: targetNumber,
-              business: biz?.name || "WitaLine",
-              has_human_consultant: hasOwnConsultant,
-              message: hasOwnConsultant
-                ? "Transfer rozpoczęty. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call) — konsultant przejmie połączenie automatycznie."
-                : "Transfer rozpoczęty. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call) — system przekieruje do centrali WitaLine.",
-            });
+              result = JSON.stringify({
+                ok: true,
+                target: targetNumber,
+                business: biz?.name || "WitaLine",
+                has_human_consultant: hasOwnConsultant,
+                message: hasOwnConsultant
+                  ? "Transfer rozpoczęty. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call) — konsultant przejmie połączenie automatycznie."
+                  : "Transfer rozpoczęty. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call) — system przekieruje do centrali WitaLine.",
+              });
+            } else {
+              // Widget / brak aktywnej rozmowy telefonicznej — kolejka powiadomień
+              console.log("[MCP transfer_to_human] no Twilio call — creating notification for widget/human-request");
+              await supabaseAdmin.from("notifications").insert({
+                business_id: bizId,
+                type: "lead",
+                title: "Klient prosi o konsultanta (przez asystenta głosowego)",
+                message: `${callerPhone || "Klient z widgetu"} poprosił o rozmowę z konsultantem. Oddzwoń na ten numer.`,
+                metadata: { source: "widget_voice_transfer", caller_phone: callerPhone },
+              }).catch(e => console.warn("[MCP transfer_to_human] notification insert failed:", e));
+
+              result = JSON.stringify({
+                ok: true,
+                target: targetNumber,
+                business: biz?.name || "WitaLine",
+                has_human_consultant: hasOwnConsultant,
+                message: "Twoja prośba o kontakt z konsultantem została przekazana. Konsultant skontaktuje się z Tobą wkrótce. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call).",
+              });
+            }
           }
         }
       else if (toolName === "create_checkout") {

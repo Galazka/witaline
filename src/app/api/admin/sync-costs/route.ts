@@ -168,9 +168,9 @@ export async function POST() {
           }
         }
 
-        // Consultant transfer cost (only if not already tracked)
+        // Consultant transfer cost (only if call was transferred)
         const durationMin = (log.duration_seconds || 0) / 60;
-        const consultantTransferCost = (!log.consultant_transfer_cost_pln && log.routed_to_extension)
+        const consultantTransferCost = log.routed_to_extension
           ? Math.round(durationMin * TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN * 100000) / 100000
           : 0;
 
@@ -180,14 +180,11 @@ export async function POST() {
         const currentElevenlabs = Number(uEL !== undefined ? uEL : log.cost_elevenlabs) || 0;
         const currentTwilio = Number(uTW !== undefined ? uTW : log.cost_twilio) || 0;
         const currentOpenrouter = Number(log.cost_openrouter) || 0;
-        const currentConsultant = Number(log.consultant_transfer_cost_pln) || 0;
+        const currentConsultant = 0;
         const calcTotalCost = Math.round((currentElevenlabs + currentTwilio + currentOpenrouter + currentConsultant + consultantTransferCost) * 100000) / 100000;
 
         updates.total_cost = calcTotalCost;
         updates.internal_cost_pln = calcTotalCost;
-        if (consultantTransferCost > 0) {
-          updates.consultant_transfer_cost_pln = consultantTransferCost;
-        }
 
         // Set revenue_pln = cost_pln for non-main-line businesses (what client was charged)
         const isMainLine = log.business_id === WITALINE_MAIN_BUSINESS_ID;
