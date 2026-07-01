@@ -126,6 +126,8 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Turn timeout 4→5s**: uploaded via `upload-prompt.js` (`scripts/upload-prompt.js:91`)
 - **save_lead phone fix**: `caller_number` added to dynamic variable placeholders, prompt instructs Maja to always include it; MCP handler falls back to latest `call_logs.from_number` if phone empty/dummy (`src/app/api/mcp/route.ts:87`)
 - **sync-costs rewrite**: removed cost filter (processes ALL records), scope extended to 365 days, fetches missing ElevenLabs conversations via API (`src/app/api/admin/sync-costs/route.ts`)
+- **Widget transfer fix**: `transfer_to_human` handler detects no Twilio call → creates notification + tells Maja to end call, instead of failing REST redirect (`src/app/api/mcp/route.ts:250`)
+- **sync-costs column fix**: removed non-existent `consultant_transfer_cost_pln` from SELECT causing empty results + from UPDATE causing silent failure (`src/app/api/admin/sync-costs/route.ts:47`)
 - **Template literal fix**: `resolveTemplate()` helper strips `{{...}}` literals from all MCP tool args, applied across all tools (save_lead, transfer_to_human, check_availability, etc.) (`src/app/api/mcp/route.ts:1`)
 - **Prompt fix**: removed "użyj caller_number z kontekstu" which caused Maja to pass literal `{{caller_number}}`; now says "NIGDY nie używaj składni {{...}}" (`scripts/upload-prompt.js`)
 - **turn_timeout 2s**: reduced from 5s to minimize pauses between turns (`scripts/upload-prompt.js:91`)

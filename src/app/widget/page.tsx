@@ -364,7 +364,13 @@ export default function WidgetPage({ searchParams }: { searchParams: Promise<{ b
       {tab === "voice" && (
         <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white/50 dark:bg-zinc-900/50 text-center gap-4">
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2">Połącz się głosowo z asystentem</p>
-          <VoiceAgent />
+          <VoiceAgent onDisconnect={() => {
+            if (tab === "voice" && conversationId) {
+              setTab("chat");
+              handleRequestHuman();
+              setMessages(prev => [...prev, { role: "bot", text: "🔄 Przekazano do konsultanta. Odpowie na czacie.", timestamp: Date.now() }]);
+            }
+          }} />
           <p className="text-[10px] text-zinc-300 dark:text-zinc-600 mt-4">Powered by <a href="https://witaline.pl" target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-500 dark:hover:text-zinc-400 transition">WitaLine</a></p>
         </div>
       )}

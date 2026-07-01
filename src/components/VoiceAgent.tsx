@@ -42,7 +42,7 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function VoiceAgentContent({ className = "" }: { className?: string }) {
+function VoiceAgentContent({ className = "", onDisconnect }: { className?: string; onDisconnect?: () => void }) {
   const [status, setStatus] = useState<"disconnected" | "connecting" | "connected" | "error">("disconnected");
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
@@ -59,9 +59,9 @@ function VoiceAgentContent({ className = "" }: { className?: string }) {
   useEffect(() => {
     if (connStatus === "connected") { setStatus("connected"); setError(null); }
     else if (connStatus === "connecting") { setStatus("connecting"); setError(null); }
-    else if (connStatus === "disconnected") { setStatus("disconnected"); setTranscript(""); setIsSpeaking(false); setIsListening(false); setCallDuration(0); }
-    else if (connStatus === "error") { setStatus("error"); }
-  }, [connStatus]);
+    else if (connStatus === "disconnected") { setStatus("disconnected"); setTranscript(""); setIsSpeaking(false); setIsListening(false); setCallDuration(0); if (onDisconnect) onDisconnect(); }
+    else if (connStatus === "error") { setStatus("error"); if (onDisconnect) onDisconnect(); }
+  }, [connStatus, onDisconnect]);
 
   // Sync speaking/listening mode
   useEffect(() => {
@@ -173,7 +173,7 @@ function VoiceAgentContent({ className = "" }: { className?: string }) {
   );
 }
 
-export default function VoiceAgent({ className = "" }: { className?: string }) {
+export default function VoiceAgent({ className = "", onDisconnect }: { className?: string; onDisconnect?: () => void }) {
   return (
     <ConversationProvider
       onConnect={() => console.log("[VoiceAgent] connected")}
@@ -181,7 +181,7 @@ export default function VoiceAgent({ className = "" }: { className?: string }) {
       onMessage={(message) => { /* handled via hooks */ }}
       onError={(message: string) => console.error("[VoiceAgent] error:", message)}
     >
-      <VoiceAgentContent className={className} />
+      <VoiceAgentContent className={className} onDisconnect={onDisconnect} />
     </ConversationProvider>
   );
 }

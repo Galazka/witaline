@@ -273,7 +273,7 @@ else if (toolName === "transfer_to_human") {
                 target: targetNumber,
                 business: biz?.name || "WitaLine",
                 has_human_consultant: hasOwnConsultant,
-                message: "Twoja prośba o kontakt z konsultantem została przekazana. Konsultant skontaktuje się z Tobą wkrótce. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call).",
+                message: "Twoja prośba o kontakt z konsultantem została przekazana. Konsultant odpowie na czacie. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call).",
               });
             }
           }
