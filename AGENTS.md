@@ -126,6 +126,10 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Turn timeout 4→5s**: uploaded via `upload-prompt.js` (`scripts/upload-prompt.js:91`)
 - **save_lead phone fix**: `caller_number` added to dynamic variable placeholders, prompt instructs Maja to always include it; MCP handler falls back to latest `call_logs.from_number` if phone empty/dummy (`src/app/api/mcp/route.ts:87`)
 - **sync-costs rewrite**: removed cost filter (processes ALL records), scope extended to 365 days, fetches missing ElevenLabs conversations via API (`src/app/api/admin/sync-costs/route.ts`)
+- **Template literal fix**: `resolveTemplate()` helper strips `{{...}}` literals from all MCP tool args, applied across all tools (save_lead, transfer_to_human, check_availability, etc.) (`src/app/api/mcp/route.ts:1`)
+- **Prompt fix**: removed "użyj caller_number z kontekstu" which caused Maja to pass literal `{{caller_number}}`; now says "NIGDY nie używaj składni {{...}}" (`scripts/upload-prompt.js`)
+- **turn_timeout 2s**: reduced from 5s to minimize pauses between turns (`scripts/upload-prompt.js:91`)
+- **registerTransferFallback call_sid**: added `callSid` parameter + `call_sid` in dynamic vars so Maja can access it in fallback conversations (`src/lib/twilio-utils.ts:70`, `src/app/api/twilio/transfer-fallback/route.ts:11`)
 
 ## To Do
 - [x] **Uruchom migrację 054-live-chat.sql** w Supabase SQL Editor (messages role 'human') ✅

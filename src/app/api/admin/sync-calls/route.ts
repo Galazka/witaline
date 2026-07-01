@@ -98,6 +98,9 @@ export async function POST() {
       if (!detail) continue;
 
       const duration = (detail.duration_seconds as number) || (detail.metadata as Record<string, unknown>)?.call_duration_secs as number || 0;
+      const startTime = (conv.start_time as string) || (detail.start_time as string) || "";
+      const createdAt = startTime || new Date(Date.now() - (duration || 0) * 1000).toISOString();
+      const endedAt = startTime ? new Date(new Date(startTime).getTime() + (duration || 0) * 1000).toISOString() : new Date().toISOString();
       const analysis = (detail.analysis as Record<string, unknown>) || {};
       const metadata = (detail.metadata as Record<string, unknown>) || {};
       const dynVars = ((detail.conversation_initiation_client_data as Record<string, unknown>)?.dynamic_variables as Record<string, unknown>) || {};
@@ -134,8 +137,8 @@ export async function POST() {
         const { data: biz } = await supabaseAdmin.from("businesses").select("current_plan").eq("id", businessId).single();
         let totalMonthlyMinutes: number | undefined;
         if (biz?.current_plan?.startsWith("elastic")) {
-          const monthStart = new Date();
-          monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+          const convDate = new Date(createdAt);
+          const monthStart = new Date(convDate.getFullYear(), convDate.getMonth(), 1);
           const { data: monthlyLogs } = await supabaseAdmin.from("call_logs").select("duration_seconds").is("deleted_at", null).eq("business_id", businessId).gte("created_at", monthStart.toISOString());
           totalMonthlyMinutes = ((monthlyLogs || []).reduce((s, l) => s + (l.duration_seconds || 0), 0) + (duration || 0)) / 60;
         }
@@ -146,6 +149,7 @@ export async function POST() {
         .from("call_logs")
         .insert({
           business_id: businessId,
+          created_at: createdAt,
           elevenlabs_conversation_id: convId,
           duration_seconds: duration,
           cost_pln: costPln,
@@ -159,7 +163,7 @@ export async function POST() {
           ai_summary: summary || "",
           was_helpful: null,
           recording_url: (detail.recording_url as string) || "",
-          ended_at: new Date().toISOString(),
+          ended_at: endedAt,
         })
         .select()
         .single();
@@ -174,8 +178,8 @@ export async function POST() {
           summary: summary || "",
           duration_seconds: duration || 0,
           message_count: transcriptText ? transcriptText.split("\n").length : 1,
-          started_at: new Date(Date.now() - (duration || 0) * 1000).toISOString(),
-          ended_at: new Date().toISOString(),
+          started_at: createdAt,
+          ended_at: endedAt,
         });
 
         if (!isMainLine) {
