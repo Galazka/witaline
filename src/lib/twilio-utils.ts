@@ -67,7 +67,7 @@ export function registerCall(fromNumber: string, toNumber: string, businessId?: 
   });
 }
 
-export function registerTransferFallback(fromNumber: string, toNumber: string, businessId: string): Promise<string> {
+export function registerTransferFallback(fromNumber: string, toNumber: string, businessId: string, callSid?: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       agent_id: process.env.ELEVENLABS_AGENT_ID,
@@ -75,14 +75,18 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
       dynamic_vars: {
         business_id: businessId,
         caller_phone: fromNumber,
+        caller_number: fromNumber,
         to_number: toNumber,
         transfer_failed: "true",
+        call_sid: callSid || "",
       },
       conversation_initiation_client_data: {
         dynamic_variables: {
           business_id: businessId,
           caller_number: fromNumber,
+          caller_phone: fromNumber,
           transfer_failed: "true",
+          call_sid: callSid || "",
         },
         conversation_config_override: {
           agent: {

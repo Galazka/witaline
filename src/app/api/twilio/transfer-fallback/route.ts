@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const from = String(formData.get("From") || "");
     const to = String(formData.get("To") || "");
+    const twilioCallSid = String(formData.get("CallSid") || "");
 
     const url = new URL(request.url);
     const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
       console.warn("[transfer-fallback] notification insert failed:", e);
     }
 
-    const xml = await registerTransferFallback(from, to, businessId);
+    const xml = await registerTransferFallback(from, to, businessId, twilioCallSid);
 
     return new NextResponse(xml, {
       status: 200,
