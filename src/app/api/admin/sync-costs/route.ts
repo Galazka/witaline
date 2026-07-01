@@ -44,7 +44,7 @@ export async function POST() {
 
   let { data: callLogs } = await supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, consultant_transfer_cost_pln, from_number")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, from_number")
     .is("deleted_at", null)
     .gte("created_at", oneYearAgo.toISOString())
     .order("created_at", { ascending: false });
@@ -83,7 +83,7 @@ export async function POST() {
   // Re-query after adding new rows
   const { data: refreshedLogs } = await supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, consultant_transfer_cost_pln, from_number")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, from_number")
     .is("deleted_at", null)
     .gte("created_at", oneYearAgo.toISOString())
     .order("created_at", { ascending: false });
