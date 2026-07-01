@@ -37,34 +37,67 @@ export async function POST() {
     } catch { /* use PLN fallback */ }
   }
 
-  // Find records where individual costs haven't been synced from APIs.
-  // Query: total_cost missing/zero OR ElevenLabs cost not fetched OR Twilio cost not fetched.
-  // Scope to last 90 days to avoid re-processing ancient records.
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-  const { data: callLogs } = await supabaseAdmin
-    .from("call_logs")
-    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, consultant_transfer_cost_pln")
-    .or("total_cost.is.null,total_cost.eq.0,cost_elevenlabs.is.null,cost_elevenlabs.eq.0,cost_twilio.is.null,cost_twilio.eq.0")
-    .is("deleted_at", null)
-    .gte("created_at", ninetyDaysAgo.toISOString())
-    .order("created_at", { ascending: false })
-    .limit(500);
+  // Process ALL call_logs (not just unsynced) within scope to recalculate costs.
+  // Also fetch recent ElevenLabs conversations missing from call_logs.
+  const oneYearAgo = new Date();
+  oneYearAgo.setDate(oneYearAgo.getDate() - 365);
 
-  if (!callLogs || callLogs.length === 0) {
-    // Diagnostic: total call_logs count for user feedback
-    const { count: totalCount } = await supabaseAdmin
-      .from("call_logs")
-      .select("id", { count: "exact", head: true })
-      .is("deleted_at", null);
+  let { data: callLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, consultant_transfer_cost_pln, from_number")
+    .is("deleted_at", null)
+    .gte("created_at", oneYearAgo.toISOString())
+    .order("created_at", { ascending: false });
+
+  // Fetch recent ElevenLabs conversations not yet in call_logs
+  let fetchedFromEL = 0;
+  if (ELEVENLABS_API_KEY) {
+    try {
+      const elRes = await fetch(
+        `https://api.elevenlabs.io/v1/convai/conversations?agent_id=${process.env.ELEVENLABS_AGENT_ID}&page_size=200&sort=start_time&order=desc`,
+        { headers: { "xi-api-key": ELEVENLABS_API_KEY } }
+      );
+      if (elRes.ok) {
+        const elData = await elRes.json() as { conversations?: Array<Record<string, unknown>> };
+        const existingConvIds = new Set((callLogs || []).map(c => c.elevenlabs_conversation_id).filter(Boolean));
+        for (const conv of (elData.conversations || [])) {
+          const convId = conv.conversation_id as string;
+          if (convId && !existingConvIds.has(convId)) {
+            await supabaseAdmin.from("call_logs").insert({
+              elevenlabs_conversation_id: convId,
+              business_id: WITALINE_MAIN_BUSINESS_ID,
+              from_number: (conv.caller_id as string) || "",
+              to_number: (conv.phone_number as Record<string, unknown>)?.phone_number as string || "",
+              created_at: conv.start_time as string || new Date().toISOString(),
+              duration_seconds: Math.round(((conv.call_duration_seconds as number) || 0)),
+            }).select().single().catch(() => {});
+            fetchedFromEL++;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[sync-costs] ElevenLabs conversation fetch error:", e);
+    }
+  }
+
+  // Re-query after adding new rows
+  const { data: refreshedLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("id, business_id, elevenlabs_conversation_id, twilio_call_sid, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, cost_pln, internal_cost_pln, duration_seconds, created_at, routed_to_extension, consultant_transfer_cost_pln, from_number")
+    .is("deleted_at", null)
+    .gte("created_at", oneYearAgo.toISOString())
+    .order("created_at", { ascending: false });
+
+  if (!refreshedLogs || refreshedLogs.length === 0) {
     return NextResponse.json({
-      message: totalCount && totalCount > 0
-        ? `Brak rozmów do synchronizacji (w bazie ${totalCount} rozmów — wszystkie mają już pobrane koszty)`
-        : `Brak rozmów do synchronizacji (baza call_logs jest pusta — uruchom Sync rozmów)`,
+      message: "Brak rozmów do synchronizacji (baza call_logs pusta)",
       stats,
-      db_total: totalCount ?? 0,
+      db_total: 0,
     });
   }
+
+  callLogs = refreshedLogs;
+  stats.total = callLogs.length;
 
   stats.total = callLogs.length;
 

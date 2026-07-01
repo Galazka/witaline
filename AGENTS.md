@@ -122,6 +122,11 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - **Dashboard error.tsx**: improved UX — detail toggle, refresh link, error message display
 - **MCP tools via ElevenLabs UI**: agent ma już przypisane narzędzia MCP (widoczne w dashboardzie ElevenLabs) — `transfer_to_human` z `caller_phone: optional`
 
+## Recent Changes (July 1, 2026)
+- **Turn timeout 4→5s**: uploaded via `upload-prompt.js` (`scripts/upload-prompt.js:91`)
+- **save_lead phone fix**: `caller_number` added to dynamic variable placeholders, prompt instructs Maja to always include it; MCP handler falls back to latest `call_logs.from_number` if phone empty/dummy (`src/app/api/mcp/route.ts:87`)
+- **sync-costs rewrite**: removed cost filter (processes ALL records), scope extended to 365 days, fetches missing ElevenLabs conversations via API (`src/app/api/admin/sync-costs/route.ts`)
+
 ## To Do
 - [x] **Uruchom migrację 054-live-chat.sql** w Supabase SQL Editor (messages role 'human') ✅
 - [x] **Uruchom migrację 055-conversation-flags.sql** w Supabase SQL Editor ✅

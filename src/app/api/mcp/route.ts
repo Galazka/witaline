@@ -1,3 +1,13 @@
+// ElevenLabs nie interpoluje zmiennych dynamicznych w argumentach tooli.
+// Agent wysyła literalne stringi np. {{caller_number}} — rozpoznajemy je i
+// zwracamy pusty string, aby fallback (ostatni call_log, domyślny bizId) zadziałał.
+function resolveTemplate(val: unknown): string {
+  if (typeof val !== "string") return "";
+  const s = val.trim();
+  if (/^\{\{.*?\}\}$/.test(s)) return "";
+  return s;
+}
+
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
@@ -76,7 +86,7 @@ export async function POST(request: NextRequest) {
 
       let result = "";
 
-      let bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+      let bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
       // transfer_to_human works even during trial - do not block
       if (toolName !== "business_lookup" && toolName !== "transfer_to_human" && toolName !== "send_whatsapp") {
         if (!(await checkTrial(bizId))) {
@@ -96,24 +106,38 @@ export async function POST(request: NextRequest) {
         result = JSON.stringify({ ok: !!data, business: data || null });
       }
       else if (toolName === "save_lead") {
-        const phone = args.phone || "";
-        const cleanPhone = phone.replace(/\D/g, "");
+        let phone = resolveTemplate(args.phone) || "";
+        let cleanPhone = phone.replace(/\D/g, "");
+        if (!cleanPhone || cleanPhone === "000000000" || cleanPhone === "48123456789") {
+          const bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
+          const { data: lastCall } = await supabaseAdmin
+            .from("call_logs")
+            .select("from_number")
+            .eq("business_id", bizId)
+            .is("deleted_at", null)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (lastCall?.from_number) {
+            cleanPhone = lastCall.from_number.replace(/\D/g, "");
+          }
+        }
         const { data, error } = await supabaseAdmin.from("leads").insert({
           company_name: args.name || "Nieznany",
           nip: args.nip || "",
           contact_email: args.email || args.contact_email || "",
-          phone: cleanPhone || "000000000",
+          phone: cleanPhone || "48123456789",
           message: args.message || "",
           status: "new",
           type: "kontakt",
           knowledge_base_raw: args.notes || "",
-          business_id: args.business_id || WITALINE_MAIN_BUSINESS,
+          business_id: resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS,
           created_at: new Date().toISOString()
         }).select().single();
         result = JSON.stringify({ ok: !error, lead: error ? null : data, error: error?.message });
       }
       else if (toolName === "get_services") {
-        const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+        const bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
         const cacheKey = `services:${bizId}`;
         const svc = await withCache(cacheKey, async () => {
           const { data } = await supabaseAdmin.from("businesses").select("services").eq("id", bizId).maybeSingle();
@@ -125,7 +149,7 @@ export async function POST(request: NextRequest) {
         result = JSON.stringify({ ok: true, services: svc });
       }
       else if (toolName === "get_business_hours") {
-        const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+        const bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
         const cacheKey = `hours:${bizId}`;
         const hours = await withCache(cacheKey, async () => {
           const { data } = await supabaseAdmin.from("businesses").select("calendar_settings").eq("id", bizId).maybeSingle();
@@ -137,18 +161,18 @@ export async function POST(request: NextRequest) {
         result = JSON.stringify({ ok: true, hours });
       }
       else if (toolName === "check_availability") {
-        const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+        const bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
         const date = args.date || "";
         const avail = await checkAvailability(bizId, date);
         result = JSON.stringify({ ok: true, ...avail, date });
       }
       else if (toolName === "create_reservation") {
         const bookingResult = await createBooking({
-          businessId: args.business_id || WITALINE_MAIN_BUSINESS,
+          businessId: resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS,
           reservedAt: args.reserved_at,
           serviceType: args.service_type,
           callerName: args.caller_name,
-          callerPhone: args.caller_phone || "",
+          callerPhone: resolveTemplate(args.caller_phone) || "",
           createdByType: "ai_agent",
         });
         if (bookingResult.ok) {
@@ -163,10 +187,10 @@ export async function POST(request: NextRequest) {
         }
       }
 else if (toolName === "transfer_to_human") {
-          let bizId = args.business_id || "";
-          const callerPhone = args.caller_phone || "";
-          const toNumber = args.to_number || "";
-          const callSid = args.call_sid || "";
+          let bizId = resolveTemplate(args.business_id) || "";
+          const callerPhone = resolveTemplate(args.caller_phone) || "";
+          const toNumber = resolveTemplate(args.to_number) || "";
+          const callSid = resolveTemplate(args.call_sid) || "";
 
           // Walidacja UUID — ElevenLabs może przysłać "witaline" zamiast prawdziwego UUID
           const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -239,7 +263,7 @@ else if (toolName === "transfer_to_human") {
           }
         }
       else if (toolName === "create_checkout") {
-        const bizId = args.business_id || WITALINE_MAIN_BUSINESS;
+        const bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
         const plan = args.plan || "growth";
         const fromUrl = (process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/+$/, "");
         result = JSON.stringify({
