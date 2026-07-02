@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 export async function GET() {
   const { error } = await checkAdminAuth();
@@ -12,14 +13,14 @@ export async function GET() {
     const result = await supabaseAdmin
       .from("businesses")
       .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, whatsapp_number, created_at, voice_id, trial_ends_at, subscription_current_period_end")
-      .neq("id", "00000000-0000-0000-0000-000000000001")
+      .neq("id", WITALINE_MAIN_BUSINESS_ID)
       .order("created_at", { ascending: false });
     businesses = result.data;
   } catch {
     const result = await supabaseAdmin
       .from("businesses")
       .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, whatsapp_number, created_at, voice_id, trial_ends_at")
-      .neq("id", "00000000-0000-0000-0000-000000000001")
+      .neq("id", WITALINE_MAIN_BUSINESS_ID)
       .order("created_at", { ascending: false });
     businesses = result.data;
   }
@@ -31,23 +32,27 @@ export async function GET() {
       const { count: totalCalls } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id);
 
       const { count: orders } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id)
         .eq("classification", "order");
 
       const { count: spamCalls } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id)
         .eq("classification", "spam");
 
       const { count: bookings } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id)
         .eq("classification", "booking");
 
@@ -59,6 +64,7 @@ export async function GET() {
       const { data: callLogs } = await supabaseAdmin
         .from("call_logs")
         .select("duration_seconds, cost_pln, created_at, classification")
+        .is("deleted_at", null)
         .eq("business_id", b.id);
 
       const totalMinutes = (callLogs || []).reduce((a, l) => a + (l.duration_seconds || 0), 0) / 60;
@@ -78,6 +84,7 @@ export async function GET() {
       const { count: transfers } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id)
         .not("routed_to_extension", "is", null);
 

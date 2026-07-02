@@ -27,6 +27,7 @@ export async function POST(request: Request) {
       const { data: log } = await supabaseAdmin
         .from("call_logs")
         .select("id")
+        .is("deleted_at", null)
         .eq("twilio_call_sid", originalCallSid)
         .maybeSingle();
       if (log) callLogId = log.id;
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
       const { data: log } = await supabaseAdmin
         .from("call_logs")
         .select("id")
+        .is("deleted_at", null)
         .eq("business_id", businessId)
         .is("handoff_recording_sid", null)
         .order("created_at", { ascending: false })

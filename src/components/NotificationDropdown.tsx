@@ -144,7 +144,7 @@ export default function NotificationDropdown({ context, businessId }: Props) {
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
             <h3 className="text-sm font-semibold text-zinc-900">Powiadomienia</h3>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs text-brand-500 hover:text-brand-600 font-medium">
+              <button onClick={markAllRead} className="text-xs text-[#0d9488] hover:text-[#0f766e] font-medium">
                 Oznacz wszystkie jako przeczytane
               </button>
             )}
@@ -209,7 +209,7 @@ function NotificationRow({
           <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">{item.message}</p>
           <div className={`flex items-center gap-2 mt-1.5 ${removing ? "opacity-40 pointer-events-none" : ""}`}>
             {!item.is_read && (
-              <button onClick={() => onMarkRead(item.id)} className="text-[10px] text-brand-500 hover:text-brand-600 font-medium">
+              <button onClick={() => onMarkRead(item.id)} className="text-[10px] text-[#0d9488] hover:text-[#0f766e] font-medium">
                 Oznacz jako przeczytane
               </button>
             )}

@@ -4,14 +4,14 @@ import { createClient } from "@supabase/supabase-js";
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 }
 
-// GET: List messages for a conversation
-export async function GET(request: Request) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { searchParams } = new URL(request.url);
-  const conversationId = searchParams.get("conversationId");
+  const conversationId = searchParams.get("conversationId") || id;
   const limit = parseInt(searchParams.get("limit") || "100");
 
   if (!conversationId) {

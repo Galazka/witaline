@@ -42,7 +42,7 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function VoiceAgentContent({ className = "" }: { className?: string }) {
+function VoiceAgentContent({ className = "", onDisconnect }: { className?: string; onDisconnect?: () => void }) {
   const [status, setStatus] = useState<"disconnected" | "connecting" | "connected" | "error">("disconnected");
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
@@ -59,9 +59,9 @@ function VoiceAgentContent({ className = "" }: { className?: string }) {
   useEffect(() => {
     if (connStatus === "connected") { setStatus("connected"); setError(null); }
     else if (connStatus === "connecting") { setStatus("connecting"); setError(null); }
-    else if (connStatus === "disconnected") { setStatus("disconnected"); setTranscript(""); setIsSpeaking(false); setIsListening(false); setCallDuration(0); }
-    else if (connStatus === "error") { setStatus("error"); }
-  }, [connStatus]);
+    else if (connStatus === "disconnected") { setStatus("disconnected"); setTranscript(""); setIsSpeaking(false); setIsListening(false); setCallDuration(0); if (onDisconnect) onDisconnect(); }
+    else if (connStatus === "error") { setStatus("error"); if (onDisconnect) onDisconnect(); }
+  }, [connStatus, onDisconnect]);
 
   // Sync speaking/listening mode
   useEffect(() => {
@@ -114,20 +114,20 @@ function VoiceAgentContent({ className = "" }: { className?: string }) {
       <div className="relative">
         {isActive && (
           <>
-            <div className="absolute inset-0 rounded-full animate-ping bg-brand-400/20" style={{ width: "120%", height: "120%", top: "-10%", left: "-10%" }} />
-            <div className="absolute inset-0 rounded-full animate-pulse bg-brand-400/10" style={{ width: "140%", height: "140%", top: "-20%", left: "-20%", animationDelay: "0.5s" }} />
+            <div className="absolute inset-0 rounded-full animate-ping bg-[#0d9488]/20" style={{ width: "120%", height: "120%", top: "-10%", left: "-10%" }} />
+            <div className="absolute inset-0 rounded-full animate-pulse bg-[#0d9488]/10" style={{ width: "140%", height: "140%", top: "-20%", left: "-20%", animationDelay: "0.5s" }} />
           </>
         )}
         {isSpeaking && (
-          <div className="absolute inset-0 rounded-full animate-ping bg-brand-300/30" style={{ width: "160%", height: "160%", top: "-30%", left: "-30%", animationDuration: "1.5s" }} />
+          <div className="absolute inset-0 rounded-full animate-ping bg-[#0d9488]/30" style={{ width: "160%", height: "160%", top: "-30%", left: "-30%", animationDuration: "1.5s" }} />
         )}
         <button
           onClick={isActive ? stopConversation : startConversation}
           disabled={status === "connecting"}
           className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 ${
             isActive ? "bg-red-500 hover:bg-red-600 shadow-red-500/30" :
-            status === "connecting" ? "bg-brand-400" :
-            "bg-brand-400 hover:bg-brand-500 shadow-brand-500/30"
+            status === "connecting" ? "bg-[#0d9488]" :
+            "bg-[#0d9488] hover:bg-[#0f766e] shadow-[#0d9488]/30"
           }`}
           style={{ color: "white" }}
           aria-label={isActive ? "Rozlacz" : "Polacz"}
@@ -145,7 +145,7 @@ function VoiceAgentContent({ className = "" }: { className?: string }) {
       </div>
 
       {/* Status text */}
-      <p className={`text-sm font-medium transition-colors ${isActive ? (isSpeaking ? "text-brand-600" : "text-amber-600") : "text-zinc-500"}`}>
+      <p className={`text-sm font-medium transition-colors ${isActive ? (isSpeaking ? "text-[#0d9488]" : "text-amber-600") : "text-zinc-500"}`}>
         {status === "connecting" ? "Laczenie..." :
          isActive ? (isSpeaking ? "Maja mowi..." : "Slucham...") :
          status === "error" ? "Blad polaczenia" :
@@ -173,7 +173,7 @@ function VoiceAgentContent({ className = "" }: { className?: string }) {
   );
 }
 
-export default function VoiceAgent({ className = "" }: { className?: string }) {
+export default function VoiceAgent({ className = "", onDisconnect }: { className?: string; onDisconnect?: () => void }) {
   return (
     <ConversationProvider
       onConnect={() => console.log("[VoiceAgent] connected")}
@@ -181,7 +181,7 @@ export default function VoiceAgent({ className = "" }: { className?: string }) {
       onMessage={(message) => { /* handled via hooks */ }}
       onError={(message: string) => console.error("[VoiceAgent] error:", message)}
     >
-      <VoiceAgentContent className={className} />
+      <VoiceAgentContent className={className} onDisconnect={onDisconnect} />
     </ConversationProvider>
   );
 }

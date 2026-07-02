@@ -112,7 +112,7 @@ export default function AdminVoiceConfig() {
         <button
           onClick={syncToElevenLabs}
           disabled={syncing}
-          className="px-4 py-2 text-sm font-medium rounded-lg bg-brand-400 text-white hover:bg-brand-500 transition disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-[#0d9488] text-white hover:bg-[#0f766e] transition disabled:opacity-50"
         >
           {syncing ? "Synchronizacja..." : "🔄 Synchronizuj z ElevenLabs"}
         </button>
@@ -128,14 +128,14 @@ export default function AdminVoiceConfig() {
               key={v.id}
               className={`p-4 rounded-xl border-2 text-center transition relative ${
                 v.is_default
-                  ? "border-brand-400 bg-brand-50 ring-2 ring-brand-400/20"
+                  ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20"
                   : "border-zinc-200 hover:border-zinc-300"
               } ${!v.active ? "opacity-40" : ""}`}
             >
               <button
                 onClick={() => previewVoice(v)}
                 className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl mb-2 transition ${
-                  playing === v.id ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"
+                  playing === v.id ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"
                 }`}
                 title="Odtwórz próbkę"
               >
@@ -146,11 +146,11 @@ export default function AdminVoiceConfig() {
               <p className="text-[9px] text-zinc-300 font-mono truncate">{v.elevenlabs_voice_id.slice(0, 16)}...</p>
               <div className="mt-2 flex justify-center gap-1">
                 {!v.is_default ? (
-                  <button onClick={() => setGlobalDefault(v.id)} className="text-[10px] px-2 py-0.5 rounded bg-brand-50 text-zinc-500 hover:bg-brand-100 hover:text-brand-600 transition">
+                  <button onClick={() => setGlobalDefault(v.id)} className="text-[10px] px-2 py-0.5 rounded bg-brand-50 text-zinc-500 hover:bg-[#ccfbf1] hover:text-[#0f766e] transition">
                     Ustaw domyślny
                   </button>
                 ) : (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-brand-100 text-brand-600 font-semibold">DOMYŚLNY</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#ccfbf1] text-[#0d9488] font-semibold">DOMYŚLNY</span>
                 )}
               </div>
             </div>
@@ -175,10 +175,10 @@ export default function AdminVoiceConfig() {
               {businesses.map(b => {
                 const currentVoice = voices.find(v => v.id === b.voice_id);
                 return (
-                  <tr key={b.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                  <tr key={b.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                     <td className="px-3 py-2 font-medium text-zinc-900 whitespace-nowrap">{b.name}</td>
                     <td className="px-3 py-2">
-                      <span className="text-xs px-2 py-0.5 rounded bg-brand-50 text-brand-600">{b.current_plan?.replace("_", " ")}</span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-[#f0fdfa] text-[#0d9488]">{b.current_plan?.replace("_", " ")}</span>
                     </td>
                     <td className="px-3 py-2">
                       <select
@@ -188,7 +188,7 @@ export default function AdminVoiceConfig() {
                       >
                         <option value="">— Domyślny ({defaultVoice?.display_name || "Maja"}) —</option>
                         {voices.filter(v => v.active).filter(v => {
-                          const planOrder = ["elastic_0", "start_100", "pro_249", "pro_500", "lux_599", "enterprise_2000"];
+                          const planOrder = ["elastic_0", "enterprise_2000"];
                           const bizIdx = planOrder.indexOf(b.current_plan as string);
                           const minIdx = planOrder.indexOf(v.min_plan as string);
                           return bizIdx >= minIdx;
@@ -203,7 +203,7 @@ export default function AdminVoiceConfig() {
                       {currentVoice ? (
                         <button
                           onClick={() => previewVoice(currentVoice)}
-                          className="text-xs px-2 py-1 rounded bg-brand-50 text-zinc-600 hover:bg-brand-100 transition"
+                          className="text-xs px-2 py-1 rounded bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1] transition"
                         >
                           {playing === currentVoice.id ? "⏹" : "▶ Odtwórz"}
                         </button>

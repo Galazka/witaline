@@ -1,8 +1,52 @@
 import { supabaseAdmin } from "./supabase-admin";
 import { sendSms } from "./twilio-sms";
+import { addNotification } from "./notifications";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+
+// ── Find next available time slots after a given datetime ──────────
+export function findNextAvailableSlots(
+  cal: Record<string, unknown>,
+  fromDate: string,
+  durationMinutes: number,
+  limit: number = 5
+): { date: string; time: string; label: string }[] {
+  const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const result: { date: string; time: string; label: string }[] = [];
+  const interval = (cal.slot_interval as number) || 30;
+  const start = new Date(fromDate);
+
+  for (let i = 0; i <= 30 && result.length < limit; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    const dayKey = dayNames[d.getDay()];
+    const dayConf = cal[dayKey] as { enabled?: boolean; start?: string; end?: string } | undefined;
+
+    if (!dayConf?.enabled) continue;
+
+    const [startH, startM] = (dayConf.start || "09:00").split(":").map(Number);
+    const [endH, endM] = (dayConf.end || "17:00").split(":").map(Number);
+    const startMin = startH * 60 + startM;
+    const endMin = endH * 60 + endM;
+
+    // If same day, only generate slots after the requested time
+    const minStartTime = i === 0 ? start.getHours() * 60 + start.getMinutes() + interval : startMin;
+
+    for (let m = Math.max(startMin, minStartTime); m + durationMinutes <= endMin && result.length < limit; m += interval) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      const time = `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+      const dateStr = d.toISOString().slice(0, 10);
+      result.push({
+        date: dateStr,
+        time,
+        label: `${d.toLocaleDateString("pl-PL", { weekday: "short", day: "numeric", month: "short" })} ${time}`,
+      });
+    }
+  }
+  return result;
+}
 
 // ── Atomic booking with double-booking prevention ──────────────
 export async function createBooking(params: {
@@ -15,13 +59,17 @@ export async function createBooking(params: {
   durationMinutes?: number;
   createdByType?: "ai_agent" | "admin" | "staff" | "client";
   createdByUserId?: string;
-}): Promise<{ ok: true; reservation: Record<string, unknown> } | { ok: false; error: string }> {
+  force?: boolean; // allow multiple bookings on same slot (manual override)
+}): Promise<
+  { ok: true; reservation: Record<string, unknown> } |
+  { ok: false; error: string; conflicts?: { id: string; reserved_at: string; duration_minutes: number }[]; nextSlots?: { date: string; time: string; label: string }[] }
+> {
   const { businessId, reservedAt, serviceType, callerName, callerPhone, notes } = params;
   const duration = params.durationMinutes || 30;
   const createdByType = params.createdByType || "ai_agent";
   const createdByUserId = params.createdByUserId || null;
+  const force = params.force || false;
 
-  // Verify the slot is actually available (atomic check)
   const { data: biz } = await supabaseAdmin
     .from("businesses")
     .select("calendar_settings, name, twilio_number")
@@ -40,7 +88,18 @@ export async function createBooking(params: {
     .lte("reserved_at", new Date(new Date(reservedAt).getTime() + duration * 60000).toISOString());
 
   if (conflicts && conflicts.length > 0) {
-    return { ok: false, error: "Ten termin jest już zajęty. Wybierz inną godzinę." };
+    if (!force) {
+      // Find next available slots as suggestion
+      const cal = biz.calendar_settings as Record<string, unknown>;
+      const nextSlots = findNextAvailableSlots(cal, reservedAt, duration, 5);
+      return {
+        ok: false,
+        error: `Ten termin (${new Date(reservedAt).toLocaleString("pl-PL")}) jest już zajęty.`,
+        conflicts: conflicts.map(c => ({ id: c.id, reserved_at: c.reserved_at, duration_minutes: c.duration_minutes })),
+        nextSlots,
+      };
+    }
+    // If force, proceed with booking (manual override)
   }
 
   // Create the reservation
@@ -53,7 +112,7 @@ export async function createBooking(params: {
       caller_name: callerName,
       caller_phone: callerPhone || "",
       notes: notes || "",
-      status: "pending",
+      status: force ? "confirmed" : "pending",
       duration_minutes: duration,
       created_by_type: createdByType,
       created_by_user_id: createdByUserId,
@@ -62,30 +121,38 @@ export async function createBooking(params: {
     .single();
 
   if (error) {
-    // Check for unique constraint violation (double-booking)
     if (error.message?.includes("idx_reservations_unique_active")) {
       return { ok: false, error: "Ktoś właśnie zarezerwował ten termin. Wybierz inną godzinę." };
     }
     return { ok: false, error: `Błąd rezerwacji: ${error.message}` };
   }
 
-  // Send confirmation SMS (with SMS limit check)
+  // Send confirmation SMS
   if (reservation.caller_phone) {
     sendConfirmationSms(reservation.caller_phone, {
       serviceType,
       reservedAt,
       businessName: biz.name || "",
-    }, businessId).catch(() => {});
+    }, businessId).catch((e) => console.warn("[calendar] sms error:", e));
   }
 
-  // Sync to Google Calendar if connected
+  // Sync to Google Calendar
   syncToGoogleCalendar(businessId, {
     id: reservation.id,
     summary: `${serviceType} - ${callerName}`,
     startDateTime: reservedAt,
     endDateTime: new Date(new Date(reservedAt).getTime() + duration * 60000).toISOString(),
     description: `Klient: ${callerName}\nTelefon: ${callerPhone || "—"}\nNotatki: ${notes || "—"}`,
-  }).catch(() => {});
+  }).catch((e) => console.warn("[calendar] gcal sync error:", e));
+
+  // Add in-app notification
+  addNotification({
+    businessId,
+    type: "booking",
+    title: "Nowa rezerwacja",
+    message: `${serviceType} - ${callerName}${callerPhone ? ` (${callerPhone})` : ""}`,
+    metadata: { reservation_id: reservation.id, reserved_at: reservedAt, created_by: createdByType },
+  }).catch((e) => console.warn("[calendar] notification error:", e));
 
   return { ok: true, reservation };
 }
@@ -162,7 +229,10 @@ async function syncToGoogleCalendar(businessId: string, event: {
 
 // ── Check availability with next-available suggestions ─────────
 export async function checkAvailability(businessId: string, date: string): Promise<{
-  available: boolean; slots: { time: string; label: string }[]; nextDates?: string[]
+  available: boolean;
+  slots: { time: string; label: string }[];
+  nextDates?: string[];
+  nextSlots?: { date: string; time: string; label: string }[];
 }> {
   const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
   const dayIndex = new Date(date).getDay();
@@ -180,9 +250,9 @@ export async function checkAvailability(businessId: string, date: string): Promi
   const dayConf = cal[dayKey] as { enabled?: boolean; start?: string; end?: string } | undefined;
 
   if (!dayConf?.enabled) {
-    // Find next available dates
     const nextDates = findNextAvailableDates(cal, date, 5);
-    return { available: false, slots: [], nextDates };
+    const nextSlots = findNextAvailableSlots(cal, date, 30, 5);
+    return { available: false, slots: [], nextDates, nextSlots };
   }
 
   const interval = (cal.slot_interval as number) || 30;
@@ -225,7 +295,8 @@ export async function checkAvailability(businessId: string, date: string): Promi
 
   if (slots.length === 0) {
     const nextDates = findNextAvailableDates(cal, date, 5);
-    return { available: false, slots: [], nextDates };
+    const nextSlots = findNextAvailableSlots(cal, date, interval, 5);
+    return { available: false, slots: [], nextDates, nextSlots };
   }
 
   return { available: true, slots };

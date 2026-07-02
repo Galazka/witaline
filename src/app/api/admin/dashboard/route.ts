@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 export async function GET(request: Request) {
   const { error } = await checkAdminAuth();
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
   const { data: businesses } = await supabaseAdmin
     .from("businesses")
     .select("*")
-    .neq("id", "00000000-0000-0000-0000-000000000001")
+    .neq("id", WITALINE_MAIN_BUSINESS_ID)
     .order("created_at", { ascending: false });
 
   const { data: leads } = await supabaseAdmin

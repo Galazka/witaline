@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   try {
     const res = await fetch(
       `https://api.elevenlabs.io/v1/convai/agents/${agentId}`,
-      { headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY! } }
+      { headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY } }
     );
     const agent = await res.json();
 

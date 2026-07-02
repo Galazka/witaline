@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 /** Zgłoszenie przeniesienia numeru przez firmę */
 export async function POST(request: Request) {
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
 
   // Utwórz powiadomienie dla admina
   await supabaseAdmin.from("notifications").insert({
-    business_id: "00000000-0000-0000-0000-000000000001",
+    business_id: WITALINE_MAIN_BUSINESS_ID,
     type: "system",
     title: "Nowe zgłoszenie przeniesienia numeru",
     message: `Firma zgłosiła chęć przeniesienia numeru ${phoneNumber}. Oczekuje na rozpatrzenie.`,

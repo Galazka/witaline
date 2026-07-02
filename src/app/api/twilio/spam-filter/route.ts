@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { connectToAgent, twiml } from "@/lib/twilio-utils";
+import { sendSms } from "@/lib/twilio-sms";
+import { sendTrialExpiredEmail, getTrialExpiredSmsText } from "@/lib/email";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const CALL_LIMIT_PER_NUMBER = 5;
 const WINDOW_SECONDS = 60;
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 // In-memory IP rate limiter (resets on server restart — fine for Twilio)
 const ipHits = new Map<string, number[]>();
@@ -57,6 +59,7 @@ export async function POST(request: Request) {
   const { count } = await supabaseAdmin
     .from("call_logs")
     .select("*", { count: "exact", head: true })
+    .is("deleted_at", null)
     .eq("caller_id", caller)
     .gte("created_at", since);
 
@@ -70,12 +73,14 @@ export async function POST(request: Request) {
   let businessName = "WitaLine";
   let voiceId: string | undefined;
   let voiceName: string | undefined;
+  let trialMinutesRemaining: number | undefined;
+  let prepaidMinutesRemaining: number | undefined;
 
   const toClean = to.replace(/^\+/, "").replace(/\D/g, "");
   if (toClean) {
     const { data: biz } = await supabaseAdmin
       .from("businesses")
-      .select("id, name, voice_id, trial_ends_at, subscription_status")
+      .select("id, name, voice_id, owner_email, trial_ends_at, subscription_status, trial_minutes_used, prepaid_minutes")
       .eq("twilio_number", toClean)
       .maybeSingle();
 
@@ -83,13 +88,34 @@ export async function POST(request: Request) {
       businessId = biz.id;
       businessName = biz.name || "WitaLine";
 
-      // Block calls for expired trials
-      if (
-        biz.subscription_status === "trialing" &&
-        biz.trial_ends_at &&
-        new Date(biz.trial_ends_at) < new Date()
-      ) {
-        return twiml(`<Say language="pl-PL">Numer jest obecnie nieaktywny. Aby odnowić usługę, odwiedź witaline.pl. Dziękujemy.</Say><Hangup/>`);
+      const TRIAL_MAX_MINUTES = 15;
+
+      if (biz.subscription_status === "trialing") {
+        const trialExpired = biz.trial_ends_at && new Date(biz.trial_ends_at) < new Date();
+        const trialMinutesUsed = biz.trial_minutes_used || 0;
+        const trialMinutesExceeded = trialMinutesUsed >= TRIAL_MAX_MINUTES;
+        trialMinutesRemaining = Math.max(0, TRIAL_MAX_MINUTES - trialMinutesUsed);
+
+        if (trialExpired || trialMinutesExceeded) {
+          sendSms(from, getTrialExpiredSmsText(), undefined, businessId).catch(e =>
+            console.error("[spam-filter] trial-block sms error:", e)
+          );
+          if (biz.owner_email) {
+            sendTrialExpiredEmail(biz.owner_email, biz.name || "Firma").catch(e =>
+              console.error("[spam-filter] trial-block email error:", e)
+            );
+          }
+          return twiml(`<Say language="pl-PL">Okres probny wygasl. Wyslismy SMS z linkiem do doładowania konta. Dziekujemy.</Say><Hangup/>`);
+        }
+      }
+
+      // Check prepaid minutes for non-trialing businesses
+      if (biz.subscription_status !== "trialing") {
+        prepaidMinutesRemaining = parseFloat(String(biz.prepaid_minutes || "0"));
+        if (prepaidMinutesRemaining <= 0) {
+          console.log("[spam-filter] blocked — no prepaid minutes left:", businessId, biz.name);
+          return twiml(`<Say language="pl-PL">Przepraszamy, konto nie ma wystarczajacych srodkow. Doladuj konto w panelu WitaLine.</Say><Hangup/>`);
+        }
       }
 
       if (biz.voice_id) {
@@ -124,7 +150,9 @@ export async function POST(request: Request) {
     to,
     voiceId,
     voiceName,
-    origin
+    origin,
+    trialMinutesRemaining,
+    prepaidMinutesRemaining
   );
 }
 

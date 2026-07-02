@@ -147,11 +147,11 @@ export default function TestimonialsSection() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-400/8 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0d9488]/8 via-transparent to-transparent pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative">
         <div className="text-center mb-12 md:mb-16">
-          <span className="inline-block bg-brand-100 text-brand-700 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">
+          <span className="inline-block bg-[#ccfbf1] text-[#065f46] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">
             OPINIE
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 font-display tracking-tight">
@@ -165,7 +165,7 @@ export default function TestimonialsSection() {
         <div className="relative">
           <button
             onClick={prev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-6 z-10 w-10 h-10 rounded-full bg-brand-950/80 backdrop-blur border border-brand-600/50 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-brand-950/80 transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-6 z-10 w-10 h-10 rounded-full bg-brand-950/80 backdrop-blur border border-[#0d3d3a]/50 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-brand-950/80 transition-colors"
             aria-label="Poprzednia opinia"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@ export default function TestimonialsSection() {
 
           <button
             onClick={next}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-6 z-10 w-10 h-10 rounded-full bg-brand-950/80 backdrop-blur border border-brand-600/50 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-brand-950/80 transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-6 z-10 w-10 h-10 rounded-full bg-brand-950/80 backdrop-blur border border-[#0d3d3a]/50 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-brand-950/80 transition-colors"
             aria-label="Następna opinia"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,8 +221,8 @@ export default function TestimonialsSection() {
               onClick={() => setCurrent(i)}
               className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                 i === current
-                  ? "bg-brand-400 w-6"
-                  : "bg-brand-500 hover:bg-brand-500"
+                  ? "bg-[#0d9488] w-6"
+                  : "bg-[#0d9488] hover:bg-[#0f766e]"
               }`}
               aria-label={`Opinia ${i + 1}`}
             />

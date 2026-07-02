@@ -126,7 +126,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="🔍 Szukaj leadów..."
-            className="px-4 py-2 border border-zinc-200 rounded-lg text-sm w-56 focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+            className="px-4 py-2 border border-zinc-200 rounded-lg text-sm w-56 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
           />
           <select value={typeFilter} onChange={e => setTypeFilter(e.target.value as LeadType | "all")} className="px-3 py-2 border border-zinc-200 rounded-lg text-sm">
             <option value="all">Wszystkie typy</option>
@@ -136,7 +136,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
           </select>
         </div>
         <div className="flex gap-1">
-          <button onClick={() => { setView("active"); setChecked(new Set()); }} className={`px-3 py-1.5 text-xs rounded-lg font-medium transition ${view === "active" ? "bg-brand-100 text-brand-600" : "text-zinc-500 hover:text-zinc-700"}`}>
+          <button onClick={() => { setView("active"); setChecked(new Set()); }} className={`px-3 py-1.5 text-xs rounded-lg font-medium transition ${view === "active" ? "bg-[#ccfbf1] text-[#0d9488]" : "text-zinc-500 hover:text-zinc-700"}`}>
             Aktywne ({leads.filter(l => l.status !== "trashed").length})
           </button>
           <button onClick={() => { setView("trashed"); setChecked(new Set()); }} className={`px-3 py-1.5 text-xs rounded-lg font-medium transition ${view === "trashed" ? "bg-red-100 text-red-600" : "text-zinc-500 hover:text-zinc-700"}`}>
@@ -148,7 +148,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
               { key: "company_name", label: "Nazwa" },
               { key: "type", label: "Typ" },
             ].map(s => (
-              <button key={s.key} onClick={() => handleSort(s.key as typeof sortBy)} className={`px-2.5 py-1.5 text-xs rounded-lg transition ${sortBy === s.key ? "bg-brand-100 text-brand-600 font-medium" : "text-zinc-500 hover:text-zinc-700"}`}>
+              <button key={s.key} onClick={() => handleSort(s.key as typeof sortBy)} className={`px-2.5 py-1.5 text-xs rounded-lg transition ${sortBy === s.key ? "bg-[#ccfbf1] text-[#0d9488] font-medium" : "text-zinc-500 hover:text-zinc-700"}`}>
                 {s.label} {sortBy === s.key ? (sortDir === "asc" ? "↑" : "↓") : ""}
               </button>
             ))}
@@ -167,7 +167,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
             </>
           ) : (
             <>
-              <button onClick={() => handleBatch("restore")} className="text-xs px-3 py-1.5 rounded-lg bg-brand-400 text-white hover:bg-brand-500 transition">Przywróć</button>
+              <button onClick={() => handleBatch("restore")} className="text-xs px-3 py-1.5 rounded-lg bg-[#0d9488] text-white hover:bg-[#0f766e] transition">Przywróć</button>
               <button onClick={() => handleBatch("delete")} className="text-xs px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">Usuń na stałe</button>
             </>
           )}
@@ -185,7 +185,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
               <thead>
                 <tr className="bg-white text-left">
                   <th className="px-3 py-2.5 w-10">
-                    <input type="checkbox" checked={checked.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="accent-brand-400 rounded" />
+                    <input type="checkbox" checked={checked.size === filtered.length && filtered.length > 0} onChange={toggleAll} className="accent-[#0d9488] rounded" />
                   </th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Lead</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Typ</th>
@@ -198,9 +198,9 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
               </thead>
               <tbody>
                 {filtered.map(l => (
-                  <tr key={l.id} onClick={() => setDetailLead(l)} className={`border-b border-zinc-50 hover:bg-brand-50/50 transition-colors cursor-pointer ${l.status === "trashed" ? "opacity-60" : ""}`}>
+                  <tr key={l.id} onClick={() => setDetailLead(l)} className={`border-b border-zinc-50 hover:bg-[#f0fdfa]/50 transition-colors cursor-pointer ${l.status === "trashed" ? "opacity-60" : ""}`}>
                     <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
-                      <input type="checkbox" checked={checked.has(l.id)} onChange={() => toggleCheck(l.id)} className="accent-brand-400 rounded" />
+                      <input type="checkbox" checked={checked.has(l.id)} onChange={() => toggleCheck(l.id)} className="accent-[#0d9488] rounded" />
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="font-medium text-zinc-900">{l.company_name}</div>
@@ -230,13 +230,13 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
                     <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                       {l.status === "trashed" && view === "trashed" ? (
                         <div className="flex gap-1">
-                          <button onClick={() => handleBatch("restore")} className="text-xs px-2 py-1 rounded bg-brand-100 text-brand-600 hover:bg-brand-200">Przywróć</button>
+                          <button onClick={() => handleBatch("restore")} className="text-xs px-2 py-1 rounded bg-[#ccfbf1] text-[#0d9488] hover:bg-[#0d9488]/20">Przywróć</button>
                         </div>
                       ) : l.type === "zgloszenie_firmy" && l.status !== "active" ? (
                         <button
                           onClick={() => handleActivate(l)}
                           disabled={activating === l.id}
-                          className="text-xs px-2 py-1 rounded bg-brand-400 text-white hover:bg-brand-500 disabled:opacity-50 transition"
+                          className="text-xs px-2 py-1 rounded bg-[#0d9488] text-white hover:bg-[#0f766e] disabled:opacity-50 transition"
                         >
                           {activating === l.id ? "..." : "Aktywuj"}
                         </button>
@@ -260,7 +260,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-zinc-900">{detailLead.company_name}</h2>
-                <button onClick={() => setDetailLead(null)} className="p-2 hover:bg-brand-50 rounded-lg transition text-lg">✕</button>
+                <button onClick={() => setDetailLead(null)} className="p-2 hover:bg-[#f0fdfa] rounded-lg transition text-lg">✕</button>
               </div>
 
               {/* Badges */}
@@ -284,13 +284,13 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
                 {detailLead.phone && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-zinc-500">Telefon</span>
-                    <a href={`tel:${detailLead.phone}`} className="text-sm font-mono text-brand-500 hover:underline">{detailLead.phone}</a>
+                    <a href={`tel:${detailLead.phone}`} className="text-sm font-mono text-[#0d9488] hover:underline">{detailLead.phone}</a>
                   </div>
                 )}
                 {detailLead.contact_email && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-zinc-500">Email</span>
-                    <a href={`mailto:${detailLead.contact_email}`} className="text-sm text-brand-500 hover:underline">{detailLead.contact_email}</a>
+                    <a href={`mailto:${detailLead.contact_email}`} className="text-sm text-[#0d9488] hover:underline">{detailLead.contact_email}</a>
                   </div>
                 )}
                 {detailLead.nip && (
@@ -336,7 +336,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
                   <button
                     onClick={() => { handleActivate(detailLead); }}
                     disabled={activating === detailLead.id}
-                    className="flex-1 px-4 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition disabled:opacity-50"
                   >
                     {activating === detailLead.id ? "Aktywowanie..." : "Aktywuj firmę"}
                   </button>
@@ -360,7 +360,7 @@ export default function AdminLeadsTable({ onRefresh, onActivate, leads }: Props)
                       setDetailLead(null);
                       onRefresh();
                     }}
-                    className="flex-1 px-4 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition"
+                    className="flex-1 px-4 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition"
                   >
                     Przywróć
                   </button>

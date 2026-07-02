@@ -101,7 +101,7 @@ export default function PlanUpgrade({
           <button
             onClick={subStatus === "past_due" ? handleBillingPortal : () => handleSubscribe("self_service")}
             disabled={loading}
-            className="mt-3 bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition"
+            className="mt-3 bg-[#0d9488] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition"
           >
             {subStatus === "past_due" ? "Zarządzaj płatnościami" : "Wybierz model i opłać"}
           </button>
@@ -109,13 +109,13 @@ export default function PlanUpgrade({
       )}
 
       {!checking && subStatus === "active" && (
-        <div className="bg-brand-50 border border-brand-200 rounded-xl p-4">
-          <p className="text-sm text-brand-500">
+        <div className="bg-brand-50 border border-[#0d9488]/20 rounded-xl p-4">
+          <p className="text-sm text-[#0d9488]">
             Subskrypcja aktywna. Zarządzaj płatnościami i fakturami w Stripe.
           </p>
           <button
             onClick={handleBillingPortal}
-            className="mt-2 text-sm text-brand-400 underline hover:text-brand-500"
+            className="mt-2 text-sm text-[#0d9488] underline hover:text-[#0f766e]"
           >
             Panel płatności →
           </button>
@@ -123,12 +123,13 @@ export default function PlanUpgrade({
       )}
 
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-3">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
           Zmiana modelu współpracy
         </h3>
         <div className="grid md:grid-cols-2 gap-4">
           {billingModels.map((model) => {
-            const isCurrent = (model.key === "self_service" && (currentPlan === "elastic_0" || currentPlan === "start_100" || currentPlan === "pro_500")) || (model.key === "enterprise" && currentPlan === "enterprise_2000");
+            const cp = currentPlan as string;
+            const isCurrent = (model.key === "elastic_0" && (cp === "elastic_0" || cp === "self_service" || cp === "start_100" || cp === "pro_500")) || (model.key === "enterprise_2000" && cp === "enterprise_2000");
             return (
               <button
                 key={model.key}
@@ -136,22 +137,22 @@ export default function PlanUpgrade({
                 disabled={isCurrent || loading}
                 className={`rounded-2xl border p-5 text-left transition-all hover:shadow-md ${
                   isCurrent
-                    ? "border-brand-500 bg-brand-50 ring-2 ring-brand-200"
-                    : "border-zinc-200 bg-white hover:border-brand-300"
+                    ? "border-[#0d9488] bg-brand-50 ring-2 ring-[#0d9488]/20"
+                    : "border-zinc-200 bg-white hover:border-[#0d9488]/30"
                 } disabled:opacity-60`}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-2xl">{model.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold text-zinc-900">{model.label}</p>
-                    {isCurrent && <span className="text-[10px] text-brand-500 font-medium">Aktualny model</span>}
+                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{model.label}</p>
+                    {isCurrent && <span className="text-[10px] text-[#0d9488] font-medium">Aktualny model</span>}
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 leading-relaxed mb-3">{model.desc}</p>
                 <ul className="space-y-1">
                   {model.features.map((f) => (
                     <li key={f} className="text-[11px] text-zinc-400 flex items-start gap-1.5">
-                      <span className="text-brand-400 shrink-0">✓</span>
+                      <span className="text-[#0d9488] shrink-0">✓</span>
                       {f}
                     </li>
                   ))}
@@ -163,7 +164,7 @@ export default function PlanUpgrade({
       </div>
 
       <div className="border-t border-zinc-200 pt-6">
-        <h3 className="text-lg font-semibold text-zinc-900 mb-3">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
           Dokup dodatkowe minuty
         </h3>
         <p className="text-sm text-zinc-500 mb-3">
@@ -177,12 +178,12 @@ export default function PlanUpgrade({
             step={10}
             value={topupMinutes}
             onChange={(e) => setTopupMinutes(parseInt(e.target.value) || 0)}
-            className="w-28 px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 transition"
+            className="w-28 px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] transition"
           />
           <button
             onClick={handleTopup}
             disabled={loading || topupMinutes < 1}
-            className="bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+            className="bg-[#0d9488] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
           >
             Dokup
           </button>
@@ -190,7 +191,7 @@ export default function PlanUpgrade({
       </div>
 
       {message && (
-        <p className="text-sm text-brand-400 bg-brand-50 px-3 py-2 rounded-lg">{message}</p>
+        <p className="text-sm text-[#0d9488] bg-brand-50 px-3 py-2 rounded-lg">{message}</p>
       )}
     </div>
   );

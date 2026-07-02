@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { sendUpcomingReminders } from "@/lib/calendar";
 
-// Cron endpoint for sending SMS reminders (call via CRON job or Vercel Cron)
-// Example: GET https://witaline.pl/api/cron/send-reminders?key=YOUR_CRON_SECRET
-export async function GET(request: Request) {
+function checkCronAuth(request: Request): boolean {
+  const header = request.headers.get("x-internal-secret");
+  if (header === process.env.CRON_SECRET) return true;
   const { searchParams } = new URL(request.url);
-  const key = searchParams.get("key");
+  return searchParams.get("key") === process.env.CRON_SECRET;
+}
 
-  if (key !== process.env.CRON_SECRET) {
+async function handler(request: Request) {
+  if (!checkCronAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,3 +23,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = handler;
+export const POST = handler;

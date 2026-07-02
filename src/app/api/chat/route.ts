@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { toolDefinitions, toolHandlers, getToolContext } from "@/lib/tools";
 import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -18,7 +19,7 @@ interface ToolMessage {
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 }
 
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
   }
 
   const prompt = systemPrompt || `Jesteś asystentem AI firmy "${businessName || "WitaLine"}". Odpowiadaj po polsku, krótko i rzeczowo.`;
-  const chatChannel = channel || (businessId === "00000000-0000-0000-0000-000000000001" ? "widget" : "web");
+  const chatChannel = channel || (businessId === WITALINE_MAIN_BUSINESS_ID ? "widget" : "web");
 
   const supabase = getSupabase();
   let convId = conversationId;

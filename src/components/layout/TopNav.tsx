@@ -1,7 +1,7 @@
 "use client";
 
-import { type JSX } from "react";
-import { IconMenu, IconSearch, IconUser, IconLogout } from "./icons";
+import { useState, useEffect, type JSX } from "react";
+import { IconMenu, IconUser, IconLogout, IconSun, IconMoon, IconMessage } from "./icons";
 import NotificationDropdown from "@/components/NotificationDropdown";
 
 interface Props {
@@ -13,38 +13,71 @@ interface Props {
   actions?: JSX.Element;
   notificationContext?: "admin" | "dashboard";
   notificationBusinessId?: string;
+  chatUnreadCount?: number;
+  onChatClick?: () => void;
 }
 
-export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLogout, actions, notificationContext, notificationBusinessId }: Props) {
+export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLogout, actions, notificationContext, notificationBusinessId, chatUnreadCount, onChatClick }: Props) {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
-    <header className="h-16 bg-white border-b border-zinc-200 sticky top-0 z-40">
+    <header className="h-[4.5rem] bg-[#0c1929] border-b border-white/5 sticky top-0 z-40">
       <div className="h-full px-4 lg:px-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           {onMenuToggle && (
-            <button onClick={onMenuToggle} className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-zinc-100 text-zinc-500">
+            <button onClick={onMenuToggle} className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-white/5 text-white/40 transition-colors">
               <IconMenu className="w-5 h-5" />
             </button>
           )}
           <div className="min-w-0">
-            <h1 className="text-base font-semibold text-zinc-900 truncate">{title}</h1>
-            {subtitle && <p className="text-xs text-zinc-400 truncate -mt-0.5">{subtitle}</p>}
+            <h1 className="text-[15px] font-semibold text-white/90 truncate">{title}</h1>
+            {subtitle && <p className="text-xs text-white/40 truncate -mt-0.5">{subtitle}</p>}
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
+            aria-label={darkMode ? 'Tryb jasny' : 'Tryb ciemny'}
+          >
+            {darkMode ? <IconSun className="w-4 h-4" /> : <IconMoon className="w-4 h-4" />}
+          </button>
           {actions}
           {notificationContext && (
             <NotificationDropdown context={notificationContext} businessId={notificationBusinessId} />
           )}
+          {typeof chatUnreadCount !== 'undefined' && (
+            <button
+              onClick={onChatClick}
+              className="relative p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
+              aria-label="Czaty"
+            >
+              <IconMessage className="w-5 h-5" />
+              {chatUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+                </span>
+              )}
+            </button>
+          )}
           {userEmail && onLogout && (
-            <div className="flex items-center gap-2 pl-2 border-l border-zinc-200">
-              <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
-                <IconUser className="w-4 h-4 text-brand-600" />
+            <div className="flex items-center gap-2 pl-3 border-l border-white/10">
+              <div className="w-8 h-8 bg-[#0d9488] rounded-full flex items-center justify-center ring-2 ring-[#0c1929]">
+                <IconUser className="w-4 h-4 text-white" />
               </div>
-              <div className="hidden md:block text-xs">
-                <p className="font-medium text-zinc-700 truncate max-w-[120px]">{userEmail}</p>
+              <div className="hidden md:block text-xs leading-tight">
+                <p className="font-medium text-white/60 truncate max-w-[120px]">{userEmail}</p>
               </div>
-              <button onClick={onLogout} className="p-1.5 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-500" title="Wyloguj">
+              <button onClick={onLogout} className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors" title="Wyloguj">
                 <IconLogout className="w-4 h-4" />
               </button>
             </div>

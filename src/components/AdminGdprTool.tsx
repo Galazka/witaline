@@ -44,7 +44,7 @@ export default function AdminGdprTool({ supabase }: Props) {
           value={phone}
           onChange={e => setPhone(e.target.value)}
           placeholder="+48 123 456 789"
-          className="flex-1 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400"
+          className="flex-1 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488]"
         />
         <button
           onClick={handleGdprDelete}

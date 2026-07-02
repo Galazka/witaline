@@ -10,12 +10,12 @@ interface Props {
 }
 
 const inputClass =
-  "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 placeholder:text-zinc-400 transition";
+  "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] placeholder:text-zinc-400 transition";
 
 const statusStyles: Record<string, string> = {
   new: "bg-blue-100 text-blue-800",
   processed: "bg-amber-100 text-amber-800",
-  active: "bg-brand-100 text-brand-500",
+  active: "bg-brand-100 text-[#0d9488]",
 };
 
 const statusLabels: Record<string, string> = {
@@ -151,7 +151,7 @@ export default function AdminLeadCard({ lead, onStatusChange, onActivate }: Prop
             <button
               onClick={handleActivate}
               disabled={activating}
-              className="w-full bg-brand-400 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+              className="w-full bg-[#0d9488] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {activating ? "Aktywowanie..." : "Aktywuj firmę"}
             </button>

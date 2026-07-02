@@ -67,7 +67,7 @@ export default function StatsCounter({
   }, [visible, end, duration]);
 
   return (
-    <span ref={ref} className={`font-bold text-brand-400 font-display ${className}`}>
+    <span ref={ref} className={`font-bold text-[#0d9488] font-display ${className}`}>
       {prefix}{count}{suffix}
     </span>
   );

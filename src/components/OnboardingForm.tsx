@@ -62,7 +62,7 @@ export default function OnboardingForm() {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 s <= step
-                  ? "bg-brand-400 text-white"
+                  ? "bg-[#0d9488] text-white"
                   : "bg-brand-50 text-zinc-400"
               }`}
             >
@@ -86,7 +86,7 @@ export default function OnboardingForm() {
               type="text"
               value={form.companyName}
               onChange={(e) => updateField("companyName", e.target.value)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
               placeholder="Nazwa Twojej firmy"
             />
           </div>
@@ -98,7 +98,7 @@ export default function OnboardingForm() {
               type="text"
               value={form.nip}
               onChange={(e) => updateField("nip", e.target.value)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
               placeholder="1234567890"
             />
           </div>
@@ -109,7 +109,7 @@ export default function OnboardingForm() {
             <select
               value={form.industry}
               onChange={(e) => updateField("industry", e.target.value)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
             >
               <option value="">Wybierz branżę</option>
               {industries.map((i) => (
@@ -127,14 +127,14 @@ export default function OnboardingForm() {
               type="email"
               value={form.contactEmail}
               onChange={(e) => updateField("contactEmail", e.target.value)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
               placeholder="kontakt@firma.pl"
             />
           </div>
           <button
             onClick={() => setStep(2)}
             disabled={!form.companyName || !form.nip || !form.contactEmail}
-            className="w-full bg-brand-400 text-white py-2.5 rounded-lg font-medium hover:bg-brand-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#0d9488] text-white py-2.5 rounded-lg font-medium hover:bg-[#0f766e] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Dalej
           </button>
@@ -158,7 +158,7 @@ export default function OnboardingForm() {
             <textarea
               value={form.knowledgeBaseRaw}
               onChange={(e) => updateField("knowledgeBaseRaw", e.target.value)}
-              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent h-48 resize-none"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent h-48 resize-none"
               placeholder={`Przykład:
 Pizza Margherita - 32 zł
 Pizza Capriciosa - 38 zł
@@ -175,14 +175,14 @@ Telefon kontaktowy do szefa: 600 600 600`}
           <div className="flex gap-3">
             <button
               onClick={() => setStep(1)}
-              className="flex-1 bg-brand-50 text-zinc-700 py-2.5 rounded-lg font-medium hover:bg-brand-100 transition"
+              className="flex-1 bg-brand-50 text-zinc-700 py-2.5 rounded-lg font-medium hover:bg-[#ccfbf1] transition"
             >
               Wstecz
             </button>
             <button
               onClick={() => setStep(3)}
               disabled={!form.knowledgeBaseRaw}
-              className="flex-1 bg-brand-400 text-white py-2.5 rounded-lg font-medium hover:bg-brand-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-[#0d9488] text-white py-2.5 rounded-lg font-medium hover:bg-[#0f766e] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Dalej
             </button>
@@ -222,14 +222,14 @@ Telefon kontaktowy do szefa: 600 600 600`}
           <div className="flex gap-3">
             <button
               onClick={() => setStep(2)}
-              className="flex-1 bg-brand-50 text-zinc-700 py-2.5 rounded-lg font-medium hover:bg-brand-100 transition"
+              className="flex-1 bg-brand-50 text-zinc-700 py-2.5 rounded-lg font-medium hover:bg-[#ccfbf1] transition"
             >
               Wstecz
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 bg-brand-400 text-white py-2.5 rounded-lg font-medium hover:bg-brand-500 transition disabled:opacity-50"
+              className="flex-1 bg-[#0d9488] text-white py-2.5 rounded-lg font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {loading ? "Wysyłanie..." : "Wyślij zgłoszenie"}
             </button>

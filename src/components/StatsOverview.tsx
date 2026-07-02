@@ -78,7 +78,7 @@ export default function StatsOverview({ businessId }: Props) {
   }
 
   if (loading) {
-    return <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center text-sm text-zinc-400">Ładowanie statystyk...</div>;
+    return <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-6 text-center text-sm text-zinc-400">Ładowanie statystyk...</div>;
   }
 
   if (!stats) return null;
@@ -88,26 +88,26 @@ export default function StatsOverview({ businessId }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Main stats */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Rozmowy</p>
-        <p className="text-3xl font-bold text-brand-400 mt-1">{stats.totalConversations}</p>
+        <p className="text-3xl font-bold text-[#0d9488] mt-1">{stats.totalConversations}</p>
         <p className="text-xs text-zinc-500 mt-1">łącznie</p>
       </div>
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Wiadomości</p>
-        <p className="text-3xl font-bold text-brand-400 mt-1">{stats.totalMessages}</p>
+        <p className="text-3xl font-bold text-[#0d9488] mt-1">{stats.totalMessages}</p>
         <p className="text-xs text-zinc-500 mt-1">śr. {stats.avgMessagesPerConv}/rozmowę</p>
       </div>
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Połączenia</p>
-        <p className="text-3xl font-bold text-brand-400 mt-1">{stats.totalCalls}</p>
+        <p className="text-3xl font-bold text-[#0d9488] mt-1">{stats.totalCalls}</p>
         <p className="text-xs text-zinc-500 mt-1">telefoniczne</p>
       </div>
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider">Kanały</p>
         <div className="flex gap-2 mt-2 flex-wrap">
           {Object.entries(stats.channelBreakdown).map(([ch, count]) => (
-            <span key={ch} className="text-xs px-2 py-1 bg-brand-50 text-zinc-600 rounded-full">
+            <span key={ch} className="text-xs px-2 py-1 bg-brand-50 dark:bg-brand-800 text-zinc-600 dark:text-zinc-300 rounded-full">
               {ch === "web" ? "💬" : ch === "voice" ? "📞" : ch === "widget" ? "🔗" : "📱"} {count}
             </span>
           ))}
@@ -115,13 +115,13 @@ export default function StatsOverview({ businessId }: Props) {
       </div>
 
       {/* Activity chart */}
-      <div className="md:col-span-2 bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="md:col-span-2 bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider mb-3">Aktywność (7 dni)</p>
         <div className="flex items-end gap-1 h-24">
           {stats.recentActivity.map((a, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
               <div
-                className="w-full bg-brand-400 rounded-t transition-all"
+                className="w-full bg-[#0d9488] rounded-t transition-all"
                 style={{ height: `${(a.count / maxActivity) * 100}%`, minHeight: a.count > 0 ? "4px" : "0" }}
               />
               <span className="text-[10px] text-zinc-400">
@@ -133,7 +133,7 @@ export default function StatsOverview({ businessId }: Props) {
       </div>
 
       {/* Sentiment */}
-      <div className="md:col-span-2 bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="md:col-span-2 bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
         <p className="text-xs text-zinc-400 uppercase tracking-wider mb-3">Sentyment klientów</p>
         <div className="flex gap-4">
           {[

@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export async function GET(request: Request) {
+  const { error: authErr } = await checkAdminAuth();
+  if (authErr) return authErr;
   const { searchParams } = new URL(request.url);
   const businessId = searchParams.get("businessId");
 
   let query = supabaseAdmin
     .from("call_logs")
     .select("to_number, business_id, routed_business_name, duration_seconds, cost_pln, classification, has_human_handoff, handoff_status, created_at")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (businessId) query = query.eq("business_id", businessId);
-  // No businessId filter = all numbers (admin)
 
   const { data: calls, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

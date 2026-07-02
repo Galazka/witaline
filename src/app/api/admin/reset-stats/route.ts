@@ -6,19 +6,67 @@ export async function POST() {
   const { error } = await checkAdminAuth();
   if (error) return error;
 
-  try {
-    await supabaseAdmin.from("call_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("conversations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("sms_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("notifications").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("wa_logs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("leads").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("reservations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("feedback").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    await supabaseAdmin.from("businesses").update({ minutes_used_this_week: 0 }).neq("id", "00000000-0000-0000-0000-000000000000");
+  const results: string[] = [];
 
-    return NextResponse.json({ ok: true, message: "Wszystkie dane testowe zostaly usuniete. Statystyki zresetowane." });
+  try {
+    const tables = [
+      "call_logs",
+      "conversations",
+      "sms_logs",
+      "wa_logs",
+      "notifications",
+      "leads",
+      "reservations",
+      "feedback",
+      "cost_items",
+      "audit_logs",
+      "transfer_attempts",
+      "contact_messages",
+    ];
+    for (const table of tables) {
+      const { error: delErr } = await supabaseAdmin
+        .from(table)
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+      if (delErr) {
+        results.push(`${table}: ${delErr.message}`);
+      } else {
+        results.push(`${table}: wyczyszczono`);
+      }
+    }
+
+    const { error: bizErr1 } = await supabaseAdmin
+      .from("businesses")
+      .update({
+        minutes_used_this_week: 0,
+        prepaid_minutes: 0,
+        sms_extra_purchased: 0,
+        trial_minutes_used: 0,
+        total_cost: 0,
+        revenue_pln: 0,
+        internal_cost_pln: 0,
+        sms_cost_usd: 0,
+        stripe_customer_id: null,
+        stripe_subscription_id: null,
+        subscription_status: "inactive",
+        subscription_current_period_end: null,
+      })
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+    if (bizErr1) {
+      results.push(`businesses update: ${bizErr1.message}`);
+    } else {
+      results.push(`businesses: statystyki zresetowane`);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "Wszystkie dane testowe usunięte. Statystyki zresetowane.",
+      results,
+    });
   } catch (err) {
-    return NextResponse.json({ ok: false, message: err instanceof Error ? err.message : "Reset failed" }, { status: 500 });
+    return NextResponse.json({
+      ok: false,
+      message: err instanceof Error ? err.message : "Reset failed",
+    }, { status: 500 });
   }
 }

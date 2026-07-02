@@ -10,7 +10,7 @@ interface Props {
 }
 
 const inputClass =
-  "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 placeholder:text-zinc-400 transition";
+  "w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] placeholder:text-zinc-400 transition";
 
 const labelClass = "text-xs font-medium text-zinc-500 block mb-1";
 
@@ -51,7 +51,7 @@ export default function ServicesEditor({ businessId, services, onUpdate }: Props
           <h3 className="text-lg font-semibold text-zinc-900">Usługi</h3>
           <p className="text-sm text-zinc-500">Zdefiniuj usługi, które asystent AI będzie oferować przez telefon.</p>
         </div>
-        <button onClick={addService} className="bg-brand-50 text-zinc-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-brand-100 transition">
+        <button onClick={addService} className="bg-brand-50 text-zinc-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-[#ccfbf1] transition">
           + Dodaj usługę
         </button>
       </div>
@@ -97,7 +97,7 @@ export default function ServicesEditor({ businessId, services, onUpdate }: Props
 
       {items.filter((s) => s.name.trim()).length > 0 && (
         <button onClick={handleSave} disabled={saving}
-          className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50">
+          className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50">
           {saving ? "Zapisywanie..." : "Zapisz usługi"}
         </button>
       )}

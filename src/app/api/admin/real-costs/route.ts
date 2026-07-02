@@ -1,25 +1,24 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
-const WITALINE_MAIN_ID = "00000000-0000-0000-0000-000000000001";
-
-const PLAN_REVENUE: Record<string, number> = {
-  start_100: 299,
-  pro_500: 600,
-  enterprise_2000: 1500,
-  elastic_0: 0,
-  pro_249: 300,
-  lux_599: 800,
-};
+import { getPlanConfig } from "@/lib/pricing";
+function getPlanRevenue(planKey: string): number {
+  if (planKey === "elastic_0" || planKey === "self_service") return 0;
+  const cfg = getPlanConfig(planKey);
+  return cfg?.price ?? 199;
+}
 
 import { INTERNAL_COST_PER_MIN } from "@/lib/pricing";
-
-const USD_TO_PLN = 4.0;
-const COST_ELEVENLABS_PER_MIN = 0.09 * USD_TO_PLN;
-const COST_TWILIO_PER_MIN = 0.013 * USD_TO_PLN;
-const COST_OPENROUTER_PER_MIN = 0.0003 * USD_TO_PLN;
-const COST_SMS_PER_UNIT = 0.0779 * USD_TO_PLN;
+import {
+  USD_TO_PLN,
+  ELEVENLABS_COST_PER_MIN_USD,
+  TWILIO_AVG_COST_PER_MIN_USD,
+  OPENROUTER_COST_PER_MIN_USD,
+  TWILIO_SMS_COST_PER_SEGMENT_PLN,
+  TWILIO_POLAND_MOBILE_COST_PER_MIN_USD,
+} from "@/lib/cost-rates";
 
 export async function GET(request: Request) {
   const { error } = await checkAdminAuth();
@@ -55,7 +54,7 @@ export async function GET(request: Request) {
   // 2. Call logs in period
   let callsQuery = supabaseAdmin
     .from("call_logs")
-    .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, from_number, caller_id, twilio_call_sid, classification, created_at")
+    .select("id, business_id, duration_seconds, cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, total_cost, revenue_pln, from_number, caller_id, twilio_call_sid, classification, created_at")
     .is("deleted_at", null)
     .gte("created_at", fromStr)
     .lte("created_at", toStr + "T23:59:59");
@@ -67,7 +66,8 @@ export async function GET(request: Request) {
   if (includePrev) {
     let pq = supabaseAdmin
       .from("call_logs")
-      .select("id, business_id, duration_seconds, cost_pln, internal_cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, from_number, caller_id, twilio_call_sid, created_at")
+      .select("id, business_id, duration_seconds, cost_pln, cost_elevenlabs, cost_twilio, cost_openrouter, from_number, caller_id, twilio_call_sid, created_at")
+      .is("deleted_at", null)
       .gte("created_at", prevFromStr)
       .lte("created_at", prevToStr + "T23:59:59");
     if (businessId) pq = pq.eq("business_id", businessId);
@@ -78,11 +78,27 @@ export async function GET(request: Request) {
   // 4. SMS logs
   let smsQuery = supabaseAdmin
     .from("sms_logs")
-    .select("business_id, id")
+    .select("business_id, id, created_at")
     .gte("created_at", fromStr)
     .lte("created_at", toStr + "T23:59:59");
   if (businessId) smsQuery = smsQuery.eq("business_id", businessId);
   const { data: smsLogs } = await smsQuery;
+
+  // 4b. WhatsApp logs
+  let waQuery = supabaseAdmin
+    .from("wa_logs")
+    .select("business_id, id, created_at")
+    .gte("created_at", fromStr)
+    .lte("created_at", toStr + "T23:59:59");
+  if (businessId) waQuery = waQuery.eq("business_id", businessId);
+  const { data: waLogs } = await waQuery;
+
+  // WhatsApp count map (aggregate, not per-call)
+  const waCountMap = new Map<string, number>();
+  for (const log of waLogs || []) {
+    const bid = log.business_id || "unknown";
+    waCountMap.set(bid, (waCountMap.get(bid) || 0) + 1);
+  }
 
   // 5. Cost items (own costs)
   const { data: costItems } = await supabaseAdmin
@@ -97,22 +113,34 @@ export async function GET(request: Request) {
   }
 
 function buildCallMap(logs: typeof callLogs) {
-    const map = new Map<string, { calls: number; minutes: number; costPln: number; costElevenlabs: number; costTwilio: number; costOpenrouter: number }>();
+    const map = new Map<string, { calls: number; minutes: number; costPln: number; costElevenlabs: number; costTwilio: number; costOpenrouter: number; consultantTransferCost: number }>();
     for (const log of logs || []) {
       const bid = log.business_id || "unknown";
-      if (!map.has(bid)) map.set(bid, { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 });
+      if (!map.has(bid)) map.set(bid, { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0, consultantTransferCost: 0 });
       const entry = map.get(bid)!;
-      entry.calls += 1;
-      entry.costPln += Number(log.internal_cost_pln ?? log.cost_pln) || 0;
       const minutes = (log.duration_seconds || 0) / 60;
+      entry.calls += 1;
+      entry.costPln += Number(log.total_cost ?? log.cost_pln) || 0;
+
+      // ElevenLabs — synced in USD from sync-costs
+      // Only use actual synced data, never inflate with fallback estimates
       const rawEleven = Number(log.cost_elevenlabs);
-      entry.costElevenlabs += rawEleven > 0 ? rawEleven * USD_TO_PLN : minutes * COST_ELEVENLABS_PER_MIN;
-      if (log.twilio_call_sid) {
-        const rawTwilio = Number(log.cost_twilio);
-        entry.costTwilio += rawTwilio > 0 ? rawTwilio * USD_TO_PLN : minutes * COST_TWILIO_PER_MIN;
+      entry.costElevenlabs += rawEleven > 0 ? rawEleven : 0;
+
+      // Twilio — synced in USD from sync-costs
+      // Only use actual synced data, never inflate with fallback estimates
+      const rawTwilio = Number(log.cost_twilio);
+      entry.costTwilio += Math.abs(rawTwilio) > 0 ? Math.abs(rawTwilio) : 0;
+
+      // OpenRouter — negligible, estimated at $0.0003/min
+      entry.costOpenrouter += minutes * OPENROUTER_COST_PER_MIN_USD;
+
+      // Consultant transfer — Twilio outbound leg (if call was transferred)
+      if ((log as any).consultant_transfer_cost_pln) {
+        entry.consultantTransferCost += Number((log as any).consultant_transfer_cost_pln) || 0;
+      } else if ((log as any).routed_to_extension && minutes > 0) {
+        entry.consultantTransferCost += minutes * TWILIO_POLAND_MOBILE_COST_PER_MIN_USD;
       }
-      const rawOpenrouter = Number(log.cost_openrouter);
-      entry.costOpenrouter += rawOpenrouter > 0 ? rawOpenrouter * USD_TO_PLN : minutes * COST_OPENROUTER_PER_MIN;
     }
     return map;
   }
@@ -126,10 +154,10 @@ function buildCallMap(logs: typeof callLogs) {
     smsCountMap.set(bid, (smsCountMap.get(bid) || 0) + 1);
   }
 
-  // Include ALL businesses + any that have calls
+  // Include ALL businesses + any that have calls/sms/wa
   const allBizIds = new Set<string>();
   for (const b of businesses || []) allBizIds.add(b.id);
-  for (const bid of [...callMap.keys(), ...smsCountMap.keys()]) allBizIds.add(bid);
+  for (const bid of [...callMap.keys(), ...smsCountMap.keys(), ...waCountMap.keys()]) allBizIds.add(bid);
   if (businessId) allBizIds.add(businessId);
 
   const daysInRange = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
@@ -139,17 +167,18 @@ function buildCallMap(logs: typeof callLogs) {
   for (const bid of allBizIds) {
     if (bid === "unknown") continue;
     const bizInfo = bizMap.get(bid) || { name: "Nieznana", plan: "start_100", status: "", customRevenue: null };
-    const callData = callMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 };
-    const prevCallData = prevCallMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0 };
+    const callData = callMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0, consultantTransferCost: 0 };
+    const prevCallData = prevCallMap.get(bid) || { calls: 0, minutes: 0, costPln: 0, costElevenlabs: 0, costTwilio: 0, costOpenrouter: 0, consultantTransferCost: 0 };
     const smsCount = smsCountMap.get(bid) || 0;
-    const costSms = smsCount * COST_SMS_PER_UNIT;
-    const costFromLogs = callData.costPln;
-    const totalCost = costFromLogs > 0 ? costFromLogs : Math.round((callData.costElevenlabs + callData.costTwilio + callData.costOpenrouter + costSms) * 100) / 100;
-    const prevCostFromLogs = prevCallData.costPln;
-    const prevTotalCost = prevCostFromLogs > 0 ? prevCostFromLogs : Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
+    const costSms = smsCount * TWILIO_SMS_COST_PER_SEGMENT_PLN;
+    const costConsultant = callData.consultantTransferCost || 0;
+    // Always calculate total from individual components (actual synced data)
+    // Never use pre-calculated costPln which may contain inflated fallback estimates
+    const totalCost = Math.round((callData.costElevenlabs + callData.costTwilio + callData.costOpenrouter + costSms + costConsultant) * 100) / 100;
+    const prevTotalCost = Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
 
-    const isWitaLine = bid === WITALINE_MAIN_ID;
-    const monthlyRevenue = isWitaLine ? 0 : (bizInfo.customRevenue ?? (PLAN_REVENUE[bizInfo.plan] ?? 0));
+    const isWitaLine = bid === WITALINE_MAIN_BUSINESS_ID;
+    const monthlyRevenue = isWitaLine ? 0 : (bizInfo.customRevenue ?? getPlanRevenue(bizInfo.plan));
     const revenue = Math.round((monthlyRevenue / 30) * daysInRange * 100) / 100;
 
     const prevRev = includePrev ? (isWitaLine ? 0 : Math.round((monthlyRevenue / 30) * Math.max(1, Math.round(prevPeriodLen / 86400000)) * 100) / 100) : 0;
@@ -165,7 +194,8 @@ function buildCallMap(logs: typeof callLogs) {
       costTwilio: Math.round(callData.costTwilio * 100) / 100,
       costOpenrouter: Math.round(callData.costOpenrouter * 100) / 100,
       costSms: Math.round(costSms * 100) / 100,
-      totalCost,
+      costConsultant: Math.round(costConsultant * 100) / 100,
+      totalCost: Math.round(totalCost * 100) / 100,
       revenue: Math.round(revenue * 100) / 100,
       customRevenue: bizInfo.customRevenue,
       prevTotalCost: includePrev ? prevTotalCost : null,
@@ -180,28 +210,49 @@ function buildCallMap(logs: typeof callLogs) {
   const ownCostsSummary = buildOwnCostsSummary(costItems || []);
 
   // Build call log details for the period (exclude prev period)
-  const callLogDetails = (callLogs || []).map((log) => ({
-    id: log.id,
-    business_id: log.business_id,
-    duration_seconds: log.duration_seconds,
-    cost_pln: Number(log.cost_pln) || 0,
-    internal_cost_pln: Number(log.internal_cost_pln ?? log.cost_pln) || 0,
-    cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
-    cost_twilio: Number(log.cost_twilio) || 0,
-    cost_openrouter: Number(log.cost_openrouter) || 0,
-    total_cost: Number(log.total_cost) || Number(log.cost_pln) || 0,
-    revenue_pln: Number(log.revenue_pln) || 0,
-    from_number: log.from_number || log.caller_id || "",
-    classification: log.classification || "unknown",
-    created_at: log.created_at,
-    business_name: bizMap.get(log.business_id || "")?.name || "Nieznana",
-  }));
+  const callLogDetails = (callLogs || []).map((log) => {
+    const bizId = log.business_id || "";
+    const planInfo = bizMap.get(bizId) || { name: "Nieznana", plan: "start", status: "", customRevenue: null };
+    const monthlyRevenue = bizId === WITALINE_MAIN_BUSINESS_ID ? 0 : (planInfo.customRevenue ?? getPlanRevenue(planInfo.plan));
+    const daysInRange = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
+    const dailyRevenue = monthlyRevenue > 0 ? monthlyRevenue / 30 : 0;
+    return {
+      id: log.id,
+      business_id: bizId,
+      duration_seconds: log.duration_seconds,
+      cost_pln: Number(log.cost_pln) || 0,
+      internal_cost_pln: Number(log.total_cost ?? log.cost_pln) || 0,
+      cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
+      cost_twilio: Number(log.cost_twilio) || 0,
+      cost_openrouter: Number(log.cost_openrouter) || 0,
+      consultant_transfer_cost_pln: Number((log as any).consultant_transfer_cost_pln) || 0,
+      // Always calculate total_cost from components (not from DB field which may be stale)
+      total_cost: Math.round(((Number(log.cost_elevenlabs) || 0) + (Number(log.cost_twilio) || 0) + (Number(log.cost_openrouter) || 0)) * 100) / 100,
+      revenue_pln: Number(log.revenue_pln) || 0,
+      plan_revenue_pln: Math.round(dailyRevenue * 100) / 100,
+      from_number: log.from_number || log.caller_id || "",
+      classification: log.classification || "unknown",
+      created_at: log.created_at,
+      business_name: planInfo.name,
+    };
+  });
+
+  const smsTotal = smsLogs?.length || 0;
+
+  // Total call_logs count (unfiltered by date) for diagnostics
+  const { count: totalCallLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("id", { count: "exact", head: true })
+    .is("deleted_at", null);
 
   return NextResponse.json({
     businesses: result,
     own_costs: ownCostsSummary,
     cost_items: costItems || [],
     call_logs: callLogDetails,
+    sms_total: smsTotal,
+    cost_sms_total: Math.round(smsTotal * TWILIO_SMS_COST_PER_SEGMENT_PLN * 100) / 100,
+    total_call_logs: totalCallLogs ?? 0,
   });
 }
 

@@ -9,6 +9,16 @@ interface Props {
   businessPlan?: string;
 }
 
+function formatDateHeader(dateStr: string): string {
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "Dzisiaj";
+  if (d.toDateString() === yesterday.toDateString()) return "Wczoraj";
+  return d.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
 const TAG_COLORS: Record<string, string> = {
   skarga: "bg-red-100 text-red-700 border-red-200",
   zamówienie: "bg-green-100 text-green-700 border-green-200",
@@ -48,7 +58,7 @@ const channelEmoji: Record<string, string> = {
 };
 
 function isPremiumPlan(plan?: string): boolean {
-  return plan === "pro_500" || plan === "enterprise_2000" || plan === "pro_249" || plan === "lux_599";
+  return plan === "enterprise_2000";
 }
 
 export default function ChatHistory({ businessId, businessPlan }: Props) {
@@ -168,7 +178,7 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
           <div className="flex gap-1">
             {["all", "web", "voice", "widget"].map(f => (
               <button key={f} onClick={() => setFilter(f)}
-                className={`px-3 py-1 text-xs rounded-full transition ${filter === f ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"}`}>
+                className={`px-3 py-1 text-xs rounded-full transition ${filter === f ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}>
                 {f === "all" ? "Wszystkie" : f === "web" ? "💬 Web" : f === "voice" ? "📞 Voice" : "🔗 Widget"}
               </button>
             ))}
@@ -182,20 +192,20 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
             </svg>
             <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Szukaj po kliencie, tagu lub treści..."
-              className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400" />
+              className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488]" />
           </div>
         </div>
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tagFilter && (
               <button onClick={() => setTagFilter("")}
-                className="text-xs px-2 py-1 rounded-full border border-zinc-300 bg-white text-zinc-500 hover:bg-brand-50 transition">
+                className="text-xs px-2 py-1 rounded-full border border-zinc-300 bg-white text-zinc-500 hover:bg-[#f0fdfa] transition">
                 ✕ Wyczyść filtr
               </button>
             )}
             {allTags.map(tag => (
               <button key={tag} onClick={() => setTagFilter(tagFilter === tag ? "" : tag)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition ${tagFilter === tag ? "ring-2 ring-brand-400 ring-offset-1" : ""} ${getTagStyle(tag)}`}>
+                className={`text-xs px-2.5 py-1 rounded-full border transition ${tagFilter === tag ? "ring-2 ring-[#0d9488] ring-offset-1" : ""} ${getTagStyle(tag)}`}>
                 #{tag}
               </button>
             ))}
@@ -215,7 +225,7 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
           filteredConversations.map(conv => {
             const statusBadge = getStatusBadge(conv.status);
             return (
-              <div key={conv.id} className={`p-4 hover:bg-brand-50 transition cursor-pointer ${selectedConv?.id === conv.id ? "bg-brand-50" : ""}`}
+              <div key={conv.id} className={`p-4 hover:bg-[#f0fdfa] transition cursor-pointer ${selectedConv?.id === conv.id ? "bg-brand-50" : ""}`}
                 onClick={() => { setSelectedConv(conv); fetchMessages(conv.id); }}>
                 {/* Top row: caller + channel + status + sentiment */}
                 <div className="flex items-center gap-2 mb-1.5">
@@ -236,7 +246,7 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
                   ) : isPremiumPlan(businessPlan) ? (
                     <button onClick={(e) => { e.stopPropagation(); generateSummary(conv); }}
                       disabled={summarizing === conv.id}
-                      className="text-xs text-brand-400 hover:text-brand-500 transition flex items-center gap-1">
+                      className="text-xs text-[#0d9488] hover:text-[#0f766e] transition flex items-center gap-1">
                       {summarizing === conv.id ? "Generowanie..." : "✨ Generuj podsumowanie AI"}
                     </button>
                   ) : (
@@ -297,10 +307,18 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
             ) : messages.length === 0 ? (
               <div className="text-center text-sm text-zinc-400 py-8">Brak wiadomości</div>
             ) : (
-              messages.map(msg => (
+              messages.map((msg, idx) => (
+                <>
+                {idx === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[idx - 1].created_at).toDateString() ? (
+                  <div className="text-center my-4">
+                    <span className="text-[10px] font-medium text-zinc-400 bg-zinc-100 px-3 py-1 rounded-full">
+                      {formatDateHeader(msg.created_at)}
+                    </span>
+                  </div>
+                ) : null}
                 <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
-                    msg.role === "user" ? "bg-brand-400 text-white rounded-br-md" : "bg-brand-50 text-zinc-800 rounded-bl-md"
+                    msg.role === "user" ? "bg-[#0d9488] text-white rounded-br-md" : "bg-brand-50 text-zinc-800 rounded-bl-md"
                   }`}>
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     <p className={`text-[10px] mt-1 ${msg.role === "user" ? "text-white/60" : "text-zinc-400"}`}>
@@ -308,6 +326,7 @@ export default function ChatHistory({ businessId, businessPlan }: Props) {
                     </p>
                   </div>
                 </div>
+                </>
               ))
             )}
           </div>

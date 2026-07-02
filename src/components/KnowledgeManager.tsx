@@ -90,7 +90,7 @@ export default function KnowledgeManager({ businessId }: Props) {
         </div>
         <button
           onClick={() => { setShowForm(true); setEditing(null); setForm({ title: "", content: "", category: "general" }); }}
-          className="px-4 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition"
+          className="px-4 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition"
         >
           + Dodaj wpis
         </button>
@@ -99,11 +99,11 @@ export default function KnowledgeManager({ businessId }: Props) {
       {/* Category filter */}
       <div className="px-5 py-3 border-b border-zinc-100 flex gap-1.5 overflow-x-auto">
         <button onClick={() => setFilter("all")} className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition ${
-          filter === "all" ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"
+          filter === "all" ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"
         }`}>Wszystkie</button>
         {CATEGORIES.map(c => (
           <button key={c.value} onClick={() => setFilter(c.value)} className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition ${
-            filter === c.value ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"
+            filter === c.value ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"
           }`}>{c.label}</button>
         ))}
       </div>
@@ -135,11 +135,11 @@ export default function KnowledgeManager({ businessId }: Props) {
           />
           <div className="flex gap-2">
             <button onClick={handleSave} disabled={saving || !form.title || !form.content}
-              className="px-4 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50">
+              className="px-4 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition disabled:opacity-50">
               {saving ? "Zapisywanie..." : editing ? "Aktualizuj" : "Dodaj"}
             </button>
             <button onClick={() => { setShowForm(false); setEditing(null); }}
-              className="px-4 py-2 bg-brand-50 text-zinc-600 text-sm rounded-lg hover:bg-brand-100 transition">
+              className="px-4 py-2 bg-brand-50 text-zinc-600 text-sm rounded-lg hover:bg-[#ccfbf1] transition">
               Anuluj
             </button>
           </div>
@@ -156,7 +156,7 @@ export default function KnowledgeManager({ businessId }: Props) {
           entries.map(entry => {
             const cat = CATEGORIES.find(c => c.value === entry.category);
             return (
-              <div key={entry.id} className={`px-5 py-3 flex items-start gap-3 hover:bg-brand-50 transition ${
+              <div key={entry.id} className={`px-5 py-3 flex items-start gap-3 hover:bg-[#f0fdfa] transition ${
                 !entry.active ? "opacity-50" : ""
               }`}>
                 <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${cat?.color || "bg-brand-50"}`}>
@@ -173,7 +173,7 @@ export default function KnowledgeManager({ businessId }: Props) {
                     {entry.active ? "✓" : "○"}
                   </button>
                   <button onClick={() => { setEditing(entry); setForm({ title: entry.title, content: entry.content, category: entry.category }); setShowForm(true); }}
-                    className="p-1.5 rounded-lg bg-brand-50 text-zinc-600 text-xs hover:bg-brand-100 transition" title="Edytuj">
+                    className="p-1.5 rounded-lg bg-brand-50 text-zinc-600 text-xs hover:bg-[#ccfbf1] transition" title="Edytuj">
                     ✏️
                   </button>
                   <button onClick={() => handleDelete(entry.id)}

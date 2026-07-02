@@ -155,9 +155,9 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 stagger">
         {[
           { label: "Firmy", value: stats?.totalBusinesses || 0, color: "text-zinc-900", sub: `+${trialingBusinesses} na trialu`, icon: "🏢" },
-          { label: "Aktywne", value: stats?.activeSubscriptions || 0, color: "text-brand-500", sub: `${((stats?.activeSubscriptions || 0) / Math.max(stats?.totalBusinesses || 1, 1)) * 100}%`, icon: "✓" },
+          { label: "Aktywne", value: stats?.activeSubscriptions || 0, color: "text-[#0d9488]", sub: `${((stats?.activeSubscriptions || 0) / Math.max(stats?.totalBusinesses || 1, 1)) * 100}%`, icon: "✓" },
           { label: "Zawieszone", value: stats?.suspendedCount || 0, color: "text-amber-600", sub: "Wymagaja uwagi", icon: "⚠" },
-          { label: "Rozmowy dzis", value: stats?.todayCalls || 0, color: "text-brand-500", sub: `${stats?.totalCalls || 0} lacznie`, icon: "📞" },
+          { label: "Rozmowy dzis", value: stats?.todayCalls || 0, color: "text-[#0d9488]", sub: `${stats?.totalCalls || 0} lacznie`, icon: "📞" },
           { label: "Nowe leady", value: newLeads, color: newLeads > 0 ? "text-violet-500" : "text-zinc-400", sub: `${leads.length} wszystkich`, icon: "🎯" },
           { label: "Koszt", value: `${(stats?.totalCost || "0.00").replace(".", ",")} zl`, color: "text-zinc-900", sub: costRange === "all" ? "Calkowity koszt" : costRange === "today" ? "Koszt dzis" : costRange === "7d" ? "Koszt 7 dni" : "Koszt 30 dni", icon: "💰" },
         ].map((kpi) => (
@@ -185,11 +185,11 @@ export default function AdminDashboard() {
                 <div
                   key={i}
                   onClick={() => item.tab && setTab(item.tab as any)}
-                  className={`flex items-start gap-3 ${item.tab ? "cursor-pointer hover:bg-brand-50/50 rounded-lg px-2 -mx-2 transition-colors" : ""}`}
+                  className={`flex items-start gap-3 ${item.tab ? "cursor-pointer hover:bg-[#f0fdfa]/50 rounded-lg px-2 -mx-2 transition-colors" : ""}`}
                 >
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                     item.type === "new_lead" ? "bg-violet-400" :
-                    item.type === "new_business" ? "bg-brand-400" :
+                    item.type === "new_business" ? "bg-[#0d9488]" :
                     item.type === "payment_issue" ? "bg-red-400" : "bg-brand-200"
                   }`} />
                   <div className="flex-1 min-w-0">
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                   <span className="text-xs text-zinc-400">/ {smsOverview.totalCapacity}</span>
                 </div>
                 <div className="w-full h-2 bg-brand-50 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${smsPct > 80 ? "bg-red-500" : smsPct > 50 ? "bg-amber-500" : "bg-brand-400"}`}
+                  <div className={`h-full rounded-full ${smsPct > 80 ? "bg-red-500" : smsPct > 50 ? "bg-amber-500" : "bg-[#0d9488]"}`}
                     style={{ width: `${Math.min(100, smsPct)}%` }} />
                 </div>
                 <p className="text-xs text-zinc-400">{smsPct}% wykorzystano ({smsOverview.businessesWithData} firm)</p>
@@ -234,15 +234,13 @@ export default function AdminDashboard() {
             <h3 className="text-sm font-semibold text-zinc-900 mb-3">Przychod (szac.)</h3>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-zinc-400">Subskrypcje</p>
-                <p className="text-lg font-bold text-zinc-900">
-                  {stats ? `${(stats.activeSubscriptions * 299).toFixed(0)} zl/mc` : "—"}
-                </p>
-                <p className="text-[10px] text-zinc-400">przy zalozeniu planu Start</p>
+                <p className="text-xs text-zinc-400">Koszt polaczen (7 dni)</p>
+                <p className="text-lg font-bold text-red-500">{stats?.totalCost || "0.00"} zl</p>
+                <p className="text-[10px] text-zinc-400">koszt za uzyte minuty (elastyczny cennik)</p>
               </div>
               <div className="border-t border-zinc-100 pt-2">
-                <p className="text-xs text-zinc-400">Koszt polaczen</p>
-                <p className="text-lg font-bold text-red-500">{stats?.totalCost || "0.00"} zl</p>
+                <p className="text-xs text-zinc-400">Rozmowy (7 dni)</p>
+                <p className="text-lg font-bold text-zinc-900">{stats?.totalCalls || 0}</p>
               </div>
             </div>
           </div>
@@ -256,7 +254,7 @@ export default function AdminDashboard() {
           <h3 className="text-sm font-semibold text-zinc-900 mb-3">Stan firm</h3>
           <div className="space-y-3">
             {[
-              { label: "Aktywne / Trial", count: stats?.activeSubscriptions || 0, color: "bg-brand-400" },
+              { label: "Aktywne / Trial", count: stats?.activeSubscriptions || 0, color: "bg-[#0d9488]" },
               { label: "Zawieszone", count: stats?.suspendedCount || 0, color: "bg-amber-400" },
               { label: "Zalegle platnosci", count: pastDueBusinesses, color: "bg-red-400" },
               { label: "Bez subskrypcji", count: Math.max(0, (stats?.totalBusinesses || 0) - (stats?.activeSubscriptions || 0) - (stats?.suspendedCount || 0)), color: "bg-brand-200" },
@@ -265,7 +263,7 @@ export default function AdminDashboard() {
               const pct = (item.count / total) * 100;
               return (
                 <div key={item.label} className="flex items-center gap-3">
-                  <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: item.color === "bg-brand-400" ? "#3CBF4A" : item.color === "bg-amber-400" ? "#F59E0B" : item.color === "bg-red-400" ? "#EF4444" : "#D4D4D8" }} />
+                  <div className="w-1 h-8 rounded-full shrink-0" style={{ backgroundColor: item.color === "bg-[#0d9488]" ? "#0d9488" : item.color === "bg-amber-400" ? "#F59E0B" : item.color === "bg-red-400" ? "#EF4444" : "#D4D4D8" }} />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-zinc-700">{item.label}</span>
@@ -288,7 +286,7 @@ export default function AdminDashboard() {
             {[
               { label: "Nowe", count: newLeads, color: "text-violet-600", bg: "bg-violet-100" },
               { label: "W kontakcie", count: leads.filter((l) => l.status === "processed").length, color: "text-blue-600", bg: "bg-blue-100" },
-              { label: "Aktywne (firmy)", count: leads.filter((l) => l.status === "active").length, color: "text-brand-600", bg: "bg-brand-100" },
+              { label: "Aktywne (firmy)", count: leads.filter((l) => l.status === "active").length, color: "text-[#0d9488]", bg: "bg-brand-100" },
               { label: "Kosz", count: leads.filter((l) => l.status === "trashed").length, color: "text-zinc-600", bg: "bg-brand-50" },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between">

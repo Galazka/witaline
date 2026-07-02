@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getActiveCallSids } from "@/lib/active-call-store";
-
-const WITALINE_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +9,7 @@ export async function POST(request: Request) {
     const callerId = body?.caller_id || "";
     const calledNumber = body?.called_number || "";
     const agentNumber = body?.phone_number?.agent_number || "";
-    let businessId = WITALINE_BUSINESS_ID;
+    let businessId = WITALINE_MAIN_BUSINESS_ID;
     let customVoiceId: string | null = null;
 
     // Look up business by agent number (Twilio number or ported number)
@@ -102,7 +101,7 @@ export async function POST(request: Request) {
       {
         type: "conversation_initiation_client_data",
         dynamic_variables: {
-          businessId: WITALINE_BUSINESS_ID,
+          businessId: WITALINE_MAIN_BUSINESS_ID,
           caller_number: "",
           called_number: "",
           agent_number: "",

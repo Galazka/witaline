@@ -50,7 +50,7 @@ export default function NotificationsPanel({ businessId }: { businessId: string 
           setUnreadCount(data.notifications.filter((n: Notification) => !n.is_read).length);
         }
       })
-      .catch(() => {});
+      .catch((e) => console.error("[NotificationsPanel] fetch error:", e));
   }, [businessId]);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function NotificationsPanel({ businessId }: { businessId: string 
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700 shrink-0">
             <h3 className="text-sm font-semibold text-zinc-200">Powiadomienia</h3>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs text-brand-400 hover:text-brand-300">
+              <button onClick={markAllRead} className="text-xs text-[#0d9488] hover:text-[#0d9488]">
                 Oznacz wszystkie jako przeczytane
               </button>
             )}
@@ -133,7 +133,7 @@ export default function NotificationsPanel({ businessId }: { businessId: string 
                       <p className="text-[10px] text-zinc-500 mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                     {!n.is_read && (
-                      <span className="w-2 h-2 bg-brand-400 rounded-full shrink-0 mt-1.5" />
+                      <span className="w-2 h-2 bg-[#0d9488] rounded-full shrink-0 mt-1.5" />
                     )}
                   </div>
                 </button>

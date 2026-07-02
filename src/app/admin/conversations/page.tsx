@@ -46,7 +46,7 @@ export default function AdminConversations() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-brand-600 mb-6">Historia rozmów telefonicznych</h1>
+      <h1 className="text-2xl font-bold text-[#0d9488] mb-6">Historia rozmów telefonicznych</h1>
       <div className="space-y-3">
         {conversations.map((c) => (
           <a

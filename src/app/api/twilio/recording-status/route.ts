@@ -50,6 +50,7 @@ export async function POST(request: Request) {
   const { data: existing } = await supabaseAdmin
     .from("call_logs")
     .select("id, business_id")
+    .is("deleted_at", null)
     .eq("twilio_call_sid", callSid)
     .maybeSingle();
 

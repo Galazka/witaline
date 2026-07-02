@@ -101,7 +101,7 @@ export default function PhoneSettings({ businessId, currentNumber, onNumberChang
       </div>
 
       {message && (
-        <div className={`px-4 py-3 rounded-lg text-sm ${message.includes("Błąd") || message.includes("błąd") ? "bg-red-50 text-red-600" : "bg-brand-50 text-brand-600"}`}>
+        <div className={`px-4 py-3 rounded-lg text-sm ${message.includes("Błąd") || message.includes("błąd") ? "bg-red-50 text-red-600" : "bg-[#f0fdfa] text-[#0d9488]"}`}>
           {message}
         </div>
       )}
@@ -112,7 +112,7 @@ export default function PhoneSettings({ businessId, currentNumber, onNumberChang
         {currentNumber ? (
           <div className="flex items-center gap-3">
             <span className="text-xl font-bold text-zinc-900 font-mono">{currentNumber}</span>
-            <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-600">
+            <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#ccfbf1] text-[#0d9488]">
               Aktywny
             </span>
           </div>
@@ -154,7 +154,7 @@ export default function PhoneSettings({ businessId, currentNumber, onNumberChang
               <button
                 onClick={handleSearch}
                 disabled={searching}
-                className="px-5 py-2.5 bg-brand-400 text-white rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+                className="px-5 py-2.5 bg-[#0d9488] text-white rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
               >
                 {searching ? "Szukam..." : "Szukaj"}
               </button>
@@ -168,7 +168,7 @@ export default function PhoneSettings({ businessId, currentNumber, onNumberChang
               </div>
               <div className="divide-y divide-zinc-100">
                 {searchResults.map((num) => (
-                  <div key={num.phoneNumber} className="px-4 py-3 flex items-center justify-between hover:bg-brand-50 transition">
+                  <div key={num.phoneNumber} className="px-4 py-3 flex items-center justify-between hover:bg-[#f0fdfa] transition">
                     <div>
                       <p className="font-mono font-semibold text-zinc-900">{num.phoneNumber}</p>
                       <p className="text-xs text-zinc-400 mt-0.5">
@@ -178,7 +178,7 @@ export default function PhoneSettings({ businessId, currentNumber, onNumberChang
                     <button
                       onClick={() => handlePurchase(num.phoneNumber)}
                       disabled={purchasing}
-                      className="px-4 py-2 bg-brand-400 text-white rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+                      className="px-4 py-2 bg-[#0d9488] text-white rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
                     >
                       {purchasing ? "Kupowanie..." : "Przypisz"}
                     </button>
@@ -226,7 +226,7 @@ export default function PhoneSettings({ businessId, currentNumber, onNumberChang
             <button
               onClick={handlePortSubmit}
               disabled={!portNumber || !portName || portSaving}
-              className="w-full bg-brand-400 text-white py-2.5 rounded-lg font-medium hover:bg-brand-500 transition disabled:opacity-50"
+              className="w-full bg-[#0d9488] text-white py-2.5 rounded-lg font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {portSaving ? "Wysyłanie..." : "Wyślij zgłoszenie przeniesienia"}
             </button>

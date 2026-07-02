@@ -30,7 +30,7 @@ export default function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors font-medium px-2 py-1.5 rounded-lg hover:bg-brand-50"
+        className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors font-medium px-2 py-1.5 rounded-lg hover:bg-[#f0fdfa]"
       >
         <span className="text-base">{current.flag}</span>
         <svg className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -43,7 +43,7 @@ export default function LanguageSwitcher() {
               <button
                 key={lang.code}
                 onClick={() => switchLang(lang.code)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${locale === lang.code ? "bg-brand-50 text-brand-600 font-medium" : "text-zinc-500 hover:bg-brand-50"}`}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${locale === lang.code ? "bg-[#f0fdfa] text-[#0d9488] font-medium" : "text-zinc-500 hover:bg-[#f0fdfa]"}`}
               >
                 <span className="text-base">{lang.flag}</span>
                 {lang.label}

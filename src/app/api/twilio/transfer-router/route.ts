@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { getPendingTransfer, deletePendingTransfer } from "@/lib/transfer-store";
-import { escapeXml, dialConsultantToQueue } from "@/lib/twilio-utils";
+import { getPendingTransfer, deletePendingTransfer, findPendingTransferByBusinessId } from "@/lib/transfer-store";
+import { escapeXml } from "@/lib/twilio-utils";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -20,16 +21,28 @@ function getBaseUrl(request: Request): string {
 export async function POST(request: Request) {
   const url = new URL(request.url);
   const callSid = url.searchParams.get("callSid") || "";
-  const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
+  const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
+  const fromNumber = url.searchParams.get("fromNumber") || "";
+  const toNumber = url.searchParams.get("toNumber") || "";
 
   console.log("[transfer-router] Stream ended, callSid:", callSid, "businessId:", businessId);
 
-  let pending = await getPendingTransfer(businessId) || await getPendingTransfer(callSid);
+  // Szukaj pending transfer: najpierw po businessId (call_sid kolumna), potem po callSid, potem po business_id w tabeli
+  let pending = await getPendingTransfer(businessId);
+  if (!pending) pending = await getPendingTransfer(callSid);
+  if (!pending) {
+    const byBiz = await findPendingTransferByBusinessId(businessId);
+    if (byBiz) pending = byBiz.data;
+  }
+  if (!pending) {
+    const byMainBiz = await findPendingTransferByBusinessId(WITALINE_MAIN_BUSINESS_ID);
+    if (byMainBiz) pending = byMainBiz.data;
+  }
+
+  console.log("[transfer-router] pending found:", !!pending);
 
   if (pending) {
-    console.log("[transfer-router] pending transfer found →", pending.targetNumber);
-    await deletePendingTransfer(businessId);
-    await deletePendingTransfer(callSid);
+    await deletePendingTransfer(businessId).catch(e => console.error("[transfer-router] deletePendingTransfer error:", e));
 
     const { data: consultants } = await supabaseAdmin
       .from("business_consultants")
@@ -39,26 +52,25 @@ export async function POST(request: Request) {
 
     const callerId = pending.callerId || process.env.TWILIO_PHONE_NUMBER || "";
     const baseUrl = getBaseUrl(request).replace(/\/+$/, "");
-    const consultantPhone = (consultants && consultants.length > 0) ? consultants[0].phone : pending.targetNumber;
-    const queueName = `handoff_${callSid || "fallback"}`;
-    const holdMusicUrl = process.env.HOLD_MUSIC_URL || "https://cdn.witaline.app/hold-music.mp3";
+
+    // Czy firma ma prawdziwych konsultantów? Użyj ich numeru jeśli tak, w przeciwnym razie użyj target z pending (WitaLine centrala)
+    const hasRealConsultants = consultants && consultants.length > 0;
+    const targetPhone = hasRealConsultants ? consultants[0].phone : pending.targetNumber;
+
+    // Dial consultant directly from caller's leg - simple, no race conditions
     const actionUrl = `${baseUrl}/api/twilio/human-handoff/next?businessId=${encodeURIComponent(pending.businessId)}&callSid=${encodeURIComponent(callSid)}`;
+    const fallbackUrl = `${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`;
 
-    // Caller enters queue with hold music — consultant dialed in parallel via REST API
     const responseTwiml = twiml(`
-<Enqueue waitUrl="${escapeXml(holdMusicUrl)}" action="${escapeXml(actionUrl)}" method="POST">
-  ${escapeXml(queueName)}
-</Enqueue>
-<Redirect method="POST">${escapeXml(`${baseUrl}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(pending.businessId)}`)}</Redirect>
-`);
-
-    // Fire-and-forget: dial consultant to queue
-    dialConsultantToQueue(consultantPhone, callerId, queueName, baseUrl, pending.businessId, callSid)
-      .catch(err => console.error("[transfer-router] dial consultant failed:", err));
+<Say language="pl-PL">Proszę pozostać na linii, łączę z konsultantem.</Say>
+<Dial callerId="${escapeXml(callerId)}" timeout="15" action="${escapeXml(actionUrl)}" method="POST" record="record-from-answer">
+  <Number>${escapeXml(targetPhone)}</Number>
+</Dial>
+<Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect>`);
 
     return responseTwiml;
   }
 
-  console.log("[transfer-router] no pending transfer, hanging up");
-  return twiml("<Hangup/>");
+  console.log("[transfer-router] no pending transfer, hanging up", "businessId:", businessId, "callSid:", callSid);
+  return twiml(`<Say language="pl-PL">Przepraszamy, wystąpił problem z przekazaniem rozmowy. Dziękujemy.</Say><Hangup/>`);
 }

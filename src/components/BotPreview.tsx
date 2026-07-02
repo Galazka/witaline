@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { templates } from "@/lib/templates";
+import { WITALINE_CONTACT_EMAIL } from "@/lib/constants";
 
 interface Message {
   role: "bot" | "user";
@@ -38,7 +39,7 @@ WitaLine to polska platforma automatycznej recepcji AI dla firm.
 4. Bot od razu odbiera telefony, widget gotowy
 
 ## Kontakt
-Strona: witaline.pl | Email: kontakt@witaline.pl`;
+Strona: witaline.pl | Email: ${WITALINE_CONTACT_EMAIL}`;
 
 function getIndustryLabel(industry: string): string {
   const labels: Record<string, string> = {
@@ -183,14 +184,14 @@ Jesteś asystentem WitaLine. Odpowiadaj po polsku, naturalnie. Jeśli klient pyt
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 shadow-lg overflow-hidden flex flex-col h-[520px]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-brand-400 to-brand-500 px-5 py-4 flex items-center gap-3">
+      <div className="bg-gradient-to-r from-[#0d9488] to-[#0f766e] px-5 py-4 flex items-center gap-3">
         <div className="relative">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-brand-400" />
+          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-[#0d9488]" />
         </div>
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-white">Asystent AI</h3>
@@ -204,9 +205,9 @@ Jesteś asystentem WitaLine. Odpowiadaj po polsku, naturalnie. Jeśli klient pyt
         {!isLoaded && (
           <div className="flex justify-center py-8">
             <div className="flex gap-1.5">
-              <span className="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="w-2 h-2 bg-[#0d9488] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-2 h-2 bg-[#0d9488] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 bg-[#0d9488] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
           </div>
         )}
@@ -215,14 +216,14 @@ Jesteś asystentem WitaLine. Odpowiadaj po polsku, naturalnie. Jeśli klient pyt
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "bot" && (
               <div className="w-7 h-7 bg-brand-100 rounded-full flex items-center justify-center mr-2 mt-1 shrink-0">
-                <svg className="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
               </div>
             )}
             <div className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
               msg.role === "user"
-                ? "bg-brand-400 text-white rounded-2xl rounded-br-md shadow-sm"
+                ? "bg-[#0d9488] text-white rounded-2xl rounded-br-md shadow-sm"
                 : "bg-white text-zinc-800 rounded-2xl rounded-bl-md border border-zinc-100 shadow-sm"
             }`}>
               {msg.text}
@@ -233,7 +234,7 @@ Jesteś asystentem WitaLine. Odpowiadaj po polsku, naturalnie. Jeśli klient pyt
         {isTyping && (
           <div className="flex justify-start">
             <div className="w-7 h-7 bg-brand-100 rounded-full flex items-center justify-center mr-2 mt-1 shrink-0">
-              <svg className="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
@@ -255,7 +256,7 @@ Jesteś asystentem WitaLine. Odpowiadaj po polsku, naturalnie. Jeśli klient pyt
             <button
               key={i}
               onClick={() => handleSend(s)}
-              className="text-xs px-3 py-1.5 bg-white text-brand-600 rounded-full hover:bg-brand-50 transition border border-brand-200 shadow-sm"
+              className="text-xs px-3 py-1.5 bg-white text-[#0d9488] rounded-full hover:bg-[#f0fdfa] transition border border-[#0d9488]/20 shadow-sm"
             >
               {s}
             </button>
@@ -277,12 +278,12 @@ Jesteś asystentem WitaLine. Odpowiadaj po polsku, naturalnie. Jeśli klient pyt
               }
             }}
             placeholder="Napisz wiadomość..."
-            className="flex-1 px-4 py-2.5 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-400 transition"
+            className="flex-1 px-4 py-2.5 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] transition"
           />
           <button
             onClick={() => handleSend(inputValue)}
             disabled={!inputValue.trim() || isTyping}
-            className="w-10 h-10 bg-brand-400 text-white rounded-full flex items-center justify-center hover:bg-brand-500 transition disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+            className="w-10 h-10 bg-[#0d9488] text-white rounded-full flex items-center justify-center hover:bg-[#0f766e] transition disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

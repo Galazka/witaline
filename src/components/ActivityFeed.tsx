@@ -29,7 +29,7 @@ const TYPE_COLORS: Record<string, string> = {
   lead: "bg-yellow-500",
   booking: "bg-purple-500",
   feedback: "bg-green-500",
-  system: "bg-white",
+  system: "bg-white dark:bg-brand-900",
   sms: "bg-pink-500",
 };
 
@@ -119,59 +119,59 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
 
   if (loading) {
     return (
-      <div className="bg-white/55 backdrop-blur-xl border border-white/20 rounded-xl p-5 text-center text-sm text-zinc-500">
+      <div className="bg-white dark:bg-brand-900/55 backdrop-blur-xl border border-white/20 rounded-xl p-5 text-center text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
         Ładowanie aktywności...
       </div>
     );
   }
 
   return (
-    <div className="bg-white/55 backdrop-blur-xl border border-white/20 rounded-xl">
+    <div className="bg-white dark:bg-brand-900/55 backdrop-blur-xl border border-white/20 rounded-xl">
       {/* Header with date filter */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-brand-700">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-zinc-900">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Ostatnia aktywność
           </h3>
           {unreadCount > 0 && (
-            <span className="text-[10px] font-medium text-brand-400 bg-brand-400/10 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-medium text-[#0d9488] bg-[#0d9488]/10 px-1.5 py-0.5 rounded-full">
               {unreadCount} nowe
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
           {/* Date filter pills */}
-          <div className="flex gap-1 bg-zinc-100 rounded-lg p-0.5">
+          <div className="flex gap-1 bg-zinc-100 dark:bg-brand-800 rounded-lg p-0.5">
             {(["7d", "30d", "all"] as DateFilter[]).map((f) => (
-              <button key={f} onClick={() => setDateFilter(f)} className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${dateFilter === f ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}>
+              <button key={f} onClick={() => setDateFilter(f)} className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${dateFilter === f ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300"}`}>
                 {f === "7d" ? "7 dni" : f === "30d" ? "30 dni" : "Wszystkie"}
               </button>
             ))}
-            <button onClick={() => setDateFilter("custom")} className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${dateFilter === "custom" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}>
+            <button onClick={() => setDateFilter("custom")} className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${dateFilter === "custom" ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300"}`}>
               Zakres
             </button>
           </div>
           {unreadCount > 0 && (
-            <button onClick={markAllRead} className="text-xs text-brand-400 hover:text-brand-300 transition">Oznacz wszystkie jako przeczytane</button>
+            <button onClick={markAllRead} className="text-xs text-[#0d9488] hover:text-[#0d9488] transition">Oznacz wszystkie jako przeczytane</button>
           )}
         </div>
       </div>
 
       {/* Custom date range */}
       {dateFilter === "custom" && (
-        <div className="flex items-center gap-2 px-5 py-2 border-b border-zinc-200 bg-zinc-50">
-          <label className="text-[10px] text-zinc-500">Od:</label>
-          <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="px-2 py-1 text-xs border border-zinc-200 rounded bg-white" />
-          <label className="text-[10px] text-zinc-500">Do:</label>
-          <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="px-2 py-1 text-xs border border-zinc-200 rounded bg-white" />
+        <div className="flex items-center gap-2 px-5 py-2 border-b border-zinc-200 dark:border-brand-700 bg-zinc-50 dark:bg-brand-800">
+          <label className="text-[10px] text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Od:</label>
+          <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="px-2 py-1 text-xs border border-zinc-200 dark:border-brand-700 rounded bg-white dark:bg-brand-900" />
+          <label className="text-[10px] text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Do:</label>
+          <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="px-2 py-1 text-xs border border-zinc-200 dark:border-brand-700 rounded bg-white dark:bg-brand-900" />
         </div>
       )}
 
       <div className="relative">
-        <div className="absolute left-[23px] top-0 bottom-0 w-px bg-zinc-200" />
+        <div className="absolute left-[23px] top-0 bottom-0 w-px bg-zinc-200 dark:bg-brand-700" />
 
         {visible.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-zinc-500">
+          <div className="px-5 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
             Brak aktywności
           </div>
         ) : (
@@ -183,24 +183,24 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
                   key={activity.id}
                   onClick={() => { if (isUnread) markRead(activity.id); }}
                   className={`w-full text-left flex items-start gap-3 px-5 py-3.5 transition ${
-                    isUnread ? "hover:bg-white/[0.03]" : "opacity-60 hover:opacity-80"
+                    isUnread ? "hover:bg-white dark:bg-brand-900/[0.03]" : "opacity-60 hover:opacity-80"
                   }`}
                 >
                   <div className="relative shrink-0 mt-0.5">
-                    <span className={`inline-flex items-center justify-center w-[14px] h-[14px] rounded-full ${TYPE_COLORS[activity.type] || "bg-white"} ring-4 ring-zinc-800/50`} />
+                    <span className={`inline-flex items-center justify-center w-[14px] h-[14px] rounded-full ${TYPE_COLORS[activity.type] || "bg-white dark:bg-brand-900"} ring-4 ring-zinc-800/50`} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="text-sm font-medium text-zinc-900 truncate">
+                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {TYPE_ICONS[activity.type] || "🔔"} {activity.title}
                       </span>
-                      <span className="text-[10px] text-zinc-500 shrink-0 whitespace-nowrap">
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 shrink-0 whitespace-nowrap">
                         {formatTimeAgo(activity.created_at)}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400 mt-0.5 line-clamp-2">{activity.message}</p>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 line-clamp-2">{activity.message}</p>
                   </div>
-                  {isUnread && <span className="w-1.5 h-1.5 bg-brand-400 rounded-full shrink-0 mt-2" />}
+                  {isUnread && <span className="w-1.5 h-1.5 bg-[#0d9488] rounded-full shrink-0 mt-2" />}
                 </button>
               );
             })}
@@ -209,8 +209,8 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
       </div>
 
       {hasMore && (
-        <div className="px-5 py-3 border-t border-zinc-200 text-center">
-          <button onClick={() => setVisibleCount((c) => c + 10)} className="text-xs text-zinc-500 hover:text-zinc-700 transition">
+        <div className="px-5 py-3 border-t border-zinc-200 dark:border-brand-700 text-center">
+          <button onClick={() => setVisibleCount((c) => c + 10)} className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 transition">
             Pokaż więcej ({activities.length - visibleCount} pozostało)
           </button>
         </div>

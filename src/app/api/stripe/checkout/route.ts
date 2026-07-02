@@ -30,8 +30,9 @@ export async function POST(request: Request) {
   const customerId = business.stripe_customer_id || undefined;
   const stripe = getStripe();
 
-  const paymentTypes: Array<"card" | "blik" | "p24"> = cur === "pln"
-    ? ["card", "blik", "p24"]
+  // BLIK only works with mode: "payment" — exclude from subscriptions
+  const paymentTypes: Array<"card" | "p24"> = cur === "pln"
+    ? ["card", "p24"]
     : ["card"];
 
   // Enterprise — multiple line items (subscription + setup fee)

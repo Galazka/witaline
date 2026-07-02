@@ -29,7 +29,7 @@ export default function AdminWebhookLogs() {
     fetch("/api/admin/webhook-logs?" + params)
       .then(r => r.json())
       .then(d => { setLogs(d.logs || []); setTotal(d.total || 0); })
-      .catch(() => {})
+      .catch((e) => console.error("[AdminWebhookLogs] fetch error:", e))
       .finally(() => setLoading(false));
   }, [page, filterStatus]);
 
@@ -43,7 +43,7 @@ export default function AdminWebhookLogs() {
         <span className="text-xs text-zinc-500">Status:</span>
         {["all", "success", "error"].map(s => (
           <button key={s} onClick={() => { setFilterStatus(s); setPage(0); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${filterStatus === s ? "bg-brand-400 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${filterStatus === s ? "bg-[#0d9488] text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
             {s === "all" ? "Wszystkie" : s === "success" ? "OK" : "Błędy"}
           </button>
         ))}

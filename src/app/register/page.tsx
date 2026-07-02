@@ -71,6 +71,7 @@ export default function RegisterPage() {
   const [industry, setIndustry] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [phone, setPhone] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [policy, setPolicy] = useState(false);
   const [scanning, setScanning] = useState(false);
 
@@ -95,6 +96,12 @@ export default function RegisterPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, sess) => setSession(!!sess));
     return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
+
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setReferralCode(ref);
+  }, [searchParams]);
 
   async function validateCouponCode() {
     if (!couponCode.trim()) { setCouponError(""); setCouponDiscount(null); setFinalPrice(null); return; }
@@ -133,7 +140,7 @@ export default function RegisterPage() {
     const scanData = await scanRes.json();
     const prompt = scanData.systemPrompt || templatePrompt;
     setScanning(false);
-    const res = await fetch("/api/onboarding/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: businessName, plan: modelToPlan[selectedPlan] || "elastic_0", systemPrompt: prompt, menuCatalog: {}, websiteUrl, phone, industry, templateId: industry !== "custom" ? industry : undefined, services: tpl?.services, calendarSettings: tpl?.calendar }) });
+    const res = await fetch("/api/onboarding/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: businessName, plan: modelToPlan[selectedPlan] || "elastic_0", systemPrompt: prompt, menuCatalog: {}, websiteUrl, phone, industry, templateId: industry !== "custom" ? industry : undefined, services: tpl?.services, calendarSettings: tpl?.calendar, referralCode: referralCode || null }) });
     if (!res.ok) { const d = await res.json(); setError(d.error || "Blad"); setSaving(false); return; }
     const result = await res.json(); setExtension(result.extension); setDone(true); setSaving(false);
   }
@@ -143,7 +150,7 @@ export default function RegisterPage() {
 if (done) return (
   <div className="flex-1 flex items-center justify-center p-4 min-h-screen bg-gradient-to-br from-brand-950 via-brand-900 to-brand-950">
     <div className="max-w-md text-center space-y-6 animate-fade-in-up">
-      <div className="w-20 h-20 bg-brand-400/20 rounded-full flex items-center justify-center mx-auto">
+      <div className="w-20 h-20 bg-[#0d9488]/20 rounded-full flex items-center justify-center mx-auto">
         <svg className="w-10 h-10 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
       </div>
       <h2 className="text-2xl md:text-3xl font-bold text-white font-display">Konto aktywne!</h2>
@@ -237,12 +244,12 @@ if (done) return (
           {/* STEP 1: Konto */}
           {step === 1 && (
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 mb-5">Dane do logowania</h2>
+              <h2 className="text-lg font-semibold text-white mb-5">Dane do logowania</h2>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="twoj@email.pl" className={inputClass} /></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="twoj@email.pl" className={inputClass} /></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Haslo</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 znakow" className={inputClass} /></div>
-                  <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Powtorz haslo</label><input type="password" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} placeholder="Wpisz ponownie" className={inputClass} />{password && passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-500 mt-1">Hasla nie sa identyczne</p>}</div>
+                  <div><label className="block text-sm font-medium text-white/80 mb-1.5">Haslo</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 znakow" className={inputClass} /></div>
+                  <div><label className="block text-sm font-medium text-white/80 mb-1.5">Powtorz haslo</label><input type="password" value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} placeholder="Wpisz ponownie" className={inputClass} />{password && passwordConfirm && password !== passwordConfirm && <p className="text-xs text-red-400 mt-1">Hasla nie sa identyczne</p>}</div>
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
@@ -255,11 +262,11 @@ if (done) return (
           {/* STEP 2: Firma */}
           {step === 2 && (
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 mb-5">Dane firmy</h2>
+              <h2 className="text-lg font-semibold text-white mb-5">Dane firmy</h2>
               <div className="space-y-4">
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Nazwa firmy <span className="text-red-400">*</span></label><input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="np. Pizzeria Napoli" className={inputClass} /></div>
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Strona www</label><input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://twojafirma.pl" className={inputClass} /><p className="text-xs text-zinc-400 mt-1">AI zeskanuje ja, by poznac Twoja oferte</p></div>
-                <div><label className="block text-sm font-medium text-zinc-700 mb-1.5">Telefon firmowy</label><input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+48 123 456 789" className={inputClass} /></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Nazwa firmy <span className="text-red-400">*</span></label><input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="np. Pizzeria Napoli" className={inputClass} /></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Strona www</label><input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://twojafirma.pl" className={inputClass} /><p className="text-xs text-white/50 mt-1">AI zeskanuje ja, by poznac Twoja oferte</p></div>
+                <div><label className="block text-sm font-medium text-white/80 mb-1.5">Telefon firmowy</label><input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+48 123 456 789" className={inputClass} /></div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button onClick={() => setStep(1)} className={`flex-1 ${btnSecondary}`}>← Wstecz</button>
@@ -271,21 +278,21 @@ if (done) return (
           {/* STEP 3: Branza */}
           {step === 3 && (
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 mb-2">Wybierz branze</h2>
-              <p className="text-sm text-zinc-500 mb-5">Dzieki temu skonfigurujemy asystenta pod Twoje potrzeby</p>
+              <h2 className="text-lg font-semibold text-white mb-2">Wybierz branze</h2>
+              <p className="text-sm text-white/60 mb-5">Dzieki temu skonfigurujemy asystenta pod Twoje potrzeby</p>
               <div className="grid grid-cols-3 gap-2.5 mb-5">
                 {Object.entries(templates).map(([key, tpl]) => (
-                  <button key={key} onClick={() => setIndustry(key)} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === key ? "border-brand-500 bg-brand-50" : "border-zinc-200 hover:border-brand-200"}`}>
+                  <button key={key} onClick={() => setIndustry(key)} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === key ? "border-brand-500 bg-brand-500/20" : "border-white/15 hover:border-brand-300 bg-white/5"}`}>
                     <span className="text-2xl">{tpl.icon}</span>
-                    <p className="text-xs font-medium text-zinc-900 mt-1 leading-tight">{tpl.name}</p>
+                    <p className="text-xs font-medium text-white mt-1 leading-tight">{tpl.name}</p>
                   </button>
                 ))}
-                <button onClick={() => setIndustry("custom")} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === "custom" ? "border-brand-500 bg-brand-50" : "border-zinc-200 hover:border-brand-200"}`}>
+                <button onClick={() => setIndustry("custom")} className={`text-center rounded-2xl border-2 p-3 transition-all hover:shadow-md ${industry === "custom" ? "border-brand-500 bg-brand-500/20" : "border-white/15 hover:border-brand-300 bg-white/5"}`}>
                   <span className="text-2xl">✏️</span>
-                  <p className="text-xs font-medium text-zinc-900 mt-1">Inna</p>
+                  <p className="text-xs font-medium text-white mt-1">Inna</p>
                 </button>
               </div>
-              <label className="flex items-start gap-2 text-sm text-zinc-600 mb-6 cursor-pointer">
+              <label className="flex items-start gap-2 text-sm text-white/70 mb-6 cursor-pointer">
                 <input type="checkbox" checked={policy} onChange={e => setPolicy(e.target.checked)} className="mt-0.5 accent-brand-400" />
                 <span>Akceptuje <Link href="/regulamin" className="text-brand-400 underline">regulamin</Link> i <Link href="/polityka-prywatnosci" className="text-brand-400 underline">polityke prywatnosci</Link></span>
               </label>

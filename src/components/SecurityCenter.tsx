@@ -94,7 +94,7 @@ export default function SecurityCenter({ businessId }: { businessId: string }) {
       </div>
 
       {toast && (
-        <div className="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-xl text-sm">
+        <div className="bg-brand-50 border border-[#0d9488]/20 text-brand-700 px-4 py-3 rounded-xl text-sm">
           {toast}
         </div>
       )}
@@ -104,7 +104,7 @@ export default function SecurityCenter({ businessId }: { businessId: string }) {
         <div className="bg-white border border-zinc-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-500 flex items-center justify-center font-bold text-sm">
+              <div className="w-10 h-10 rounded-full bg-brand-100 text-[#0d9488] flex items-center justify-center font-bold text-sm">
                 {owner.email.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -112,7 +112,7 @@ export default function SecurityCenter({ businessId }: { businessId: string }) {
                 <p className="text-xs text-zinc-400">Właściciel firmy • pełny dostęp</p>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-medium">
+            <span className="px-2.5 py-1 rounded-full bg-[#ccfbf1] text-[#065f46] text-xs font-medium">
               Admin
             </span>
           </div>
@@ -143,7 +143,7 @@ export default function SecurityCenter({ businessId }: { businessId: string }) {
                   <select
                     value={m.role}
                     onChange={(e) => handleChangeRole(m.id, e.target.value, e as any)}
-                    className="text-xs px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+                    className="text-xs px-2 py-1.5 border border-zinc-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
                   >
                     {Object.entries(roleLabels).map(([key, label]) => (
                       <option key={key} value={key}>{label}</option>
@@ -173,12 +173,12 @@ export default function SecurityCenter({ businessId }: { businessId: string }) {
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
             placeholder="email@pracownika.pl"
-            className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
           />
           <select
             value={inviteRole}
             onChange={e => setInviteRole(e.target.value)}
-            className="px-3 py-2 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="px-3 py-2 border border-zinc-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
           >
             <option value="manager">Menedżer</option>
             <option value="receptionist">Recepcjonista</option>
@@ -187,7 +187,7 @@ export default function SecurityCenter({ businessId }: { businessId: string }) {
           <button
             onClick={handleInvite}
             disabled={inviting || !inviteEmail}
-            className="bg-brand-400 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+            className="bg-[#0d9488] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
           >
             {inviting ? "..." : "Dodaj"}
           </button>

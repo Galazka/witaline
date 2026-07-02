@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, t
 import { createClient } from "@/lib/supabase";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
+import MobileBottomNav from "./MobileBottomNav";
 import {
   IconHome, IconBuilding, IconUsers, IconChart, IconMessage,
   IconPhone, IconDollar, IconMail, IconShield, IconLock,
@@ -14,9 +15,9 @@ import type { Session } from "@supabase/supabase-js";
 
 type AdminTab =
   | "dashboard" | "leads" | "businesses" | "witaline" | "messages"
-  | "feedback" | "conversations" | "voice"
+  | "feedback" | "conversations" | "live-chat" | "voice"
   | "coupons" | "callbacks" | "sms" | "blocklist"
-  | "security" | "costs" | "porty" | "webhooks"
+  | "security" | "costs" | "porty" | "webhooks" | "email" | "agents" | "verifications" | "support"
   // Deprecated but still handled in admin page (redirect to relevant tabs)
   | "statystyki" | "kalkulator" | "rodo" | "routing" | "numery" | "pricing";
 
@@ -45,6 +46,7 @@ const sidebarItems = (leadCount: number) => [
     children: [
       { key: "messages" as AdminTab, label: "Wiadomości", icon: <IconMail className="w-4 h-4" /> },
       { key: "conversations" as AdminTab, label: "Rozmowy", icon: <IconMessageSquare className="w-4 h-4" /> },
+      { key: "live-chat" as AdminTab, label: "Czaty na żywo", icon: <IconMessage className="w-4 h-4" /> },
       { key: "webhooks" as AdminTab, label: "Webhooki", icon: <IconMessageSquare className="w-4 h-4" /> },
       { key: "sms" as AdminTab, label: "SMS", icon: <IconMessage className="w-4 h-4" /> },
       { key: "feedback" as AdminTab, label: "Opinie", icon: <IconStar className="w-4 h-4" /> },
@@ -65,6 +67,10 @@ const sidebarItems = (leadCount: number) => [
       { key: "blocklist" as AdminTab, label: "Blokady", icon: <IconBan className="w-4 h-4" /> },
       { key: "callbacks" as AdminTab, label: "Callbacki", icon: <IconPhone className="w-4 h-4" /> },
       { key: "porty" as AdminTab, label: "Porty", icon: <IconPhoneForward className="w-4 h-4" /> },
+      { key: "email" as AdminTab, label: "Emails", icon: <IconMail className="w-4 h-4" /> },
+      { key: "agents" as AdminTab, label: "Agenci support", icon: <IconUsers className="w-4 h-4" /> },
+      { key: "verifications" as AdminTab, label: "Weryfikacje", icon: <IconLock className="w-4 h-4" /> },
+      { key: "support" as AdminTab, label: "Panel support", icon: <IconMessageSquare className="w-4 h-4" />, href: "/support" },
     ],
   },
   { key: "voice" as AdminTab, label: "Voice", icon: <IconPhone className="w-5 h-5" /> },
@@ -76,6 +82,24 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   const [data, setData] = useState<{ businesses: Business[]; leads: Lead[] } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
+
+  const [chatUnread, setChatUnread] = useState(0);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("chat-notifications-admin")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: "role=eq.user" },
+        () => { setChatUnread(prev => prev + 1); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (tab === "live-chat") setChatUnread(0);
+  }, [tab]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -92,9 +116,28 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  if (session === "loading") return <div className="flex-1 flex items-center justify-center"><p className="text-zinc-400">Sprawdzanie uprawnień...</p></div>;
+  if (session === "loading") return (
+    <div className="flex-1 flex items-center justify-center bg-[#FAFAF9] dark:bg-brand-950">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-zinc-400 dark:text-zinc-400">Sprawdzanie uprawnień...</p>
+      </div>
+    </div>
+  );
+
   if (!session) {
-    return <div className="flex-1 flex items-center justify-center"><p className="text-zinc-400">Brak dostępu — <a href="/login" className="text-brand-500 hover:underline">Zaloguj się</a></p></div>;
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#FAFAF9] dark:bg-brand-950">
+        <div className="text-center max-w-xs">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-brand-50 dark:bg-brand-900 flex items-center justify-center">
+            <IconShield className="w-6 h-6 text-[#0d9488]" />
+          </div>
+          <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-1">Brak dostępu</h2>
+          <p className="text-sm text-zinc-400 dark:text-zinc-400 mb-4">Zaloguj się, aby uzyskać dostęp do panelu administracyjnego.</p>
+          <a href="/login" className="btn-primary text-sm px-5 py-2.5">Zaloguj się</a>
+        </div>
+      </div>
+    );
   }
 
   const leadCount = data?.leads?.length || 0;
@@ -103,30 +146,23 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
 
   return (
     <AdminTabContext.Provider value={{ tab, setTab, data, refresh: fetchData }}>
-      <div className="flex min-h-screen bg-zinc-50">
-        <div className="hidden lg:block">
-          <Sidebar items={items} activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} />
-        </div>
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
-            <div className="absolute left-0 top-0 h-full">
-              <Sidebar items={items} activeKey={tab} onNavigate={(key) => { setTab(key as AdminTab); setMobileOpen(false); }} />
-            </div>
-          </div>
-        )}
-        <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+      <div className="flex min-h-screen bg-[#FAFAF9] dark:bg-brand-950">
+        <Sidebar items={items} activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <div className="flex-1 flex flex-col min-h-screen lg:ml-64 pb-16 lg:pb-0">
           <TopNav
             title={tab.charAt(0).toUpperCase() + tab.slice(1)}
             onMenuToggle={() => setMobileOpen(!mobileOpen)}
             userEmail={userEmail}
             onLogout={async () => { await supabase.auth.signOut(); window.location.href = "/login"; }}
             notificationContext="admin"
+            chatUnreadCount={chatUnread}
+            onChatClick={() => setTab("live-chat")}
           />
           <main className="flex-1 p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">{children}</div>
+            {children}
           </main>
         </div>
+        <MobileBottomNav activeKey={tab} onNavigate={(key) => setTab(key as AdminTab)} context="admin" />
       </div>
     </AdminTabContext.Provider>
   );

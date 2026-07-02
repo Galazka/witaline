@@ -77,13 +77,13 @@ export default function CalendarEditor({ businessId, initial, onUpdate }: Props)
             <div
               key={key}
               className={`flex items-center gap-4 p-3 rounded-xl border transition ${
-                enabled ? "bg-brand-50 border-brand-200" : "bg-white border-zinc-200"
+                enabled ? "bg-brand-50 border-[#0d9488]/20" : "bg-white border-zinc-200"
               }`}
             >
               <button
                 onClick={() => toggleDay(key)}
                 className={`w-10 h-6 rounded-full transition relative shrink-0 ${
-                  enabled ? "bg-brand-400" : "bg-brand-200"
+                  enabled ? "bg-[#0d9488]" : "bg-brand-200"
                 }`}
               >
                 <span
@@ -105,14 +105,14 @@ export default function CalendarEditor({ businessId, initial, onUpdate }: Props)
                       type="time"
                       value={day?.start || "09:00"}
                       onChange={(e) => setDayTime(key, "start", e.target.value)}
-                      className="px-3 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 transition"
+                      className="px-3 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] transition"
                     />
                     <span className="text-zinc-400 text-sm">—</span>
                     <input
                       type="time"
                       value={day?.end || "17:00"}
                       onChange={(e) => setDayTime(key, "end", e.target.value)}
-                      className="px-3 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 transition"
+                      className="px-3 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] transition"
                     />
                 </div>
               )}
@@ -129,7 +129,7 @@ export default function CalendarEditor({ businessId, initial, onUpdate }: Props)
           <select
             value={settings.buffer_minutes}
             onChange={(e) => setBuffer(Number(e.target.value))}
-            className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 transition"
+            className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] transition"
           >
             <option value={0}>Brak</option>
             <option value={5}>5 min</option>
@@ -145,7 +145,7 @@ export default function CalendarEditor({ businessId, initial, onUpdate }: Props)
           <select
             value={settings.slot_interval}
             onChange={(e) => setInterval(Number(e.target.value))}
-            className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 transition"
+            className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] transition"
           >
             <option value={15}>15 min</option>
             <option value={30}>30 min</option>
@@ -157,7 +157,7 @@ export default function CalendarEditor({ businessId, initial, onUpdate }: Props)
       <button
         onClick={handleSave}
         disabled={saving}
-        className="bg-brand-400 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+        className="bg-[#0d9488] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
       >
         {saving ? "Zapisywanie..." : "Zapisz grafik"}
       </button>

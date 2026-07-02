@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getPlanConfig } from "@/lib/pricing";
 import { twiml, escapeXml } from "@/lib/twilio-utils";
+import { sendSms } from "@/lib/twilio-sms";
+import { sendTrialExpiredEmail, getTrialExpiredSmsText } from "@/lib/email";
+import { WITALINE_MAIN_BUSINESS_ID, WITALINE_PHONE_NUMBER } from "@/lib/constants";
 import type { PlanKey } from "@/types/database";
-
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 function isSpam(addOns: string | null): boolean {
   if (!addOns) return false;
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
   const callerId = formData.get("From") as string;
   const callSid = formData.get("CallSid") as string;
   const addOns = formData.get("AddOns") as string | null;
-  const mainNumber = process.env.TWILIO_PHONE_NUMBER || "+48732125752";
+  const mainNumber = process.env.TWILIO_PHONE_NUMBER || WITALINE_PHONE_NUMBER;
 
   console.log("[incoming] Call received:", { twilioNumber, callerId, callSid, isMain: twilioNumber === mainNumber });
 
@@ -102,9 +103,27 @@ export async function POST(request: Request) {
     );
   }
 
+  // Trial limit check — block if trial expired or minutes exceeded
+  const TRIAL_MAX_MINUTES = 15;
+  if (business.subscription_status === "trialing") {
+    const trialExpired = business.trial_ends_at && new Date(business.trial_ends_at) < new Date();
+    const trialMinutesExceeded = (business.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+    if (trialExpired || trialMinutesExceeded) {
+      sendSms(callerId, getTrialExpiredSmsText(), undefined, business.id).catch(e =>
+        console.error("[incoming] trial-block sms error:", e)
+      );
+      if (business.owner_email) {
+        sendTrialExpiredEmail(business.owner_email, business.name || "Firma").catch(e =>
+          console.error("[incoming] trial-block email error:", e)
+        );
+      }
+      return twiml(`<Say language="pl-PL">Okres probny wygasl. Wyslismy SMS z linkiem do doładowania konta. Dziekujemy.</Say><Hangup/>`);
+    }
+  }
+
   const config = getPlanConfig(business.current_plan as PlanKey);
   if (business.minutes_used_this_week >= config.monthlyVoiceMinutes) {
-    if (business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {
+    if (business.current_plan !== "elastic_0" && business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {
       return twiml(
         `<Say language="pl-PL">Przepraszamy, firma ${escapeXml(business.name)} wyczerpala limit minut na ten tydzien. Prosimy zadzwonic pozniej.</Say><Hangup/>`
       );

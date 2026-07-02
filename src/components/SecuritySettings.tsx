@@ -86,7 +86,7 @@ export default function SecuritySettings({ businessId, business }: Props) {
             <thead>
               <tr className="border-b border-zinc-100">
                 <th className="text-left py-2 px-2 font-medium text-zinc-500">Akcja</th>
-                <th className="text-center py-2 px-2 font-medium text-brand-600">Właściciel</th>
+                <th className="text-center py-2 px-2 font-medium text-[#0d9488]">Właściciel</th>
                 <th className="text-center py-2 px-2 font-medium text-blue-600">Admin</th>
                 <th className="text-center py-2 px-2 font-medium text-zinc-500">Viewer</th>
               </tr>
