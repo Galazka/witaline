@@ -108,6 +108,8 @@ export default function AdminRealCosts() {
   const [from, setFrom] = useState(firstOfMonth);
   const [to, setTo] = useState(todayStr);
   const [search, setSearch] = useState("");
+  const [selectedBiz, setSelectedBiz] = useState<string>("all");
+  const [expandedBiz, setExpandedBiz] = useState<string | null>(null);
   const [showOwnCosts, setShowOwnCosts] = useState(true);
   const [showCallCosts, setShowCallCosts] = useState(true);
   const [showUnpaid, setShowUnpaid] = useState(false);
@@ -167,9 +169,11 @@ export default function AdminRealCosts() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const filtered = search.trim()
-    ? data.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()))
-    : data;
+  const filtered = selectedBiz !== "all"
+    ? data.filter((b) => b.id === selectedBiz)
+    : search.trim()
+      ? data.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()))
+      : data;
 
   /* ── KPI summaries ── */
   const totalCost = filtered.reduce((a, b) => a + b.totalCost, 0);
@@ -327,7 +331,12 @@ export default function AdminRealCosts() {
           {syncMsg && <span className="text-xs text-zinc-500">{syncMsg}</span>}
         </div>
         <div className="flex items-center gap-3">
-          <input type="text" placeholder="Szukaj firmy..." value={search} onChange={(e) => setSearch(e.target.value)}
+          <select value={selectedBiz} onChange={(e) => setSelectedBiz(e.target.value)}
+            className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-[#0d9488] min-w-[140px]">
+            <option value="all">— Wszystkie firmy —</option>
+            {data.map((b) => <option key={b.id} value={b.id}>{b.name}{b.is_centrala ? " (Centrala)" : ""}</option>)}
+          </select>
+          <input type="text" placeholder="Szukaj firmy..." value={search} onChange={(e) => { setSearch(e.target.value); setSelectedBiz("all"); }}
             className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none focus:border-[#0d9488] w-48" />
           <button onClick={exportCsv}
             className="px-3 py-1.5 text-xs font-medium bg-brand-50 text-zinc-600 rounded-lg hover:bg-[#ccfbf1] transition">
@@ -677,9 +686,12 @@ export default function AdminRealCosts() {
                   const barColor = marginPctVal > 20 ? "bg-green-500" : marginPctVal >= 0 ? "bg-amber-500" : "bg-red-500";
 
                   return (
-                    <tr key={b.id} className={`border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition ${b.is_centrala ? "bg-amber-50/50" : ""}`}>
+                    <>
+                    <tr className={`border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition cursor-pointer ${b.is_centrala ? "bg-amber-50/50" : ""} ${expandedBiz === b.id ? "bg-[#f0fdfa]" : ""}`}
+                      onClick={() => setExpandedBiz(expandedBiz === b.id ? null : b.id)}>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
+                          <span className={`text-[10px] transition ${expandedBiz === b.id ? "text-[#0d9488]" : "text-zinc-300"}`}>{expandedBiz === b.id ? "▼" : "▶"}</span>
                           <span className="font-medium text-zinc-900">{b.name}</span>
                           {b.is_centrala && <span className="text-[10px] bg-amber-100 text-amber-700 rounded-full px-1.5 py-0.5 font-medium">Centrala</span>}
                           {b.plan === "elastic_0" && <span className="text-[10px] bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 font-medium">Pay-as-you-go</span>}
@@ -703,7 +715,8 @@ export default function AdminRealCosts() {
                               if (pct >= 0 && pct <= 100) handleDiscountChange(b.id, Math.round(stdRevenue * (1 - pct / 100) * 100) / 100);
                             }}
                             className="w-14 px-1.5 py-1 border border-zinc-200 rounded text-xs text-zinc-700 text-center focus:outline-none focus:border-[#0d9488]"
-                            disabled={savingDiscount === b.id} />
+                            disabled={savingDiscount === b.id}
+                            onClick={(e) => e.stopPropagation()} />
                           <span className="text-[10px] text-zinc-400">%</span>
                         </div>
                       </td>
@@ -718,6 +731,34 @@ export default function AdminRealCosts() {
                         </div>
                       </td>
                     </tr>
+                    {expandedBiz === b.id && (
+                      <tr key={`${b.id}-calls`}>
+                        <td colSpan={14} className="p-0">
+                          <div className="bg-zinc-50 border-b border-zinc-200 px-5 py-4">
+                            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider mb-3">Szczegoly polaczen</p>
+                            {(() => {
+                              const bizCalls = callLogs.filter((c) => c.business_id === b.id);
+                              if (bizCalls.length === 0) return <p className="text-xs text-zinc-400">Brak polaczen w tym okresie</p>;
+                              return (
+                                <div className="space-y-1 max-h-80 overflow-y-auto">
+                                  {bizCalls.sort((a, c) => c.created_at?.localeCompare(a.created_at || "") || 0).map((c) => (
+                                    <div key={c.id} className="flex items-center justify-between text-xs px-3 py-2 bg-white border border-zinc-100 rounded-lg">
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-zinc-400 w-28">{new Date(c.created_at).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                        <span className="text-zinc-500 font-mono">{c.from_number || "—"}</span>
+                                        <span className="text-zinc-400">{(c.duration_seconds || 0) >= 60 ? `${Math.round((c.duration_seconds || 0) / 60)} min` : `${c.duration_seconds || 0} s`}</span>
+                                      </div>
+                                      <span className="font-medium text-red-500">{fmt((c.total_cost ?? c.cost_pln) || 0)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </>
                   );
                 })
               )}
@@ -792,7 +833,7 @@ export default function AdminRealCosts() {
                 if (r.ok) fetchData();
               } catch { alert("Blad resetowania"); }
             }}
-            className="text-[10px] px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 opacity-40 hover:opacity-100 transition"
+            className="text-xs px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition"
             title="Usuwa wszystkie dane testowe (call_logs, rozmowy, SMS, leady, rezerwacje, koszty)"
           >
             RESET

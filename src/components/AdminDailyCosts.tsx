@@ -27,6 +27,10 @@ function fmtDateFull(d: string): string {
   return new Date(d + "T12:00:00").toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" });
 }
 
+function fmtWarsawTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("pl-PL", { timeZone: "Europe/Warsaw", hour: "2-digit", minute: "2-digit" });
+}
+
 function todayStr(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -451,7 +455,7 @@ export default function AdminDailyCosts() {
                                           className="border-b border-zinc-100 hover:bg-white cursor-pointer"
                                         >
                                           <td className="py-1.5 pr-2 text-zinc-600 whitespace-nowrap">
-                                            {call.created_at?.slice(11, 16) || "—"}
+                                            {call.created_at ? fmtWarsawTime(call.created_at) : "—"}
                                           </td>
                                           <td className="py-1.5 pr-2 text-zinc-700 truncate max-w-[120px]">
                                             {call.from_number || call.business_name || "—"}

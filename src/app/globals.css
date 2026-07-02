@@ -450,9 +450,9 @@ body {
 /* Tailwind v4 utility classes reference CSS vars (e.g. bg-zinc-50 uses --color-zinc-50).
    Overriding them in .dark scopes all zinc/gray/white classes automatically. */
 .dark {
-  --color-zinc-50: #122840;
-  --color-zinc-100: #0f1d33;
-  --color-zinc-200: #0f1d33;
+  --color-zinc-50: #1c3450;
+  --color-zinc-100: #284260;
+  --color-zinc-200: #345074;
   --color-zinc-300: rgba(255,255,255,0.08);
   --color-zinc-400: #94a3b8;
   --color-zinc-500: #cbd5e1;
@@ -462,9 +462,9 @@ body {
   --color-zinc-900: #f1f5f9;
   --color-zinc-950: #f8fafc;
 
-  --color-gray-50: #122840;
-  --color-gray-100: #0f1d33;
-  --color-gray-200: #0f1d33;
+  --color-gray-50: #1c3450;
+  --color-gray-100: #284260;
+  --color-gray-200: #345074;
   --color-gray-300: rgba(255,255,255,0.08);
   --color-gray-400: #94a3b8;
   --color-gray-500: #cbd5e1;
@@ -474,9 +474,9 @@ body {
   --color-gray-900: #f1f5f9;
   --color-gray-950: #f8fafc;
 
-  --color-slate-50: #122840;
-  --color-slate-100: #0f1d33;
-  --color-slate-200: #0f1d33;
+  --color-slate-50: #1c3450;
+  --color-slate-100: #284260;
+  --color-slate-200: #345074;
   --color-slate-300: rgba(255,255,255,0.08);
   --color-slate-400: #94a3b8;
   --color-slate-500: #cbd5e1;
@@ -486,9 +486,9 @@ body {
   --color-slate-900: #f1f5f9;
   --color-slate-950: #f8fafc;
 
-  --color-neutral-50: #122840;
-  --color-neutral-100: #0f1d33;
-  --color-neutral-200: #0f1d33;
+  --color-neutral-50: #1c3450;
+  --color-neutral-100: #284260;
+  --color-neutral-200: #345074;
   --color-neutral-300: rgba(255,255,255,0.08);
   --color-neutral-400: #94a3b8;
   --color-neutral-500: #cbd5e1;
