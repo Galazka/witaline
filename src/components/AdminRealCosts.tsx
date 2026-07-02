@@ -793,9 +793,9 @@ export default function AdminRealCosts() {
               } catch { alert("Blad resetowania"); }
             }}
             className="text-[10px] px-2 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 opacity-40 hover:opacity-100 transition"
-            title="Resetuj wszystkie statystyki (TESTY)"
+            title="Usuwa wszystkie dane testowe (call_logs, rozmowy, SMS, leady, rezerwacje, koszty)"
           >
-            🗑 Reset statystyk
+            RESET
           </button>
         </div>
       </div>
