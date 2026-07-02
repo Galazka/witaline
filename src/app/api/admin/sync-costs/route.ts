@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
-import { USD_TO_PLN, TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN, AI_CALL_COST_PER_MIN_PLN } from "@/lib/cost-rates";
+import { USD_TO_PLN, TWILIO_POLAND_MOBILE_COST_PER_MIN_USD } from "@/lib/cost-rates";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
@@ -22,7 +22,7 @@ export async function POST() {
 
   const stats: SyncStats = { total: 0, elevenlabs: 0, twilio: 0, errors: 0, skipped: 0 };
 
-  let twilioAccountCurrency = "PLN";
+  let twilioAccountCurrency = "USD";
   if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
     try {
       const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64");
@@ -32,10 +32,13 @@ export async function POST() {
       );
       if (accRes.ok) {
         const accData = await accRes.json() as Record<string, unknown>;
-        twilioAccountCurrency = (accData.currency as string) || "PLN";
+        twilioAccountCurrency = (accData.currency as string) || "USD";
       }
-    } catch { /* use PLN fallback */ }
+    } catch { /* use USD fallback */ }
   }
+
+  // Helper: round to N decimal places
+  const roundTo = (n: number, decimals = 4) => Math.round(n * 10 ** decimals) / 10 ** decimals;
 
   // Process ALL call_logs (not just unsynced) within scope to recalculate costs.
   // Also fetch recent ElevenLabs conversations missing from call_logs.
@@ -125,12 +128,15 @@ export async function POST() {
               const charging = meta?.charging as Record<string, unknown> | undefined;
 
               if (charging) {
+                // ElevenLabs returns charges in credits/cents (integer).
+                // 100 credits = $1 USD. Divide by 100, store in USD.
                 const llmCharge = Number(charging.llm_charge) || 0;
                 const callCharge = Number(charging.call_charge) || 0;
-                const totalCharge = llmCharge + callCharge;
+                const platformCharge = Number(charging.platform_charge) || 0;
+                const totalChargeCredits = llmCharge + callCharge + platformCharge;
 
-                if (totalCharge > 0) {
-                  updates.cost_elevenlabs = Math.round(totalCharge * USD_TO_PLN * 100000) / 100000;
+                if (totalChargeCredits > 0) {
+                  updates.cost_elevenlabs = roundTo(totalChargeCredits / 100);
                   stats.elevenlabs++;
                 }
               }
@@ -141,7 +147,7 @@ export async function POST() {
           }
         }
 
-        // 2. Twilio cost (convert to PLN if account currency is USD)
+        // 2. Twilio cost — store in USD
         if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && log.twilio_call_sid) {
           try {
             const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64");
@@ -154,9 +160,10 @@ export async function POST() {
               const price = Number(data.price) || 0;
               if (price !== 0 || data.price !== undefined) {
                 const absPrice = Math.abs(price);
-                updates.cost_twilio = Math.round(
-                  twilioAccountCurrency === "USD"
-                    ? absPrice * USD_TO_PLN
+                // Twilio returns price in account currency. Convert to USD if needed.
+                updates.cost_twilio = roundTo(
+                  twilioAccountCurrency === "PLN"
+                    ? absPrice / USD_TO_PLN
                     : absPrice
                 );
                 stats.twilio++;
@@ -168,10 +175,10 @@ export async function POST() {
           }
         }
 
-        // Consultant transfer cost (only if call was transferred)
+        // Consultant transfer cost (only if call was transferred) — stored in USD
         const durationMin = (log.duration_seconds || 0) / 60;
         const consultantTransferCost = log.routed_to_extension
-          ? Math.round(durationMin * TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN * 100000) / 100000
+          ? roundTo(durationMin * TWILIO_POLAND_MOBILE_COST_PER_MIN_USD)
           : 0;
 
         // 3. Always calculate total_cost and revenue_pln
@@ -181,7 +188,7 @@ export async function POST() {
         const currentTwilio = Number(uTW !== undefined ? uTW : log.cost_twilio) || 0;
         const currentOpenrouter = Number(log.cost_openrouter) || 0;
         const currentConsultant = 0;
-        const calcTotalCost = Math.round((currentElevenlabs + currentTwilio + currentOpenrouter + currentConsultant + consultantTransferCost) * 100000) / 100000;
+        const calcTotalCost = roundTo(currentElevenlabs + currentTwilio + currentOpenrouter + currentConsultant + consultantTransferCost);
 
         updates.total_cost = calcTotalCost;
 
