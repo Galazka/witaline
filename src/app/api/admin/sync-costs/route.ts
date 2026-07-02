@@ -125,20 +125,40 @@ export async function POST() {
             if (res.ok) {
               const data = await res.json() as Record<string, unknown>;
               const meta = data.metadata as Record<string, unknown> | undefined;
+
+              // Root-level dollar-denominated fields (call_charge, call_duration_charges, etc.)
+              const rootCallCharge = Number(data.call_charge) || 0;
+              const rootDurationCharges = Number(data.call_duration_charges) || 0;
+              const rootInitCharge = Number(data.conversation_initiation_client_charge) || 0;
+              const hasRootCharges = rootCallCharge > 0 || rootDurationCharges > 0 || rootInitCharge > 0;
+
+              // Metadata-level charging in platform credits (int)
               const charging = meta?.charging as Record<string, unknown> | undefined;
+              const llmCharge = Number(charging?.llm_charge) || 0;
+              const callChargeCr = Number(charging?.call_charge) || 0;
+              const platformCharge = Number(charging?.platform_charge) || 0;
+              const totalChargeCredits = llmCharge + callChargeCr + platformCharge;
 
-              if (charging) {
-                // ElevenLabs returns charges in credits/cents (integer).
-                // 100 credits = $1 USD. Divide by 100, store in USD.
-                const llmCharge = Number(charging.llm_charge) || 0;
-                const callCharge = Number(charging.call_charge) || 0;
-                const platformCharge = Number(charging.platform_charge) || 0;
-                const totalChargeCredits = llmCharge + callCharge + platformCharge;
+              // Log raw data for first few conversations to debug
+              if (stats.elevenlabs < 3) {
+                console.log("[sync-costs-debug] conv", log.elevenlabs_conversation_id, {
+                  charging: charging || null,
+                  root_call_charge: data.call_charge,
+                  root_call_duration_charges: data.call_duration_charges,
+                  root_conversation_initiation_client_charge: data.conversation_initiation_client_charge,
+                });
+              }
 
-                if (totalChargeCredits > 0) {
-                  updates.cost_elevenlabs = roundTo(totalChargeCredits / 100);
-                  stats.elevenlabs++;
-                }
+              const CREDIT_TO_USD = Number(process.env.ELEVENLABS_CREDIT_TO_USD_RATE) || 0.000165;
+
+              if (hasRootCharges) {
+                // Root-level dollar-denominated fields — use directly (in USD)
+                updates.cost_elevenlabs = roundTo(rootCallCharge + rootDurationCharges + rootInitCharge);
+                stats.elevenlabs++;
+              } else if (totalChargeCredits > 0) {
+                // Fallback: convert from platform credits to USD using plan $/credit rate
+                updates.cost_elevenlabs = roundTo(totalChargeCredits * CREDIT_TO_USD);
+                stats.elevenlabs++;
               }
             }
           } catch (e) {
