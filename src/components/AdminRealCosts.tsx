@@ -329,6 +329,17 @@ export default function AdminRealCosts() {
             {syncing ? "Sync..." : "Sync koszty"}
           </button>
           {syncMsg && <span className="text-xs text-zinc-500">{syncMsg}</span>}
+          <button
+            onClick={async () => {
+              if (!confirm("CZY NA PEWNO? To usunie WSZYSTKIE dane testowe: call_logs, rozmowy, SMS, notyfikacje, leady. Tej operacji NIE MOZNA cofnac. Kontynuowac?")) return;
+              if (!confirm("NAPRAWDE? Wszystkie statystyki zostana zresetowane do zera. To nie jest zabawa.")) return;
+              try { const r = await fetch("/api/admin/reset-stats", { method: "POST" }); const d = await r.json(); alert(d.message || "OK"); if (r.ok) fetchData(); } catch { alert("Blad resetowania"); }
+            }}
+            className="px-3 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+            title="Usuwa wszystkie dane testowe"
+          >
+            RESET
+          </button>
         </div>
         <div className="flex items-center gap-3">
           <select value={selectedBiz} onChange={(e) => setSelectedBiz(e.target.value)}

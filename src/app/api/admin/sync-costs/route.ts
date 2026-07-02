@@ -127,66 +127,43 @@ export async function POST() {
             if (res.ok) {
               const data = await res.json() as Record<string, unknown>;
               const meta = data.metadata as Record<string, unknown> | undefined;
-
-              // Root-level dollar-denominated fields (call_charge, call_duration_charges, etc.)
-              const rootCallCharge = Number(data.call_charge) || 0;
-              const rootDurationCharges = Number(data.call_duration_charges) || 0;
-              const rootInitCharge = Number(data.conversation_initiation_client_charge) || 0;
-              const hasRootCharges = rootCallCharge > 0 || rootDurationCharges > 0 || rootInitCharge > 0;
-
-              // Metadata-level charging in platform credits (int)
               const charging = meta?.charging as Record<string, unknown> | undefined;
-              const llmCharge = Number(charging?.llm_charge) || 0;
-              const callChargeCr = Number(charging?.call_charge) || 0;
-              const platformCharge = Number(charging?.platform_charge) || 0;
-              const totalChargeCredits = llmCharge + callChargeCr + platformCharge;
+
+              // ElevenLabs API returns dollar-denominated prices directly:
+              //   charging.llm_price     — LLM usage cost in USD (float)
+              //   charging.platform_price — Platform/call cost in USD (float)
+              //   (charging.llm_charge / call_charge / platform_charge are integer credits)
+              const llmPrice = Number(charging?.llm_price) || 0;
+              const platformPrice = Number(charging?.platform_price) || 0;
+              const elevenLabsCostUsd = llmPrice + platformPrice;
 
               // Collect diagnostic sample from first conversation
-              const freeLlmDollars = Number(data.free_llm_dollars_consumed) || 0;
-
               if (!debugSample) {
                 debugSample = {
                   conversation_id: log.elevenlabs_conversation_id,
                   duration_seconds: log.duration_seconds,
-                  charging: charging || null,
-                  root_call_charge: data.call_charge,
-                  root_call_duration_charges: data.call_duration_charges,
-                  root_conversation_initiation_client_charge: data.conversation_initiation_client_charge,
-                  free_llm_dollars_consumed: data.free_llm_dollars_consumed,
-                  hasRootCharges,
-                  totalChargeCredits,
-                  willUseDollars: hasRootCharges,
-                  willUseCreditsMult: !hasRootCharges && totalChargeCredits > 0,
-                  CREDIT_TO_USD: Number(process.env.ELEVENLABS_CREDIT_TO_USD_RATE) || 0.000165,
-                  resultCost: hasRootCharges
-                    ? roundTo(rootCallCharge + rootDurationCharges + rootInitCharge)
-                    : totalChargeCredits > 0
-                      ? roundTo(totalChargeCredits * (Number(process.env.ELEVENLABS_CREDIT_TO_USD_RATE) || 0.000165))
-                      : 0,
-                  freeLlmDollars,
+                  llm_price: charging?.llm_price,
+                  platform_price: charging?.platform_price,
+                  llm_charge: charging?.llm_charge,
+                  call_charge: charging?.call_charge,
+                  platform_charge: charging?.platform_charge,
+                  elevenLabsCostUsd,
                 };
               }
 
               // Log raw data for debugging
               if (stats.elevenlabs < 3) {
                 console.log("[sync-costs-debug] conv", log.elevenlabs_conversation_id, {
-                  charging: charging || null,
-                  root_call_charge: data.call_charge,
-                  root_call_duration_charges: data.call_duration_charges,
-                  root_conversation_initiation_client_charge: data.conversation_initiation_client_charge,
-                  free_llm_dollars_consumed: data.free_llm_dollars_consumed,
+                  llm_price: charging?.llm_price,
+                  platform_price: charging?.platform_price,
+                  llm_charge: charging?.llm_charge,
+                  call_charge: charging?.call_charge,
+                  platform_charge: charging?.platform_charge,
                 });
               }
 
-              const CREDIT_TO_USD = Number(process.env.ELEVENLABS_CREDIT_TO_USD_RATE) || 0.000165;
-
-              if (hasRootCharges) {
-                // Root-level dollar-denominated fields — use directly (in USD)
-                updates.cost_elevenlabs = roundTo(rootCallCharge + rootDurationCharges + rootInitCharge);
-                stats.elevenlabs++;
-              } else if (totalChargeCredits > 0) {
-                // Fallback: convert from platform credits to USD using plan $/credit rate
-                updates.cost_elevenlabs = roundTo(totalChargeCredits * CREDIT_TO_USD);
+              if (elevenLabsCostUsd > 0) {
+                updates.cost_elevenlabs = roundTo(elevenLabsCostUsd);
                 stats.elevenlabs++;
               }
             }
