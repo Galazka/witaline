@@ -363,17 +363,17 @@ export default function AdminRealCosts() {
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Od:</label>
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-[#0d9488]" />
+              className="px-2 py-1.5 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs text-zinc-700 dark:text-zinc-200 dark:bg-brand-800 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Do:</label>
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-[#0d9488]" />
+              className="px-2 py-1.5 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs text-zinc-700 dark:text-zinc-200 dark:bg-brand-800 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value as ViewCurrency)}
-            className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 bg-white focus:outline-none focus:border-[#0d9488]"
+            className="px-2 py-1.5 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs text-zinc-700 dark:text-zinc-200 bg-white dark:bg-brand-800 focus:outline-none focus:border-[#0d9488]"
             title="Wyświetl w">
             <option value="PLN">PLN (zł)</option>
             <option value="EUR">EUR (€)</option>
@@ -749,14 +749,14 @@ export default function AdminRealCosts() {
                 + Dodaj koszt
               </button>
             ) : (
-              <div className="bg-brand-50 rounded-xl p-4 space-y-3">
+              <div className="bg-brand-50 dark:bg-brand-800 rounded-xl p-4 space-y-3">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <input value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    placeholder="Nazwa" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
+                    placeholder="Nazwa" className="px-3 py-2 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs bg-white dark:bg-brand-900 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-[#0d9488]" />
                   <input type="number" value={newItem.amount || ""} onChange={(e) => setNewItem({ ...newItem, amount: Number(e.target.value) })}
-                    placeholder="Kwota" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
+                    placeholder="Kwota" className="px-3 py-2 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs bg-white dark:bg-brand-900 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-[#0d9488]" />
                   <select value={newItem.frequency} onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
-                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]">
+                    className="px-3 py-2 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs bg-white dark:bg-brand-900 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-[#0d9488]">
                     <option value="monthly">Miesieczny</option>
                     <option value="quarterly">Kwartalny</option>
                     <option value="yearly">Roczny</option>
@@ -764,11 +764,11 @@ export default function AdminRealCosts() {
                     <option value="irregular">Nieregularny</option>
                   </select>
                   <input type="date" value={newItem.due_date} onChange={(e) => setNewItem({ ...newItem, due_date: e.target.value })}
-                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
+                    className="px-3 py-2 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs bg-white dark:bg-brand-900 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-[#0d9488]" />
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <select value={newItem.category} onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-                    className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]">
+                    className="px-3 py-2 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs bg-white dark:bg-brand-900 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-[#0d9488]">
                     <option value="marketing">Marketing</option>
                     <option value="server">Serwer / hosting</option>
                     <option value="tools">Narzedzia</option>
@@ -777,7 +777,7 @@ export default function AdminRealCosts() {
                     <option value="other">Inne</option>
                   </select>
                   <input value={newItem.notes} onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
-                    placeholder="Notatki" className="px-3 py-2 border border-zinc-200 rounded-lg text-xs bg-white focus:outline-none focus:border-[#0d9488]" />
+                    placeholder="Notatki" className="px-3 py-2 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs bg-white dark:bg-brand-900 text-zinc-700 dark:text-zinc-200 focus:outline-none focus:border-[#0d9488]" />
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => saveCostItem(newItem)} disabled={!newItem.name || !newItem.amount}
@@ -785,7 +785,7 @@ export default function AdminRealCosts() {
                     Dodaj
                   </button>
                   <button onClick={() => setShowAddItem(false)}
-                    className="px-4 py-1.5 text-xs font-medium bg-zinc-100 text-zinc-600 rounded-lg hover:bg-zinc-200 transition">
+                    className="px-4 py-1.5 text-xs font-medium bg-zinc-100 dark:bg-brand-700 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-brand-600 transition">
                     Anuluj
                   </button>
                 </div>
