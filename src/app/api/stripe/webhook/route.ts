@@ -75,13 +75,17 @@ export async function POST(request: Request) {
 
         // Notification about purchase with currency info
         const discountMsg = appliedCouponId ? ` (z kuponem rabatowym)` : "";
-        await supabaseAdmin.from("notifications").insert({
-          business_id: businessId,
-          type: "system",
-          title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
-          message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${discountMsg}${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
-          metadata: { currency, amount_pln: amountPLN, minutes, applied_coupon_id: appliedCouponId },
-        }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
+        try {
+          await supabaseAdmin.from("notifications").insert({
+            business_id: businessId,
+            type: "system",
+            title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
+            message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${discountMsg}${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+            metadata: { currency, amount_pln: amountPLN, minutes, applied_coupon_id: appliedCouponId },
+          });
+        } catch (e) {
+          console.error("[stripe/webhook] notification insert error:", e);
+        }
 
         console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance, appliedCouponId });
       }
@@ -110,13 +114,17 @@ export async function POST(request: Request) {
           })
           .eq("id", businessId);
 
-        await supabaseAdmin.from("notifications").insert({
-          business_id: businessId,
-          type: "system",
-          title: currency === "pln" ? "Zakupiono pakiet SMS" : "SMS package purchased",
-          message: `${smsCount} SMS — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
-          metadata: { currency, amount_pln: amountPLN, sms_count: smsCount },
-        }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
+        try {
+          await supabaseAdmin.from("notifications").insert({
+            business_id: businessId,
+            type: "system",
+            title: currency === "pln" ? "Zakupiono pakiet SMS" : "SMS package purchased",
+            message: `${smsCount} SMS — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+            metadata: { currency, amount_pln: amountPLN, sms_count: smsCount },
+          });
+        } catch (e) {
+          console.error("[stripe/webhook] notification insert error:", e);
+        }
 
         console.log("[stripe] sms package purchased:", { businessId, smsCount, currency, amountPLN });
       }
@@ -160,13 +168,17 @@ export async function POST(request: Request) {
         .eq("id", businessId);
 
       // Notification with currency info
-      await supabaseAdmin.from("notifications").insert({
-        business_id: businessId,
-        type: "system",
-        title: currency === "pln" ? "Subskrypcja aktywowana" : "Subscription activated",
-        message: `${obj?.metadata?.plan || "subscription"}${currency !== "pln" ? ` (${currency.toUpperCase()})` : ""} — ${amountPLN.toFixed(2).replace(".", ",")} PLN`,
-        metadata: { currency, amount_pln: amountPLN, plan: obj?.metadata?.plan },
-      }).catch((e) => console.error("[stripe/webhook] upsert error:", e));
+      try {
+        await supabaseAdmin.from("notifications").insert({
+          business_id: businessId,
+          type: "system",
+          title: currency === "pln" ? "Subskrypcja aktywowana" : "Subscription activated",
+          message: `${obj?.metadata?.plan || "subscription"}${currency !== "pln" ? ` (${currency.toUpperCase()})` : ""} — ${amountPLN.toFixed(2).replace(".", ",")} PLN`,
+          metadata: { currency, amount_pln: amountPLN, plan: obj?.metadata?.plan },
+        });
+      } catch (e) {
+        console.error("[stripe/webhook] notification insert error:", e);
+      }
 
       const { data: biz } = await supabaseAdmin
         .from("businesses")

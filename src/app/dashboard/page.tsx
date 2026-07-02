@@ -79,8 +79,8 @@ export default function DashboardPage() {
   useEffect(() => {
     if (business) {
       fetch(`/api/stripe/status?businessId=${business.id}`)
-        .then(r => r.json())
-        .then(d => { setSubStatus(d.status || ""); setTrialEndsAt(d.trialEndsAt || ""); setSubLoading(false); })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) { setSubStatus(d.status || ""); setTrialEndsAt(d.trialEndsAt || ""); } setSubLoading(false); })
         .catch(() => setSubLoading(false));
     }
   }, [business]);
@@ -94,9 +94,9 @@ export default function DashboardPage() {
       setBusiness(biz as Business);
       // Fetch permissions for RBAC
       fetch(`/api/business/permissions?businessId=${biz.id}`)
-        .then(r => r.json())
+        .then(r => r.ok ? r.json() : null)
         .then(p => {
-          if (p.role || p.isOwner) {
+          if (p && (p.role || p.isOwner)) {
             setPerms(p.role || null, p.isOwner, p.isSuperAdmin, p.permissions || []);
           }
         })
@@ -104,7 +104,7 @@ export default function DashboardPage() {
       const [logsRes, reservationsRes, feedbackRes] = await Promise.all([
         supabase.from("call_logs").select("*").eq("business_id", biz.id).is("deleted_at", null).order("created_at", { ascending: false }).limit(50),
         supabase.from("reservations").select("*").eq("business_id", biz.id).order("reserved_at", { ascending: false }).limit(100),
-        fetch(`/api/feedback?businessId=${biz.id}`).then((r) => r.json()),
+        fetch(`/api/feedback?businessId=${biz.id}`).then((r) => r.ok ? r.json() : []),
       ]);
       if (logsRes.data) setCallLogs(logsRes.data as CallLog[]);
       if (reservationsRes.data) setReservations(reservationsRes.data as Reservation[]);

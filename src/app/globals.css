@@ -91,8 +91,13 @@ body {
 }
 
 .dark body {
-  background: var(--color-brand-900);
-  color: var(--color-text-dark-primary);
+  background: #0c1929;
+  color: #18181b;
+}
+
+/* Main content area — always light background */
+.dark main {
+  background: #f9fafb;
 }
 
 ::selection { background: rgba(13,148,136,0.18); color: var(--color-brand-900); }
@@ -100,7 +105,7 @@ body {
 
 /* ── Glass morphism ── */
 .glass { background: rgba(255,255,255,0.72); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255,255,255,0.5); }
-.glass-dark { background: rgba(0,0,0,0.35); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255,255,255,0.08); }
+main .glass-dark { background: rgba(255,255,255,0.72); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255,255,255,0.5); }
 
 .glass-card {
   background: rgba(255,255,255,0.55);
@@ -115,11 +120,11 @@ body {
   transform: translateY(-2px);
 }
 
-.glass-card-dark {
-  background: rgba(0,0,0,0.35);
+main .glass-card-dark {
+  background: #ffffff;
   backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -174,21 +179,21 @@ body {
 .card-lift { transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
 .card-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl); }
 
-.dark .card,
-.dark .card-kpi {
-  background: var(--color-surface-card-dark);
-  border-color: var(--color-border-dark);
+.dark main .card,
+.dark main .card-kpi {
+  background: #ffffff;
+  border-color: #e4e4e7;
 }
 
-.dark .card-modern {
-  background: rgba(15, 29, 51, 0.85);
+.dark main .card-modern {
+  background: #ffffff;
   backdrop-filter: blur(14px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-.dark .card-modern:hover {
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
-  border-color: rgba(13, 148, 136, 0.25);
+.dark main .card-modern:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+  border-color: rgba(13, 148, 136, 0.18);
 }
 
 /* ── Premium card variant ── */
@@ -204,9 +209,9 @@ body {
   border-color: rgba(13,148,136,0.15);
   transform: translateY(-3px);
 }
-.dark .card-elevated {
-  background: var(--color-surface-card-dark);
-  border-color: var(--color-border-dark);
+.dark main .card-elevated {
+  background: #ffffff;
+  border-color: #e4e4e7;
 }
 
 /* ── Buttons ── */
@@ -457,61 +462,8 @@ body {
 .dark .border-surface { border-color: var(--color-border-dark); }
 .dark .border-surface-subtle { border-color: rgba(255,255,255,0.04); }
 
-/* ── Dark mode: override Tailwind v4 color CSS vars ── */
-/* Tailwind v4 utility classes reference CSS vars (e.g. bg-zinc-50 uses --color-zinc-50).
-   Overriding them in .dark scopes all zinc/gray/white classes automatically. */
-.dark {
-  --color-zinc-50: #1c3450;
-  --color-zinc-100: #284260;
-  --color-zinc-200: #345074;
-  --color-zinc-300: rgba(255,255,255,0.08);
-  --color-zinc-400: #94a3b8;
-  --color-zinc-500: #cbd5e1;
-  --color-zinc-600: #cbd5e1;
-  --color-zinc-700: #e2e8f0;
-  --color-zinc-800: #f1f5f9;
-  --color-zinc-900: #f1f5f9;
-  --color-zinc-950: #f8fafc;
-
-  --color-gray-50: #1c3450;
-  --color-gray-100: #284260;
-  --color-gray-200: #345074;
-  --color-gray-300: rgba(255,255,255,0.08);
-  --color-gray-400: #94a3b8;
-  --color-gray-500: #cbd5e1;
-  --color-gray-600: #cbd5e1;
-  --color-gray-700: #e2e8f0;
-  --color-gray-800: #f1f5f9;
-  --color-gray-900: #f1f5f9;
-  --color-gray-950: #f8fafc;
-
-  --color-slate-50: #1c3450;
-  --color-slate-100: #284260;
-  --color-slate-200: #345074;
-  --color-slate-300: rgba(255,255,255,0.08);
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #cbd5e1;
-  --color-slate-600: #cbd5e1;
-  --color-slate-700: #e2e8f0;
-  --color-slate-800: #f1f5f9;
-  --color-slate-900: #f1f5f9;
-  --color-slate-950: #f8fafc;
-
-  --color-neutral-50: #1c3450;
-  --color-neutral-100: #284260;
-  --color-neutral-200: #345074;
-  --color-neutral-300: rgba(255,255,255,0.08);
-  --color-neutral-400: #94a3b8;
-  --color-neutral-500: #cbd5e1;
-  --color-neutral-600: #cbd5e1;
-  --color-neutral-700: #e2e8f0;
-  --color-neutral-800: #f1f5f9;
-  --color-neutral-900: #f1f5f9;
-  --color-neutral-950: #f8fafc;
-
-  --color-white: #0f1d33;
-  --color-black: #e2e8f0;
-}
+/* ── Dark mode: Tailwind v4 color CSS vars — REMOVED ── */
+/* All card backgrounds are now white via global overrides below */
 
 /* ── Glass pricing/ROI ── */
 .glass-pricing { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
@@ -532,57 +484,72 @@ body {
 .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
 
 /* ══════════════════════════════════════════════════════════════
-   GLOBAL DARK MODE — fixes ~2000 hardcoded light colors
+   SCOPED UNDER main: biale karty + czarny tekst
+   Sidebar/topbar maja wlasne inline klasy — nie ruszamy ich
    ══════════════════════════════════════════════════════════════ */
 
-/* Backgrounds */
-.dark .bg-white { background-color: #0f1d33 !important; }
-.dark .bg-zinc-50 { background-color: #183350 !important; }
-.dark .bg-zinc-100 { background-color: #1e3e60 !important; }
-.dark .bg-brand-50 { background-color: #183350 !important; }
-.dark .bg-brand-100 { background-color: #1e3e60 !important; }
-
-/* Borders */
-.dark .border-zinc-100 { border-color: rgba(255,255,255,0.06) !important; }
-.dark .border-zinc-200 { border-color: rgba(255,255,255,0.08) !important; }
-.dark .border-zinc-300 { border-color: rgba(255,255,255,0.1) !important; }
-
-/* Text — dark enough to read on #0f1d33 backgrounds */
-.dark .text-zinc-900 { color: #f1f5f9 !important; }
-.dark .text-zinc-800 { color: #e2e8f0 !important; }
-.dark .text-zinc-700 { color: #cbd5e1 !important; }
-.dark .text-zinc-600 { color: #94a3b8 !important; }
-.dark .text-zinc-500 { color: #7a9eb8 !important; }
-
-/* Hover states */
-.dark .hover\:bg-white:hover { background-color: #183350 !important; }
-.dark .hover\:bg-zinc-50:hover { background-color: #1e3e60 !important; }
-.dark .hover\:bg-zinc-100:hover { background-color: #284260 !important; }
-
-/* Focus ring colors */
-.dark .focus\:border-zinc-200:focus { border-color: rgba(255,255,255,0.12) !important; }
-.dark .focus\:border-zinc-300:focus { border-color: rgba(255,255,255,0.15) !important; }
-
-/* Ring shadows */
-.dark .ring-zinc-200 { --tw-ring-color: rgba(255,255,255,0.08) !important; }
-.dark .ring-zinc-300 { --tw-ring-color: rgba(255,255,255,0.1) !important; }
-
-/* Form elements */
-.dark input, .dark select, .dark textarea {
-  background-color: #183350 !important;
-  border-color: rgba(255,255,255,0.08) !important;
-  color: #e2e8f0 !important;
+/* Tla kart — zawsze biale */
+main .bg-white, main .bg-zinc-50, main .bg-zinc-100, main .bg-brand-50, main .bg-brand-100 {
+  background-color: #ffffff !important;
 }
-.dark input::placeholder, .dark select::placeholder, .dark textarea::placeholder {
-  color: #4a6e8c !important;
+
+/* Tekst — czarny/ciemny */
+main .text-zinc-900, main .text-zinc-800, main .text-zinc-700, main .text-zinc-600 {
+  color: #18181b !important;
 }
-.dark input:focus, .dark select:focus, .dark textarea:focus {
+main .text-zinc-500, main .text-zinc-400 {
+  color: #71717a !important;
+}
+
+/* Obramowania — jasne szare */
+main .border-zinc-100 { border-color: #f4f4f5 !important; }
+main .border-zinc-200 { border-color: #e4e4e7 !important; }
+main .border-zinc-300 { border-color: #d4d4d8 !important; }
+
+/* Hover */
+main .hover\:bg-white:hover, main .hover\:bg-zinc-50:hover, main .hover\:bg-zinc-100:hover {
+  background-color: #f9fafb !important;
+}
+
+/* Focus ring */
+main .focus\:border-zinc-200:focus { border-color: #e4e4e7 !important; }
+main .focus\:border-zinc-300:focus { border-color: #d4d4d8 !important; }
+
+/* Formularze — biale tla, czarny tekst */
+main input, main select, main textarea {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+main input::placeholder, main select::placeholder, main textarea::placeholder {
+  color: #a1a1aa !important;
+}
+main input:focus, main select:focus, main textarea:focus {
   border-color: #0d9488 !important;
   outline: none;
 }
 
-/* Scrollbar dark mode */
-.dark ::-webkit-scrollbar { width: 6px; height: 6px; }
-.dark ::-webkit-scrollbar-track { background: #0f1d33; }
-.dark ::-webkit-scrollbar-thumb { background: #2d4e70; border-radius: 3px; }
-.dark ::-webkit-scrollbar-thumb:hover { background: #3d5e80; }
+/* Dark mode — karty nadal biale */
+.dark main .bg-white, .dark main .bg-zinc-50, .dark main .bg-zinc-100 { background-color: #ffffff !important; }
+.dark main .text-zinc-900, .dark main .text-zinc-800, .dark main .text-zinc-700 { color: #18181b !important; }
+.dark main .text-zinc-600 { color: #404040 !important; }
+.dark main .text-zinc-500, .dark main .text-zinc-400 { color: #71717a !important; }
+.dark main .border-zinc-100 { border-color: #f4f4f5 !important; }
+.dark main .border-zinc-200 { border-color: #e4e4e7 !important; }
+.dark main .hover\:bg-white:hover, .dark main .hover\:bg-zinc-50:hover, .dark main .hover\:bg-zinc-100:hover {
+  background-color: #f9fafb !important;
+}
+
+/* Card classes — zawsze biale */
+main .card, main .card-kpi, main .card-elevated {
+  background: #ffffff !important;
+}
+.dark main .card, .dark main .card-kpi, .dark main .card-elevated {
+  background: #ffffff !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f9fafb; }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
