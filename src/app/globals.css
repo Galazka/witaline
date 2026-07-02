@@ -180,6 +180,17 @@ body {
   border-color: var(--color-border-dark);
 }
 
+.dark .card-modern {
+  background: rgba(15, 29, 51, 0.85);
+  backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.dark .card-modern:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  border-color: rgba(13, 148, 136, 0.25);
+}
+
 /* ── Premium card variant ── */
 .card-elevated {
   background: var(--color-surface-card);

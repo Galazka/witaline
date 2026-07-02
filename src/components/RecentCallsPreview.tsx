@@ -46,7 +46,7 @@ export default function RecentCallsPreview({ callLogs = [], onClick }: Props) {
 
       {/* Classification bar */}
       {safeLogs.length > 0 && (
-        <div className="bg-white/55 backdrop-blur-xl rounded-lg p-3 mb-3">
+        <div className="bg-white/55 dark:bg-brand-800/55 backdrop-blur-xl rounded-lg p-3 mb-3">
           <div className="flex items-center gap-3 text-xs">
             <span className="text-zinc-500">Skuteczność:</span>
             <span className="text-green-600 font-medium">{helpfulCount} pozytywnych</span>
@@ -59,12 +59,12 @@ export default function RecentCallsPreview({ callLogs = [], onClick }: Props) {
       )}
 
       {/* Recent calls list */}
-      <div className="bg-white/55 backdrop-blur-xl rounded-xl border border-white/20 divide-y divide-zinc-100">
+      <div className="bg-white/55 dark:bg-brand-800/55 backdrop-blur-xl rounded-xl border border-white/20 dark:border-white/5 divide-y divide-zinc-100 dark:divide-brand-700">
         {recentCalls.length === 0 ? (
           <div className="p-4 text-center text-sm text-zinc-400">Brak połączeń</div>
         ) : (
           recentCalls.map(call => (
-            <div key={call.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f0fdfa] transition cursor-pointer" onClick={onClick}>
+            <div key={call.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f0fdfa] dark:hover:bg-brand-800/30 transition cursor-pointer" onClick={onClick}>
               <span className="text-sm">{call.classification === "order" ? "🛒" : "❓"}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-zinc-900 dark:text-zinc-100">{call.caller_id || "Anonim"}</p>

@@ -120,7 +120,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
   }
 
   if (loading) {
-    return <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center text-sm text-zinc-400">Ładowanie...</div>;
+    return <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-6 text-center text-sm text-zinc-400">Ładowanie...</div>;
   }
 
   if (!config) return null;
@@ -128,8 +128,8 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
   const sortedWidgets = [...(config.layout?.widgets || [])].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-      <div className="px-5 py-4 border-b border-zinc-100">
+    <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
+      <div className="px-5 py-4 border-b border-zinc-100 dark:border-brand-700">
         <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">Widgety dashboardu</h3>
         <p className="text-xs text-zinc-400 mt-0.5">Wybierz które sekcje chcesz widzieć na głównym panelu</p>
       </div>
@@ -138,7 +138,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
         {sortedWidgets.map((widget) => {
           const meta = WIDGET_TYPES.find(w => w.type === widget.type);
           return (
-            <div key={widget.type} className="px-5 py-3 flex items-center gap-4 hover:bg-[#f0fdfa] transition">
+            <div key={widget.type} className="px-5 py-3 flex items-center gap-4 hover:bg-[#f0fdfa] dark:hover:bg-brand-800/30 transition">
               {/* Toggle */}
               <button
                 onClick={() => toggleWidget(widget.type)}
@@ -146,7 +146,7 @@ export default function DashboardWidgets({ businessId, onConfigChange }: Props) 
                   widget.enabled ? "bg-[#0d9488]" : "bg-brand-100"
                 }`}
               >
-                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-brand-200 rounded-full shadow transition-transform ${
                   widget.enabled ? "translate-x-5" : ""
                 }`} />
               </button>

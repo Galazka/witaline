@@ -61,12 +61,12 @@ export default function DashboardHeader({
   return (
     <div className="space-y-4">
       {extension && (
-        <div className="bg-gradient-to-r from-[#f0fdfa] to-[#ccfbf1] border-2 border-[#0d9488]/20 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="bg-gradient-to-r from-[#f0fdfa] to-[#ccfbf1] dark:from-brand-900 dark:to-brand-800 border-2 border-[#0d9488]/20 rounded-xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="text-xs font-medium text-[#0d9488] uppercase tracking-wider mb-1">
+            <p className="text-xs font-medium text-[#0d9488] dark:text-teal-300 uppercase tracking-wider mb-1">
               Twoja firma na WitaLine
             </p>
-            <p className="text-lg font-bold dark:text-zinc-200">
+            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
               {businessName || "Firma"}
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
@@ -74,7 +74,7 @@ export default function DashboardHeader({
               aby połączyć się bezpośrednio z Tobą
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-white rounded-xl px-6 py-4 border border-[#0d9488]/20 shadow-sm">
+          <div className="flex items-center gap-3 bg-white dark:bg-brand-800 rounded-xl px-6 py-4 border border-[#0d9488]/20 shadow-sm">
             <span className="text-xs text-zinc-400 uppercase tracking-wider">Twój kod:</span>
             <span className="text-4xl font-bold text-[#0d9488] font-mono tracking-widest">
               # {extension} *
@@ -85,14 +85,14 @@ export default function DashboardHeader({
 
       <div className="grid md:grid-cols-4 gap-4">
         {/* Pakiet */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
           <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">Pakiet</p>
-          <p className="text-lg font-semibold text-zinc-900">{planLabel}</p>
+          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{planLabel}</p>
           <p className="text-xs text-zinc-400 mt-1">{plan === "elastic_0" ? config.pricePLN : `${config.pricePLN} brutto/mies`}</p>
         </div>
 
         {/* Minuty */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
           <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">
             ⏱️ Wykorzystane minuty
           </p>
@@ -119,7 +119,7 @@ export default function DashboardHeader({
         </div>
 
         {/* Tokeny */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
           <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">
             🪙 Tokeny
           </p>
@@ -146,7 +146,7 @@ export default function DashboardHeader({
         </div>
 
         {/* Zaoszczędzony czas */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
           <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">
             💰 Zaoszczędzony czas
           </p>
@@ -161,26 +161,26 @@ export default function DashboardHeader({
       </div>
 
       {isTrialing && (
-        <div className={`border rounded-xl p-4 ${trialExpired ? "bg-red-50 border-red-200" : "bg-brand-50 border-[#0d9488]/20"}`}>
+        <div className={`border rounded-xl p-4 ${trialExpired ? "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800" : "bg-brand-50 dark:bg-brand-900 border-[#0d9488]/20"}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-start gap-3">
               <span className="text-lg shrink-0">{trialExpired ? "⛔" : "🎯"}</span>
               <div>
-                <p className={`text-sm font-semibold ${trialExpired ? "text-red-800" : "text-brand-800"}`}>
+                <p className={`text-sm font-semibold ${trialExpired ? "text-red-800 dark:text-red-300" : "text-brand-800 dark:text-brand-200"}`}>
                   {trialExpired
                     ? "Okres próbny wygasł"
                     : `Darmowy okres próbny — zostało ${trialDaysLeft} dni`}
                 </p>
-                <p className={`text-xs mt-1 ${trialExpired ? "text-red-600" : "text-[#0d9488]"}`}>
+                <p className={`text-xs mt-1 ${trialExpired ? "text-red-600 dark:text-red-400" : "text-[#0d9488] dark:text-teal-300"}`}>
                   {trialExpired
                     ? "Dodaj środki, aby kontynuować korzystanie z WitaLine."
                     : `Bezpłatnie: ${FREE_TRIAL_MINUTES} min połączeń · ${FREE_TRIAL_SMS} SMS`}
                 </p>
                 <div className="flex gap-4 mt-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${trialMinutesExceeded ? "bg-red-100 text-red-700" : "bg-white text-brand-700"}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${trialMinutesExceeded ? "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300" : "bg-white dark:bg-brand-800 text-brand-700 dark:text-brand-300"}`}>
                     🎙️ {Math.min(minutesUsed, FREE_TRIAL_MINUTES)}/{FREE_TRIAL_MINUTES} min
                   </span>
-                  <span className="text-xs px-2 py-0.5 bg-white text-brand-700 rounded-full">
+                  <span className="text-xs px-2 py-0.5 bg-white dark:bg-brand-800 text-brand-700 dark:text-brand-300 rounded-full">
                     ✉️ 0/{FREE_TRIAL_SMS} SMS
                   </span>
                 </div>

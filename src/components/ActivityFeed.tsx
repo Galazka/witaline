@@ -141,7 +141,7 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
         </div>
         <div className="flex items-center gap-2">
           {/* Date filter pills */}
-          <div className="flex gap-1 bg-zinc-100 rounded-lg p-0.5">
+          <div className="flex gap-1 bg-zinc-100 dark:bg-brand-800 rounded-lg p-0.5">
             {(["7d", "30d", "all"] as DateFilter[]).map((f) => (
               <button key={f} onClick={() => setDateFilter(f)} className={`px-2 py-1 text-[10px] font-medium rounded-md transition ${dateFilter === f ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300"}`}>
                 {f === "7d" ? "7 dni" : f === "30d" ? "30 dni" : "Wszystkie"}
@@ -168,7 +168,7 @@ export default function ActivityFeed({ businessId }: ActivityFeedProps) {
       )}
 
       <div className="relative">
-        <div className="absolute left-[23px] top-0 bottom-0 w-px bg-zinc-200" />
+        <div className="absolute left-[23px] top-0 bottom-0 w-px bg-zinc-200 dark:bg-brand-700" />
 
         {visible.length === 0 ? (
           <div className="px-5 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">

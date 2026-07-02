@@ -77,7 +77,7 @@ export default function TrendKpiCard({
 
   return (
     <div
-      className="group relative bg-white/55 backdrop-blur-xl border border-white/20 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-[#0d9488]/20"
+      className="group relative bg-white/55 backdrop-blur-xl border border-white/20 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-[#0d9488]/20 dark:bg-[#1c3450]/80 dark:border-[#345074]/30"
       style={
         {
           "--glow-color": cfg.glow,
@@ -90,7 +90,7 @@ export default function TrendKpiCard({
       />
       <div className="relative z-10 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
             {title}
           </span>
           {icon && (
@@ -101,7 +101,7 @@ export default function TrendKpiCard({
             </span>
           )}
         </div>
-        <p className="text-2xl sm:text-3xl font-bold text-zinc-900 font-display tracking-tight">
+        <p className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 font-display tracking-tight">
           {formatValue(value, format)}
         </p>
         {trend !== undefined && (
@@ -119,7 +119,7 @@ export default function TrendKpiCard({
               {Math.abs(trend)}%
             </span>
             {trendLabel && (
-              <span className="text-xs text-zinc-500">{trendLabel}</span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">{trendLabel}</span>
             )}
           </div>
         )}

@@ -27,7 +27,7 @@ export default function RecentChatsPreview({ businessId, onClick }: Props) {
   }, [businessId]);
 
   if (loading) {
-    return <div className="bg-white rounded-xl border border-zinc-200 p-5 text-sm text-zinc-400">Ładowanie rozmów...</div>;
+    return <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5 text-sm text-zinc-400">Ładowanie rozmów...</div>;
   }
 
   const channelEmoji: Record<string, string> = { web: "💬", voice: "📞", widget: "🔗", sms: "📱" };
@@ -38,12 +38,12 @@ export default function RecentChatsPreview({ businessId, onClick }: Props) {
         <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Ostatnie rozmowy</p>
         <button onClick={onClick} className="text-xs text-[#0d9488] hover:text-[#0f766e] transition">Zobacz wszystkie →</button>
       </div>
-      <div className="bg-white rounded-xl border border-zinc-200 divide-y divide-zinc-100">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 divide-y divide-zinc-100 dark:divide-brand-700">
         {convs.length === 0 ? (
           <div className="p-5 text-center text-sm text-zinc-400">Brak rozmów</div>
         ) : (
           convs.map(conv => (
-            <div key={conv.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[#f0fdfa] transition cursor-pointer" onClick={onClick}>
+            <div key={conv.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[#f0fdfa] dark:hover:bg-brand-800/30 transition cursor-pointer" onClick={onClick}>
               <span className="text-sm">{channelEmoji[conv.channel] || "💬"}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{conv.caller_name || conv.caller_id || "Anonimowy"}</p>
@@ -55,7 +55,7 @@ export default function RecentChatsPreview({ businessId, onClick }: Props) {
               </div>
               <div className="flex gap-1.5 shrink-0">
                 {(conv.tags || []).slice(0, 2).map((tag: string) => (
-                  <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full border border-zinc-200 text-zinc-500">#{tag}</span>
+                  <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full border border-zinc-200 dark:border-brand-700 text-zinc-500 dark:text-zinc-400">#{tag}</span>
                 ))}
               </div>
               <span className="text-[10px] text-zinc-400 shrink-0 whitespace-nowrap">{new Date(conv.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
