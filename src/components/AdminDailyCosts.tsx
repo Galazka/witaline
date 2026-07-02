@@ -232,11 +232,10 @@ export default function AdminDailyCosts() {
   const [costSmsTotal, setCostSmsTotal] = useState(0);
   const [diagnostics, setDiagnostics] = useState<{ totalCallLogs: number; totalBusinesses: number } | null>(null);
 
-  // Projections
-  const avgProfitPerDay = daysElapsed > 0 ? totalProfit / daysElapsed : 0;
-  const projectedProfit = avgProfitPerDay * totalDays;
+  // Projections (for KPI cards only)
   const projectedRevenue = daysElapsed > 0 ? (totalRevenue / daysElapsed) * totalDays : 0;
   const projectedCost = daysElapsed > 0 ? (totalCost / daysElapsed) * totalDays : 0;
+  const projectedProfit = projectedRevenue - projectedCost;
 
   return (
     <div className="space-y-4">
@@ -512,29 +511,6 @@ export default function AdminDailyCosts() {
                   <td className="p-2.5 text-right">
                     <span className={`${totalProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
                       {totalRevenue > 0 ? fmtPct((totalProfit / totalRevenue) * 100) : "—"}
-                    </span>
-                  </td>
-                </tr>
-                {/* Projection row */}
-                <tr className="border-t border-zinc-200 bg-brand-50/50 text-xs">
-                  <td className="p-2.5 text-brand-700 font-semibold">PROGNOZA (koniec miesiąca)</td>
-                  <td className="p-2.5 text-right text-brand-700 font-medium">
-                    {daysElapsed > 0 ? Math.round((totalCalls / daysElapsed) * totalDays) : "—"}
-                  </td>
-                  <td className="p-2.5 text-right text-brand-700 font-medium">
-                    {daysElapsed > 0 ? Math.round((totalMinutes / daysElapsed) * totalDays) : "—"}
-                  </td>
-                  <td className="p-2.5 text-right text-zinc-500">—</td>
-                  <td className="p-2.5 text-right text-zinc-500">—</td>
-                  <td className="p-2.5 text-right text-zinc-500">—</td>
-                  <td className="p-2.5 text-right text-amber-600 font-medium">{fmt(projectedCost)}</td>
-                  <td className="p-2.5 text-right text-[#0d9488] font-medium">{fmt(projectedRevenue)}</td>
-                  <td className={`p-2.5 text-right font-bold ${projectedProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                    {projectedProfit >= 0 ? "+" : ""}{fmt(projectedProfit)}
-                  </td>
-                  <td className="p-2.5 text-right">
-                    <span className={`${projectedProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                      {projectedRevenue > 0 ? fmtPct((projectedProfit / projectedRevenue) * 100) : "—"}
                     </span>
                   </td>
                 </tr>

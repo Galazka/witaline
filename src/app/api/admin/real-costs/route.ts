@@ -226,7 +226,8 @@ function buildCallMap(logs: typeof callLogs) {
       cost_twilio: Number(log.cost_twilio) || 0,
       cost_openrouter: Number(log.cost_openrouter) || 0,
       consultant_transfer_cost_pln: Number((log as any).consultant_transfer_cost_pln) || 0,
-      total_cost: Number(log.total_cost) || Number(log.cost_pln) || 0,
+      // Always calculate total_cost from components (not from DB field which may be stale)
+      total_cost: Math.round(((Number(log.cost_elevenlabs) || 0) + (Number(log.cost_twilio) || 0) + (Number(log.cost_openrouter) || 0)) * 100) / 100,
       revenue_pln: Number(log.revenue_pln) || 0,
       plan_revenue_pln: Math.round(dailyRevenue * 100) / 100,
       from_number: log.from_number || log.caller_id || "",

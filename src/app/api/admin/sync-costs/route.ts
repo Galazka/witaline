@@ -288,11 +288,44 @@ export async function POST() {
     }
   }
 
+  // Final pass: recalculate total_cost for ALL logs in scope from individual components
+  // This fixes old inflated total_cost values from when fallback rates were used
+  const { data: allLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("id, cost_elevenlabs, cost_twilio, cost_openrouter, cost_pln")
+    .is("deleted_at", null)
+    .gte("created_at", oneYearAgo.toISOString());
+
+  let recalculated = 0;
+  const concurrency2 = 10;
+  const chunks2: typeof allLogs[] = [];
+  for (let i = 0; i < (allLogs || []).length; i += concurrency2) {
+    chunks2.push((allLogs || []).slice(i, i + concurrency2));
+  }
+  for (const chunk of chunks2) {
+    await Promise.allSettled(chunk.map(async (log) => {
+      const el = Number(log.cost_elevenlabs) || 0;
+      const tw = Number(log.cost_twilio) || 0;
+      const or_ = Number(log.cost_openrouter) || 0;
+      const newTotal = roundTo(el + tw + or_);
+      const oldTotal = Number(log.cost_pln) || 0;
+      // Only update if different (avoid unnecessary writes)
+      if (Math.abs(newTotal - oldTotal) > 0.0001) {
+        await supabaseAdmin
+          .from("call_logs")
+          .update({ total_cost: newTotal })
+          .eq("id", log.id);
+        recalculated++;
+      }
+    }));
+  }
+
   return NextResponse.json({
-    message: `Zsynchronizowano: ${stats.elevenlabs} ElevenLabs, ${stats.twilio} Twilio, ${estimated} oszacowano (avg ${avgCostPerMinUsd.toFixed(4)} $/min)`,
+    message: `Zsynchronizowano: ${stats.elevenlabs} EL, ${stats.twilio} TW, ${estimated} oszacowano, ${recalculated} przeliczono total_cost (avg ${avgCostPerMinUsd.toFixed(4)} $/min)`,
     stats,
     debug_first_conv: debugSample,
     avg_cost_per_min_usd: avgCostPerMinUsd,
     estimated_count: estimated,
+    recalculated_count: recalculated,
   });
 }
