@@ -60,8 +60,6 @@ type DayGroup = {
       cost_elevenlabs: number;
       cost_twilio: number;
       cost_openrouter: number;
-      total_cost: number;
-      revenue_pln: number;
       created_at: string;
     }>;
     totalCalls: number;
@@ -258,8 +256,6 @@ export default function AdminRealCosts() {
       cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
       cost_twilio: Number(log.cost_twilio) || 0,
       cost_openrouter: Number(log.cost_openrouter) || 0,
-      total_cost: Number(log.total_cost) || 0,
-      revenue_pln: Number(log.revenue_pln) || 0,
       created_at: log.created_at,
     });
     bd.totalCalls++;
@@ -267,7 +263,7 @@ export default function AdminRealCosts() {
     bd.totalCostElevenlabs += Number(log.cost_elevenlabs) || 0;
     bd.totalCostTwilio += Number(log.cost_twilio) || 0;
     bd.totalCostOpenrouter += Number(log.cost_openrouter) || 0;
-    bd.totalCost += Number(log.total_cost) || 0;
+    bd.totalCost += Math.round(((Number(log.cost_elevenlabs) || 0) + (Number(log.cost_twilio) || 0) + (Number(log.cost_openrouter) || 0)) * 100) / 100;
     bd.totalRevenue += Number(log.revenue_pln) || 0;
   }
   dayGroups.sort((a, b) => b.date.localeCompare(a.date));
@@ -601,7 +597,7 @@ export default function AdminRealCosts() {
                                         <div className="flex items-center gap-3">
                                           <span className="text-zinc-500 dark:text-zinc-400">EL: {fmt(c.cost_elevenlabs)}</span>
                                           <span className="text-zinc-500 dark:text-zinc-400">TW: {fmt(c.cost_twilio)}</span>
-                                          <span className="font-medium text-red-500">{fmt(c.total_cost)}</span>
+                                          <span className="font-medium text-red-500">{fmt(c.cost_elevenlabs + c.cost_twilio + c.cost_openrouter)}</span>
                                         </div>
                                       </div>
                                     ))}
@@ -899,7 +895,7 @@ export default function AdminRealCosts() {
                                         <span className="text-zinc-500 dark:text-zinc-400 font-mono">{c.from_number || "—"}</span>
                                         <span className="text-zinc-400 dark:text-zinc-500">{(c.duration_seconds || 0) >= 60 ? `${Math.round((c.duration_seconds || 0) / 60)} min` : `${c.duration_seconds || 0} s`}</span>
                                       </div>
-                                      <span className="font-medium text-red-500">{fmt((c.total_cost ?? c.cost_pln) || 0)}</span>
+                                      <span className="font-medium text-red-500">{fmt((Number(c.cost_elevenlabs) || 0) + (Number(c.cost_twilio) || 0) + (Number(c.cost_openrouter) || 0))}</span>
                                     </div>
                                   ))}
                                 </div>

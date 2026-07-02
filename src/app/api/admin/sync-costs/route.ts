@@ -267,12 +267,12 @@ export async function POST() {
     if (totalMinutes > 0) avgCostPerMinUsd = totalCostUsd / totalMinutes;
   }
 
-  // Estimate costs for conversations still missing ElevenLabs cost
+  // Estimate costs for conversations still missing ElevenLabs cost (NULL or 0)
   const { data: logsNeedEstimate } = await supabaseAdmin
     .from("call_logs")
     .select("id, duration_seconds, cost_elevenlabs")
     .is("deleted_at", null)
-    .is("cost_elevenlabs", null)
+    .or("cost_elevenlabs.is.null,cost_elevenlabs.eq.0")
     .gte("created_at", oneYearAgo.toISOString());
 
   let estimated = 0;

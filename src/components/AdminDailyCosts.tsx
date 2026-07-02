@@ -146,7 +146,8 @@ export default function AdminDailyCosts() {
           cost_twilio: Number(l.cost_twilio) || 0,
           cost_openrouter: Number(l.cost_openrouter) || 0,
           consultant_transfer_cost_pln: Number(l.consultant_transfer_cost_pln) || 0,
-          total_cost: Number(l.total_cost) || Number(l.cost_pln) || 0,
+          // Always calculate total from components — never trust DB total_cost
+          total_cost: Math.round(((Number(l.cost_elevenlabs) || 0) + (Number(l.cost_twilio) || 0) + (Number(l.cost_openrouter) || 0)) * 100) / 100,
           revenue_pln: Number(l.revenue_pln) || 0,
           plan_revenue_pln: Number(l.plan_revenue_pln) || 0,
           internal_cost_pln: Number(l.internal_cost_pln) || 0.65 * ((Number(l.duration_seconds) || 0) / 60),
