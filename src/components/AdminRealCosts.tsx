@@ -46,6 +46,34 @@ interface OwnCostsSummary {
 
 type ViewCurrency = "PLN" | "EUR" | "USD";
 
+type DayGroup = {
+  date: string;
+  businesses: Map<string, {
+    bizId: string;
+    name: string;
+    plan: string;
+    is_centrala: boolean;
+    calls: Array<{
+      id: string;
+      from_number: string;
+      duration_seconds: number;
+      cost_elevenlabs: number;
+      cost_twilio: number;
+      cost_openrouter: number;
+      total_cost: number;
+      revenue_pln: number;
+      created_at: string;
+    }>;
+    totalCalls: number;
+    totalMinutes: number;
+    totalCostElevenlabs: number;
+    totalCostTwilio: number;
+    totalCostOpenrouter: number;
+    totalCost: number;
+    totalRevenue: number;
+  }>;
+};
+
 /* ── Helpers ── */
 
 function fmtPLN(v: number): string {
@@ -122,7 +150,9 @@ export default function AdminRealCosts() {
   const [ratesDate, setRatesDate] = useState<string>("");
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItem, setNewItem] = useState({ name: "", amount: 0, frequency: "monthly", category: "other", due_date: "", is_paid: false, notes: "" });
-  const [callLogs, setCallLogs] = useState<Array<{ id: string; business_id: string; duration_seconds: number; cost_pln: number; total_cost: number; from_number: string; created_at: string; business_name: string }>>([]);
+  const [callLogs, setCallLogs] = useState<Array<{ id: string; business_id: string; duration_seconds: number; cost_pln: number; cost_elevenlabs: number; cost_twilio: number; cost_openrouter: number; total_cost: number; revenue_pln: number; from_number: string; created_at: string; business_name: string }>>([]);
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [expandedBizDay, setExpandedBizDay] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -191,6 +221,56 @@ export default function AdminRealCosts() {
     const rev = b.customRevenue ?? b.revenue;
     return rev - b.totalCost < 0;
   }).length;
+
+  // Build day groups from call logs
+  const dayGroups: DayGroup[] = [];
+  const dayMap = new Map<string, DayGroup>();
+  for (const log of callLogs) {
+    const day = log.created_at?.slice(0, 10) || "nieznany";
+    if (!dayMap.has(day)) {
+      dayMap.set(day, { date: day, businesses: new Map() });
+      dayGroups.push(dayMap.get(day)!);
+    }
+    const dg = dayMap.get(day)!;
+    const bizId = log.business_id || "unknown";
+    if (!dg.businesses.has(bizId)) {
+      const bizInfo = data.find(b => b.id === bizId);
+      dg.businesses.set(bizId, {
+        bizId,
+        name: bizInfo?.name || log.business_name || "Nieznana",
+        plan: bizInfo?.plan || "elastic_0",
+        is_centrala: bizInfo?.is_centrala || false,
+        calls: [],
+        totalCalls: 0,
+        totalMinutes: 0,
+        totalCostElevenlabs: 0,
+        totalCostTwilio: 0,
+        totalCostOpenrouter: 0,
+        totalCost: 0,
+        totalRevenue: 0,
+      });
+    }
+    const bd = dg.businesses.get(bizId)!;
+    bd.calls.push({
+      id: log.id,
+      from_number: log.from_number || "",
+      duration_seconds: log.duration_seconds || 0,
+      cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
+      cost_twilio: Number(log.cost_twilio) || 0,
+      cost_openrouter: Number(log.cost_openrouter) || 0,
+      total_cost: Number(log.total_cost) || 0,
+      revenue_pln: Number(log.revenue_pln) || 0,
+      created_at: log.created_at,
+    });
+    bd.totalCalls++;
+    bd.totalMinutes += (log.duration_seconds || 0) / 60;
+    bd.totalCostElevenlabs += Number(log.cost_elevenlabs) || 0;
+    bd.totalCostTwilio += Number(log.cost_twilio) || 0;
+    bd.totalCostOpenrouter += Number(log.cost_openrouter) || 0;
+    bd.totalCost += Number(log.total_cost) || 0;
+    bd.totalRevenue += Number(log.revenue_pln) || 0;
+  }
+  dayGroups.sort((a, b) => b.date.localeCompare(a.date));
 
   const atRisk = filtered.filter((b) => {
     if (b.is_centrala) return false;
@@ -358,7 +438,7 @@ export default function AdminRealCosts() {
 
       {/* ── KPI cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug</p>
           <p className="text-xl font-bold text-red-500 mt-1">{fmt(totalCost)}</p>
           <p className="text-[10px] text-zinc-400">w tym centrala: {fmt(centralaCost)}</p>
@@ -368,43 +448,43 @@ export default function AdminRealCosts() {
             </p>
           )}
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszty wlasne</p>
           <p className="text-xl font-bold text-amber-500 mt-1">{fmt(totalOwnCosts)}</p>
           <p className="text-[10px] text-zinc-400 mt-0.5">{ownCostsSummary?.total_items || 0} pozycji</p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Lacznie koszty</p>
           <p className="text-xl font-bold text-red-600 mt-1">{fmt(totalAllCosts)}</p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod</p>
           <p className="text-xl font-bold text-[#0d9488] mt-1">{fmt(totalRevenue)}</p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Marza</p>
           <p className={`text-xl font-bold mt-1 ${totalMargin >= 0 ? "text-green-600" : "text-red-500"}`}>
             {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Marza %</p>
           <p className={`text-xl font-bold mt-1 ${marginPct >= 20 ? "text-green-600" : marginPct >= 0 ? "text-amber-600" : "text-red-500"}`}>
             {marginPct.toFixed(1)}%
           </p>
-          <div className="mt-2 h-1.5 bg-brand-50 rounded-full overflow-hidden">
+          <div className="mt-2 h-1.5 bg-brand-50 dark:bg-brand-800 rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${marginPct >= 20 ? "bg-green-500" : marginPct >= 0 ? "bg-amber-500" : "bg-red-500"}`}
               style={{ width: `${Math.min(100, Math.max(0, marginPct * 2))}%` }} />
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Firmy na minusie</p>
           <p className={`text-xl font-bold mt-1 ${unprofitable > 0 ? "text-red-500" : "text-green-600"}`}>{unprofitable}</p>
           <p className="text-xs text-zinc-400 mt-0.5">z {filtered.length} firm</p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4">
           <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Rozmowy</p>
-          <p className="text-xl font-bold text-zinc-900 mt-1">{totalCalls}</p>
+          <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{totalCalls}</p>
           {comparePrev && (
             <p className={`text-[10px] mt-0.5 ${totalCalls >= prevTotalCalls ? "text-green-500" : "text-red-400"}`}>
               {totalCalls >= prevTotalCalls ? "+" : ""}{totalCalls - prevTotalCalls} vs poprz.
@@ -413,79 +493,139 @@ export default function AdminRealCosts() {
         </div>
       </div>
 
-      {/* ── Koszty polaczen (call logs) ── */}
-      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+      {/* ── Koszty wg dni (day → business → calls) ── */}
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
         <button
           onClick={() => setShowCallCosts(!showCallCosts)}
-          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-[#f0fdfa] transition"
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-[#f0fdfa] dark:hover:bg-brand-800/30 transition"
         >
           <span className="flex items-center gap-2">
-            <span>📞 Koszty połączeń</span>
-            <span className="text-[10px] bg-[#ccfbf1] text-[#065f46] rounded-full px-2 py-0.5 font-medium">
-              {callLogs.length} rozmów
+            <span>📞 Koszty wg dni</span>
+            <span className="text-[10px] bg-[#ccfbf1] dark:bg-brand-800 text-[#065f46] dark:text-teal-300 rounded-full px-2 py-0.5 font-medium">
+              {dayGroups.length} dni · {callLogs.length} rozmów
             </span>
           </span>
-          <span className="text-zinc-300">{showCallCosts ? "▲" : "▼"}</span>
+          <span className="text-zinc-300 dark:text-zinc-500">{showCallCosts ? "▲" : "▼"}</span>
         </button>
         {showCallCosts && (
-          <div className="px-5 pb-4 space-y-4">
-            {/* Monthly summary */}
-            {(() => {
-              const monthGroups = new Map<string, { calls: number; minutes: number; cost: number }>();
-              for (const log of callLogs) {
-                const month = log.created_at?.slice(0, 7) || "nieznany";
-                if (!monthGroups.has(month)) monthGroups.set(month, { calls: 0, minutes: 0, cost: 0 });
-                const g = monthGroups.get(month)!;
-                g.calls += 1;
-                g.minutes += (log.duration_seconds || 0) / 60;
-                g.cost += (log.total_cost ?? log.cost_pln) || 0;
-              }
-              const totalCost = [...monthGroups.values()].reduce((s, g) => s + g.cost, 0);
-              const totalMin = [...monthGroups.values()].reduce((s, g) => s + g.minutes, 0);
-              return (
-                <>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-zinc-50 rounded-lg p-3">
-                      <p className="text-xs text-zinc-400">Liczba rozmów</p>
-                      <p className="text-lg font-bold text-zinc-800">{callLogs.length}</p>
-                    </div>
-                    <div className="bg-zinc-50 rounded-lg p-3">
-                      <p className="text-xs text-zinc-400">Łączny czas</p>
-                      <p className="text-lg font-bold text-zinc-800">{Math.round(totalMin)} min</p>
-                    </div>
-                    <div className="bg-zinc-50 rounded-lg p-3">
-                      <p className="text-xs text-zinc-400">Łączny koszt</p>
-                      <p className="text-lg font-bold text-red-500">{fmt(totalCost)}</p>
-                    </div>
-                    <div className="bg-zinc-50 rounded-lg p-3">
-                      <p className="text-xs text-zinc-400">Średnio/min</p>
-                      <p className="text-lg font-bold text-zinc-800">{totalMin > 0 ? fmt(totalCost / totalMin) : "—"}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    {[...monthGroups.entries()].sort(([a], [b]) => b.localeCompare(a)).map(([month, group]) => (
-                      <div key={month} className="flex items-center justify-between text-xs px-3 py-2 bg-white border border-zinc-100 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium text-zinc-700 w-20">{month}</span>
-                          <span className="text-zinc-400">{group.calls} rozmów</span>
-                          <span className="text-zinc-400">{Math.round(group.minutes)} min</span>
-                        </div>
-                        <span className="font-medium text-red-500">{fmt(group.cost)}</span>
+          <div className="px-5 pb-4 space-y-2">
+            {dayGroups.length === 0 ? (
+              <p className="text-xs text-zinc-400 text-center py-4">Brak rozmów w wybranym okresie</p>
+            ) : (
+              dayGroups.map(dg => {
+                const dayTotalCost = [...dg.businesses.values()].reduce((s, b) => s + b.totalCost, 0);
+                const dayTotalRevenue = [...dg.businesses.values()].reduce((s, b) => s + b.totalRevenue, 0);
+                const dayTotalCalls = [...dg.businesses.values()].reduce((s, b) => s + b.totalCalls, 0);
+                const dayTotalMinutes = [...dg.businesses.values()].reduce((s, b) => s + b.totalMinutes, 0);
+                const dayProfit = dayTotalRevenue - dayTotalCost;
+                const isExpanded = expandedDay === dg.date;
+                return (
+                  <div key={dg.date} className="border border-zinc-100 dark:border-brand-700 rounded-lg overflow-hidden">
+                    {/* Day header */}
+                    <button
+                      onClick={() => setExpandedDay(isExpanded ? null : dg.date)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-50 dark:hover:bg-brand-800/20 transition text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`text-[10px] transition ${isExpanded ? "text-[#0d9488]" : "text-zinc-300 dark:text-zinc-500"}`}>{isExpanded ? "▼" : "▶"}</span>
+                        <span className="font-medium text-zinc-800 dark:text-zinc-200 text-sm">
+                          {new Date(dg.date + "T12:00:00").toLocaleDateString("pl-PL", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                        </span>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{dayTotalCalls} rozmów · {Math.round(dayTotalMinutes)} min</span>
                       </div>
-                    ))}
+                      <div className="flex items-center gap-4">
+                        <span className="text-xs font-medium text-red-500">{fmt(dayTotalCost)}</span>
+                        {dayTotalRevenue > 0 && <span className="text-xs font-medium text-[#0d9488]">{fmt(dayTotalRevenue)}</span>}
+                        {dayTotalRevenue > 0 && (
+                          <span className={`text-xs font-medium ${dayProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
+                            {dayProfit >= 0 ? "+" : ""}{fmt(dayProfit)}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Day expanded: businesses */}
+                    {isExpanded && (
+                      <div className="border-t border-zinc-100 dark:border-brand-700 bg-zinc-50/50 dark:bg-brand-950/50">
+                        {[...dg.businesses.values()].map(bd => {
+                          const bizProfit = bd.totalRevenue - bd.totalCost;
+                          const bizExpanded = expandedBizDay === `${dg.date}-${bd.bizId}`;
+                          return (
+                            <div key={bd.bizId}>
+                              {/* Business row */}
+                              <button
+                                onClick={() => setExpandedBizDay(bizExpanded ? null : `${dg.date}-${bd.bizId}`)}
+                                className="w-full flex items-center justify-between px-6 py-2.5 hover:bg-white dark:hover:bg-brand-900/50 transition text-left border-b border-zinc-100 dark:border-brand-800 last:border-b-0"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className={`text-[10px] transition ${bizExpanded ? "text-[#0d9488]" : "text-zinc-300 dark:text-zinc-500"}`}>{bizExpanded ? "▼" : "▶"}</span>
+                                  <span className="font-medium text-zinc-700 dark:text-zinc-300 text-xs">{bd.name}</span>
+                                  {bd.is_centrala && <span className="text-[9px] bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 rounded-full px-1.5 py-0.5 font-medium">Centrala</span>}
+                                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{bd.totalCalls} rozmów · {Math.round(bd.totalMinutes * 10) / 10} min</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                  <span className="text-zinc-500 dark:text-zinc-400">EL: <span className="font-medium text-zinc-700 dark:text-zinc-300">{fmt(bd.totalCostElevenlabs)}</span></span>
+                                  <span className="text-zinc-500 dark:text-zinc-400">TW: <span className="font-medium text-zinc-700 dark:text-zinc-300">{fmt(bd.totalCostTwilio)}</span></span>
+                                  <span className="font-medium text-red-500">{fmt(bd.totalCost)}</span>
+                                  {bd.totalRevenue > 0 && <span className="font-medium text-[#0d9488]">{fmt(bd.totalRevenue)}</span>}
+                                  {bd.totalRevenue > 0 && (
+                                    <span className={`font-medium ${bizProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
+                                      {bizProfit >= 0 ? "+" : ""}{fmt(bizProfit)}
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+
+                              {/* Business expanded: individual calls */}
+                              {bizExpanded && (
+                                <div className="bg-white dark:bg-brand-900 border-t border-zinc-100 dark:border-brand-800 px-6 py-2">
+                                  {/* Summary bar */}
+                                  <div className="flex items-center gap-4 text-[10px] text-zinc-400 dark:text-zinc-500 mb-2 px-2">
+                                    <span>Łącznie: {bd.totalCalls} rozmów, {Math.round(bd.totalMinutes * 10) / 10} min</span>
+                                    <span>EL: {fmt(bd.totalCostElevenlabs)}</span>
+                                    <span>TW: {fmt(bd.totalCostTwilio)}</span>
+                                    <span>OR: {fmt(bd.totalCostOpenrouter)}</span>
+                                    <span className="font-medium text-red-500">Koszt: {fmt(bd.totalCost)}</span>
+                                    {bd.totalRevenue > 0 && <span className="font-medium text-[#0d9488]">Przychód: {fmt(bd.totalRevenue)}</span>}
+                                    {bd.totalRevenue > 0 && <span className={`font-medium ${bizProfit >= 0 ? "text-green-600" : "text-red-500"}`}>Zysk: {bizProfit >= 0 ? "+" : ""}{fmt(bizProfit)}</span>}
+                                  </div>
+                                  {/* Call list */}
+                                  <div className="space-y-1 max-h-60 overflow-y-auto">
+                                    {bd.calls.sort((a, c) => c.created_at?.localeCompare(a.created_at || "") || 0).map(c => (
+                                      <div key={c.id} className="flex items-center justify-between text-[11px] px-3 py-1.5 bg-zinc-50 dark:bg-brand-800/50 border border-zinc-100 dark:border-brand-800 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-zinc-400 dark:text-zinc-500 w-24">{new Date(c.created_at).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                          <span className="text-zinc-500 dark:text-zinc-400 font-mono">{c.from_number || "—"}</span>
+                                          <span className="text-zinc-400 dark:text-zinc-500">{c.duration_seconds >= 60 ? `${Math.round(c.duration_seconds / 60)} min` : `${c.duration_seconds} s`}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-zinc-500 dark:text-zinc-400">EL: {fmt(c.cost_elevenlabs)}</span>
+                                          <span className="text-zinc-500 dark:text-zinc-400">TW: {fmt(c.cost_twilio)}</span>
+                                          <span className="font-medium text-red-500">{fmt(c.total_cost)}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                </>
-              );
-            })()}
+                );
+              })
+            )}
           </div>
         )}
       </div>
 
       {/* ── Wlasne koszty / Cost items ── */}
-      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
         <button
           onClick={() => setShowOwnCosts(!showOwnCosts)}
-          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-[#f0fdfa] transition"
+          className="w-full flex items-center justify-between px-5 py-3 text-sm font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-[#f0fdfa] dark:hover:bg-brand-800/30 transition"
         >
           <span className="flex items-center gap-2">
             <span>📊 Koszty wlasne</span>
@@ -501,21 +641,21 @@ export default function AdminRealCosts() {
           <div className="px-5 pb-4 space-y-4">
             {/* Summary */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-zinc-50 rounded-lg p-3">
+              <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Miesiecznie</p>
-                <p className="text-lg font-bold text-zinc-800">{fmt(ownCostsSummary?.monthly_total || 0)}</p>
+                <p className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{fmt(ownCostsSummary?.monthly_total || 0)}</p>
               </div>
-              <div className="bg-zinc-50 rounded-lg p-3">
+              <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Niezaplacone</p>
                 <p className="text-lg font-bold text-red-500">{fmt(ownCostsSummary?.unpaid_total || 0)}</p>
               </div>
-              <div className="bg-zinc-50 rounded-lg p-3">
+              <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Pozycji</p>
-                <p className="text-lg font-bold text-zinc-800">{ownCostsSummary?.total_items || 0}</p>
+                <p className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{ownCostsSummary?.total_items || 0}</p>
               </div>
-              <div className="bg-zinc-50 rounded-lg p-3">
+              <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
                 <p className="text-xs text-zinc-400">Kategorii</p>
-                <p className="text-lg font-bold text-zinc-800">{ownCostsSummary ? Object.keys(ownCostsSummary.by_category).length : 0}</p>
+                <p className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{ownCostsSummary ? Object.keys(ownCostsSummary.by_category).length : 0}</p>
               </div>
             </div>
 
@@ -660,11 +800,11 @@ export default function AdminRealCosts() {
       </div>
 
       {/* ── Tabela firm ── */}
-      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200 bg-white">
+              <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200 dark:border-brand-700 bg-white dark:bg-brand-900">
                 <th className="p-3 font-semibold">Firma</th>
                 <th className="p-3 font-semibold">Plan</th>
                 <th className="p-3 font-semibold">Rozmowy</th>
@@ -698,26 +838,26 @@ export default function AdminRealCosts() {
 
                   return (
                     <>
-                    <tr className={`border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] transition cursor-pointer ${b.is_centrala ? "bg-amber-50/50" : ""} ${expandedBiz === b.id ? "bg-[#f0fdfa]" : ""}`}
+                    <tr className={`border-b border-zinc-100 dark:border-brand-800 last:border-b-0 hover:bg-[#f0fdfa] dark:hover:bg-brand-800/20 transition cursor-pointer ${b.is_centrala ? "bg-amber-50/50 dark:bg-amber-900/10" : ""} ${expandedBiz === b.id ? "bg-[#f0fdfa] dark:bg-brand-800/20" : ""}`}
                       onClick={() => setExpandedBiz(expandedBiz === b.id ? null : b.id)}>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] transition ${expandedBiz === b.id ? "text-[#0d9488]" : "text-zinc-300"}`}>{expandedBiz === b.id ? "▼" : "▶"}</span>
-                          <span className="font-medium text-zinc-900">{b.name}</span>
-                          {b.is_centrala && <span className="text-[10px] bg-amber-100 text-amber-700 rounded-full px-1.5 py-0.5 font-medium">Centrala</span>}
-                          {b.plan === "elastic_0" && <span className="text-[10px] bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 font-medium">Pay-as-you-go</span>}
+                          <span className={`text-[10px] transition ${expandedBiz === b.id ? "text-[#0d9488]" : "text-zinc-300 dark:text-zinc-500"}`}>{expandedBiz === b.id ? "▼" : "▶"}</span>
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">{b.name}</span>
+                          {b.is_centrala && <span className="text-[10px] bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 rounded-full px-1.5 py-0.5 font-medium">Centrala</span>}
+                          {b.plan === "elastic_0" && <span className="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full px-1.5 py-0.5 font-medium">Pay-as-you-go</span>}
                         </div>
                         {b.calls === 0 && !b.is_centrala && b.plan !== "elastic_0" && <span className="text-[10px] text-zinc-400">(brak polaczen)</span>}
                       </td>
-                      <td className="p-3 text-zinc-500 text-xs">{getPlanLabel(b.plan)}</td>
-                      <td className="p-3 text-zinc-700">{b.calls}</td>
-                      <td className="p-3 text-zinc-700">{b.minutes.toFixed(1)}</td>
-                      <td className="p-3 text-zinc-600">{fmt(b.costElevenlabs)}</td>
-                      <td className="p-3 text-zinc-600">{fmt(b.costTwilio)}</td>
-                      <td className="p-3 text-zinc-600">{fmt(b.costOpenrouter)}</td>
-                      <td className="p-3 text-zinc-600">{fmt(b.costSms)}</td>
+                      <td className="p-3 text-zinc-500 dark:text-zinc-400 text-xs">{getPlanLabel(b.plan)}</td>
+                      <td className="p-3 text-zinc-700 dark:text-zinc-300">{b.calls}</td>
+                      <td className="p-3 text-zinc-700 dark:text-zinc-300">{b.minutes.toFixed(1)}</td>
+                      <td className="p-3 text-zinc-600 dark:text-zinc-400">{fmt(b.costElevenlabs)}</td>
+                      <td className="p-3 text-zinc-600 dark:text-zinc-400">{fmt(b.costTwilio)}</td>
+                      <td className="p-3 text-zinc-600 dark:text-zinc-400">{fmt(b.costOpenrouter)}</td>
+                      <td className="p-3 text-zinc-600 dark:text-zinc-400">{fmt(b.costSms)}</td>
                       <td className="p-3 text-red-600 font-medium">{fmt(b.totalCost)}</td>
-                      <td className="p-3 text-zinc-500">{fmt(stdRevenue)}</td>
+                      <td className="p-3 text-zinc-500 dark:text-zinc-400">{fmt(stdRevenue)}</td>
                       <td className="p-3">
                         <div className="flex items-center gap-1.5">
                           <input type="number" min={0} max={100} defaultValue={String(discountPct)}
@@ -725,7 +865,7 @@ export default function AdminRealCosts() {
                               const pct = Number(e.target.value);
                               if (pct >= 0 && pct <= 100) handleDiscountChange(b.id, Math.round(stdRevenue * (1 - pct / 100) * 100) / 100);
                             }}
-                            className="w-14 px-1.5 py-1 border border-zinc-200 rounded text-xs text-zinc-700 text-center focus:outline-none focus:border-[#0d9488]"
+                            className="w-14 px-1.5 py-1 border border-zinc-200 dark:border-brand-700 rounded text-xs text-zinc-700 dark:text-zinc-300 bg-white dark:bg-brand-800 text-center focus:outline-none focus:border-[#0d9488]"
                             disabled={savingDiscount === b.id}
                             onClick={(e) => e.stopPropagation()} />
                           <span className="text-[10px] text-zinc-400">%</span>
@@ -735,7 +875,7 @@ export default function AdminRealCosts() {
                       <td className={`p-3 font-medium ${marginColor}`}>{margin >= 0 ? "+" : ""}{fmt(margin)}</td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 h-2 bg-brand-50 rounded-full overflow-hidden">
+                          <div className="w-16 h-2 bg-brand-50 dark:bg-brand-800 rounded-full overflow-hidden">
                             <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min(100, Math.max(0, marginPctVal))}%` }} />
                           </div>
                           <span className={`text-xs font-medium ${marginColor}`}>{marginPctVal.toFixed(1)}%</span>
@@ -745,19 +885,19 @@ export default function AdminRealCosts() {
                     {expandedBiz === b.id && (
                       <tr key={`${b.id}-calls`}>
                         <td colSpan={14} className="p-0">
-                          <div className="bg-zinc-50 border-b border-zinc-200 px-5 py-4">
-                            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider mb-3">Szczegoly polaczen</p>
+                          <div className="bg-zinc-50 dark:bg-brand-950 border-b border-zinc-200 dark:border-brand-700 px-5 py-4">
+                            <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-wider mb-3">Szczegoly polaczen</p>
                             {(() => {
                               const bizCalls = callLogs.filter((c) => c.business_id === b.id);
                               if (bizCalls.length === 0) return <p className="text-xs text-zinc-400">Brak polaczen w tym okresie</p>;
                               return (
                                 <div className="space-y-1 max-h-80 overflow-y-auto">
                                   {bizCalls.sort((a, c) => c.created_at?.localeCompare(a.created_at || "") || 0).map((c) => (
-                                    <div key={c.id} className="flex items-center justify-between text-xs px-3 py-2 bg-white border border-zinc-100 rounded-lg">
+                                    <div key={c.id} className="flex items-center justify-between text-xs px-3 py-2 bg-white dark:bg-brand-900 border border-zinc-100 dark:border-brand-800 rounded-lg">
                                       <div className="flex items-center gap-3">
-                                        <span className="text-zinc-400 w-28">{new Date(c.created_at).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                                        <span className="text-zinc-500 font-mono">{c.from_number || "—"}</span>
-                                        <span className="text-zinc-400">{(c.duration_seconds || 0) >= 60 ? `${Math.round((c.duration_seconds || 0) / 60)} min` : `${c.duration_seconds || 0} s`}</span>
+                                        <span className="text-zinc-400 dark:text-zinc-500 w-28">{new Date(c.created_at).toLocaleString("pl-PL", { timeZone: "Europe/Warsaw", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                        <span className="text-zinc-500 dark:text-zinc-400 font-mono">{c.from_number || "—"}</span>
+                                        <span className="text-zinc-400 dark:text-zinc-500">{(c.duration_seconds || 0) >= 60 ? `${Math.round((c.duration_seconds || 0) / 60)} min` : `${c.duration_seconds || 0} s`}</span>
                                       </div>
                                       <span className="font-medium text-red-500">{fmt((c.total_cost ?? c.cost_pln) || 0)}</span>
                                     </div>
@@ -779,32 +919,32 @@ export default function AdminRealCosts() {
       </div>
 
       {/* ── Podsumowanie zyskow/strat ── */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
-        <h3 className="text-sm font-semibold text-zinc-900 mb-4">📊 Podsumowanie finansowe</h3>
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-5">
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">📊 Podsumowanie finansowe</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-          <div className="bg-zinc-50 rounded-lg p-3">
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Przychod (klienci)</p>
             <p className="text-lg font-bold text-[#0d9488]">{fmt(totalRevenue)}</p>
           </div>
-          <div className="bg-zinc-50 rounded-lg p-3">
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt uslug (klienci)</p>
             <p className="text-lg font-bold text-red-500">{fmt(clientCost)}</p>
           </div>
-          <div className="bg-zinc-50 rounded-lg p-3">
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszt centrali</p>
             <p className="text-lg font-bold text-amber-600">{fmt(centralaCost)}</p>
           </div>
-          <div className="bg-zinc-50 rounded-lg p-3">
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Koszty wlasne</p>
             <p className="text-lg font-bold text-amber-500">{fmt(totalOwnCosts)}</p>
           </div>
-          <div className="bg-zinc-50 rounded-lg p-3">
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Wynik (klienci)</p>
             <p className={`text-lg font-bold ${totalRevenue - clientCost >= 0 ? "text-green-600" : "text-red-500"}`}>
               {totalRevenue - clientCost >= 0 ? "+" : ""}{fmt(totalRevenue - clientCost)}
             </p>
           </div>
-          <div className="bg-zinc-50 rounded-lg p-3">
+          <div className="bg-zinc-50 dark:bg-brand-800 rounded-lg p-3">
             <p className="text-[11px] text-zinc-400 uppercase tracking-wider">Wynik calkowity</p>
             <p className={`text-lg font-bold ${totalMargin >= 0 ? "text-green-600" : "text-red-500"}`}>
               {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}
@@ -814,22 +954,22 @@ export default function AdminRealCosts() {
       </div>
 
       {/* ── Footer ── */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 p-4 flex flex-wrap items-center justify-between gap-3 text-sm">
         <div className="flex items-center gap-4">
-          <span className="text-zinc-400">Wybrano: <strong className="text-zinc-700">{filtered.length}</strong> firm</span>
-          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-400">Wybrano: <strong className="text-zinc-700 dark:text-zinc-200">{filtered.length}</strong> firm</span>
+          <span className="text-zinc-200 dark:text-zinc-600">|</span>
           <span className="text-zinc-400">Uslugi: <strong className="text-red-600">{fmt(totalCost)}</strong></span>
-          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-200 dark:text-zinc-600">|</span>
       <span className="text-zinc-400">Centrala: <strong className="text-amber-600">{fmt(centralaCost)}</strong></span>
-      <span className="text-zinc-200">|</span>
+      <span className="text-zinc-200 dark:text-zinc-600">|</span>
       <span className="text-zinc-400">Klienci: <strong className="text-red-500">{fmt(clientCost)}</strong></span>
-      <span className="text-zinc-200">|</span>
+      <span className="text-zinc-200 dark:text-zinc-600">|</span>
       <span className="text-zinc-400">Wlasne: <strong className="text-amber-600">{fmt(totalOwnCosts)}</strong></span>
-          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-200 dark:text-zinc-600">|</span>
           <span className="text-zinc-400">Lacznie: <strong className="text-red-700">{fmt(totalAllCosts)}</strong></span>
-          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-200 dark:text-zinc-600">|</span>
           <span className="text-zinc-400">Przychod: <strong className="text-[#0d9488]">{fmt(totalRevenue)}</strong></span>
-          <span className="text-zinc-200">|</span>
+          <span className="text-zinc-200 dark:text-zinc-600">|</span>
           <span className="text-zinc-400">Marza: <strong className={totalMargin >= 0 ? "text-green-600" : "text-red-500"}>{fmt(totalMargin)}</strong></span>
         </div>
         <div className="flex items-center gap-2">

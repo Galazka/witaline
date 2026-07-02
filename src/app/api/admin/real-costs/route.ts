@@ -122,15 +122,17 @@ function buildCallMap(logs: typeof callLogs) {
       entry.calls += 1;
       entry.costPln += Number(log.total_cost ?? log.cost_pln) || 0;
 
-      // ElevenLabs — synced in USD (from sync-costs)
+      // ElevenLabs — synced in USD from sync-costs
+      // Only use actual synced data, never inflate with fallback estimates
       const rawEleven = Number(log.cost_elevenlabs);
-      entry.costElevenlabs += rawEleven > 0 ? rawEleven : minutes * ELEVENLABS_COST_PER_MIN_USD;
+      entry.costElevenlabs += rawEleven > 0 ? rawEleven : 0;
 
-      // Twilio — synced in USD (from sync-costs)
+      // Twilio — synced in USD from sync-costs
+      // Only use actual synced data, never inflate with fallback estimates
       const rawTwilio = Number(log.cost_twilio);
-      entry.costTwilio += Math.abs(rawTwilio) > 0 ? Math.abs(rawTwilio) : minutes * TWILIO_AVG_COST_PER_MIN_USD;
+      entry.costTwilio += Math.abs(rawTwilio) > 0 ? Math.abs(rawTwilio) : 0;
 
-      // OpenRouter — not currently synced; use fallback
+      // OpenRouter — negligible, estimated at $0.0003/min
       entry.costOpenrouter += minutes * OPENROUTER_COST_PER_MIN_USD;
 
       // Consultant transfer — Twilio outbound leg (if call was transferred)
@@ -170,10 +172,10 @@ function buildCallMap(logs: typeof callLogs) {
     const smsCount = smsCountMap.get(bid) || 0;
     const costSms = smsCount * TWILIO_SMS_COST_PER_SEGMENT_PLN;
     const costConsultant = callData.consultantTransferCost || 0;
-    const costFromLogs = callData.costPln;
-    const totalCost = costFromLogs > 0 ? costFromLogs : Math.round((callData.costElevenlabs + callData.costTwilio + callData.costOpenrouter + costSms + costConsultant) * 100) / 100;
-    const prevCostFromLogs = prevCallData.costPln;
-    const prevTotalCost = prevCostFromLogs > 0 ? prevCostFromLogs : Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
+    // Always calculate total from individual components (actual synced data)
+    // Never use pre-calculated costPln which may contain inflated fallback estimates
+    const totalCost = Math.round((callData.costElevenlabs + callData.costTwilio + callData.costOpenrouter + costSms + costConsultant) * 100) / 100;
+    const prevTotalCost = Math.round((prevCallData.costElevenlabs + prevCallData.costTwilio + prevCallData.costOpenrouter) * 100) / 100;
 
     const isWitaLine = bid === WITALINE_MAIN_BUSINESS_ID;
     const monthlyRevenue = isWitaLine ? 0 : (bizInfo.customRevenue ?? getPlanRevenue(bizInfo.plan));

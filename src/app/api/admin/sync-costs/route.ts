@@ -166,6 +166,10 @@ export async function POST() {
                 updates.cost_elevenlabs = roundTo(elevenLabsCostUsd);
                 stats.elevenlabs++;
               }
+              // If API returned null charging data, mark as needing estimation
+              else if (charging?.llm_price === null || charging?.llm_price === undefined) {
+                stats.skipped++;
+              }
             }
           } catch (e) {
             console.warn(`[sync-costs] ElevenLabs fetch error for ${log.elevenlabs_conversation_id}:`, e);
@@ -245,9 +249,50 @@ export async function POST() {
     }
   }
 
+  // Post-sync: estimate costs for conversations without actual ElevenLabs data
+  // Calculate average cost-per-minute from conversations WITH actual data
+  const { data: logsWithCosts } = await supabaseAdmin
+    .from("call_logs")
+    .select("cost_elevenlabs, duration_seconds")
+    .is("deleted_at", null)
+    .not("cost_elevenlabs", "is", null)
+    .gt("cost_elevenlabs", 0)
+    .gt("duration_seconds", 0)
+    .gte("created_at", oneYearAgo.toISOString());
+
+  let avgCostPerMinUsd = 0.04; // conservative default
+  if (logsWithCosts && logsWithCosts.length > 5) {
+    const totalCostUsd = logsWithCosts.reduce((s, l) => s + (Number(l.cost_elevenlabs) || 0), 0);
+    const totalMinutes = logsWithCosts.reduce((s, l) => s + ((Number(l.duration_seconds) || 0) / 60), 0);
+    if (totalMinutes > 0) avgCostPerMinUsd = totalCostUsd / totalMinutes;
+  }
+
+  // Estimate costs for conversations still missing ElevenLabs cost
+  const { data: logsNeedEstimate } = await supabaseAdmin
+    .from("call_logs")
+    .select("id, duration_seconds, cost_elevenlabs")
+    .is("deleted_at", null)
+    .is("cost_elevenlabs", null)
+    .gte("created_at", oneYearAgo.toISOString());
+
+  let estimated = 0;
+  for (const log of logsNeedEstimate || []) {
+    const minutes = (Number(log.duration_seconds) || 0) / 60;
+    if (minutes > 0) {
+      const estCost = roundTo(minutes * avgCostPerMinUsd);
+      await supabaseAdmin
+        .from("call_logs")
+        .update({ cost_elevenlabs: estCost })
+        .eq("id", log.id);
+      estimated++;
+    }
+  }
+
   return NextResponse.json({
-    message: `Zsynchronizowano: ${stats.elevenlabs} ElevenLabs, ${stats.twilio} Twilio (${stats.skipped} pominięto, ${stats.errors} błędów)`,
+    message: `Zsynchronizowano: ${stats.elevenlabs} ElevenLabs, ${stats.twilio} Twilio, ${estimated} oszacowano (avg ${avgCostPerMinUsd.toFixed(4)} $/min)`,
     stats,
     debug_first_conv: debugSample,
+    avg_cost_per_min_usd: avgCostPerMinUsd,
+    estimated_count: estimated,
   });
 }
