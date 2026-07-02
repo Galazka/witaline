@@ -530,3 +530,59 @@ body {
 .animate-slide-in { animation: slideInRight 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
 .animate-pulse-soft { animation: pulseSoft 2s ease-in-out infinite; }
 .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+/* ══════════════════════════════════════════════════════════════
+   GLOBAL DARK MODE — fixes ~2000 hardcoded light colors
+   ══════════════════════════════════════════════════════════════ */
+
+/* Backgrounds */
+.dark .bg-white { background-color: #0f1d33 !important; }
+.dark .bg-zinc-50 { background-color: #183350 !important; }
+.dark .bg-zinc-100 { background-color: #1e3e60 !important; }
+.dark .bg-brand-50 { background-color: #183350 !important; }
+.dark .bg-brand-100 { background-color: #1e3e60 !important; }
+
+/* Borders */
+.dark .border-zinc-100 { border-color: rgba(255,255,255,0.06) !important; }
+.dark .border-zinc-200 { border-color: rgba(255,255,255,0.08) !important; }
+.dark .border-zinc-300 { border-color: rgba(255,255,255,0.1) !important; }
+
+/* Text — dark enough to read on #0f1d33 backgrounds */
+.dark .text-zinc-900 { color: #f1f5f9 !important; }
+.dark .text-zinc-800 { color: #e2e8f0 !important; }
+.dark .text-zinc-700 { color: #cbd5e1 !important; }
+.dark .text-zinc-600 { color: #94a3b8 !important; }
+.dark .text-zinc-500 { color: #7a9eb8 !important; }
+
+/* Hover states */
+.dark .hover\:bg-white:hover { background-color: #183350 !important; }
+.dark .hover\:bg-zinc-50:hover { background-color: #1e3e60 !important; }
+.dark .hover\:bg-zinc-100:hover { background-color: #284260 !important; }
+
+/* Focus ring colors */
+.dark .focus\:border-zinc-200:focus { border-color: rgba(255,255,255,0.12) !important; }
+.dark .focus\:border-zinc-300:focus { border-color: rgba(255,255,255,0.15) !important; }
+
+/* Ring shadows */
+.dark .ring-zinc-200 { --tw-ring-color: rgba(255,255,255,0.08) !important; }
+.dark .ring-zinc-300 { --tw-ring-color: rgba(255,255,255,0.1) !important; }
+
+/* Form elements */
+.dark input, .dark select, .dark textarea {
+  background-color: #183350 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #e2e8f0 !important;
+}
+.dark input::placeholder, .dark select::placeholder, .dark textarea::placeholder {
+  color: #4a6e8c !important;
+}
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: #0d9488 !important;
+  outline: none;
+}
+
+/* Scrollbar dark mode */
+.dark ::-webkit-scrollbar { width: 6px; height: 6px; }
+.dark ::-webkit-scrollbar-track { background: #0f1d33; }
+.dark ::-webkit-scrollbar-thumb { background: #2d4e70; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #3d5e80; }
