@@ -100,7 +100,7 @@ export default function AdminDailyCosts() {
   const [syncMsg, setSyncMsg] = useState("");
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [expandedCall, setExpandedCall] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<ViewCurrency>("PLN");
+  const [currency, setCurrency] = useState<ViewCurrency>("USD");
   const [rates, setRates] = useState<{ usdPln: number; eurPln: number } | null>(null);
 
   useEffect(() => {
@@ -109,16 +109,22 @@ export default function AdminDailyCosts() {
     });
   }, []);
 
+  // All cost values from API are in USD
   const fmt = (v: number): string => {
-    if (currency === "PLN") {
+    if (currency === "USD") {
       const s = Math.abs(v).toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      return v < 0 ? `-${s} zl` : `${s} zl`;
+      return v < 0 ? `-${s} $` : `${s} $`;
     }
-    const rate = currency === "EUR" ? (rates?.eurPln || 4.52) : (rates?.usdPln || 4.15);
-    const converted = Math.abs(v) / rate;
-    const s = converted.toFixed(2).replace(".", ",");
-    const sym = currency === "EUR" ? "€" : "$";
-    return `${v < 0 ? "-" : ""}${s} ${sym}`;
+    const usdPln = rates?.usdPln || 4.15;
+    if (currency === "PLN") {
+      const inPln = Math.abs(v) * usdPln;
+      const s = Math.round(inPln * 100) / 100;
+      return `${v < 0 ? "-" : ""}${s.toFixed(2).replace(".", ",")} zł`;
+    }
+    const eurPln = rates?.eurPln || 4.52;
+    const inEur = Math.abs(v) * usdPln / eurPln;
+    const s = Math.round(inEur * 100) / 100;
+    return `${v < 0 ? "-" : ""}${s.toFixed(2).replace(".", ",")} €`;
   };
 
   const fetchData = useCallback(async () => {

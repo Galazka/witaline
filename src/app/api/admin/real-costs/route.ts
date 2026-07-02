@@ -13,11 +13,11 @@ function getPlanRevenue(planKey: string): number {
 import { INTERNAL_COST_PER_MIN } from "@/lib/pricing";
 import {
   USD_TO_PLN,
-  ELEVENLABS_COST_PER_MIN_PLN,
-  TWILIO_AVG_COST_PER_MIN_PLN,
-  OPENROUTER_COST_PER_MIN_PLN,
+  ELEVENLABS_COST_PER_MIN_USD,
+  TWILIO_AVG_COST_PER_MIN_USD,
+  OPENROUTER_COST_PER_MIN_USD,
   TWILIO_SMS_COST_PER_SEGMENT_PLN,
-  TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN,
+  TWILIO_POLAND_MOBILE_COST_PER_MIN_USD,
 } from "@/lib/cost-rates";
 
 export async function GET(request: Request) {
@@ -122,22 +122,22 @@ function buildCallMap(logs: typeof callLogs) {
       entry.calls += 1;
       entry.costPln += Number(log.total_cost ?? log.cost_pln) || 0;
 
-      // ElevenLabs — stored in PLN by sync-costs (USD converted at sync time)
+      // ElevenLabs — synced in USD (from sync-costs)
       const rawEleven = Number(log.cost_elevenlabs);
-      entry.costElevenlabs += rawEleven > 0 ? rawEleven : minutes * ELEVENLABS_COST_PER_MIN_PLN;
+      entry.costElevenlabs += rawEleven > 0 ? rawEleven : minutes * ELEVENLABS_COST_PER_MIN_USD;
 
-      // Twilio — synced as PLN (Polish account returns PLN natively)
+      // Twilio — synced in USD (from sync-costs)
       const rawTwilio = Number(log.cost_twilio);
-      entry.costTwilio += Math.abs(rawTwilio) > 0 ? Math.abs(rawTwilio) : minutes * TWILIO_AVG_COST_PER_MIN_PLN;
+      entry.costTwilio += Math.abs(rawTwilio) > 0 ? Math.abs(rawTwilio) : minutes * TWILIO_AVG_COST_PER_MIN_USD;
 
-      // OpenRouter — not currently synced; use fallback (PLN)
-      entry.costOpenrouter += minutes * OPENROUTER_COST_PER_MIN_PLN;
+      // OpenRouter — not currently synced; use fallback
+      entry.costOpenrouter += minutes * OPENROUTER_COST_PER_MIN_USD;
 
       // Consultant transfer — Twilio outbound leg (if call was transferred)
       if ((log as any).consultant_transfer_cost_pln) {
         entry.consultantTransferCost += Number((log as any).consultant_transfer_cost_pln) || 0;
       } else if ((log as any).routed_to_extension && minutes > 0) {
-        entry.consultantTransferCost += minutes * TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN;
+        entry.consultantTransferCost += minutes * TWILIO_POLAND_MOBILE_COST_PER_MIN_USD;
       }
     }
     return map;

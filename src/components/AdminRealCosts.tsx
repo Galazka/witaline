@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getExchangeRates, convertPln, type Rates } from "@/lib/exchange-rates";
+import { getExchangeRates, convertToPln, type Rates } from "@/lib/exchange-rates";
 
 /* ── Types ── */
 
@@ -115,12 +115,12 @@ export default function AdminRealCosts() {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
   const [editItem, setEditItem] = useState<CostItem | null>(null);
-  const [currency, setCurrency] = useState<ViewCurrency>("PLN");
+  const [currency, setCurrency] = useState<ViewCurrency>("USD");
   const [rates, setRates] = useState<Rates | null>(null);
   const [ratesDate, setRatesDate] = useState<string>("");
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItem, setNewItem] = useState({ name: "", amount: 0, frequency: "monthly", category: "other", due_date: "", is_paid: false, notes: "" });
-  const [callLogs, setCallLogs] = useState<Array<{ id: string; business_id: string; duration_seconds: number; cost_pln: number; internal_cost_pln: number; from_number: string; created_at: string; business_name: string }>>([]);
+  const [callLogs, setCallLogs] = useState<Array<{ id: string; business_id: string; duration_seconds: number; cost_pln: number; total_cost: number; from_number: string; created_at: string; business_name: string }>>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,12 +133,21 @@ export default function AdminRealCosts() {
     return () => { cancelled = true; };
   }, []);
 
-  const fmt = (plnValue: number): string => {
-    if (currency === "PLN") return fmtPLN(plnValue);
-    const converted = convertPln(plnValue, currency, rates || undefined);
-    const symbols: Record<string, string> = { PLN: "zł", EUR: "€", USD: "$" };
-    const fmt2 = converted.toFixed(2).replace(".", ",");
-    return `${fmt2} ${symbols[currency]}`;
+  // All cost values from API are in USD
+  const fmt = (valueInUsd: number): string => {
+    if (currency === "USD") {
+      const isNeg = valueInUsd < 0;
+      const s = Math.abs(valueInUsd).toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return isNeg ? `-${s} $` : `${s} $`;
+    }
+    const inPln = convertToPln(valueInUsd, "USD", rates || undefined);
+    if (currency === "PLN") {
+      const s = inPln.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return `${valueInUsd < 0 ? "-" : ""}${s} zł`;
+    }
+    const r = rates || { usdPln: 4.15, eurPln: 4.52 };
+    const inEur = Math.round((inPln / r.eurPln) * 100) / 100;
+    return `${inEur.toFixed(2).replace(".", ",")} €`;
   };
 
   const fetchData = useCallback(async () => {
@@ -409,7 +418,7 @@ export default function AdminRealCosts() {
                 const g = monthGroups.get(month)!;
                 g.calls += 1;
                 g.minutes += (log.duration_seconds || 0) / 60;
-                g.cost += (log.internal_cost_pln ?? log.cost_pln) || 0;
+                g.cost += (log.total_cost ?? log.cost_pln) || 0;
               }
               const totalCost = [...monthGroups.values()].reduce((s, g) => s + g.cost, 0);
               const totalMin = [...monthGroups.values()].reduce((s, g) => s + g.minutes, 0);

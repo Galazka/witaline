@@ -29,6 +29,7 @@ export const TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN = Math.round(TWILIO_POLAND_MO
 export const TWILIO_POLAND_LANDLINE_COST_PER_MIN_PLN = Math.round(TWILIO_POLAND_LANDLINE_COST_PER_MIN_USD * USD_TO_PLN * 1000) / 1000;
 
 // Fallback average when caller number type is unknown
+export const TWILIO_AVG_COST_PER_MIN_USD = (TWILIO_POLAND_MOBILE_COST_PER_MIN_USD + TWILIO_POLAND_LANDLINE_COST_PER_MIN_USD) / 2;
 export const TWILIO_AVG_COST_PER_MIN_PLN = Math.round(((TWILIO_POLAND_MOBILE_COST_PER_MIN_PLN + TWILIO_POLAND_LANDLINE_COST_PER_MIN_PLN) / 2) * 1000) / 1000;
 
 // ─── OpenRouter (LLM) ─────────────────────────────────────────────
