@@ -16,6 +16,8 @@ interface SyncStats {
   skipped: number;
 }
 
+let debugSample: Record<string, unknown> | null = null;
+
 export async function POST() {
   const { error } = await checkAdminAuth();
   if (error) return error;
@@ -139,13 +141,40 @@ export async function POST() {
               const platformCharge = Number(charging?.platform_charge) || 0;
               const totalChargeCredits = llmCharge + callChargeCr + platformCharge;
 
-              // Log raw data for first few conversations to debug
+              // Collect diagnostic sample from first conversation
+              const freeLlmDollars = Number(data.free_llm_dollars_consumed) || 0;
+
+              if (!debugSample) {
+                debugSample = {
+                  conversation_id: log.elevenlabs_conversation_id,
+                  duration_seconds: log.duration_seconds,
+                  charging: charging || null,
+                  root_call_charge: data.call_charge,
+                  root_call_duration_charges: data.call_duration_charges,
+                  root_conversation_initiation_client_charge: data.conversation_initiation_client_charge,
+                  free_llm_dollars_consumed: data.free_llm_dollars_consumed,
+                  hasRootCharges,
+                  totalChargeCredits,
+                  willUseDollars: hasRootCharges,
+                  willUseCreditsMult: !hasRootCharges && totalChargeCredits > 0,
+                  CREDIT_TO_USD: Number(process.env.ELEVENLABS_CREDIT_TO_USD_RATE) || 0.000165,
+                  resultCost: hasRootCharges
+                    ? roundTo(rootCallCharge + rootDurationCharges + rootInitCharge)
+                    : totalChargeCredits > 0
+                      ? roundTo(totalChargeCredits * (Number(process.env.ELEVENLABS_CREDIT_TO_USD_RATE) || 0.000165))
+                      : 0,
+                  freeLlmDollars,
+                };
+              }
+
+              // Log raw data for debugging
               if (stats.elevenlabs < 3) {
                 console.log("[sync-costs-debug] conv", log.elevenlabs_conversation_id, {
                   charging: charging || null,
                   root_call_charge: data.call_charge,
                   root_call_duration_charges: data.call_duration_charges,
                   root_conversation_initiation_client_charge: data.conversation_initiation_client_charge,
+                  free_llm_dollars_consumed: data.free_llm_dollars_consumed,
                 });
               }
 
@@ -242,5 +271,6 @@ export async function POST() {
   return NextResponse.json({
     message: `Zsynchronizowano: ${stats.elevenlabs} ElevenLabs, ${stats.twilio} Twilio (${stats.skipped} pominięto, ${stats.errors} błędów)`,
     stats,
+    debug_first_conv: debugSample,
   });
 }
