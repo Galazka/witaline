@@ -169,9 +169,9 @@ export default function ProviderBalanceWidget() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Znaki pozostałe</span>
-              {balances.elevenLabs.alertLevel !== "none" && (
-                {renderAlertIcon(balances.elevenLabs.alertLevel)}
-              )}
+              {balances.elevenLabs.alertLevel !== "none" && 
+                renderAlertIcon(balances.elevenLabs.alertLevel)
+              }
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-2">
               {balances.elevenLabs.characters.toLocaleString()}
@@ -186,9 +186,9 @@ export default function ProviderBalanceWidget() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Saldo USD</span>
-              {balances.twilio.alertLevel !== "none" && (
-                {renderAlertIcon(balances.twilio.alertLevel)}
-              )}
+              {balances.twilio.alertLevel !== "none" && 
+                renderAlertIcon(balances.twilio.alertLevel)
+              }
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-2">
               ${balances.twilio.balance.toFixed(2)}
