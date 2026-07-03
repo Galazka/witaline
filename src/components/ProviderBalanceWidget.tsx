@@ -73,14 +73,14 @@ export default function ProviderBalanceWidget() {
     }
   };
 
-  const getAlertIcon = (level: "none" | "low" | "critical") => {
+  const renderAlertIcon = (level: "none" | "low" | "critical") => {
     switch (level) {
       case "low":
-        return AlertCircleIcon;
+        return <AlertCircleIcon className="w-4 h-4" />;
       case "critical":
-        return BatteryLowIcon;
+        return <BatteryLowIcon className="w-4 h-4" />;
       default:
-        return CheckCircleIcon;
+        return <CheckCircleIcon className="w-4 h-4" />;
     }
   };
 
@@ -170,7 +170,7 @@ export default function ProviderBalanceWidget() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Znaki pozostałe</span>
               {balances.elevenLabs.alertLevel !== "none" && (
-                <getAlertIcon(balances.elevenLabs.alertLevel) className="w-4 h-4" />
+                {renderAlertIcon(balances.elevenLabs.alertLevel)}
               )}
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-2">
@@ -187,7 +187,7 @@ export default function ProviderBalanceWidget() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Saldo USD</span>
               {balances.twilio.alertLevel !== "none" && (
-                <getAlertIcon(balances.twilio.alertLevel) className="w-4 h-4" />
+                {renderAlertIcon(balances.twilio.alertLevel)}
               )}
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-2">
