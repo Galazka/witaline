@@ -132,6 +132,7 @@ export async function POST(request: Request) {
   }
 
   const { conversationId, callerId, durationSeconds, transcript, summary, wasHelpful, metadata, customData, recordingUrl } = parsed;
+  const callSidFromMetadata = (metadata.twilio_call_sid as string) || (metadata.call_sid as string) || "";
 
   let businessId = (metadata.businessId as string) || "";
   if (!businessId) {
@@ -182,7 +183,7 @@ export async function POST(request: Request) {
         internal_cost_pln: mainLineCostPln,
         caller_id: callerId || "unknown",
         from_number: (metadata.from_number as string) || callerId || "",
-        twilio_call_sid: (metadata.twilio_call_sid as string) || "",
+        twilio_call_sid: callSidFromMetadata,
         routed_from_main: true,
         transcript: transcript || "",
         classification,
@@ -266,7 +267,7 @@ export async function POST(request: Request) {
     .is("deleted_at", null)
     .eq("business_id", businessId);
 
-  const isFirstCall = existingCallCount === 0 || (existingCallCount === 1 && metadata.twilio_call_sid);
+  const isFirstCall = existingCallCount === 0 || (existingCallCount === 1 && callSidFromMetadata);
   if (isFirstCall && business.owner_email) {
     const { sendFirstCallEmail } = await import("@/lib/email");
     sendFirstCallEmail(business.owner_email, business.name || "Firma", durationSeconds).catch(e =>
@@ -319,7 +320,7 @@ export async function POST(request: Request) {
       revenue_pln: costPln,
       caller_id: callerId || "unknown",
       from_number: (metadata.from_number as string) || callerId || "",
-      twilio_call_sid: (metadata.twilio_call_sid as string) || "",
+      twilio_call_sid: callSidFromMetadata,
       routed_from_main: !!(metadata.routed_from_main),
       routed_to_extension: (metadata.routed_to_extension as string) || null,
       routed_business_name: (metadata.routed_business_name as string) || null,

@@ -95,6 +95,11 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - Plany Start/Pro/Growth/Lux usunięte — działa tylko elastyczny model minut
 - `sms-pricing.ts`: usunięto `WA_PACKAGES`, `getWaRemaining`, wszystkie stałe `WHATSAPP_*`
 
+## Recent Changes (July 2, 2026)
+- **Twilio call SID fix**: `registerCall()` and `registerTransferFallback()` now pass `twilio_call_sid` (not just `call_sid`) in dynamic_vars to ElevenLabs; `call-completed` has fallback `callSidFromMetadata` that checks both keys ✅
+- **active_calls cleanup**: lazy cleanup on every `setActiveCallSid()` (deletes expired), plus cron endpoint `/api/cron/cleanup-active-calls` (co 2h via railway.json) ✅
+- **ignoreBuildErrors removed**: `typescript: { ignoreBuildErrors: true }` removed from `next.config.ts` — build passes clean without it ✅
+
 ## Known Issues
 - Cloudflare tunnel zmienia URL przy każdym restarcie → uruchom `node scripts/start.js` (automatycznie restartuje wszystko). Możesz też ręcznie: `node scripts/setup-tunnel.js https://nowy-tunel.trycloudflare.com` — skrypt aktualizuje .env, MCP server URL, webhooki agenta i Twilio.
 - **`transfer_to_number` disabled**: narzędzie nie działa dla zewnętrznych numerów - wyłączone w konfiguracji agenta

@@ -45,7 +45,7 @@ function twilioApiRequest(method: "GET" | "POST", path: string, creds: TwilioCre
 
 export function registerCall(fromNumber: string, toNumber: string, businessId?: string, callSid?: string, trialMinutesRemaining?: number, prepaidMinutesRemaining?: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    const dynVars: Record<string, string | undefined> = { business_id: businessId || WITALINE_MAIN_BUSINESS_ID, caller_number: fromNumber, call_sid: callSid || "" };
+    const dynVars: Record<string, string | undefined> = { business_id: businessId || WITALINE_MAIN_BUSINESS_ID, caller_number: fromNumber, call_sid: callSid || "", twilio_call_sid: callSid || "" };
     if (trialMinutesRemaining !== undefined && trialMinutesRemaining >= 0) {
       dynVars.trial_minutes_remaining = String(trialMinutesRemaining);
     }
@@ -55,7 +55,7 @@ export function registerCall(fromNumber: string, toNumber: string, businessId?: 
     const body = JSON.stringify({
       agent_id: process.env.ELEVENLABS_AGENT_ID,
       from_number: fromNumber, to_number: toNumber, direction: "inbound",
-      dynamic_vars: businessId ? { business_id: businessId, call_sid: callSid || undefined, caller_phone: fromNumber || undefined, to_number: toNumber || undefined, trial_minutes_remaining: trialMinutesRemaining !== undefined ? String(trialMinutesRemaining) : undefined, minutes_remaining: prepaidMinutesRemaining !== undefined ? String(prepaidMinutesRemaining) : undefined } : undefined,
+      dynamic_vars: businessId ? { business_id: businessId, call_sid: callSid || undefined, twilio_call_sid: callSid || undefined, caller_phone: fromNumber || undefined, to_number: toNumber || undefined, trial_minutes_remaining: trialMinutesRemaining !== undefined ? String(trialMinutesRemaining) : undefined, minutes_remaining: prepaidMinutesRemaining !== undefined ? String(prepaidMinutesRemaining) : undefined } : undefined,
       conversation_initiation_client_data: { dynamic_variables: dynVars }
     });
     const req = https.request({ method: "POST", hostname: "api.elevenlabs.io", path: "/v1/convai/twilio/register-call", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), "xi-api-key": process.env.ELEVENLABS_API_KEY } }, (res) => {
@@ -79,6 +79,7 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
         to_number: toNumber,
         transfer_failed: "true",
         call_sid: callSid || "",
+        twilio_call_sid: callSid || "",
       },
       conversation_initiation_client_data: {
         dynamic_variables: {
@@ -87,6 +88,7 @@ export function registerTransferFallback(fromNumber: string, toNumber: string, b
           caller_phone: fromNumber,
           transfer_failed: "true",
           call_sid: callSid || "",
+          twilio_call_sid: callSid || "",
         },
         conversation_config_override: {
           agent: {
