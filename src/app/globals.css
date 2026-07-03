@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-granat: #050f1a;
+  --color-szmaragd: #0d9488;
   --color-brand-950: #050f1a;
   --color-brand-900: #0a1628;
   --color-brand-800: #0f1d33;
@@ -549,7 +551,15 @@ main .card, main .card-kpi, main .card-elevated {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f9fafb; }
-::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f9fafb; }
+  ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+  /* Granat i Szmaragd utilities */
+  .text-granat { color: var(--color-granat) !important; }
+  .bg-granat { background-color: var(--color-granat) !important; }
+  .bg-szmaragd { background-color: var(--color-szmaragd) !important; }
+  .border-granat { border-color: var(--color-granat) !important; }
+  .bg-granat\\/10 { background-color: rgba(5, 15, 26, 0.1) !important; }
+  .bg-granat\\/20 { background-color: rgba(5, 15, 26, 0.2) !important; }

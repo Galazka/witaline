@@ -1,7 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertCircle, BatteryLow, CheckCircle } from "lucide-react";
+
+const AlertCircleIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4.938a1 1 0 011.591 1.183l-.367 3.879a1 1 0 01-1.987.217l-.367-3.879a1 1 0 011.987-.217l.367 3.879a1 1 0 00.59.816a1 1 0 001.39-1.039l-.367-3.879a1 1 0 011.987-.217l.367 3.879a1 1 0 00.59.816a1 1 0 001.39-1.039l-.367-3.879a1 1 0 011.987-.217l.367 3.879a1 1 0 00.59.816a1 1 0 001.39-1.039l-.367-3.879a1 1 0 011.987-.217l.367 3.879a1 1 0 00.59.816a1 1 0 001.39-1.039l-3.879-3.879a1 1 0 00-1.414-1.414l3.879 3.879z" />
+  </svg>
+);
+
+const BatteryLowIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 14c-1.657 0-3 .895-3 2v4a3 3 0 003 3h12a3 3 0 003-3v-4a3 3 0 00-3-3H6zM9 11V7a3 3 0 016 0v4M9 11h6" />
+  </svg>
+);
+
+const CheckCircleIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
+  </svg>
+);
 
 interface ProviderBalance {
   provider: "elevenlabs" | "twilio";
@@ -63,11 +80,11 @@ export default function ProviderBalanceWidget() {
   const getAlertIcon = (level: "none" | "low" | "critical") => {
     switch (level) {
       case "low":
-        return AlertCircle;
+        return AlertCircleIcon;
       case "critical":
-        return BatteryLow;
+        return BatteryLowIcon;
       default:
-        return CheckCircle;
+        return CheckCircleIcon;
     }
   };
 
@@ -86,7 +103,7 @@ export default function ProviderBalanceWidget() {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-granat/20 p-6">
         <div className="text-center py-8">
-          <AlertCircle className="w-12 h-12 text-granat mx-auto mb-4" />
+          <AlertCircleIcon className="w-12 h-12 text-granat mx-auto mb-4" />
           <p className="text-granat/60">Błąd ładowania: {error}</p>
         </div>
       </div>
@@ -101,7 +118,7 @@ export default function ProviderBalanceWidget() {
         <h3 className="text-lg font-semibold text-granat">Saldo Dostawców</h3>
         {balances.elevenLabs.alertLevel !== "none" || balances.twilio.alertLevel !== "none" && (
           <div className="flex items-center gap-2 text-sm text-amber-600">
-            <AlertCircle className="w-4 h-4" />
+            <AlertCircleIcon className="w-4 h-4" />
             <span>Aktywne alerty</span>
           </div>
         )}
