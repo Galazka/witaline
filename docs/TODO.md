@@ -10,11 +10,11 @@ Stan na: 2026-07-02
 - [x] **Cleanup active_calls** — dodano cleanup przy każdym setActiveCallSid + cron `/api/cron/cleanup-active-calls` co 2h
 - [x] **Wyłączyć `ignoreBuildErrors`** — usunięto z next.config.ts (build przechodzi czysto)
 
-## Priorytet 2 — Testy
+## Priorytet 2 — Testy ✅
 
-- [ ] **Testy integracyjne dla MCP** — najważniejszy endpoint biznesowy
-- [ ] **Testy sync-costs** — krytyczne dla poprawności kosztów
-- [ ] **Testy AdminRealCosts/AdminDailyCosts** — skomplikowana logika agregacji
+- [x] **Testy integracyjne dla MCP** — 7 testów: GET, parse error, unknown method, tools/list (8 tooli), initialize, tools/call unknown tool, prefix stripping
+- [x] **Testy sync-costs** — 2 testy: 401 bez auth, poprawne statystyki
+- [ ] **Testy AdminRealCosts/AdminDailyCosts** — wymaga instalacji jsdom + @testing-library/react + konfiguracji vitest
 
 ## Priorytet 3 — Uzupełnienia
 
