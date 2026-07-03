@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, type JSX } from "react";
-import { IconMenu, IconUser, IconLogout, IconSun, IconMoon, IconMessage } from "./icons";
+import { IconMenu, IconUser, IconLogout, IconSun, IconMoon, IconMessage, IconAlertTriangle } from "./icons";
 import NotificationDropdown from "@/components/NotificationDropdown";
 
 interface Props {
@@ -17,8 +17,14 @@ interface Props {
   onChatClick?: () => void;
 }
 
+interface ProviderAlert {
+  provider: "elevenlabs" | "twilio";
+  level: "low" | "critical";
+}
+
 export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLogout, actions, notificationContext, notificationBusinessId, chatUnreadCount, onChatClick }: Props) {
   const [darkMode, setDarkMode] = useState(false);
+  const [providerAlerts, setProviderAlerts] = useState<ProviderAlert[]>([]);
 
   useEffect(() => {
     if (darkMode) {
@@ -27,6 +33,30 @@ export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLog
       document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const res = await fetch("/api/admin/provider-balances");
+        if (res.ok) {
+          const data = await res.json();
+          const alerts: ProviderAlert[] = [];
+          if (data.elevenLabs?.alertLevel !== "none") {
+            alerts.push({ provider: "elevenlabs", level: data.elevenLabs.alertLevel });
+          }
+          if (data.twilio?.alertLevel !== "none") {
+            alerts.push({ provider: "twilio", level: data.twilio.alertLevel });
+          }
+          setProviderAlerts(alerts);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="h-[4.5rem] bg-[#0c1929] border-b border-white/5 sticky top-0 z-40">
@@ -44,6 +74,16 @@ export default function TopNav({ title, subtitle, onMenuToggle, userEmail, onLog
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {providerAlerts.length > 0 && (
+            <button
+              className="relative p-2 rounded-xl hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 transition-colors"
+              aria-label="Alerty dostawców"
+              title="Alerty dostawców"
+            >
+              <IconAlertTriangle className="w-5 h-5" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 rounded-full" />
+            </button>
+          )}
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white/80 transition-colors"
