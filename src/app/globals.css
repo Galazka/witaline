@@ -561,5 +561,3 @@ main .card, main .card-kpi, main .card-elevated {
   .bg-granat { background-color: var(--color-granat) !important; }
   .bg-szmaragd { background-color: var(--color-szmaragd) !important; }
   .border-granat { border-color: var(--color-granat) !important; }
-  .bg-granat\\/10 { background-color: rgba(5, 15, 26, 0.1) !important; }
-  .bg-granat\\/20 { background-color: rgba(5, 15, 26, 0.2) !important; }
