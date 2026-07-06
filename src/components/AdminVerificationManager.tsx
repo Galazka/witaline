@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface VerificationLog {
   id: string;
@@ -30,6 +30,8 @@ export default function AdminVerificationManager() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [verifyingGus, setVerifyingGus] = useState<string | null>(null);
+  const [gusResult, setGusResult] = useState<Record<string, { success: boolean; data?: any; error?: string }>>({});
 
   const fetchVerifications = async () => {
     try {
@@ -54,6 +56,23 @@ export default function AdminVerificationManager() {
     }
     setUpdating(null);
   };
+
+  const handleGusVerify = useCallback(async (businessId: string, nip: string) => {
+    setVerifyingGus(businessId);
+    try {
+      const res = await fetch("/api/admin/verify-nip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nip }),
+      });
+      const data = await res.json();
+      setGusResult(prev => ({ ...prev, [businessId]: data }));
+    } catch {
+      setGusResult(prev => ({ ...prev, [businessId]: { success: false, error: "Błąd połączenia" } }));
+    } finally {
+      setVerifyingGus(null);
+    }
+  }, []);
 
   function getEmail(email: string | { email: string } | undefined): string {
     if (!email) return "";
@@ -109,7 +128,29 @@ export default function AdminVerificationManager() {
 
               {/* Details */}
               <div className="px-4 pb-2 space-y-1">
-                {biz.nip && <p className="text-xs text-zinc-500">NIP: <span className="font-mono text-zinc-700">{biz.nip}</span></p>}
+                {biz.nip && (
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-zinc-500">NIP: <span className="font-mono text-zinc-700">{biz.nip}</span></p>
+                    <button
+                      onClick={() => handleGusVerify(biz.id, biz.nip!)}
+                      disabled={verifyingGus === biz.id}
+                      className="px-2 py-0.5 text-[10px] font-medium bg-[#0d9488] text-white rounded-md hover:bg-[#0f766e] disabled:opacity-50 transition-all"
+                    >
+                      {verifyingGus === biz.id ? "..." : "GUS"}
+                    </button>
+                  </div>
+                )}
+                {gusResult[biz.id] && (
+                  <div className={`mt-1 px-2 py-1 rounded-lg text-[10px] ${
+                    gusResult[biz.id].success
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "bg-red-50 text-red-600 border border-red-200"
+                  }`}>
+                    {gusResult[biz.id].success
+                      ? `GUS: ${gusResult[biz.id].data.name}, ${gusResult[biz.id].data.city}`
+                      : gusResult[biz.id].error || "Nie znaleziono w GUS"}
+                  </div>
+                )}
                 {biz.krs && <p className="text-xs text-zinc-500">KRS: <span className="font-mono text-zinc-700">{biz.krs}</span></p>}
                 {biz.verification_doc_url && (
                   <p className="text-xs">

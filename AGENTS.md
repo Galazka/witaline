@@ -48,6 +48,12 @@ Polish B2B SaaS platform "WitaLine" — automatyczna recepcja AI. Telephony IVR,
 - `scripts/migrations/*.sql` — migracje SQL
 - `RUN-MIGRATION.sql` — kompleksowa migracja SQL
 
+## Cookie Consent
+- **Component**: `src/components/CookieConsent.tsx` — fixed bottom banner, GTM consent update, localStorage persistence (key: `witaline_cookie_consent`)
+- Default: denied until user acts
+- **GUS NIP Verification**: `src/lib/gus.ts` + `POST /api/admin/verify-nip` (SOAP → GUS BIR API)
+- `GUS_API_KEY` — opcjonalny env var, bez niego weryfikacja NIP działa manualnie
+
 ## Critical Config
 - **Tunnel**: https://arizona-minutes-notification-chronicles.trycloudflare.com
 - **Agent ID**: agent_1501krvm9y90e549tyg96mgczsfv ("Rob", voice Maja: tWVHsc0fuVfAZWfScX9a)
