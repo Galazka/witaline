@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Inter_Tight } from "next/font/google";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import { ToastProvider } from "@/components/ToastNotifications";
 import JsonLd from "@/components/JsonLd";
+import GoogleTagManager from "@/components/GoogleTagManager";
 import "./globals.css";
 
 const inter = Inter({
@@ -85,6 +86,7 @@ export default function RootLayout({
       className={`${inter.variable} ${interTight.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-surface text-foreground" style={{ fontFamily: "var(--font-sans), system-ui, sans-serif" }}>
+        <GoogleTagManager />
         <JsonLd />
         <ToastProvider>
           {children}
