@@ -5,10 +5,21 @@ import { twimlDocument, escapeXml } from "@/lib/twilio-utils";
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_SEC = 10;
 
-function twilioApiRedirect(callSid: string, fallbackUrl: string): Promise<boolean> {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token || !callSid) return Promise.resolve(false);
+async function twilioApiRedirect(callSid: string, fallbackUrl: string, businessId?: string): Promise<boolean> {
+  let sid = process.env.TWILIO_ACCOUNT_SID;
+  let token = process.env.TWILIO_AUTH_TOKEN;
+  if (businessId) {
+    const { data: biz } = await supabaseAdmin
+      .from("businesses")
+      .select("twilio_account_sid, twilio_auth_token")
+      .eq("id", businessId)
+      .single();
+    if (biz?.twilio_account_sid && biz?.twilio_auth_token) {
+      sid = biz.twilio_account_sid;
+      token = biz.twilio_auth_token;
+    }
+  }
+  if (!sid || !token || !callSid) return false;
   const auth = Buffer.from(`${sid}:${token}`).toString("base64");
   const twiml = `<Response><Redirect method="POST">${escapeXml(fallbackUrl)}</Redirect></Response>`;
   const body = new URLSearchParams({ Twiml: twimlDocument(twiml) });
@@ -44,7 +55,7 @@ export async function POST(request: NextRequest) {
       if (originalCallSid && businessId) {
         const baseUrl = process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const fallbackUrl = `${baseUrl.replace(/\/+$/, "")}/api/twilio/transfer-fallback?businessId=${encodeURIComponent(businessId)}`;
-        const redirected = await twilioApiRedirect(originalCallSid, fallbackUrl);
+        const redirected = await twilioApiRedirect(originalCallSid, fallbackUrl, businessId);
         console.log("[transfer-status] max attempts, redirected caller to fallback:", redirected, "callSid:", originalCallSid);
       }
       return NextResponse.json({ ok: true });
