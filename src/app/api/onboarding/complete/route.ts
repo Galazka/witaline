@@ -32,13 +32,13 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { name, plan, systemPrompt, menuCatalog, websiteUrl, phone, industry, templateId, services, calendarSettings, referralCode } = body;
+  const { name, plan, systemPrompt, menuCatalog, websiteUrl, phone, industry, templateId, services, calendarSettings, referralCode, nip, krs, verification_doc_url } = body;
 
   if (!name || !plan) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const validPlans = ["start_100", "pro_500", "enterprise_2000", "elastic_0", "pro_249", "lux_599"];
+  const validPlans = ["elastic_0", "enterprise_2000"];
   if (!validPlans.includes(plan)) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
@@ -64,6 +64,9 @@ export async function POST(request: Request) {
       industry: body.industry || "",
       website_url: websiteUrl || "",
       phone: phone || "",
+      nip: nip || null,
+      krs: krs || null,
+      verification_doc_url: verification_doc_url || null,
     })
     .select()
     .single();

@@ -74,6 +74,9 @@ export default function RegisterPage() {
   const [referralCode, setReferralCode] = useState("");
   const [policy, setPolicy] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [nip, setNip] = useState("");
+  const [krs, setKrs] = useState("");
+  const [docUrl, setDocUrl] = useState("");
 
   const supabase = createClient();
 
@@ -140,7 +143,7 @@ export default function RegisterPage() {
     const scanData = await scanRes.json();
     const prompt = scanData.systemPrompt || templatePrompt;
     setScanning(false);
-    const res = await fetch("/api/onboarding/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: businessName, plan: modelToPlan[selectedPlan] || "elastic_0", systemPrompt: prompt, menuCatalog: {}, websiteUrl, phone, industry, templateId: industry !== "custom" ? industry : undefined, services: tpl?.services, calendarSettings: tpl?.calendar, referralCode: referralCode || null }) });
+    const res = await fetch("/api/onboarding/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: businessName, plan: modelToPlan[selectedPlan] || "elastic_0", systemPrompt: prompt, menuCatalog: {}, websiteUrl, phone, industry, templateId: industry !== "custom" ? industry : undefined, services: tpl?.services, calendarSettings: tpl?.calendar, referralCode: referralCode || null, nip: nip || null, krs: krs || null, verification_doc_url: docUrl || null }) });
     if (!res.ok) { const d = await res.json(); setError(d.error || "Blad"); setSaving(false); return; }
     const result = await res.json(); setExtension(result.extension); setDone(true); setSaving(false);
   }
@@ -267,6 +270,19 @@ if (done) return (
                 <div><label className="block text-sm font-medium text-white/80 mb-1.5">Nazwa firmy <span className="text-red-400">*</span></label><input value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="np. Pizzeria Napoli" className={inputClass} /></div>
                 <div><label className="block text-sm font-medium text-white/80 mb-1.5">Strona www</label><input value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://twojafirma.pl" className={inputClass} /><p className="text-xs text-white/50 mt-1">AI zeskanuje ja, by poznac Twoja oferte</p></div>
                 <div><label className="block text-sm font-medium text-white/80 mb-1.5">Telefon firmowy</label><input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+48 123 456 789" className={inputClass} /></div>
+              </div>
+              <div className="border-t border-white/15 my-4 pt-4">
+                <p className="text-sm font-semibold text-white/80 mb-3">Dane do weryfikacji (opcjonalne)</p>
+                <p className="text-xs text-white/50 mb-3">Przyspiesz proces weryfikacji firmy przez administratora</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className="block text-sm font-medium text-white/80 mb-1.5">NIP</label><input value={nip} onChange={e => setNip(e.target.value)} placeholder="1234567890" maxLength={10} className={inputClass} />{nip && !/^\d{10}$/.test(nip) && <p className="text-xs text-red-400 mt-1">NIP musi zawierać 10 cyfr</p>}</div>
+                  <div><label className="block text-sm font-medium text-white/80 mb-1.5">KRS</label><input value={krs} onChange={e => setKrs(e.target.value)} placeholder="0000123456" className={inputClass} /></div>
+                </div>
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-white/80 mb-1.5">Link do dokumentu rejestrowego</label>
+                  <input value={docUrl} onChange={e => setDocUrl(e.target.value)} placeholder="https://drive.google.com/..." className={inputClass} />
+                  <p className="text-xs text-white/50 mt-1">CEIDG, odpis KRS lub inny dokument potwierdzający firmę</p>
+                </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button onClick={() => setStep(1)} className={`flex-1 ${btnSecondary}`}>← Wstecz</button>
