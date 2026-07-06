@@ -2,7 +2,7 @@ import { getResend } from "@/lib/resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl";
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "WitaLine <hello@witaline.pl>";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "WitaLine <witam@witaline.pl>";
 
 // ── In-memory cache for email templates ──────────────────────────
 let templateCache: Map<string, { subject: string; html: string }> | null = null;

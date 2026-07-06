@@ -37,20 +37,32 @@ export function getFreeSmsForRate(minuteRatePLN: number): number {
   return Math.max(20, Math.round(base / 10) * 10); // zaokrąglenie w górę do 10
 }
 
-// ─── SMS prepaid package pricing (BRUTTO) ────────────────────────
-// Wyliczane dynamicznie na podstawie domyślnego tieru (1.20 PLN/min netto = 1.476 brutto)
-function computeSmsPackages(): SmsPackage[] {
-  const baseRate = 1.20; // najwyższa stawka — najdroższy SMS
-  const basePriceNetto = getSmsPriceNettoForRate(baseRate); // 0.50
-  const baseBrutto = Math.round(basePriceNetto * VAT_MULTIPLIER * 100) / 100;
+export const SMS_VOLUME_DISCOUNTS: Record<number, number> = {
+  50:   0,       // 0% — cena bazowa
+  100:  0.05,    // 5%
+  200:  0.10,    // 10%
+  500:  0.16,    // 16%
+  1000: 0.21,    // 21%
+};
 
-  return [
-    { smsCount: 50,  clientPricePLN: Math.round(baseBrutto * 50 * 100) / 100,  witalineCostPLN: 12.5,  marginPLN: Math.round((baseBrutto * 50 - 12.5) * 100) / 100,  pricePerSmsPLN: baseBrutto },
-    { smsCount: 100, clientPricePLN: Math.round(baseBrutto * 100 * 100) / 100, witalineCostPLN: 25,    marginPLN: Math.round((baseBrutto * 100 - 25) * 100) / 100,   pricePerSmsPLN: baseBrutto },
-    { smsCount: 200, clientPricePLN: Math.round(baseBrutto * 200 * 100) / 100, witalineCostPLN: 50,    marginPLN: Math.round((baseBrutto * 200 - 50) * 100) / 100,   pricePerSmsPLN: baseBrutto },
-    { smsCount: 500, clientPricePLN: Math.round(baseBrutto * 500 * 100) / 100, witalineCostPLN: 125,   marginPLN: Math.round((baseBrutto * 500 - 125) * 100) / 100,  pricePerSmsPLN: baseBrutto },
-    { smsCount: 1000, clientPricePLN: Math.round(baseBrutto * 1000 * 100) / 100, witalineCostPLN: 250, marginPLN: Math.round((baseBrutto * 1000 - 250) * 100) / 100, pricePerSmsPLN: baseBrutto },
-  ];
+function computeSmsPackages(): SmsPackage[] {
+  const baseRate = 1.20;
+  const basePriceNetto = getSmsPriceNettoForRate(baseRate); // 0.50
+  const baseBrutto = Math.round(basePriceNetto * VAT_MULTIPLIER * 100) / 100; // 0.62
+
+  return (Object.entries(SMS_VOLUME_DISCOUNTS) as [string, number][]).sort(([a], [b]) => Number(a) - Number(b)).map(([countStr, discount]) => {
+    const count = Number(countStr);
+    const pricePerSms = Math.round(baseBrutto * (1 - discount) * 100) / 100;
+    const clientPrice = Math.round(pricePerSms * count * 100) / 100;
+    const witalineCost = Math.round(TWILIO_SMS_COST_PLN * count * 100) / 100; // koszt Twilio netto
+    return {
+      smsCount: count,
+      clientPricePLN: clientPrice,
+      witalineCostPLN: witalineCost,
+      marginPLN: Math.round((clientPrice - witalineCost) * 100) / 100,
+      pricePerSmsPLN: pricePerSms,
+    };
+  });
 }
 
 export const SMS_PACKAGES: SmsPackage[] = computeSmsPackages();

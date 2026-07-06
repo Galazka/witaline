@@ -763,7 +763,7 @@ function Footer() {
             <h4 className="text-white text-sm font-semibold mb-4">Kontakt</h4>
             <ul className="space-y-2">
               <li><a href={`tel:${WITALINE_PHONE_NUMBER}`} className="text-zinc-400 text-sm hover:text-white transition-colors">{WITALINE_PHONE_DISPLAY}</a></li>
-              <li><a href="mailto:hello@witaline.pl" className="text-zinc-400 text-sm hover:text-white transition-colors">hello@witaline.pl</a></li>
+              <li><a href="mailto:witam@witaline.pl" className="text-zinc-400 text-sm hover:text-white transition-colors">witam@witaline.pl</a></li>
             </ul>
           </div>
           <div>
