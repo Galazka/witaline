@@ -84,22 +84,6 @@ export async function GET(request: Request) {
   if (businessId) smsQuery = smsQuery.eq("business_id", businessId);
   const { data: smsLogs } = await smsQuery;
 
-  // 4b. WhatsApp logs
-  let waQuery = supabaseAdmin
-    .from("wa_logs")
-    .select("business_id, id, created_at")
-    .gte("created_at", fromStr)
-    .lte("created_at", toStr + "T23:59:59");
-  if (businessId) waQuery = waQuery.eq("business_id", businessId);
-  const { data: waLogs } = await waQuery;
-
-  // WhatsApp count map (aggregate, not per-call)
-  const waCountMap = new Map<string, number>();
-  for (const log of waLogs || []) {
-    const bid = log.business_id || "unknown";
-    waCountMap.set(bid, (waCountMap.get(bid) || 0) + 1);
-  }
-
   // 5. Cost items (own costs)
   const { data: costItems } = await supabaseAdmin
     .from("cost_items")
@@ -136,9 +120,7 @@ function buildCallMap(logs: typeof callLogs) {
       entry.costOpenrouter += minutes * OPENROUTER_COST_PER_MIN_USD;
 
       // Consultant transfer — Twilio outbound leg (if call was transferred)
-      if ((log as any).consultant_transfer_cost_pln) {
-        entry.consultantTransferCost += Number((log as any).consultant_transfer_cost_pln) || 0;
-      } else if ((log as any).routed_to_extension && minutes > 0) {
+      if ((log as any).routed_to_extension && minutes > 0) {
         entry.consultantTransferCost += minutes * TWILIO_POLAND_MOBILE_COST_PER_MIN_USD;
       }
     }
@@ -157,7 +139,7 @@ function buildCallMap(logs: typeof callLogs) {
   // Include ALL businesses + any that have calls/sms/wa
   const allBizIds = new Set<string>();
   for (const b of businesses || []) allBizIds.add(b.id);
-  for (const bid of [...callMap.keys(), ...smsCountMap.keys(), ...waCountMap.keys()]) allBizIds.add(bid);
+  for (const bid of [...callMap.keys(), ...smsCountMap.keys()]) allBizIds.add(bid);
   if (businessId) allBizIds.add(businessId);
 
   const daysInRange = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86400000) + 1);
@@ -225,7 +207,6 @@ function buildCallMap(logs: typeof callLogs) {
       cost_elevenlabs: Number(log.cost_elevenlabs) || 0,
       cost_twilio: Number(log.cost_twilio) || 0,
       cost_openrouter: Number(log.cost_openrouter) || 0,
-      consultant_transfer_cost_pln: Number((log as any).consultant_transfer_cost_pln) || 0,
       // Always calculate total_cost from components (not from DB field which may be stale)
       total_cost: Math.round(((Number(log.cost_elevenlabs) || 0) + (Number(log.cost_twilio) || 0) + (Number(log.cost_openrouter) || 0)) * 100) / 100,
       revenue_pln: Number(log.revenue_pln) || 0,

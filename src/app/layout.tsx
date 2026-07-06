@@ -38,6 +38,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://witaline.pl"),
   alternates: {
     canonical: "https://witaline.pl",
+    languages: {
+      "pl": "https://witaline.pl",
+      "en": "https://witaline.pl/en",
+      "x-default": "https://witaline.pl",
+    },
   },
   openGraph: {
     title: "WitaLine — Automatyczna Recepcja AI 24/7",

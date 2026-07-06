@@ -12,14 +12,14 @@ export async function GET() {
   try {
     const result = await supabaseAdmin
       .from("businesses")
-      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, whatsapp_number, created_at, voice_id, trial_ends_at, subscription_current_period_end")
+      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, created_at, voice_id, trial_ends_at, subscription_current_period_end")
       .neq("id", WITALINE_MAIN_BUSINESS_ID)
       .order("created_at", { ascending: false });
     businesses = result.data;
   } catch {
     const result = await supabaseAdmin
       .from("businesses")
-      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, whatsapp_number, created_at, voice_id, trial_ends_at")
+      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, created_at, voice_id, trial_ends_at")
       .neq("id", WITALINE_MAIN_BUSINESS_ID)
       .order("created_at", { ascending: false });
     businesses = result.data;
@@ -102,7 +102,6 @@ export async function GET() {
 
       return {
         ...b,
-        whatsapp_number: (b as any).whatsapp_number || null,
         consultant_count: consultantCount || 0,
         ported_phone: portRequest?.[0]?.phone_number || null,
         port_status: portRequest?.[0]?.status || null,

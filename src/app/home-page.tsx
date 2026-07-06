@@ -22,7 +22,7 @@ function CheckIcon() {
 }
 
 const faqItems = [
-  { q: "Co to są tokeny?", a: "Tokeny to jednostki przetwarzania rozmowy. 1 minuta rozmowy głosowej zużywa około 1000 tokenów. Chat i widget na stronie zużywają minimalne ilości — dlatego są nielimitowane w każdym planie." },
+  { q: "Jak działa rozliczenie?", a: "WitaLine działa w modelu pay-as-you-go — nie ma stałej opłaty miesięcznej. Płacisz tylko za wykorzystane minuty rozmów. Stawki zaczynają się od 1,20 PLN/min i maleją wraz z większym wolumenem (nawet do 0,85 PLN/min). Kupujesz minuty z góry w pakietach, a SMS-y rozliczane są według progresywnej stawki zależnej od poziomu minut." },
   { q: "Jak asystent rozumie klienta?", a: "Kiedy ktoś dzwoni, głos jest zamieniany na tekst w czasie rzeczywistym przez zaawansowany silnik rozpoznawania mowy. Model językowy analizuje intencje — czy to pytanie o ofertę, zamówienie, rezerwację. Następnie generuje odpowiedź, która jest odczytywana przez syntezator mowy. Cały cykl trwa poniżej 2 sekund." },
   { q: "Czy asystent brzmi naturalnie?", a: "Tak. Nasze głosy są uznawane za najbardziej naturalne na rynku — w testach użytkownicy regularnie mylą je z żywymi ludźmi. Latencja odpowiedzi to poniżej 100 ms, a pełny cykl zamiany mowy na odpowiedź zajmuje poniżej 2 sekund. Możesz zadzwonić i sprawdzić: +48 732 125 752." },
   { q: "Jak bot radzi sobie z emocjami klienta?", a: "Model językowy wykrywa nastroje i emocje w tekście. Jeśli klient jest zdenerwowany, bot może spowolnić tempo, użyć bardziej empatycznych sformułowań, a w razie potrzeby — przekazać rozmowę do konsultanta." },
@@ -31,7 +31,7 @@ const faqItems = [
   { q: "Z jakimi systemami się integrujecie?", a: "Natywnie: Google Calendar, HubSpot, Livespace, Pipedrive. Przez API możemy zintegrować się z dowolnym CRM, ERP lub systemem rezerwacji. Dla klientów Enterprise — niestandardowe integracje." },
   { q: "Czy mogę przenieść swój numer?", a: "Tak. W modelu Self-Service możesz otrzymać nowy numer lub przenieść istniejący. Proces przenoszenia trwa do 5 dni roboczych. W modelu Enterprise przenosimy numer w ramach onboardingu." },
   { q: "Jakie jezyki obslugujecie?", a: "Polski i angielski. Mozemy dodac kolejny jezyk na zyczenie klienta. W planie Enterprise uruchamiamy dowolna konfiguracje jezykowa." },
-  { q: "Co z ochroną danych i RODO?", a: "WitaLine działa na europejerskich serwerach (Google Cloud, region Frankfurt). Każda rozmowa poprzedzona jest komunikatem o nagrywaniu i zgodzie. Nagrania przechowujemy maksymalnie 30 dni. Pełna zgodność z RODO. Dla Enterprise — umowa powierzenia danych i audyt bezpieczeństwa." },
+  { q: "Co z ochroną danych i RODO?", a: "WitaLine działa na europejskich serwerach (Google Cloud, region Frankfurt). Każda rozmowa poprzedzona jest komunikatem o nagrywaniu i zgodzie. Nagrania przechowujemy maksymalnie 30 dni. Pełna zgodność z RODO. Dla Enterprise — umowa powierzenia danych i audyt bezpieczeństwa." },
   { q: "Ile kosztuje wdrożenie dla mojej firmy?", a: "Skorzystaj z konfiguratora w zakładce cennik — wybierz minuty i dodatki, zobaczysz cenę od ręki. Dla firm powyżej 10 konsultantów polecamy plan Enterprise z indywidualną wyceną i dedykowanym onboardingiem." },
   { q: "Musicie wiedzieć wszystko o mojej firmie?", a: "Nie. Wystarczy baza wiedzy: cennik, godziny otwarcia, menu produktów. Resztę bot wyciąga z rozmowy. Dla bardziej zaawansowanych potrzeb — konfigurujesz własnego prompta." },
 ];

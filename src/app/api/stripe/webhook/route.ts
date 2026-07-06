@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const subscriptionId = obj?.subscription;
     const paymentType = obj?.metadata?.type;
     const currency = obj?.metadata?.currency || "pln";
-    const amountPLN = parseFloat(obj?.metadata?.amount_pln || obj?.metadata?.price_pln || "0");
+    const amountPLN = parseFloat(obj?.metadata?.amount_brutto_pln || obj?.metadata?.amount_pln || obj?.metadata?.price_pln || "0");
 
     if (!businessId) return NextResponse.json({ received: true });
 

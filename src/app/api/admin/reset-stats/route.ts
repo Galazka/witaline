@@ -13,7 +13,6 @@ export async function POST() {
       "call_logs",
       "conversations",
       "sms_logs",
-      "wa_logs",
       "notifications",
       "leads",
       "reservations",

@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
       let bizId = resolveTemplate(args.business_id) || WITALINE_MAIN_BUSINESS;
       // transfer_to_human works even during trial - do not block
-      if (toolName !== "business_lookup" && toolName !== "transfer_to_human" && toolName !== "send_whatsapp") {
+      if (toolName !== "business_lookup" && toolName !== "transfer_to_human") {
         if (!(await checkTrial(bizId))) {
           result = JSON.stringify({ ok: false, error: "Trial expired" });
           return NextResponse.json({ jsonrpc: "2.0", id, result: { content: [{ type: "text", text: result }] } });

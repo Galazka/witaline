@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
-    "typecheck": "npx tsc --noEmit"
+    "typecheck": "npx tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.59.0",
@@ -30,7 +32,11 @@
   },
   "devDependencies": {
     "@elevenlabs/react": "^1.6.8",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "dotenv": "^17.4.2",
+    "jsdom": "^29.1.1",
     "vitest": "^4.1.9"
   }
 }

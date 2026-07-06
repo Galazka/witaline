@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Lead, Business } from "@/types/database";
 import { useAdminTab } from "@/components/layout/AdminLayout";
+import ProviderBalanceWidget from "./ProviderBalanceWidget";
 
 interface DashboardStats {
   totalBusinesses: number;
@@ -150,6 +151,9 @@ export default function AdminDashboard() {
           <button onClick={fetchAll} className="btn-ghost text-xs">Odświez</button>
         </div>
       </div>
+
+      {/* Provider balances */}
+      <ProviderBalanceWidget />
 
       {/* KPI cards — stagger animation */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 stagger">

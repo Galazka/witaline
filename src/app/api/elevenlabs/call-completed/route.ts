@@ -9,6 +9,38 @@ import { rateLimitMiddleware } from "@/lib/rate-limit";
 import { analyzeCall } from "@/lib/analyze-call";
 import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
+function roundTo(n: number, decimals = 4) {
+  return Math.round(n * 10 ** decimals) / 10 ** decimals;
+}
+
+async function syncCallCosts(callLogId: string, conversationId: string) {
+  if (!conversationId) return;
+  try {
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) return;
+    const convRes = await fetch(
+      `https://api.elevenlabs.io/v1/convai/conversations/${conversationId}`,
+      { headers: { "xi-api-key": apiKey } }
+    );
+    if (!convRes.ok) return;
+    const conv = await convRes.json() as Record<string, unknown>;
+    const charging = conv.charging as Record<string, unknown> | undefined;
+    if (!charging) return;
+    const llmPrice = typeof charging.llm_price === "number" ? charging.llm_price : 0;
+    const platformPrice = typeof charging.platform_price === "number" ? charging.platform_price : 0;
+    const costEl = roundTo(llmPrice + platformPrice);
+    await supabaseAdmin
+      .from("call_logs")
+      .update({
+        cost_elevenlabs: costEl,
+        total_cost: roundTo((costEl || 0) + 0),
+      })
+      .eq("id", callLogId);
+  } catch (e) {
+    console.warn("[call-completed] sync-cost error:", e);
+  }
+}
+
 function verifyWebhook(request: Request): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
   if (!secret) return true;
@@ -200,6 +232,7 @@ export async function POST(request: Request) {
 
     if (callLog) {
       analyzeCall(transcript || "", summary || "", callLog.id).catch((e) => console.error("[call-completed] analyze error:", e));
+      syncCallCosts(callLog.id, conversationId);
 
       await supabaseAdmin.from("conversations").insert({
         business_id: WITALINE_MAIN_BUSINESS_ID,
@@ -341,6 +374,7 @@ export async function POST(request: Request) {
 
   if (callLog) {
     analyzeCall(transcript || "", summary || "", callLog.id).catch((e) => console.error("[call-completed] analyze error:", e));
+    syncCallCosts(callLog.id, conversationId);
 
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,

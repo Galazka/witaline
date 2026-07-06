@@ -70,7 +70,6 @@ interface CallLog {
   cost_elevenlabs: number;
   cost_twilio: number;
   cost_openrouter: number;
-  consultant_transfer_cost_pln: number;
   total_cost: number;
   revenue_pln: number;
   plan_revenue_pln: number;
@@ -88,7 +87,6 @@ interface DailyGroup {
   totalElevenlabs: number;
   totalTwilio: number;
   totalOpenrouter: number;
-  totalConsultantTransfer: number;
   totalRevenue: number;
   profit: number;
 }
@@ -145,7 +143,6 @@ export default function AdminDailyCosts() {
           cost_elevenlabs: Number(l.cost_elevenlabs) || 0,
           cost_twilio: Number(l.cost_twilio) || 0,
           cost_openrouter: Number(l.cost_openrouter) || 0,
-          consultant_transfer_cost_pln: Number(l.consultant_transfer_cost_pln) || 0,
           // Always calculate total from components — never trust DB total_cost
           total_cost: Math.round(((Number(l.cost_elevenlabs) || 0) + (Number(l.cost_twilio) || 0) + (Number(l.cost_openrouter) || 0)) * 100) / 100,
           revenue_pln: Number(l.revenue_pln) || 0,
@@ -209,10 +206,9 @@ export default function AdminDailyCosts() {
       const totalElevenlabs = calls.reduce((s, c) => s + c.cost_elevenlabs, 0);
       const totalTwilio = calls.reduce((s, c) => s + c.cost_twilio, 0);
       const totalOpenrouter = calls.reduce((s, c) => s + c.cost_openrouter, 0);
-      const totalConsultantTransfer = calls.reduce((s, c) => s + (c.consultant_transfer_cost_pln || 0), 0);
       const totalRevenue = calls.reduce((s, c) => s + (c.plan_revenue_pln || 0), 0);
       const profit = totalRevenue - totalCost;
-      return { date, calls, totalMinutes, totalCost, totalElevenlabs, totalTwilio, totalOpenrouter, totalConsultantTransfer, totalRevenue, profit };
+      return { date, calls, totalMinutes, totalCost, totalElevenlabs, totalTwilio, totalOpenrouter, totalRevenue, profit };
     });
 
   const today = todayStr();

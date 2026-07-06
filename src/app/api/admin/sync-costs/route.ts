@@ -106,6 +106,20 @@ export async function POST() {
 
   stats.total = callLogs.length;
 
+  // Build map of business Twilio credentials for subaccount support
+  const { data: allBusinesses } = await supabaseAdmin
+    .from("businesses")
+    .select("id, twilio_account_sid, twilio_auth_token")
+    .not("twilio_account_sid", "is", null)
+    .not("twilio_auth_token", "is", null);
+
+  const subaccountCreds = new Map<string, { sid: string; token: string }>();
+  for (const biz of allBusinesses || []) {
+    if (biz.twilio_account_sid && biz.twilio_auth_token) {
+      subaccountCreds.set(biz.id, { sid: biz.twilio_account_sid, token: biz.twilio_auth_token });
+    }
+  }
+
   const concurrency = 5;
   const chunks: typeof callLogs[] = [];
   for (let i = 0; i < callLogs.length; i += concurrency) {
@@ -177,31 +191,37 @@ export async function POST() {
           }
         }
 
-        // 2. Twilio cost — store in USD
-        if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && log.twilio_call_sid) {
-          try {
-            const auth = Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64");
-            const res = await fetch(
-              `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls/${log.twilio_call_sid}.json`,
-              { headers: { "Authorization": `Basic ${auth}` } }
-            );
-            if (res.ok) {
-              const data = await res.json() as Record<string, unknown>;
-              const price = Number(data.price) || 0;
-              if (price !== 0 || data.price !== undefined) {
-                const absPrice = Math.abs(price);
-                // Twilio returns price in account currency. Convert to USD if needed.
-                updates.cost_twilio = roundTo(
-                  twilioAccountCurrency === "PLN"
-                    ? absPrice / USD_TO_PLN
-                    : absPrice
-                );
-                stats.twilio++;
+        // 2. Twilio cost — store in USD (supports subaccounts)
+        if (log.twilio_call_sid) {
+          // Determine which Twilio account to use (subaccount or main)
+          const bizCreds = subaccountCreds.get(log.business_id || "");
+          const twSid = bizCreds?.sid || TWILIO_ACCOUNT_SID;
+          const twToken = bizCreds?.token || TWILIO_AUTH_TOKEN;
+
+          if (twSid && twToken) {
+            try {
+              const auth = Buffer.from(`${twSid}:${twToken}`).toString("base64");
+              const res = await fetch(
+                `https://api.twilio.com/2010-04-01/Accounts/${twSid}/Calls/${log.twilio_call_sid}.json`,
+                { headers: { "Authorization": `Basic ${auth}` } }
+              );
+              if (res.ok) {
+                const data = await res.json() as Record<string, unknown>;
+                const price = Number(data.price) || 0;
+                if (price !== 0 || data.price !== undefined) {
+                  const absPrice = Math.abs(price);
+                  updates.cost_twilio = roundTo(
+                    twilioAccountCurrency === "PLN"
+                      ? absPrice / USD_TO_PLN
+                      : absPrice
+                  );
+                  stats.twilio++;
+                }
               }
+            } catch (e) {
+              console.warn(`[sync-costs] Twilio fetch error for ${log.twilio_call_sid}:`, e);
+              stats.errors++;
             }
-          } catch (e) {
-            console.warn(`[sync-costs] Twilio fetch error for ${log.twilio_call_sid}:`, e);
-            stats.errors++;
           }
         }
 
