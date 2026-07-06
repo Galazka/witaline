@@ -32,10 +32,14 @@ export async function POST(req: NextRequest) {
 
   if (email && password) {
     // Check if user already exists in auth.users
-    const { data: existingUser } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    const { data: existingUser } = await supabaseAdmin
+      .from("auth.users")
+      .select("id")
+      .eq("email", email.toLowerCase())
+      .maybeSingle();
 
-    if (existingUser?.user) {
-      targetUserId = existingUser.user.id;
+    if (existingUser?.id) {
+      targetUserId = existingUser.id;
     } else {
       const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
         email,
