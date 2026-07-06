@@ -12,14 +12,14 @@ export async function GET() {
   try {
     const result = await supabaseAdmin
       .from("businesses")
-      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, created_at, voice_id, trial_ends_at, subscription_current_period_end")
+      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, created_at, voice_id, trial_ends_at, subscription_current_period_end, verification_status")
       .neq("id", WITALINE_MAIN_BUSINESS_ID)
       .order("created_at", { ascending: false });
     businesses = result.data;
   } catch {
     const result = await supabaseAdmin
       .from("businesses")
-      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, created_at, voice_id, trial_ends_at")
+      .select("id, name, owner_uid, twilio_number, current_plan, minutes_used_this_week, subscription_status, suspended, industry, website_url, phone, created_at, voice_id, trial_ends_at, verification_status")
       .neq("id", WITALINE_MAIN_BUSINESS_ID)
       .order("created_at", { ascending: false });
     businesses = result.data;

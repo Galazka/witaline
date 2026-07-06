@@ -34,6 +34,7 @@ interface BizRecord {
   created_at: string;
   trial_ends_at: string | null;
   subscription_current_period_end: string | null;
+  verification_status: string;
   stats: BizStats;
 }
 
@@ -109,6 +110,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [verificationFilter, setVerificationFilter] = useState<string>("all");
 
   useEffect(() => {
     fetch("/api/admin/business-stats")
@@ -142,6 +144,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
   const filtered = useMemo(() => {
     return businesses
       .filter(b => {
+        if (verificationFilter !== "all" && b.verification_status !== verificationFilter) return false;
         if (!search) return true;
         const q = search.toLowerCase();
         return b.name.toLowerCase().includes(q)
@@ -228,7 +231,18 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
           />
           <span className="text-xs text-zinc-400 dark:text-zinc-500">{filtered.length} / {businesses.length} firm</span>
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex items-center gap-2">
+          <select
+            value={verificationFilter}
+            onChange={e => setVerificationFilter(e.target.value)}
+            className="px-2.5 py-1.5 text-xs rounded-lg border border-zinc-200 bg-white text-zinc-600"
+          >
+            <option value="all">Weryfikacja: wszystkie</option>
+            <option value="verified">Zweryfikowane</option>
+            <option value="pending">Oczekujące</option>
+            <option value="rejected">Odrzucone</option>
+            <option value="unverified">Niezweryfikowane</option>
+          </select>
           {[
             { key: "name", label: "Nazwa" },
             { key: "created_at", label: "Data" },
@@ -263,6 +277,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Firma</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Plan</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Status</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Weryfikacja</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Okres próbny</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Subskrypcja</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Kontakt</th>
@@ -306,6 +321,21 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                       <td className="px-3 py-2.5">
                         <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${sCfg.bg} ${sCfg.text}`}>
                           {sCfg.label}
+                        </span>
+                      </td>
+
+                      {/* Weryfikacja */}
+                      <td className="px-3 py-2.5">
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                          b.verification_status === "verified" ? "bg-green-50 text-green-700" :
+                          b.verification_status === "pending" ? "bg-amber-50 text-amber-700" :
+                          b.verification_status === "rejected" ? "bg-red-50 text-red-600" :
+                          "bg-zinc-100 text-zinc-500"
+                        }`}>
+                          {b.verification_status === "verified" ? "Zweryfikowana" :
+                           b.verification_status === "pending" ? "Oczekuje" :
+                           b.verification_status === "rejected" ? "Odrzucona" :
+                           "Niezweryfikowana"}
                         </span>
                       </td>
 
