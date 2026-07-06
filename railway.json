@@ -32,7 +32,7 @@
     },
     "db-backup": {
       "schedule": "0 4 * * *",
-      "command": "cd /app && npx supabase db dump --db-url '${SUPABASE_DB_URL}' --schema public --file backups/schema-\$(date +\\%Y\\%m\\%d).sql && npx supabase db dump --db-url '${SUPABASE_DB_URL}' --data-only --use-copy --file backups/data-\$(date +\\%Y\\%m\\%d).sql"
+      "command": "cd /app && npx supabase db dump --db-url '${SUPABASE_DB_URL}' --schema public --file backups/schema-$(date +%Y%m%d).sql && npx supabase db dump --db-url '${SUPABASE_DB_URL}' --data-only --use-copy --file backups/data-$(date +%Y%m%d).sql"
     }
   }
 }
