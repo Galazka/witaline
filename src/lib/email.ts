@@ -1,4 +1,4 @@
-import { resend } from "@/lib/resend";
+import { getResend } from "@/lib/resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://witaline.pl";
@@ -65,7 +65,7 @@ export async function sendEmail({
       }
     }
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: FROM_EMAIL,
       to,
       subject: finalSubject,
