@@ -4,10 +4,8 @@ import ConditionalFooter from "@/components/ConditionalFooter";
 import { ToastProvider } from "@/components/ToastNotifications";
 import JsonLd from "@/components/JsonLd";
 import GoogleTagManager from "@/components/GoogleTagManager";
-import dynamic from "next/dynamic";
+import CookieConsent from "@/components/CookieConsentWrapper";
 import "./globals.css";
-
-const CookieConsent = dynamic(() => import("@/components/CookieConsent"), { ssr: false });
 
 const inter = Inter({
   variable: "--font-inter",
