@@ -62,7 +62,10 @@ useEffect(() => {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Błąd logowania."); }
-      else { redirectAfterLogin(data.userId, data.email); }
+      else {
+        await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+        redirectAfterLogin(data.userId, data.email);
+      }
     } catch {
       setError("Wystąpił błąd. Spróbuj ponownie.");
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,24 +8,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email i hasło są wymagane." }, { status: 400 });
     }
 
-    const cookiesToSet: { name: string; value: string; options?: any }[] = [];
-
-    const supabase = createServerClient(
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return req.cookies.getAll();
-          },
-          setAll(cookies) {
-            cookies.forEach(({ name, value, options }) => {
-              req.cookies.set(name, value);
-              cookiesToSet.push({ name, value, options });
-            });
-          },
-        },
-      },
     );
 
     const result = await supabase.auth.signInWithPassword({ email, password });
@@ -41,14 +26,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Nie udało się zalogować. Spróbuj ponownie." }, { status: 401 });
     }
 
-    const { user } = result.data;
-    const response = NextResponse.json({ ok: true, userId: user?.id, email: user?.email });
+    const { session, user } = result.data;
 
-    cookiesToSet.forEach(({ name, value, options }) => {
-      response.cookies.set(name, value, options);
+    return NextResponse.json({
+      ok: true,
+      userId: user?.id,
+      email: user?.email,
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
     });
-
-    return response;
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "Wystąpił błąd serwera." }, { status: 500 });
   }
