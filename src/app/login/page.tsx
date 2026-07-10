@@ -36,14 +36,12 @@ useEffect(() => {
   supabase.auth.getSession().then(({ data: { session: s } }) => {
     setSession(!!s);
     clearTimeout(timeout);
-    if (s) redirectAfterLogin(s.user.id, s.user.email);
   }).catch(() => {
     clearTimeout(timeout);
     if (session === null) setSession(false);
   });
   const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, sess) => {
     setSession(!!sess);
-    if (sess) redirectAfterLogin(sess.user.id, sess.user.email);
   });
   return () => { subscription.unsubscribe(); clearTimeout(timeout); };
 }, []);
@@ -53,13 +51,28 @@ useEffect(() => {
     setError("");
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
       if (err) { setError(err.message === "Invalid login credentials" ? "Nieprawidłowy email lub hasło." : err.message); }
+      else if (data.session) { redirectAfterLogin(data.session.user.id, data.session.user.email); }
     } catch { setError("Wystąpił błąd. Spróbuj ponownie."); }
     finally { setLoading(false); }
   }
 
   if (session === null) return <div className="flex-1 flex items-center justify-center"><p className="text-zinc-400">Ładowanie...</p></div>;
+
+  if (session && !sessionTimeout) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-gradient-to-br from-brand-950 via-brand-900 to-brand-950 px-4">
+        <div className="glass-card-dark p-6 md:p-8 max-w-sm w-full text-center space-y-4">
+          <p className="text-white text-sm">Jesteś już zalogowany.</p>
+          <div className="flex gap-3 justify-center">
+            <button onClick={() => router.replace("/dashboard")} className="px-4 py-2 text-sm font-medium text-white bg-[#0d9488] rounded-xl hover:bg-[#0f766e] transition-all">Przejdź do panelu</button>
+            <button onClick={async () => { await supabase.auth.signOut(); setSession(false); }} className="px-4 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-xl hover:bg-white/5 transition-all">Wyloguj się</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex items-center justify-center min-h-screen bg-gradient-to-br from-brand-950 via-brand-900 to-brand-950 px-4 py-8 relative overflow-hidden">
