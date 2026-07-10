@@ -40,10 +40,14 @@ useEffect(() => {
     clearTimeout(timeout);
     if (session === null) setSession(false);
   });
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, sess) => {
-    setSession(!!sess);
-  });
-  return () => { subscription.unsubscribe(); clearTimeout(timeout); };
+  let subscription: { unsubscribe: () => void } | null = null;
+  try {
+    const r = supabase.auth.onAuthStateChange((_e, sess) => {
+      setSession(!!sess);
+    });
+    if (r && r.data) subscription = r.data.subscription;
+  } catch {}
+  return () => { subscription?.unsubscribe(); clearTimeout(timeout); };
 }, []);
 
   async function handleLogin(e: React.FormEvent) {
