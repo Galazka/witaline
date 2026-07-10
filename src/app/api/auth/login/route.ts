@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Nie udało się zalogować. Spróbuj ponownie." }, { status: 401 });
     }
 
-    const response = NextResponse.json({ ok: true });
+    const response = NextResponse.json({
+      ok: true,
+      access_token: result.data.session.access_token,
+      refresh_token: result.data.session.refresh_token,
+    });
     collectedCookies.forEach((c) => {
       response.cookies.set(c.name, c.value, { path: "/", httpOnly: false, sameSite: "lax", secure: true });
     });
