@@ -40,8 +40,8 @@ export async function POST(req: NextRequest) {
 
     const { user } = result.data;
     const response = NextResponse.json({ ok: true });
-    req.cookies.getAll().forEach((cookie) => {
-      response.cookies.set(cookie.name, cookie.value);
+    req.cookies.getAll().forEach((c) => {
+      response.cookies.set(c.name, c.value, { path: "/", httpOnly: false, sameSite: "lax", secure: true });
     });
 
     return response;
