@@ -8,6 +8,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email i hasło są wymagane." }, { status: 400 });
     }
 
+    let collectedCookies: { name: string; value: string }[] = [];
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,9 +19,7 @@ export async function POST(req: NextRequest) {
             return req.cookies.getAll();
           },
           setAll(cookies) {
-            cookies.forEach(({ name, value }) => {
-              req.cookies.set(name, value);
-            });
+            collectedCookies = cookies.map((c) => ({ name: c.name, value: c.value }));
           },
         },
       },
@@ -38,9 +38,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Nie udało się zalogować. Spróbuj ponownie." }, { status: 401 });
     }
 
-    const { user } = result.data;
     const response = NextResponse.json({ ok: true });
-    req.cookies.getAll().forEach((c) => {
+    collectedCookies.forEach((c) => {
       response.cookies.set(c.name, c.value, { path: "/", httpOnly: false, sameSite: "lax", secure: true });
     });
 
