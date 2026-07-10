@@ -51,10 +51,8 @@ useEffect(() => {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Błąd logowania."); }
       else {
-        await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
-        const res = await fetch("/api/admin/check");
-        const check = await res.json();
-        window.location.href = check.isAdmin ? "/admin" : "/dashboard";
+        const ch = await (await fetch("/api/admin/check")).json();
+        window.location.href = ch.isAdmin ? "/admin" : "/dashboard";
       }
     } catch {
       setError("Wystąpił błąd. Spróbuj ponownie.");
