@@ -1,6 +1,5 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-RUN npm i -g npm@latest
 
 FROM base AS deps
 COPY package*.json ./
