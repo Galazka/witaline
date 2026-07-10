@@ -54,21 +54,19 @@ useEffect(() => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const timeout = setTimeout(() => {
-      setLoading(false);
-      setError("Serwer nie odpowiada. Spróbuj ponownie za chwilę.");
-    }, 15000);
     try {
-      const result = await supabase.auth.signInWithPassword({ email, password });
-      clearTimeout(timeout);
-      if (result.error) { setError(result.error.message === "Invalid login credentials" ? "Nieprawidłowy email lub hasło." : result.error.message); }
-      else if (result.data?.session) { redirectAfterLogin(result.data.session.user.id, result.data.session.user.email); }
-      else { setError("Nie udało się zalogować. Sprawdź dane i spróbuj ponownie."); }
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Błąd logowania."); }
+      else { redirectAfterLogin(data.userId, data.email); }
     } catch {
-      clearTimeout(timeout);
       setError("Wystąpił błąd. Spróbuj ponownie.");
     }
-    finally { clearTimeout(timeout); setLoading(false); }
+    finally { setLoading(false); }
   }
 
   if (session === null) return <div className="flex-1 flex items-center justify-center"><p className="text-zinc-400">Ładowanie...</p></div>;
