@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
-export default function LoginLayout({ children }: { children: ReactNode }) {
-  cookies();
+export default async function LoginLayout({ children }: { children: ReactNode }) {
+  await cookies();
   return <>{children}</>;
 }
