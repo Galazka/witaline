@@ -86,15 +86,17 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   const [chatUnread, setChatUnread] = useState(0);
 
   useEffect(() => {
-    const channel = supabase
-      .channel("chat-notifications-admin")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: "role=eq.user" },
-        () => { setChatUnread(prev => prev + 1); }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    try {
+      const channel = supabase
+        .channel("chat-notifications-admin")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: "role=eq.user" },
+          () => { setChatUnread(prev => prev + 1); }
+        )
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    } catch { return; }
   }, [supabase]);
 
   useEffect(() => {

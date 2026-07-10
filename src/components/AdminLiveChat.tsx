@@ -99,26 +99,27 @@ export default function AdminLiveChat() {
 
   // Realtime subscription for new messages across all businesses
   useEffect(() => {
-    const channel = supabase
-      .channel("admin-live-chat")
-      .on(
-        "postgres_changes" as any,
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload: any) => {
-          const msg = payload.new as AdminMessage;
-          if (msg.conversation_id === selectedId) {
-            setMessages((prev) => [...prev, msg]);
-          }
-          fetchConversations();
-        },
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    try {
+      const channel = supabase
+        .channel("admin-live-chat")
+        .on(
+          "postgres_changes" as any,
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          (payload: any) => {
+            const msg = payload.new as AdminMessage;
+            if (msg.conversation_id === selectedId) {
+              setMessages((prev) => [...prev, msg]);
+            }
+            fetchConversations();
+          },
+        )
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    } catch { return; }
   }, [selectedId, supabase, fetchConversations]);
 
   const handleSendReply = async () => {

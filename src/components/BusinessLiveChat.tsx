@@ -56,22 +56,24 @@ export default function BusinessLiveChat({ businessId }: { businessId: string })
 
   useEffect(() => {
     fetchConversations();
-    const channel = supabase
-      .channel("business-chats")
-      .on("postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `business_id=eq.${businessId}` },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            if (selected && newMsg.conversation_id === selected.id) return [...prev, newMsg];
-            return prev;
-          });
-          fetchConversations();
-        }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    try {
+      const channel = supabase
+        .channel("business-chats")
+        .on("postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `business_id=eq.${businessId}` },
+          (payload) => {
+            const newMsg = payload.new as Message;
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === newMsg.id)) return prev;
+              if (selected && newMsg.conversation_id === selected.id) return [...prev, newMsg];
+              return prev;
+            });
+            fetchConversations();
+          }
+        )
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    } catch { return; }
   }, [businessId, selected?.id]);
 
   useEffect(() => { fetchConversations(); }, [businessId, filters]);

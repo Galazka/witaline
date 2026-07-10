@@ -33,29 +33,28 @@ export default function ChatView({ conversation, agent, onUpdate }: Props) {
 
   // Real-time subscription via Supabase Realtime
   useEffect(() => {
-    const channel = supabase
-      .channel(`support-conv-${conversation.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "support_messages",
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return [...prev, newMsg];
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    try {
+      const channel = supabase
+        .channel(`support-conv-${conversation.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "support_messages",
+            filter: `conversation_id=eq.${conversation.id}`,
+          },
+          (payload) => {
+            const newMsg = payload.new as Message;
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+          }
+        )
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    } catch { return; }
   }, [conversation.id, supabase]);
 
   useEffect(() => {
