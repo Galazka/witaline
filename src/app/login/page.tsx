@@ -17,18 +17,6 @@ export default function LoginPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  async function redirectAfterLogin(uid: string, userEmail?: string) {
-    try {
-      const res = await fetch("/api/admin/check");
-      const data = await res.json();
-      if (data.isAdmin) {
-        router.replace("/admin");
-        return;
-      }
-    } catch {}
-    router.replace("/dashboard");
-  }
-
 useEffect(() => {
   const timeout = setTimeout(() => {
     if (session === null) setSession(false);
@@ -64,7 +52,9 @@ useEffect(() => {
       if (!res.ok) { setError(data.error || "Błąd logowania."); }
       else {
         await supabase.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
-        redirectAfterLogin(data.userId, data.email);
+        const res = await fetch("/api/admin/check");
+        const check = await res.json();
+        window.location.href = check.isAdmin ? "/admin" : "/dashboard";
       }
     } catch {
       setError("Wystąpił błąd. Spróbuj ponownie.");
