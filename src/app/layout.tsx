@@ -89,6 +89,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-surface text-foreground" style={{ fontFamily: "var(--font-sans), system-ui, sans-serif" }}>
         <GoogleTagManager />
         <JsonLd />
+        <script id="witaline-env" type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ url: process.env.NEXT_PUBLIC_SUPABASE_URL, key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY }) }} />
         <ToastProvider>
           {children}
         </ToastProvider>
