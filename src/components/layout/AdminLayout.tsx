@@ -76,7 +76,7 @@ const sidebarItems = (leadCount: number) => [
   { key: "voice" as AdminTab, label: "Voice", icon: <IconPhone className="w-5 h-5" /> },
 ];
 
-export default function AdminLayoutShell({ children }: { children: ReactNode }) {
+export default function AdminLayoutShell({ children, sessionJson: initialSessionJson }: { children: ReactNode; sessionJson?: string }) {
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [session, setSession] = useState<Session | null | "loading">("loading");
   const [data, setData] = useState<{ businesses: Business[]; leads: Lead[] } | null>(null);
@@ -84,17 +84,29 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("witaline_session");
-    if (stored) {
-      try {
-        const { access_token, refresh_token } = JSON.parse(stored);
-        if (access_token) {
-          supabase.auth.setSession({ access_token, refresh_token });
-        }
-      } catch {}
-      sessionStorage.removeItem("witaline_session");
-    }
-  }, [supabase]);
+    const initSession = async () => {
+      let s: Session | null = null;
+      const fromStorage = sessionStorage.getItem("witaline_session");
+      if (fromStorage) {
+        try {
+          const { access_token, refresh_token } = JSON.parse(fromStorage);
+          if (access_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+          }
+        } catch {}
+        sessionStorage.removeItem("witaline_session");
+      }
+      if (!s) {
+        try { s = JSON.parse(initialSessionJson || "null"); } catch {}
+      }
+      if (!s) {
+        const { data: { session: sess } } = await supabase.auth.getSession();
+        s = sess;
+      }
+      setSession(s);
+    };
+    initSession();
+  }, [supabase, initialSessionJson]);
 
   const [chatUnread, setChatUnread] = useState(0);
 
@@ -122,12 +134,12 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
       if (res.ok) {
         const dashData = await res.json();
         setData({ businesses: dashData.businesses || [], leads: dashData.leads || [] });
-        setSession((await supabase.auth.getSession()).data.session);
+        setSession(prev => prev !== null && prev !== "loading" ? prev : dashData.session || null);
       } else if (res.status === 401) {
         setSession(null);
       }
     } catch { /* ignore */ }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

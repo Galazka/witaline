@@ -90,7 +90,7 @@ const ROLE_VISIBLE_TABS: Record<string, DashboardTab[]> = {
   viewer: ["overview", "calls", "reservations", "costs", "account"],
 };
 
-export default function DashboardLayoutShell({ children }: { children: ReactNode }) {
+export default function DashboardLayoutShell({ children, sessionJson: initialSessionJson }: { children: ReactNode; sessionJson?: string }) {
   const [tab, setTab] = useState<DashboardTab>("overview");
   const [session, setSession] = useState<Session | null | "loading">("loading");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -102,21 +102,28 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
 
   useEffect(() => {
     const init = async () => {
-      const stored = sessionStorage.getItem("witaline_session");
-      if (stored) {
+      let s: Session | null = null;
+      const fromStorage = sessionStorage.getItem("witaline_session");
+      if (fromStorage) {
         try {
-          const { access_token, refresh_token } = JSON.parse(stored);
+          const { access_token, refresh_token } = JSON.parse(fromStorage);
           if (access_token) {
             await supabase.auth.setSession({ access_token, refresh_token });
           }
         } catch {}
         sessionStorage.removeItem("witaline_session");
       }
-      const { data: { session: s } } = await supabase.auth.getSession();
+      if (!s) {
+        try { s = JSON.parse(initialSessionJson || "null"); } catch {}
+      }
+      if (!s) {
+        const { data } = await supabase.auth.getSession();
+        s = data.session;
+      }
       setSession(s);
     };
     init();
-  }, [supabase]);
+  }, [supabase, initialSessionJson]);
 
   const [chatUnread, setChatUnread] = useState(0);
 
