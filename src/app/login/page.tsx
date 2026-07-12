@@ -51,6 +51,7 @@ useEffect(() => {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Błąd logowania."); }
       else {
+        sessionStorage.setItem("witaline_session", JSON.stringify(data));
         const ch = await (await fetch("/api/admin/check")).json();
         window.location.href = ch.isAdmin ? "/admin" : "/dashboard";
       }

@@ -101,9 +101,21 @@ export default function DashboardLayoutShell({ children }: { children: ReactNode
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    const init = async () => {
+      const stored = sessionStorage.getItem("witaline_session");
+      if (stored) {
+        try {
+          const { access_token, refresh_token } = JSON.parse(stored);
+          if (access_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+          }
+        } catch {}
+        sessionStorage.removeItem("witaline_session");
+      }
+      const { data: { session: s } } = await supabase.auth.getSession();
       setSession(s);
-    });
+    };
+    init();
   }, [supabase]);
 
   const [chatUnread, setChatUnread] = useState(0);

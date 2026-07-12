@@ -83,6 +83,19 @@ export default function AdminLayoutShell({ children }: { children: ReactNode }) 
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
+  useEffect(() => {
+    const stored = sessionStorage.getItem("witaline_session");
+    if (stored) {
+      try {
+        const { access_token, refresh_token } = JSON.parse(stored);
+        if (access_token) {
+          supabase.auth.setSession({ access_token, refresh_token });
+        }
+      } catch {}
+      sessionStorage.removeItem("witaline_session");
+    }
+  }, [supabase]);
+
   const [chatUnread, setChatUnread] = useState(0);
 
   useEffect(() => {
