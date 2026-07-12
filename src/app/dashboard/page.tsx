@@ -46,7 +46,7 @@ import ConsultantListManager from "@/components/ConsultantListManager";
 import BillingHistory from "@/components/BillingHistory";
 import { t, initLocale } from "@/lib/i18n";
 import { getPlanConfig, formatPLN } from "@/lib/pricing";
-import { useDashboardTab, useDashboardPerms } from "@/components/layout/DashboardLayout";
+import { useDashboardTab, useDashboardPerms, useDashboardSession } from "@/components/layout/DashboardLayout";
 import type { CallLog, PlanKey, Business, Reservation, Feedback, Service } from "@/types/database";
 
 export default function DashboardPage() {
@@ -64,6 +64,7 @@ export default function DashboardPage() {
   const [trialEndsAt, setTrialEndsAt] = useState<string>("");
   const [subLoading, setSubLoading] = useState(true);
   const [buyingMinutes, setBuyingMinutes] = useState(false);
+  const session = useDashboardSession();
   const { setPerms, hasPerm } = useDashboardPerms();
 
   const supabase = createClient();
@@ -74,7 +75,8 @@ export default function DashboardPage() {
   const alwaysAccessible = ["overview", "upgrade", "account", "team", "security"];
   const tabBlocked = isBlocked && !alwaysAccessible.includes(tab);
 
-  useEffect(() => { initLocale(); fetchAll(); }, []);
+  useEffect(() => { if (session) fetchAll(); }, [session]);
+  useEffect(() => { initLocale(); }, []);
 
   useEffect(() => {
     if (business) {
@@ -86,9 +88,8 @@ export default function DashboardPage() {
   }, [business]);
 
   async function fetchAll() {
-    const { data: { session: s } } = await supabase.auth.getSession();
-    if (!s?.user) { setLoading(false); return; }
-    const uid = s.user.id;
+    if (!session?.user) { setLoading(false); return; }
+    const uid = session.user.id;
     const { data: biz } = await supabase.from("businesses").select("*").eq("owner_uid", uid).maybeSingle();
     if (biz) {
       setBusiness(biz as Business);

@@ -96,9 +96,13 @@ export default function AdminLayoutShell({ children, sessionJson: initialSession
         } catch {}
         sessionStorage.removeItem("witaline_session");
       }
-      if (!s) {
-        try { s = JSON.parse(initialSessionJson || "null"); } catch {}
-      }
+      try {
+        const parsed = JSON.parse(initialSessionJson || "null");
+        if (parsed && parsed.access_token && parsed.refresh_token) {
+          s = parsed;
+          await supabase.auth.setSession({ access_token: parsed.access_token, refresh_token: parsed.refresh_token });
+        }
+      } catch {}
       if (!s) {
         const { data: { session: sess } } = await supabase.auth.getSession();
         s = sess;

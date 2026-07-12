@@ -43,8 +43,11 @@ const defaultPerms: PermContextValue = {
 
 export const DashboardPermContext = createContext<PermContextValue>(defaultPerms);
 
+const DashboardSessionContext = createContext<Session | null>(null);
+
 export function useDashboardTab() { return useContext(DashboardTabContext); }
 export function useDashboardPerms() { return useContext(DashboardPermContext); }
+export function useDashboardSession() { return useContext(DashboardSessionContext); }
 
 const sidebarGroups: { label?: string; items: { key: DashboardTab; label: string; icon: JSX.Element }[] }[] = [
   {
@@ -113,9 +116,13 @@ export default function DashboardLayoutShell({ children, sessionJson: initialSes
         } catch {}
         sessionStorage.removeItem("witaline_session");
       }
-      if (!s) {
-        try { s = JSON.parse(initialSessionJson || "null"); } catch {}
-      }
+      try {
+        const parsed = JSON.parse(initialSessionJson || "null");
+        if (parsed && parsed.access_token && parsed.refresh_token) {
+          s = parsed;
+          await supabase.auth.setSession({ access_token: parsed.access_token, refresh_token: parsed.refresh_token });
+        }
+      } catch {}
       if (!s) {
         const { data } = await supabase.auth.getSession();
         s = data.session;
@@ -195,6 +202,7 @@ export default function DashboardLayoutShell({ children, sessionJson: initialSes
   const userEmail = session.user?.email || "user@witaline.pl";
 
   return (
+    <DashboardSessionContext.Provider value={session}>
     <DashboardPermContext.Provider value={permCtx}>
     <DashboardTabContext.Provider value={{ tab, setTab }}>
       <div className="flex min-h-screen bg-zinc-50 dark:bg-brand-950">
@@ -217,5 +225,6 @@ export default function DashboardLayoutShell({ children, sessionJson: initialSes
       </div>
     </DashboardTabContext.Provider>
     </DashboardPermContext.Provider>
+    </DashboardSessionContext.Provider>
   );
 }
