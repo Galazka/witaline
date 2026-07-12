@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendTrialActivationEmail } from "@/lib/email";
 
 async function assignExtension(supabaseA: typeof supabaseAdmin, businessId: string): Promise<string | null> {
   const { data: existing } = await supabaseA
@@ -32,13 +32,13 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { name, plan, systemPrompt, menuCatalog, websiteUrl, phone, industry, templateId, services, calendarSettings } = body;
+  const { name, plan, systemPrompt, menuCatalog, websiteUrl, phone, industry, templateId, services, calendarSettings, referralCode, nip, krs, verification_doc_url } = body;
 
   if (!name || !plan) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const validPlans = ["start_100", "pro_500", "enterprise_2000", "elastic_0", "pro_249", "lux_599"];
+  const validPlans = ["elastic_0", "enterprise_2000"];
   if (!validPlans.includes(plan)) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
@@ -64,6 +64,9 @@ export async function POST(request: Request) {
       industry: body.industry || "",
       website_url: websiteUrl || "",
       phone: phone || "",
+      nip: nip || null,
+      krs: krs || null,
+      verification_doc_url: verification_doc_url || null,
     })
     .select()
     .single();
@@ -74,9 +77,45 @@ export async function POST(request: Request) {
 
   const extension = await assignExtension(supabaseAdmin, business.id);
 
-  // Send welcome email (non-blocking)
+  // Handle referral if code provided — create discount coupons for both parties
+  let referrerId: string | null = null;
+  if (referralCode && typeof referralCode === "string") {
+    const { data: referrer } = await supabaseAdmin
+      .from("businesses")
+      .select("id, referral_code")
+      .eq("referral_code", referralCode.trim().toLowerCase())
+      .maybeSingle();
+
+    if (referrer && referrer.id !== business.id) {
+      referrerId = referrer.id;
+      await supabaseAdmin.from("businesses")
+        .update({ referred_by: referrerId })
+        .eq("id", business.id);
+
+      const referrerCouponCode = `REF-${business.referral_code?.toUpperCase() || "X"}-A`;
+      const referredCouponCode = `REF-${business.referral_code?.toUpperCase() || "X"}-B`;
+      const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+
+      await supabaseAdmin.from("referrals").upsert({
+        referrer_business_id: referrerId,
+        referred_business_id: business.id,
+        status: "completed",
+      }, { onConflict: "referrer_business_id,referred_business_id" });
+
+      await supabaseAdmin.from("referral_coupons").insert([
+        { code: referrerCouponCode, business_id: referrerId, discount_percent: 20, expires_at: expiresAt },
+        { code: referredCouponCode, business_id: business.id, discount_percent: 20, expires_at: expiresAt },
+      ]).catch(e => console.error("[onboarding] referral coupon error:", e));
+    }
+  }
+
+  // Send welcome + trial activation emails (non-blocking)
   if (user.email) {
     fireWelcomeEmail(user.email, name, plan);
+    const testNumber = process.env.WITALINE_TEST_NUMBER || process.env.TWILIO_PHONE_NUMBER || "+48 732 125 752";
+    sendTrialActivationEmail(user.email, name, testNumber).catch(e =>
+      console.error("[onboarding] trial activation email error:", e)
+    );
   }
 
   // Insert template services if provided

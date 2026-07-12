@@ -19,7 +19,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const fullRecordingUrl = recordingUrl || `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Recordings/${recordingSid}`;
+    let recordingSidFallback = process.env.TWILIO_ACCOUNT_SID;
+    if (businessId) {
+      const { data: biz } = await supabaseAdmin
+        .from("businesses")
+        .select("twilio_account_sid")
+        .eq("id", businessId)
+        .single();
+      if (biz?.twilio_account_sid) recordingSidFallback = biz.twilio_account_sid;
+    }
+    const fullRecordingUrl = recordingUrl || `https://api.twilio.com/2010-04-01/Accounts/${recordingSidFallback}/Recordings/${recordingSid}`;
 
     let callLogId: string | null = null;
 
@@ -27,6 +36,7 @@ export async function POST(request: Request) {
       const { data: log } = await supabaseAdmin
         .from("call_logs")
         .select("id")
+        .is("deleted_at", null)
         .eq("twilio_call_sid", originalCallSid)
         .maybeSingle();
       if (log) callLogId = log.id;
@@ -36,6 +46,7 @@ export async function POST(request: Request) {
       const { data: log } = await supabaseAdmin
         .from("call_logs")
         .select("id")
+        .is("deleted_at", null)
         .eq("business_id", businessId)
         .is("handoff_recording_sid", null)
         .order("created_at", { ascending: false })

@@ -66,7 +66,7 @@ export default function CrmPipeline({ businessId, callLogs, onNavigate }: Props)
     fetch(`/api/leads?businessId=${businessId}`)
       .then(r => r.ok ? r.json() : [])
       .then(data => { if (Array.isArray(data)) setLeads(data); })
-      .catch(() => {})
+      .catch((e) => console.error("[CrmPipeline] fetch error:", e))
       .finally(() => setLoading(false));
   }, [businessId]);
 
@@ -150,7 +150,7 @@ export default function CrmPipeline({ businessId, callLogs, onNavigate }: Props)
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
             activeStage === null
               ? "bg-brand-950 text-white"
-              : "bg-brand-50 text-zinc-600 hover:bg-brand-100"
+              : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"
           }`}
         >
           Wszystkie ({contacts.length})
@@ -162,7 +162,7 @@ export default function CrmPipeline({ businessId, callLogs, onNavigate }: Props)
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition flex items-center gap-1.5 ${
               activeStage === stage.key
                 ? `${stage.bgColor} ${stage.textColor} ${stage.borderColor} border`
-                : "bg-brand-50 text-zinc-600 hover:bg-brand-100"
+                : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"
             }`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${stage.color}`} />
@@ -211,7 +211,7 @@ export default function CrmPipeline({ businessId, callLogs, onNavigate }: Props)
         <div className="flex justify-center">
           <button
             onClick={() => onNavigate?.("leads")}
-            className="text-xs text-brand-500 hover:text-brand-600 font-medium transition"
+            className="text-xs text-[#0d9488] hover:text-[#0f766e] font-medium transition"
           >
             Zobacz wszystkie kontakty →
           </button>
@@ -254,7 +254,7 @@ function ContactCard({ contact, compact }: { contact: Contact; compact?: boolean
               {contact.interest && (
                 <>
                   <span>·</span>
-                  <span className="text-brand-500">{contact.interest}</span>
+                  <span className="text-[#0d9488]">{contact.interest}</span>
                 </>
               )}
             </div>

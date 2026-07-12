@@ -14,15 +14,28 @@ export async function sendSms(
   try { creds = await getTwilioCredentials(businessId); } catch { return { success: false, error: "Twilio credentials not configured" }; }
 
   let smsUsed = 0;
+  let isTrialing = false;
+  let trialSmsUsed = 0;
 
   if (businessId) {
     const { data: biz } = await supabaseAdmin
       .from("businesses")
-      .select("sms_limit, sms_used, sms_extra_purchased")
+      .select("subscription_status, trial_sms_used, sms_limit, sms_used, sms_extra_purchased")
       .eq("id", businessId)
       .single();
 
     if (biz) {
+      const TRIAL_MAX_SMS = 10;
+      isTrialing = biz.subscription_status === "trialing";
+      trialSmsUsed = biz.trial_sms_used || 0;
+
+      // Trial cap check
+      if (isTrialing && trialSmsUsed >= TRIAL_MAX_SMS) {
+        await logSms(toNumber, messageBody, "failed", callLogId, businessId, undefined, "Limit SMS w okresie próbnym wyczerpany");
+        return { success: false, error: "Limit SMS w okresie próbnym wyczerpany — doładuj konto." };
+      }
+
+      // Regular SMS cap check (for non-trial or top-up)
       const total = (biz.sms_limit || 0) + (biz.sms_extra_purchased || 0);
       const used = biz.sms_used || 0;
       smsUsed = used;
@@ -68,6 +81,14 @@ export async function sendSms(
         await supabaseAdmin
           .from("businesses")
           .update({ sms_used: smsUsed + 1 })
+          .eq("id", businessId);
+      }
+
+      // Track trial SMS usage (no extra query needed)
+      if (isTrialing) {
+        await supabaseAdmin
+          .from("businesses")
+          .update({ trial_sms_used: trialSmsUsed + 1 })
           .eq("id", businessId);
       }
     }

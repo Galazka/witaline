@@ -67,36 +67,14 @@ export const TOOL_DEFINITIONS: ToolDef[] = [
     },
   },
   {
-    name: "send_whatsapp",
-    description:
-      "Wysyla wiadomosc WhatsApp do klienta. Uzyj gdy klient wyrazil zgode na kontakt przez WhatsApp.",
-    inputSchema: {
-      phone: z.string().describe("Numer telefonu klienta z kierunkowym"),
-      message: z.string().optional().describe("Tresc wiadomosci"),
-      template: z
-        .enum(["booking", "order", "offer", "payment_reminder", "default"])
-        .optional()
-        .describe("Szablon wiadomosci"),
-      name: z.string().optional().describe("Imie klienta"),
-      date: z.string().optional(),
-      time: z.string().optional(),
-      service: z.string().optional(),
-      summary: z.string().optional(),
-      plan_name: z.string().optional(),
-      price: z.string().optional(),
-      payment_link: z.string().optional(),
-      amount: z.string().optional(),
-      business_id: z.string().optional(),
-    },
-  },
-  {
     name: "transfer_to_human",
     description:
-      "Przekazuje polaczenie do czlowieka/konsultanta firmy, gdy klient wyraznie poprosi o rozmowe z osoba. Uzyj tylko wtedy, gdy klient powiedzial np. poprosze czlowieka, konsultant, nie bot, polacz z wlascicielem.",
+      "Przekazuje polaczenie do czlowieka/konsultanta firmy. PO SKORZYSTANIU Z TEGO NARZEDZIA KONIECZNIE zakoncz rozmowe (end_call) — system przekieruje polaczenie automatycznie po zakonczeniu strumienia.",
     inputSchema: {
       business_id: z.string().describe("ID firmy z dynamic_vars.business_id"),
-      caller_phone: z.string().describe("Numer telefonu klienta z kierunkowym"),
-      to_number: z.string().describe("Numer Twilio na ktory klient dzwonil"),
+      caller_phone: z.string().optional().describe("Automatycznie pobrany z polaczenia - NIE pytaj klienta"),
+      to_number: z.string().optional().describe("Numer Twilio na ktory klient dzwonil (opcjonalny)"),
+      call_sid: z.string().optional().describe("Twilio Call SID — automatycznie z dynamic_vars.call_sid"),
       reason: z.string().optional().describe("Powod przekazania"),
     },
   },

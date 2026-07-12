@@ -24,7 +24,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  owner: "bg-brand-100 text-brand-600",
+  owner: "bg-[#ccfbf1] text-[#0d9488]",
   admin: "bg-blue-100 text-blue-600",
   viewer: "bg-brand-50 text-zinc-600",
 };
@@ -175,7 +175,7 @@ export default function MemberManager({ businessId, yourRole }: Props) {
                       {m.invite_token && (
                         <button
                           onClick={() => copyInviteLink(m.invite_token!)}
-                          className="text-xs text-brand-500 hover:text-brand-600 font-medium"
+                          className="text-xs text-[#0d9488] hover:text-[#0f766e] font-medium"
                         >
                           {copiedToken === m.invite_token ? "Skopiowano!" : "Kopiuj link"}
                         </button>
@@ -200,7 +200,7 @@ export default function MemberManager({ businessId, yourRole }: Props) {
               value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
               placeholder="email@firma.pl"
-              className="flex-1 px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400/20"
+              className="flex-1 px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20"
             />
             <select
               value={inviteRole}
@@ -213,7 +213,7 @@ export default function MemberManager({ businessId, yourRole }: Props) {
             <button
               onClick={handleInvite}
               disabled={inviting || !inviteEmail.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-brand-400 rounded-xl hover:bg-brand-500 transition disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#0d9488] rounded-xl hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {inviting ? "..." : "Zaproś"}
             </button>

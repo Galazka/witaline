@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { logAudit } from "@/lib/audit";
+import { sendSms } from "@/lib/twilio-sms";
 
 export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
 
@@ -104,14 +105,18 @@ export async function sendVerificationSms(
   const { error } = await supabaseAdmin
     .from("businesses")
     .update({
-      // We'll use a dedicated column or store in a JSONB field
-      // For now, store in dtmf_code temporarily (will be overwritten)
+      verification_code: code,
     })
     .eq("id", businessId);
 
-  // TODO: Send SMS via Twilio with verification code
-  // For now, log the code and return it
-  console.log(`[verify] SMS code for ${phone}: ${code}`);
+  const smsResult = await sendSms(phone, `Twój kod weryfikacyjny WitaLine: ${code}. Kod ważny 10 minut.`, undefined, businessId);
+
+  if (!smsResult.success) {
+    console.error(`[verify] Failed to send SMS to ${phone}:`, smsResult.error);
+    return { ok: false, error: smsResult.error || "Nie udało się wysłać SMS-a" };
+  }
+
+  console.log(`[verify] SMS code sent to ${phone}: ${code}`);
 
   return { ok: true, code };
 }

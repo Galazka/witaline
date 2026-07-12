@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { humanHandoffTwiML, humanHandoffHuntTwiML } from "@/lib/twilio-utils";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     .eq("twilio_number", toClean)
     .maybeSingle();
 
-  const businessId = business?.id || "00000000-0000-0000-0000-000000000001";
+  const businessId = business?.id || WITALINE_MAIN_BUSINESS_ID;
   const businessName = business?.name || "WitaLine";
   const callerId = business?.twilio_number || to;
 

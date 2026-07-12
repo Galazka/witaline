@@ -10,10 +10,6 @@ interface PricingValues {
   elasticTierStep: number;
   elasticStartMin: number;
   elasticMaxMin: number;
-  planStart: number;
-  planGrowth: number;
-  planPro: number;
-  planLux: number;
   planEnterprise: number;
   addonOwnNumber: number;
   addonGoogleCalendar: number;
@@ -36,10 +32,6 @@ const DEFAULTS: PricingValues = {
   elasticTierStep: 500,
   elasticStartMin: 50,
   elasticMaxMin: 5000,
-  planStart: 299,
-  planGrowth: 600,
-  planPro: 300,
-  planLux: 800,
   planEnterprise: 1500,
   addonOwnNumber: 49,
   addonGoogleCalendar: 39,
@@ -76,7 +68,7 @@ function Slider({ label, value, min, max, step, suffix, onChange }: SliderProp) 
       </div>
       <input type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-brand-100 rounded-full appearance-none cursor-pointer accent-brand-400" />
+        className="w-full h-1.5 bg-brand-100 rounded-full appearance-none cursor-pointer accent-[#0d9488]" />
     </div>
   );
 }
@@ -229,13 +221,13 @@ export default function AdminPricingSimulator() {
       <div className="flex items-center gap-2 mb-4">
         {(["simulator", "overrides", "configs"] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === t ? "bg-brand-400 text-white shadow-sm" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-brand-50"}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === t ? "bg-[#0d9488] text-white shadow-sm" : "bg-white text-zinc-600 border border-zinc-200 hover:bg-[#f0fdfa]"}`}>
             {t === "simulator" ? "Symulator" : t === "overrides" ? "Override firm" : "Zapisane konfiguracje"}
           </button>
         ))}
       </div>
 
-      {toast && <div className="bg-brand-50 border border-brand-200 text-brand-700 text-sm px-4 py-2 rounded-xl">{toast}</div>}
+      {toast && <div className="bg-brand-50 border border-[#0d9488]/20 text-brand-700 text-sm px-4 py-2 rounded-xl">{toast}</div>}
 
       {tab === "simulator" && (
         <div className="grid lg:grid-cols-5 gap-6">
@@ -256,11 +248,7 @@ export default function AdminPricingSimulator() {
             </div>
 
             <div className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-              <h3 className="text-sm font-semibold text-zinc-900">Plany abonamentowe (ceny netto)</h3>
-              <Slider label="START (250 min)" value={vals.planStart} min={99} max={999} step={10} suffix=" zł" onChange={v => update("planStart", v)} />
-              <Slider label="GROWTH (600 min)" value={vals.planGrowth} min={199} max={1999} step={10} suffix=" zł" onChange={v => update("planGrowth", v)} />
-              <Slider label="PRO (300 min)" value={vals.planPro} min={99} max={999} step={10} suffix=" zł" onChange={v => update("planPro", v)} />
-              <Slider label="LUX (800 min)" value={vals.planLux} min={199} max={1999} step={10} suffix=" zł" onChange={v => update("planLux", v)} />
+              <h3 className="text-sm font-semibold text-zinc-900">Enterprise</h3>
               <Slider label="ENTERPRISE (1500 min)" value={vals.planEnterprise} min={499} max={4999} step={50} suffix=" zł" onChange={v => update("planEnterprise", v)} />
             </div>
 
@@ -280,9 +268,9 @@ export default function AdminPricingSimulator() {
               <h3 className="text-sm font-semibold text-zinc-900">Zapisz konfigurację</h3>
               <input value={saveName} onChange={e => setSaveName(e.target.value)}
                 placeholder="Np. Cennik lipiec 2026"
-                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-200" />
+                className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20" />
               <button onClick={handleSave} disabled={saving}
-                className="w-full bg-brand-400 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-500 transition disabled:opacity-50">
+                className="w-full bg-[#0d9488] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0f766e] transition disabled:opacity-50">
                 {saving ? "Zapisywanie..." : "Zapisz i aktywuj"}
               </button>
             </div>
@@ -308,10 +296,7 @@ export default function AdminPricingSimulator() {
                   </thead>
                   <tbody>
                     {[
-                      { name: "START", price: vals.planStart, min: 250 },
-                      { name: "GROWTH", price: vals.planGrowth, min: 600, hot: true },
-                      { name: "PRO", price: vals.planPro, min: 300 },
-                      { name: "LUX", price: vals.planLux, min: 800 },
+                      { name: "Elastyczny", price: vals.elasticBaseRate, min: 1, isElastic: true },
                       { name: "ENTERPRISE", price: vals.planEnterprise, min: 1500 },
                     ].map(p => {
                       const rpm = p.price / p.min;
@@ -382,9 +367,9 @@ export default function AdminPricingSimulator() {
             <h3 className="text-sm font-semibold text-zinc-900">Nowy override</h3>
             <input value={overrideBizId} onChange={e => setOverrideBizId(e.target.value)}
               placeholder="ID firmy (UUID)"
-              className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-200" />
+              className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20" />
             <Slider label="Rabat %" value={overrideDiscount} min={0} max={50} step={1} suffix="%" onChange={setOverrideDiscount} />
-            <button onClick={handleSaveOverride} className="w-full bg-brand-400 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-500 transition">Zapisz override</button>
+            <button onClick={handleSaveOverride} className="w-full bg-[#0d9488] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0f766e] transition">Zapisz override</button>
           </div>
           <div className="lg:col-span-3 bg-white border border-zinc-200 rounded-xl p-5">
             <h3 className="text-sm font-semibold text-zinc-900 mb-3">Aktywne override'y</h3>
@@ -415,13 +400,13 @@ export default function AdminPricingSimulator() {
           ) : (
             <div className="space-y-2">
               {configs.map((c: any) => (
-                <div key={c.id} className={`flex items-center justify-between px-4 py-3 rounded-lg ${c.is_active ? "bg-brand-50 border border-brand-200" : "bg-zinc-50"}`}>
+                <div key={c.id} className={`flex items-center justify-between px-4 py-3 rounded-lg ${c.is_active ? "bg-brand-50 border border-[#0d9488]/20" : "bg-zinc-50"}`}>
                   <div>
                     <p className="text-sm font-medium text-zinc-800">{c.name}</p>
                     <p className="text-xs text-zinc-400">{new Date(c.created_at).toLocaleString("pl-PL")}{c.is_active ? " · aktywna" : ""}</p>
                   </div>
                   {!c.is_active && (
-                    <button onClick={() => handleSetActive(c.id)} className="text-xs text-brand-500 hover:text-brand-600 transition">Aktywuj</button>
+                    <button onClick={() => handleSetActive(c.id)} className="text-xs text-[#0d9488] hover:text-[#0f766e] transition">Aktywuj</button>
                   )}
                 </div>
               ))}

@@ -41,13 +41,12 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { business_id, caller_name, caller_phone, service_type, reserved_at, duration_minutes, notes } = body;
+  const { business_id, caller_name, caller_phone, service_type, reserved_at, duration_minutes, notes, force } = body;
 
   if (!business_id || !service_type || !reserved_at) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // Determine role — staff or admin
   const { data: staff } = await supabase
     .from("business_staff")
     .select("role")
@@ -67,12 +66,22 @@ export async function POST(request: Request) {
     durationMinutes: duration_minutes || 30,
     createdByType,
     createdByUserId: user.id,
+    force: force === true,
   });
 
   if (!result.ok) {
-    const err = (result as { ok: false; error: string }).error;
-    return NextResponse.json({ error: err }, { status: 409 });
+    const errResult = result as { ok: false; error: string; conflicts?: unknown; nextSlots?: unknown };
+    if (errResult.conflicts) {
+      return NextResponse.json({
+        ok: false,
+        error: errResult.error,
+        conflict: true,
+        conflicts: errResult.conflicts,
+        nextSlots: errResult.nextSlots || [],
+      }, { status: 409 });
+    }
+    return NextResponse.json({ ok: false, error: errResult.error }, { status: 409 });
   }
 
-  return NextResponse.json(result.reservation, { status: 201 });
+  return NextResponse.json({ ok: true, reservation: result.reservation }, { status: 201 });
 }

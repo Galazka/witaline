@@ -533,6 +533,240 @@ Kwiaty to emocje — bądź ciepły i kreatywny.`,
       slot_interval: 15,
     },
   },
+  budowlanka: {
+    name: "Budownictwo / Remonty",
+    icon: "🔨",
+    prompt: `Jesteś asystentem głosowym AI dla firmy budowlanej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zapytania o wyceny remontów i budowy
+2. Umawiaj spotkania z kierownikiem budowy
+3. Odpowiadaj na pytania o usługi (malowanie, tynki, podłogi, dachy)
+4. Sprawdzaj dostępność ekipy`,
+    services: [{ name: "Konsultacja budowlana", duration_minutes: 60 }, { name: "Wycena remontu", duration_minutes: 30 }],
+    calendar: { monday: { enabled: true, start: "07:00", end: "17:00" }, tuesday: { enabled: true, start: "07:00", end: "17:00" }, wednesday: { enabled: true, start: "07:00", end: "17:00" }, thursday: { enabled: true, start: "07:00", end: "17:00" }, friday: { enabled: true, start: "07:00", end: "17:00" }, saturday: { enabled: false, start: "08:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  sprzatanie: {
+    name: "Sprzątanie / Cleaning",
+    icon: "🧹",
+    prompt: `Jesteś asystentem głosowym AI dla firmy sprzątającej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zamówienia na sprzątanie (biur, domów, mieszkań)
+2. Umawiaj terminy wizyt sprzątających
+3. Podawaj cennik usług
+4. Informuj o ofercie (sprzątanie jednorazowe, regularne, poimprezowe)`,
+    services: [{ name: "Sprzątanie mieszkania", duration_minutes: 120 }, { name: "Sprzątanie biura", duration_minutes: 180 }],
+    calendar: { monday: { enabled: true, start: "08:00", end: "20:00" }, tuesday: { enabled: true, start: "08:00", end: "20:00" }, wednesday: { enabled: true, start: "08:00", end: "20:00" }, thursday: { enabled: true, start: "08:00", end: "20:00" }, friday: { enabled: true, start: "08:00", end: "20:00" }, saturday: { enabled: true, start: "09:00", end: "16:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 30, slot_interval: 120 },
+  },
+  ksiegowosc: {
+    name: "Księgowość / Finanse",
+    icon: "📊",
+    prompt: `Jesteś asystentem głosowym AI dla biura rachunkowego. Mów po polsku.
+
+Twoje zadania:
+1. Umawiaj spotkania z księgowym
+2. Informuj o terminach rozliczeń (PIT, VAT, ZUS)
+3. Przyjmuj zapytania o usługi księgowe
+4. Odbieraj dokumenty do kontaktu`,
+    services: [{ name: "Konsultacja księgowa", duration_minutes: 60 }, { name: "Spotkanie z klientem", duration_minutes: 30 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "17:00" }, tuesday: { enabled: true, start: "09:00", end: "17:00" }, wednesday: { enabled: true, start: "09:00", end: "17:00" }, thursday: { enabled: true, start: "09:00", end: "17:00" }, friday: { enabled: true, start: "09:00", end: "17:00" }, saturday: { enabled: false, start: "00:00", end: "00:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  marketing: {
+    name: "Marketing / Reklama",
+    icon: "📢",
+    prompt: `Jesteś asystentem głosowym AI dla agencji marketingowej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zapytania o usługi reklamowe
+2. Umawiaj spotkania z klientami
+3. Informuj o ofercie (social media, SEO, reklama online)
+4. Zapisuj leady`,
+    services: [{ name: "Konsultacja marketingowa", duration_minutes: 60 }, { name: "Audyt social media", duration_minutes: 45 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "17:00" }, tuesday: { enabled: true, start: "09:00", end: "17:00" }, wednesday: { enabled: true, start: "09:00", end: "17:00" }, thursday: { enabled: true, start: "09:00", end: "17:00" }, friday: { enabled: true, start: "09:00", end: "17:00" }, saturday: { enabled: false, start: "00:00", end: "00:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  consulting: {
+    name: "Doradztwo / Consulting",
+    icon: "💼",
+    prompt: `Jesteś asystentem głosowym AI dla firmy doradczej. Mów po polsku.
+
+Twoje zadania:
+1. Umawiaj spotkania z doradcami
+2. Przyjmuj zapytania o usługi doradcze
+3. Informuj o specjalizacji firmy
+4. Zapisuj dane klientów do kontaktu`,
+    services: [{ name: "Konsultacja doradcza", duration_minutes: 60 }, { name: "Spotkanie biznesowe", duration_minutes: 90 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "18:00" }, tuesday: { enabled: true, start: "09:00", end: "18:00" }, wednesday: { enabled: true, start: "09:00", end: "18:00" }, thursday: { enabled: true, start: "09:00", end: "18:00" }, friday: { enabled: true, start: "09:00", end: "18:00" }, saturday: { enabled: false, start: "00:00", end: "00:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  ubezpieczenia: {
+    name: "Ubezpieczenia",
+    icon: "🛡️",
+    prompt: `Jesteś asystentem głosowym AI dla agenta ubezpieczeniowego. Mów po polsku.
+
+Twoje zadania:
+1. Umawiaj spotkania z agentem ubezpieczeniowym
+2. Przyjmuj zapytania o ofertę ubezpieczeń (OC, AC, na życie, zdrowotne)
+3. Informuj o likwidacji szkód
+4. Zapisuj leady`,
+    services: [{ name: "Spotkanie z agentem", duration_minutes: 60 }, { name: "Wycena polisy", duration_minutes: 30 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "17:00" }, tuesday: { enabled: true, start: "09:00", end: "17:00" }, wednesday: { enabled: true, start: "09:00", end: "17:00" }, thursday: { enabled: true, start: "09:00", end: "17:00" }, friday: { enabled: true, start: "09:00", end: "17:00" }, saturday: { enabled: true, start: "09:00", end: "13:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  ogrodnictwo: {
+    name: "Ogrodnictwo / Zieleniec",
+    icon: "🌿",
+    prompt: `Jesteś asystentem głosowym AI dla firmy ogrodniczej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zamówienia na usługi ogrodnicze
+2. Umawiaj wizyty na wycenę ogrodu
+3. Informuj o ofercie (koszenie, sadzenie, projektowanie ogrodów)
+4. Podawaj ceny usług`,
+    services: [{ name: "Koszenie trawnika", duration_minutes: 60 }, { name: "Projekt ogrodu", duration_minutes: 120 }],
+    calendar: { monday: { enabled: true, start: "07:00", end: "18:00" }, tuesday: { enabled: true, start: "07:00", end: "18:00" }, wednesday: { enabled: true, start: "07:00", end: "18:00" }, thursday: { enabled: true, start: "07:00", end: "18:00" }, friday: { enabled: true, start: "07:00", end: "18:00" }, saturday: { enabled: true, start: "08:00", end: "15:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 30, slot_interval: 60 },
+  },
+  eventy: {
+    name: "Eventy / Rozrywka",
+    icon: "🎪",
+    prompt: `Jesteś asystentem głosowym AI dla firmy eventowej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zapytania o organizację eventów
+2. Umawiaj spotkania z klientami
+3. Informuj o ofercie (wesela, konferencje, imprezy firmowe)
+4. Zapisuj daty rezerwacji`,
+    services: [{ name: "Konsultacja eventowa", duration_minutes: 60 }, { name: "Wycena imprezy", duration_minutes: 45 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "18:00" }, tuesday: { enabled: true, start: "09:00", end: "18:00" }, wednesday: { enabled: true, start: "09:00", end: "18:00" }, thursday: { enabled: true, start: "09:00", end: "18:00" }, friday: { enabled: true, start: "09:00", end: "18:00" }, saturday: { enabled: true, start: "10:00", end: "16:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  apteka: {
+    name: "Apteka",
+    icon: "💊",
+    prompt: `Jesteś asystentem głosowym AI dla apteki. Mów po polsku.
+
+Twoje zadania:
+1. Informuj o dostępności leków
+2. Przyjmuj zamówienia na leki na receptę
+3. Informuj o godzinach otwarcia
+4. Umawiaj konsultacje z farmaceutą`,
+    services: [{ name: "Zamówienie leku", duration_minutes: 10 }, { name: "Konsultacja farmaceutyczna", duration_minutes: 15 }],
+    calendar: { monday: { enabled: true, start: "08:00", end: "20:00" }, tuesday: { enabled: true, start: "08:00", end: "20:00" }, wednesday: { enabled: true, start: "08:00", end: "20:00" }, thursday: { enabled: true, start: "08:00", end: "20:00" }, friday: { enabled: true, start: "08:00", end: "20:00" }, saturday: { enabled: true, start: "09:00", end: "16:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 5, slot_interval: 15 },
+  },
+  optyk: {
+    name: "Optyk",
+    icon: "👓",
+    prompt: `Jesteś asystentem głosowym AI dla salonu optycznego. Mów po polsku.
+
+Twoje zadania:
+1. Umawiaj wizyty u optyka
+2. Informuj o ofercie (okulary, soczewki, badania wzroku)
+3. Przyjmuj zamówienia na soczewki kontaktowe
+4. Informuj o terminach odbioru`,
+    services: [{ name: "Badanie wzroku", duration_minutes: 30 }, { name: "Dobór okularów", duration_minutes: 45 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "18:00" }, tuesday: { enabled: true, start: "09:00", end: "18:00" }, wednesday: { enabled: true, start: "09:00", end: "18:00" }, thursday: { enabled: true, start: "09:00", end: "18:00" }, friday: { enabled: true, start: "09:00", end: "18:00" }, saturday: { enabled: true, start: "09:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 30 },
+  },
+  serwis_komputerow: {
+    name: "Serwis komputerów",
+    icon: "💻",
+    prompt: `Jesteś asystentem głosowym AI dla serwisu komputerowego. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zgłoszenia napraw
+2. Umawiaj terminy oddania/odbioru sprzętu
+3. Informuj o cenniku usług
+4. Sprawdzaj status naprawy`,
+    services: [{ name: "Diagnostyka komputera", duration_minutes: 30 }, { name: "Naprawa laptopa", duration_minutes: 120 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "18:00" }, tuesday: { enabled: true, start: "09:00", end: "18:00" }, wednesday: { enabled: true, start: "09:00", end: "18:00" }, thursday: { enabled: true, start: "09:00", end: "18:00" }, friday: { enabled: true, start: "09:00", end: "18:00" }, saturday: { enabled: true, start: "10:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  hydraulik: {
+    name: "Hydraulik / Elektryk",
+    icon: "🔧",
+    prompt: `Jesteś asystentem głosowym AI dla firmy hydrauliczno-elektrycznej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zgłoszenia awarii
+2. Umawiaj wizyty serwisowe
+3. Informuj o cenniku usług
+4. Priorytetyzuj awarie (zalanie, brak prądu)`,
+    services: [{ name: "Naprawa awarii", duration_minutes: 60 }, { name: "Przegląd instalacji", duration_minutes: 90 }],
+    calendar: { monday: { enabled: true, start: "07:00", end: "20:00" }, tuesday: { enabled: true, start: "07:00", end: "20:00" }, wednesday: { enabled: true, start: "07:00", end: "20:00" }, thursday: { enabled: true, start: "07:00", end: "20:00" }, friday: { enabled: true, start: "07:00", end: "20:00" }, saturday: { enabled: true, start: "08:00", end: "16:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  spa: {
+    name: "SPA / Sauna / Wellness",
+    icon: "🧖",
+    prompt: `Jesteś asystentem głosowym AI dla SPA. Mów po polsku.
+
+Twoje zadania:
+1. Umawiaj wizyty na zabiegi SPA
+2. Informuj o ofercie (masaże, sauna, zabiegi kosmetyczne)
+3. Przyjmuj zapytania o pakiety i ceny
+4. Informuj o godzinach otwarcia`,
+    services: [{ name: "Masaż relaksacyjny", duration_minutes: 60 }, { name: "Karnet SPA", duration_minutes: 120 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "21:00" }, tuesday: { enabled: true, start: "09:00", end: "21:00" }, wednesday: { enabled: true, start: "09:00", end: "21:00" }, thursday: { enabled: true, start: "09:00", end: "21:00" }, friday: { enabled: true, start: "09:00", end: "21:00" }, saturday: { enabled: true, start: "09:00", end: "18:00" }, sunday: { enabled: true, start: "10:00", end: "16:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  jubiler: {
+    name: "Jubiler / Zegarmistrz",
+    icon: "💍",
+    prompt: `Jesteś asystentem głosowym AI dla salonu jubilerskiego. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zapytania o produkty (biżuteria, zegarki)
+2. Umawiaj wizyty na przymiarki
+3. Informuj o naprawach (zegarmistrz)
+4. Przyjmuj zamówienia na wyroby na zamówienie`,
+    services: [{ name: "Przymiarka biżuterii", duration_minutes: 30 }, { name: "Naprawa zegarka", duration_minutes: 15 }],
+    calendar: { monday: { enabled: true, start: "09:00", end: "17:00" }, tuesday: { enabled: true, start: "09:00", end: "17:00" }, wednesday: { enabled: true, start: "09:00", end: "17:00" }, thursday: { enabled: true, start: "09:00", end: "17:00" }, friday: { enabled: true, start: "09:00", end: "17:00" }, saturday: { enabled: true, start: "09:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 30 },
+  },
+  pralnia: {
+    name: "Pralnia chemiczna",
+    icon: "👕",
+    prompt: `Jesteś asystentem głosowym AI dla pralni chemicznej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zamówienia na pranie
+2. Informuj o cenniku
+3. Informuj o terminach odbioru
+4. Potwierdzaj gotowość zamówienia`,
+    services: [{ name: "Pranie odzieży", duration_minutes: 1440 }, { name: "Czyszczenie obuwia", duration_minutes: 1440 }],
+    calendar: { monday: { enabled: true, start: "08:00", end: "18:00" }, tuesday: { enabled: true, start: "08:00", end: "18:00" }, wednesday: { enabled: true, start: "08:00", end: "18:00" }, thursday: { enabled: true, start: "08:00", end: "18:00" }, friday: { enabled: true, start: "08:00", end: "18:00" }, saturday: { enabled: true, start: "09:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 1440, slot_interval: 1440 },
+  },
+  ochrona: {
+    name: "Ochrona / Detektywistyka",
+    icon: "🔒",
+    prompt: `Jesteś asystentem głosowym AI dla firmy ochroniarskiej. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zapytania o usługi ochrony
+2. Umawiaj spotkania z doradcą
+3. Informuj o ofercie (monitoring, ochrona fizyczna, detektyw)
+4. Zapisuj leady`,
+    services: [{ name: "Konsultacja ochrony", duration_minutes: 60 }, { name: "Wycena monitoringu", duration_minutes: 30 }],
+    calendar: { monday: { enabled: true, start: "08:00", end: "18:00" }, tuesday: { enabled: true, start: "08:00", end: "18:00" }, wednesday: { enabled: true, start: "08:00", end: "18:00" }, thursday: { enabled: true, start: "08:00", end: "18:00" }, friday: { enabled: true, start: "08:00", end: "18:00" }, saturday: { enabled: true, start: "09:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  wino: {
+    name: "Winiarnia / Alkohole",
+    icon: "🍷",
+    prompt: `Jesteś asystentem głosowym AI dla winiarni/sklepu alkoholowego. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj zamówienia
+2. Informuj o dostępności produktów
+3. Informuj o godzinach otwarcia
+4. Przyjmuj rezerwacje na degustacje`,
+    services: [{ name: "Degustacja wina", duration_minutes: 60 }, { name: "Zamówienie online", duration_minutes: 10 }],
+    calendar: { monday: { enabled: false, start: "00:00", end: "00:00" }, tuesday: { enabled: false, start: "00:00", end: "00:00" }, wednesday: { enabled: false, start: "00:00", end: "00:00" }, thursday: { enabled: true, start: "12:00", end: "20:00" }, friday: { enabled: true, start: "12:00", end: "22:00" }, saturday: { enabled: true, start: "11:00", end: "22:00" }, sunday: { enabled: true, start: "12:00", end: "18:00" }, buffer_minutes: 15, slot_interval: 60 },
+  },
+  wypozyczalnia: {
+    name: "Wypożyczalnia sprzętu",
+    icon: "🚜",
+    prompt: `Jesteś asystentem głosowym AI dla wypożyczalni sprzętu. Mów po polsku.
+
+Twoje zadania:
+1. Przyjmuj rezerwacje sprzętu
+2. Informuj o dostępności
+3. Podawaj cennik wypożyczenia
+4. Umawiaj odbiór/zwrot`,
+    services: [{ name: "Wypożyczenie sprzętu", duration_minutes: 30 }, { name: "Rezerwacja terminu", duration_minutes: 15 }],
+    calendar: { monday: { enabled: true, start: "08:00", end: "17:00" }, tuesday: { enabled: true, start: "08:00", end: "17:00" }, wednesday: { enabled: true, start: "08:00", end: "17:00" }, thursday: { enabled: true, start: "08:00", end: "17:00" }, friday: { enabled: true, start: "08:00", end: "17:00" }, saturday: { enabled: true, start: "09:00", end: "14:00" }, sunday: { enabled: false, start: "00:00", end: "00:00" }, buffer_minutes: 15, slot_interval: 30 },
+  },
 };
 
 export function getTemplates() {

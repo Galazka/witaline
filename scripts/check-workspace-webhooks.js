@@ -1,25 +1,29 @@
-const fs = require("fs");
 const https = require("https");
+const fs = require("fs");
+const envRaw = fs.readFileSync(".env", "utf-8");
+const env = {};
+envRaw.split("\n").forEach(line => {
+  const t = line.trim(); if (!t || t.startsWith("#")) return;
+  const i = t.indexOf("="); if (i === -1) return;
+  env[t.slice(0, i).trim()] = t.slice(i + 1).trim().replace(/^['"]|['"]$/g, "");
+});
+const key = env.ELEVENLABS_API_KEY;
 
-function getEnv(key) {
-  const content = fs.readFileSync(".env", "utf-8");
-  const m = content.match(new RegExp("^" + key + "=(.+)", "m"));
-  if (!m) return null;
-  return m[1].trim().replace(/^['"]|['"]$/g, "");
+function api(method, path, body) {
+  return new Promise((resolve, reject) => {
+    const data = body ? JSON.stringify(body) : null;
+    const opts = { method, hostname: "api.elevenlabs.io", path,
+      headers: { "xi-api-key": key, "Content-Type": "application/json" } };
+    if (data) opts.headers["Content-Length"] = Buffer.byteLength(data);
+    const req = https.request(opts, res => { let d = ""; res.on("data", c => d += c); res.on("end", () => { try { resolve(JSON.parse(d)); } catch { resolve(d); } }); });
+    req.on("error", reject); if (data) req.write(data); req.end();
+  });
 }
 
-const apiKey = getEnv("ELEVENLABS_API_KEY");
+async function main() {
+  // Try workspace-level webhook API
+  const wh = await api("GET", "/v1/workspace/webhooks/settings");
+  console.log("Workspace webhook settings:", JSON.stringify(wh, null, 2).slice(0, 3000));
+}
 
-https.get("https://api.elevenlabs.io/v1/workspace/webhooks", { headers: { "xi-api-key": apiKey } }, (res) => {
-  let data = "";
-  res.on("data", (c) => (data += c));
-  res.on("end", () => {
-    console.log("Status:", res.statusCode);
-    try {
-      const j = JSON.parse(data);
-      console.log(JSON.stringify(j, null, 2));
-    } catch (e) {
-      console.log("Raw:", data.slice(0, 1000));
-    }
-  });
-});
+main().catch(e => console.error(e));

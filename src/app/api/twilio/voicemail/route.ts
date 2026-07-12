@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 function twiml(body: string): NextResponse {
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`, {
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
   const digits = String(formData.get("Digits") || "");
   const from = String(formData.get("From") || "").replace(/^\+/, "");
   const url = new URL(request.url);
-  const businessId = url.searchParams.get("businessId") || "00000000-0000-0000-0000-000000000001";
+  const businessId = url.searchParams.get("businessId") || WITALINE_MAIN_BUSINESS_ID;
 
   if (digits === "1") {
     // Klient chce zostawić wiadomość

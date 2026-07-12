@@ -69,13 +69,13 @@ export default function AdminDtmfLogs() {
           </thead>
           <tbody>
             {logs.map((log) => (
-              <tr key={log.id} className="border-b border-zinc-50 hover:bg-brand-50/50 transition-colors">
+              <tr key={log.id} className="border-b border-zinc-50 hover:bg-[#f0fdfa]/50 transition-colors">
                 <td className="px-4 py-3 text-zinc-700 whitespace-nowrap">
                   {new Date(log.created_at).toLocaleString("pl-PL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </td>
                 <td className="px-4 py-3 font-medium text-zinc-900">{log.caller_id || log.from_number || "—"}</td>
                 <td className="px-4 py-3">
-                  <span className="inline-flex items-center gap-1 bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md text-xs font-mono font-semibold">
+                  <span className="inline-flex items-center gap-1 bg-[#f0fdfa] text-[#0d9488] px-2 py-0.5 rounded-md text-xs font-mono font-semibold">
                     # {log.routed_to_extension || "?"} *
                   </span>
                 </td>

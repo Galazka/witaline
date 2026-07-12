@@ -3,9 +3,9 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import { calculateCost, getPlanConfig } from "@/lib/pricing";
 import type { PlanKey } from "@/types/database";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const ELEVENLABS_API = "https://api.elevenlabs.io/v1/convai";
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
 
 type Classification = "spam" | "offer" | "order" | "question" | "booking" | "unknown";
 
@@ -44,13 +44,18 @@ export async function POST() {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   const agentId = process.env.ELEVENLABS_AGENT_ID;
   if (!apiKey || !agentId) {
-    return NextResponse.json({ error: "ELEVENLABS_API_KEY or AGENT_ID not configured" }, { status: 500 });
+    return NextResponse.json({ error: "ELEVENLABS_API_KEY lub AGENT_ID nie skonfigurowane" }, { status: 500 });
   }
 
   // Collect existing ElevenLabs conversation IDs for dedup
-  const { data: existingLogs } = await supabaseAdmin
+  const { data: existingLogs, error: dbError } = await supabaseAdmin
     .from("call_logs")
-    .select("elevenlabs_conversation_id");
+    .select("elevenlabs_conversation_id")
+    .is("deleted_at", null);
+
+  if (dbError) {
+    return NextResponse.json({ error: "Błąd bazy danych: " + dbError.message }, { status: 500 });
+  }
 
   const existingConvIds = new Set(
     (existingLogs || [])
@@ -58,16 +63,26 @@ export async function POST() {
       .filter(Boolean)
   );
 
+  console.log(`[sync-calls] Starting. Agent: ${agentId}, existing convs in DB: ${existingConvIds.size}`);
+
   let cursor: string | undefined;
   let page = 0;
   let saved = 0;
   let skipped = 0;
+  let apiErrors = 0;
 
   while (page < 10) {
     page++;
-    const data = await fetchConversationsPage(apiKey, agentId, cursor);
+    let data: Record<string, unknown>;
+    try {
+      data = await fetchConversationsPage(apiKey, agentId, cursor);
+    } catch (e) {
+      console.error(`[sync-calls] ElevenLabs API error on page ${page}:`, e);
+      apiErrors++;
+      break;
+    }
 
-    const conversations: Array<Record<string, unknown>> = data.conversations || [];
+    const conversations = (data.conversations || []) as Array<Record<string, unknown>>;
     if (conversations.length === 0) break;
 
     for (const conv of conversations) {
@@ -83,6 +98,9 @@ export async function POST() {
       if (!detail) continue;
 
       const duration = (detail.duration_seconds as number) || (detail.metadata as Record<string, unknown>)?.call_duration_secs as number || 0;
+      const startTime = (conv.start_time as string) || (detail.start_time as string) || "";
+      const createdAt = startTime || new Date(Date.now() - (duration || 0) * 1000).toISOString();
+      const endedAt = startTime ? new Date(new Date(startTime).getTime() + (duration || 0) * 1000).toISOString() : new Date().toISOString();
       const analysis = (detail.analysis as Record<string, unknown>) || {};
       const metadata = (detail.metadata as Record<string, unknown>) || {};
       const dynVars = ((detail.conversation_initiation_client_data as Record<string, unknown>)?.dynamic_variables as Record<string, unknown>) || {};
@@ -117,17 +135,24 @@ export async function POST() {
         costPln = Math.round(tokens * 0.00038 * 100) / 100;
       } else {
         const { data: biz } = await supabaseAdmin.from("businesses").select("current_plan").eq("id", businessId).single();
-        costPln = biz ? calculateCost(duration, biz.current_plan as PlanKey) : 0;
+        let totalMonthlyMinutes: number | undefined;
+        if (biz?.current_plan?.startsWith("elastic")) {
+          const convDate = new Date(createdAt);
+          const monthStart = new Date(convDate.getFullYear(), convDate.getMonth(), 1);
+          const { data: monthlyLogs } = await supabaseAdmin.from("call_logs").select("duration_seconds").is("deleted_at", null).eq("business_id", businessId).gte("created_at", monthStart.toISOString());
+          totalMonthlyMinutes = ((monthlyLogs || []).reduce((s, l) => s + (l.duration_seconds || 0), 0) + (duration || 0)) / 60;
+        }
+        costPln = biz ? calculateCost(duration, biz.current_plan as PlanKey, totalMonthlyMinutes) : 0;
       }
 
       const { data: callLog } = await supabaseAdmin
         .from("call_logs")
         .insert({
           business_id: businessId,
+          created_at: createdAt,
           elevenlabs_conversation_id: convId,
           duration_seconds: duration,
           cost_pln: costPln,
-          internal_cost_pln: costPln,
           caller_id: callNumber || "unknown",
           from_number: callNumber || "",
           twilio_call_sid: (metadata.twilio_call_sid as string) || "",
@@ -137,7 +162,7 @@ export async function POST() {
           ai_summary: summary || "",
           was_helpful: null,
           recording_url: (detail.recording_url as string) || "",
-          ended_at: new Date().toISOString(),
+          ended_at: endedAt,
         })
         .select()
         .single();
@@ -152,8 +177,8 @@ export async function POST() {
           summary: summary || "",
           duration_seconds: duration || 0,
           message_count: transcriptText ? transcriptText.split("\n").length : 1,
-          started_at: new Date(Date.now() - (duration || 0) * 1000).toISOString(),
-          ended_at: new Date().toISOString(),
+          started_at: createdAt,
+          ended_at: endedAt,
         });
 
         if (!isMainLine) {
@@ -173,5 +198,5 @@ export async function POST() {
     if (!cursor || !data.has_more) break;
   }
 
-  return NextResponse.json({ saved, skipped, pages: page });
+  return NextResponse.json({ saved, skipped, pages: page, api_errors: apiErrors, db_count: existingConvIds.size });
 }

@@ -1,116 +1,114 @@
 /**
- * SMS / WhatsApp Pricing System
+ * SMS Pricing System — powiązane ze stawkami minut ELASIC_TIERS
  *
- * Two-tier pricing:
- *   WitaLine cost  = what we pay Twilio (actual cost per segment)
- *   Client price    = WitaLine cost + markup (per-business override possible)
- *   Markup          = WitaLine profit per SMS
+ * Ceny BRUTTO (z VAT 23%).
+ * Im niższa stawka za minutę, tym więcej wliczonych SMS i niższa cena dodatkowego SMS.
  *
- * Admin sets base markup. Per-business overrides can add extra margin.
+ * Stawki minut (netto):  1.20→1.10→1.00→0.95→0.90→0.85 PLN/min
+ * Stawki SMS (netto):    0.50→0.46→0.42→0.40→0.38→0.36 PLN/SMS
+ * Darmowe SMS w pakiecie: 20→50→100→200→500→1000
+ *
+ * Klient kupuje minuty i SMS osobno — salda sumują się.
  */
 
 import { convertPrice, type Currency } from "./pricing";
+import { ELASTIC_TIERS } from "./pricing";
 
-// ─── Twilio actual costs ───────────────────────────────────────────
-// Poland outbound SMS: $0.0457/segment ≈ 0.19 PLN (at $1=4.15 PLN)
-// With carrier fees ≈ 0.25 PLN real cost
-export const TWILIO_SMS_COST_PLN = 0.25; // our real cost per SMS segment
-export const TWILIO_WHATSAPP_COST_PLN = 0.30; // WhatsApp Business API ~$0.07
+export const VAT_RATE = 0.23;
+export const VAT_MULTIPLIER = 1 + VAT_RATE;
 
-// ─── Default markup ────────────────────────────────────────────────
-// Client pays: TWILIO_SMS_COST_PLN * (1 + DEFAULT_MARKUP_PERCENT/100)
-// 0.25 * (1 + 1.0) = 0.50 PLN
-export const DEFAULT_SMS_MARKUP_PERCENT = 100; // 100% = 2x
-export const DEFAULT_SMS_BASE_PRICE_PLN = TWILIO_SMS_COST_PLN * (1 + DEFAULT_SMS_MARKUP_PERCENT / 100); // 0.50
+// ─── Twilio actual cost (NETTO) ───────────────────────────────────
+export const TWILIO_SMS_COST_PLN = 0.25;
 
-export const DEFAULT_WHATSAPP_MARKUP_PERCENT = 80;
-export const DEFAULT_WHATSAPP_BASE_PRICE_PLN =
-  TWILIO_WHATSAPP_COST_PLN * (1 + DEFAULT_WHATSAPP_MARKUP_PERCENT / 100); // ~0.54
+// ─── SMS price per minute rate (NETTO) ────────────────────────────
+// cena dodatkowego SMS jako ułamek stawki minut (około 42% stawki)
+export const SMS_PRICE_PER_MIN_RATE_RATIO = 0.42;
 
-// ─── Default monthly SMS limits per plan ───────────────────────────
-export const SMS_PLAN_LIMITS: Record<string, number> = {
-  start: 50,
-  pro: 100,
-  growth: 150,
-  lux: 200,
-  enterprise: 500,
+// ─── Free SMS per tier (NETTO cena SMS) ───────────────────────────
+// wyliczane z: smsPriceNetto = minuteRate * 0.42
+// freeSms = round(20 * (1.20 / minuteRate))
+export function getSmsPriceNettoForRate(minuteRatePLN: number): number {
+  return Math.round(minuteRatePLN * SMS_PRICE_PER_MIN_RATE_RATIO * 100) / 100;
+}
+
+export function getFreeSmsForRate(minuteRatePLN: number): number {
+  if (minuteRatePLN <= 0) return 0;
+  const base = 20 * (1.20 / minuteRatePLN);
+  return Math.max(20, Math.round(base / 10) * 10); // zaokrąglenie w górę do 10
+}
+
+export const SMS_VOLUME_DISCOUNTS: Record<number, number> = {
+  50:   0,       // 0% — cena bazowa
+  100:  0.05,    // 5%
+  200:  0.10,    // 10%
+  500:  0.16,    // 16%
+  1000: 0.21,    // 21%
 };
 
-// ─── SMS prepaid package pricing (client price) ────────────────────
-export interface SmsPackage {
-  smsCount: number;
-  clientPricePLN: number; // what client pays
-  witalineCostPLN: number; // our Twilio cost
-  marginPLN: number;
-  pricePerSmsPLN: number;
+function computeSmsPackages(): SmsPackage[] {
+  const baseRate = 1.20;
+  const basePriceNetto = getSmsPriceNettoForRate(baseRate); // 0.50
+  const baseBrutto = Math.round(basePriceNetto * VAT_MULTIPLIER * 100) / 100; // 0.62
+
+  return (Object.entries(SMS_VOLUME_DISCOUNTS) as [string, number][]).sort(([a], [b]) => Number(a) - Number(b)).map(([countStr, discount]) => {
+    const count = Number(countStr);
+    const pricePerSms = Math.round(baseBrutto * (1 - discount) * 100) / 100;
+    const clientPrice = Math.round(pricePerSms * count * 100) / 100;
+    const witalineCost = Math.round(TWILIO_SMS_COST_PLN * count * 100) / 100; // koszt Twilio netto
+    return {
+      smsCount: count,
+      clientPricePLN: clientPrice,
+      witalineCostPLN: witalineCost,
+      marginPLN: Math.round((clientPrice - witalineCost) * 100) / 100,
+      pricePerSmsPLN: pricePerSms,
+    };
+  });
 }
 
-export const SMS_PACKAGES: SmsPackage[] = [
-  { smsCount: 50, clientPricePLN: 25, witalineCostPLN: 12.5, marginPLN: 12.5, pricePerSmsPLN: 0.50 },
-  { smsCount: 100, clientPricePLN: 45, witalineCostPLN: 25, marginPLN: 20, pricePerSmsPLN: 0.45 },
-  { smsCount: 200, clientPricePLN: 80, witalineCostPLN: 50, marginPLN: 30, pricePerSmsPLN: 0.40 },
-  { smsCount: 500, clientPricePLN: 175, witalineCostPLN: 125, marginPLN: 50, pricePerSmsPLN: 0.35 },
-  { smsCount: 1000, clientPricePLN: 300, witalineCostPLN: 250, marginPLN: 50, pricePerSmsPLN: 0.30 },
-];
-
-// ─── WhatsApp prepaid package pricing ──────────────────────────────
-export interface WaPackage {
-  waCount: number;
-  clientPricePLN: number;
-  witalineCostPLN: number;
-}
-
-export const WA_PACKAGES: WaPackage[] = [
-  { waCount: 50, clientPricePLN: 30, witalineCostPLN: 15 },
-  { waCount: 100, clientPricePLN: 55, witalineCostPLN: 30 },
-  { waCount: 200, clientPricePLN: 100, witalineCostPLN: 60 },
-  { waCount: 500, clientPricePLN: 220, witalineCostPLN: 150 },
-];
+export const SMS_PACKAGES: SmsPackage[] = computeSmsPackages();
 
 // ─── Types ─────────────────────────────────────────────────────────
 
+export interface SmsPackage {
+  smsCount: number;
+  clientPricePLN: number; // brutto
+  witalineCostPLN: number; // netto
+  marginPLN: number; // brutto
+  pricePerSmsPLN: number; // brutto
+}
+
 export interface SmsPricingConfig {
-  /** Our Twilio cost per segment */
-  witalineCostPerSms: number;
-  /** Markup percent (e.g. 100 = 2x) */
+  witalineCostPerSms: number; // netto
   markupPercent: number;
-  /** Client-facing price per SMS */
-  clientPricePerSms: number;
-  /** WitaLine profit per SMS */
-  marginPerSms: number;
-  /** WhatsApp pricing */
-  waCostPerMsg: number;
-  waClientPrice: number;
-  waMargin: number;
+  clientPricePerSms: number; // brutto
+  marginPerSms: number; // brutto
 }
 
 export interface SmsCostBreakdown {
   segments: number;
-  witalineCostPLN: number;
-  clientPricePLN: number;
-  marginPLN: number;
+  witalineCostPLN: number; // netto
+  clientPricePLN: number; // brutto
+  marginPLN: number; // brutto
   marginPercent: number;
 }
 
 export function getSmsPricingConfig(
+  minuteRatePLN?: number | null,
   businessOverrides?: {
     smsMarkupPercent?: number | null;
     smsBasePriceOverride?: number | null;
   } | null
 ): SmsPricingConfig {
-  const markupPct = businessOverrides?.smsMarkupPercent ?? DEFAULT_SMS_MARKUP_PERCENT;
-  const clientPrice =
-    businessOverrides?.smsBasePriceOverride ??
-    Math.round(TWILIO_SMS_COST_PLN * (1 + markupPct / 100) * 100) / 100;
+  const rate = minuteRatePLN ?? ELASTIC_TIERS[0].rate; // domyślnie 1.20
+  const basePriceNetto = getSmsPriceNettoForRate(rate);
+  const clientPriceBrutto = Math.round(basePriceNetto * VAT_MULTIPLIER * 100) / 100;
+  const costToUsBrutto = Math.round(TWILIO_SMS_COST_PLN * VAT_MULTIPLIER * 100) / 100;
 
   return {
     witalineCostPerSms: TWILIO_SMS_COST_PLN,
-    markupPercent: markupPct,
-    clientPricePerSms: clientPrice,
-    marginPerSms: Math.round((clientPrice - TWILIO_SMS_COST_PLN) * 100) / 100,
-    waCostPerMsg: TWILIO_WHATSAPP_COST_PLN,
-    waClientPrice: DEFAULT_WHATSAPP_BASE_PRICE_PLN,
-    waMargin: Math.round((DEFAULT_WHATSAPP_BASE_PRICE_PLN - TWILIO_WHATSAPP_COST_PLN) * 100) / 100,
+    markupPercent: businessOverrides?.smsMarkupPercent ?? Math.round(((clientPriceBrutto / TWILIO_SMS_COST_PLN) - 1) * 100),
+    clientPricePerSms: clientPriceBrutto,
+    marginPerSms: Math.round((clientPriceBrutto - costToUsBrutto) * 100) / 100,
   };
 }
 
@@ -147,11 +145,11 @@ export function findClosestSmsPackage(smsCount: number): SmsPackage {
 export function getSmsPackagePrice(smsCount: number): number {
   const pkg = SMS_PACKAGES.find((p) => p.smsCount === smsCount);
   if (pkg) return pkg.clientPricePLN;
-  // Custom amount — interpolate between nearest packages
   const sorted = [...SMS_PACKAGES].sort((a, b) => a.smsCount - b.smsCount);
   const lower = sorted.filter((p) => p.smsCount <= smsCount).pop();
   const upper = sorted.find((p) => p.smsCount >= smsCount);
-  if (!lower && !upper) return smsCount * DEFAULT_SMS_BASE_PRICE_PLN;
+  const baseBrutto = SMS_PACKAGES[0].pricePerSmsPLN;
+  if (!lower && !upper) return smsCount * baseBrutto;
   if (!lower && upper) return smsCount * (upper.clientPricePLN / upper.smsCount);
   if (lower && !upper) return smsCount * (lower.clientPricePLN / lower.smsCount);
   const ratio = (smsCount - lower!.smsCount) / (upper!.smsCount - lower!.smsCount);
@@ -170,18 +168,7 @@ export function getSmsRemaining(row: {
   return Math.max(0, limit + extra - used);
 }
 
-export function getWaRemaining(row: {
-  wa_limit?: number | null;
-  wa_extra_purchased?: number | null;
-  wa_used?: number | null;
-}): number {
-  const limit = row.wa_limit ?? 0;
-  const extra = row.wa_extra_purchased ?? 0;
-  const used = row.wa_used ?? 0;
-  return Math.max(0, limit + extra - used);
-}
-
-/** Estimate how many minutes business can still handle with their prepaid balance */
+/** Estimate how many minutes business can still handle */
 export function estimateMinutesFromPrepaid(
   prepaidMinutes: number,
   avgRatePLN: number = 1.05

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToAgent } from "@/lib/twilio-utils";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 const DEFAULT_CONFIG = {
   internalCostPerMin: 0.65,
@@ -63,56 +64,25 @@ async function getActivePricing(): Promise<PricingCfg> {
 
 function fmt(n: number): string { return n.toFixed(2).replace(".", ","); }
 
-function buildPricingSection(p: PricingCfg): string {
-  const tiers: { min: number; max: number; rate: number }[] = [];
-  let cr = p.elasticBaseRate;
-  tiers.push({ min: 0, max: p.elasticStartMin!, rate: cr });
-  let cm = p.elasticStartMin!;
-  while (cm < p.elasticMaxMin!) {
-    const nm = Math.min(cm + p.elasticTierStep!, p.elasticMaxMin!);
-    cr = Math.max(p.elasticMinRate, cr - p.elasticStepDecrease!);
-    tiers.push({ min: cm + 1, max: nm, rate: Math.round(cr * 100) / 100 });
-    cm = nm;
-  }
-  const lowTier = tiers[tiers.length - 1];
-  const elasticRateDesc = `Od ${fmt(p.elasticBaseRate)} do ${fmt(lowTier.rate)} zł/min – im więcej minut, tym niższa stawka`;
+function buildPricingSection(): string {
+  return `## Cennik (elastyczny pay-as-you-go)
 
-  const overage = (price: number, inclMin: number): string => {
-    const rpm = price / inclMin;
-    return fmt(Math.max(rpm, p.elasticMinRate));
-  };
+WitaLine nie ma stałej opłaty miesięcznej. Klient płaci tylko za wykorzystane minuty.
 
-  return `===== OFERTA WITALINE =====
+Stawki minutowe (netto):
+- 0–500 min: 1,20 PLN/min
+- 501–1000 min: 1,10 PLN/min
+- 1001–2000 min: 1,00 PLN/min
+- 2001–3000 min: 0,95 PLN/min
+- 3001–5000 min: 0,90 PLN/min
+- 5000+ min: 0,85 PLN/min
 
-Pakiet ELASTYCZNY — 0 zł/mies, płacisz tylko za użycie
-- ${elasticRateDesc}
-- Suwak 50–${p.elasticMaxMin} minut, cena spada co ${p.elasticTierStep} minut
-- Bot odbiera telefony 24/7, widget, czat, transkrypcje
-- Idealny dla małych firm i dopiero testujących
+SMS-y: od 0,50 PLN/szt (netto), progresywnie taniej.
 
-Pakiet PRO — ${p.planPro} zł/mies (300 min wliczone, potem ${overage(p.planPro, 300)} zł/min)
-- Wszystko co w Elastycznym plus:
-- Integracja z Google Calendar (bot zapisuje terminy)
-- Baza wiedzy o firmie
-- Własny polski numer telefonu
-- Do 3 konsultantów
+Klient kupuje minuty z góry przez Stripe (jednorazowo). Minuty ważne bezterminowo.
+Dostępne pakiety SMS do dokupienia (50/100/200/500/1000 sztuk).
 
-Pakiet LUX — ${p.planLux} zł/mies (800 min wliczone, potem ${overage(p.planLux, 800)} zł/min, NAJPOPULARNIEJSZY)
-- Wszystko co w PRO plus:
-- Integracja z CRM (HubSpot, Livespace)
-- Profesjonalny klon głosu właściciela
-- Do 10 konsultantów
-- Dedykowany opiekun klienta
-- SLA 24/7
-
-Pakiet GROWTH — ${p.planGrowth} zł/mies (600 min wliczone, potem ${overage(p.planGrowth, 600)} zł/min)
-- Dla rozwijających się firm — dobry balans ceny i minut
-
-Pakiet START — ${p.planStart} zł/mies (250 min wliczone)
-- Dla małych firm i JDG — niska cena, pełna funkcjonalność
-
-Pakiet ENTERPRISE — od ${p.planEnterprise} zł/mies (1500 min, indywidualna wycena)
-- Dla dużych firm — integracja CRM, klon głosu, SLA 24/7`;
+Dla firm powyżej 10 konsultantów oferujemy indywidualną wycenę Enterprise.`;
 }
 
 async function getBusinessVoice(businessId: string): Promise<{ voiceId: string; voiceName: string }> {
@@ -154,9 +124,9 @@ export async function POST(request: Request) {
 
   const { voiceId, voiceName } = await getBusinessVoice(businessId);
   const pricing = await getActivePricing();
-  const pricingBlock = buildPricingSection(pricing);
+  const pricingBlock = buildPricingSection();
 
-  const isMainLine = businessId === "00000000-0000-0000-0000-000000000001";
+  const isMainLine = businessId === WITALINE_MAIN_BUSINESS_ID;
 
   if (isMainLine) {
     const mainPrompt = `Jesteś ${voiceName}, recepcjonistka WitaLine (wymowa: witalajn) — polskiej platformy automatycznej recepcji AI dla firm. Twoim zadaniem jest odbieranie telefonów od klientów zainteresowanych ofertą, prezentowanie pakietów i umawianie demo.

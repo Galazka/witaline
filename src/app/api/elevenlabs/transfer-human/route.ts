@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { setPendingTransfer } from "@/lib/transfer-store";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
-/** Szuka konsultanta lub numeru dla danej firmy */
-async function resolveTargetNumber(businessId: string): Promise<{ number: string; businessName: string; callerId: string } | null> {
+/** Szukasz konsultanta lub numeru dla danej firmy. */
+async function resolveTargetNumber(businessId: string): Promise<{ number: string; businessName: string; callerId: string; hasHumanConsultant: boolean; consultants: { phone: string }[] } | null> {
   const { data: business } = await supabaseAdmin
     .from("businesses")
     .select("id, name, phone, twilio_number")
@@ -18,23 +19,31 @@ async function resolveTargetNumber(businessId: string): Promise<{ number: string
     .eq("business_id", businessId)
     .order("sort_order", { ascending: true });
 
-  let targetNumber = "";
-  if (consultants && consultants.length > 0) {
-    targetNumber = consultants[0].phone;
-  } else {
-    targetNumber = business.phone || process.env.WITALINE_CONSULTANT_NUMBER || "";
+  const consultantList = consultants || [];
+
+  if (consultantList.length > 0) {
+    return {
+      number: consultantList[0].phone,
+      businessName: business.name || "WitaLine",
+      callerId: business.twilio_number || process.env.TWILIO_PHONE_NUMBER || "",
+      hasHumanConsultant: true,
+      consultants: consultantList,
+    };
   }
 
-  if (!targetNumber) return null;
+  const defaultNumber = process.env.WITALINE_CONSULTANT_NUMBER || process.env.TWILIO_PHONE_NUMBER || "";
+  if (!defaultNumber) return null;
 
   return {
-    number: targetNumber,
+    number: defaultNumber,
     businessName: business.name || "WitaLine",
     callerId: business.twilio_number || process.env.TWILIO_PHONE_NUMBER || "",
+    hasHumanConsultant: false,
+    consultants: [],
   };
 }
 
-/* Obsługa GET — dla ElevenLabs system tool transfer_to_number (webhook) */
+/* GET — dla ElevenLabs system tool transfer_to_number */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const businessId = searchParams.get("business_id") || searchParams.get("businessId") || "";
@@ -53,7 +62,12 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     console.log("[transfer-human] received:", JSON.stringify(body).slice(0, 300));
 
-    const businessId = body.business_id || body.dynamic_vars?.business_id;
+    let businessId = body.business_id || body.dynamic_vars?.business_id || "";
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(businessId)) {
+      console.log("[transfer-human] invalid businessId, falling back to main:", businessId);
+      businessId = WITALINE_MAIN_BUSINESS_ID;
+    }
     const callerPhone = body.caller_phone || body.dynamic_vars?.caller_phone || "";
     const toNumber = body.to_number || body.dynamic_vars?.to_number || "";
     const callSid = body.call_sid || body.dynamic_vars?.call_sid || "";
@@ -73,10 +87,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ number: target.number });
     }
 
-    // Custom tool: zapisz zamiar transferu w shared store
-    // Stream zakończy się naturalnie → Twilio wykona <Redirect> → transfer-router sprawdzi store
-    const storeKey = callSid || businessId;
-    await setPendingTransfer(storeKey, {
+    // ZAWSZE używaj businessId jako klucza — call_sid może nie być dostępne
+    const pending = {
       businessId,
       targetNumber: target.number,
       callerId: target.callerId,
@@ -84,15 +96,32 @@ export async function POST(request: Request) {
       fromNumber: callerPhone,
       toNumber,
       createdAt: Date.now(),
-    });
+    };
+    await setPendingTransfer(businessId, pending);
+    console.log("[transfer-human] saved pending transfer for", businessId, "→", pending.targetNumber);
 
-    console.log("[transfer-human] transfer stored for", storeKey, "→", target.number);
+    // Utwórz support conversation
+    try {
+      await supabaseAdmin.from("support_conversations").insert({
+        business_id: businessId,
+        customer_phone: callerPhone || null,
+        customer_name: null,
+        source: "transfer",
+        status: "open",
+      });
+    } catch (convErr) {
+      console.warn("[transfer-human] failed to create support conversation:", convErr);
+    }
 
+    // Nie próbujemy redirectu REST API — ElevenLabs <Connect> nie pozwala na
+    // przerwanie strumienia. Agent musi zakończyć rozmowę, wtedy <Redirect>
+    // wstrzyknięty w connectToAgent przekaże do transfer-router.
     return NextResponse.json({
       ok: true,
       target: target.number,
       business: target.businessName,
-      message: `Transfer initiated to ${target.number}. Caller will be connected when Stream ends.`,
+      has_human_consultant: target.hasHumanConsultant,
+      message: `Transfer do ${target.number}. PO UKOŃCZENIU TEGO NARZĘDZIA KONIECZNIE zakończ rozmowę (end_call) — system przekieruje połączenie automatycznie.`,
     });
 
   } catch (err) {

@@ -4,11 +4,8 @@ import { useState, type JSX } from "react";
 import { ELASTIC_TIERS, calculateElasticPrice, INTERNAL_COST_PER_MIN } from "@/lib/pricing";
 
 const PLANS = [
-  { key: "start", label: "START", pricePLN: 299, includedMinutes: 250 },
-  { key: "growth", label: "GROWTH", pricePLN: 600, includedMinutes: 600, hot: true },
-  { key: "enterprise", label: "ENTERPRISE", pricePLN: 1500, includedMinutes: 1500 },
-  { key: "pro", label: "PRO", pricePLN: 300, includedMinutes: 300 },
-  { key: "lux", label: "LUX", pricePLN: 800, includedMinutes: 800 },
+  { key: "elastic_0", label: "ELASTYCZNY", pricePLN: 0, includedMinutes: 0 },
+  { key: "enterprise_2000", label: "ENTERPRISE", pricePLN: 999, includedMinutes: 1500 },
 ];
 
 const EUR_RATE = 0.92;
@@ -116,8 +113,8 @@ export default function AdminProfitability() {
       <div className="bg-white rounded-xl border border-zinc-200 p-6">
         <h2 className="text-base font-semibold text-zinc-900 mb-4">Rabat</h2>
         <div className="flex items-center gap-4">
-          <input type="range" min="0" max="50" step="1" value={discount} onChange={e => setDiscount(parseInt(e.target.value))} className="flex-1 accent-brand-400" />
-          <span className="text-lg font-bold text-brand-400 min-w-[4rem] text-right">{discount}%</span>
+          <input type="range" min="0" max="50" step="1" value={discount} onChange={e => setDiscount(parseInt(e.target.value))} className="flex-1 accent-[#0d9488]" />
+          <span className="text-lg font-bold text-[#0d9488] min-w-[4rem] text-right">{discount}%</span>
         </div>
         <p className="text-xs text-zinc-400 mt-2">Rabat % dla symulacji — cena dla klienta jest pomniejszona o ten procent</p>
       </div>
@@ -171,19 +168,19 @@ export default function AdminProfitability() {
                 const isProfitable = profitPerMonth >= 0;
 
                 return (
-                  <tr key={plan.key} className={`border-b border-zinc-100 last:border-b-0 ${plan.hot ? "bg-brand-50/50" : ""}`}>
+                  <tr key={plan.key} className="border-b border-zinc-100 last:border-b-0">
                     <td className="px-4 py-3 font-semibold text-zinc-900">{plan.label}</td>
                     <td className="px-4 py-3 font-mono">{plan.pricePLN.toFixed(0)} zł</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">€{(plan.pricePLN / usdPlnRate * eurUsdRate).toFixed(0)}</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">${(plan.pricePLN / usdPlnRate).toFixed(0)}</td>
                     <td className="px-4 py-3 font-mono">{plan.includedMinutes}</td>
-                    <td className="px-4 py-3 font-mono">{revenuePerMin.toFixed(4)} zł</td>
+                    <td className="px-4 py-3 font-mono">{plan.includedMinutes > 0 ? revenuePerMin.toFixed(4) : "—"} zł</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-500">{fmtUSD(totalCostPerMinUSD)} / {fmtEUR(totalCostPerMinUSD)} / {fmtPLN(totalCostPerMinUSD)}</td>
-                    <td className={`px-4 py-3 font-mono font-semibold ${isProfitable ? "text-brand-400" : "text-red-500"}`}>
+                    <td className={`px-4 py-3 font-mono font-semibold ${isProfitable ? "text-[#0d9488]" : "text-red-500"}`}>
                       {profitPerMonth.toFixed(2)} zł
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${marginPct > 20 ? "bg-brand-100 text-brand-500" : marginPct > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${marginPct > 20 ? "bg-brand-100 text-[#0d9488]" : marginPct > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"}`}>
                         {marginPct.toFixed(1)}%
                       </span>
                     </td>
@@ -204,7 +201,7 @@ export default function AdminProfitability() {
         <h2 className="text-base font-semibold text-zinc-900 mb-4">Symulacja przy skali</h2>
         <div className="flex items-center gap-4 mb-4">
           <label className="text-xs text-zinc-500">Liczba firm:</label>
-          <input type="range" min="10" max="500" step="10" value={scale} onChange={e => setScale(parseInt(e.target.value))} className="flex-1 accent-brand-400" />
+          <input type="range" min="10" max="500" step="10" value={scale} onChange={e => setScale(parseInt(e.target.value))} className="flex-1 accent-[#0d9488]" />
           <span className="text-lg font-bold text-zinc-900 min-w-[3rem] text-right">{scale}</span>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
@@ -219,13 +216,13 @@ export default function AdminProfitability() {
             const profitUSD = profit / usdPlnRate;
             const profitEUR = profitUSD * eurUsdRate;
             return (
-              <div key={plan.key} className={`border rounded-lg p-4 ${plan.hot ? "border-brand-400 bg-brand-50/50" : "border-zinc-100"}`}>
+              <div key={plan.key} className="border rounded-lg p-4 border-zinc-100">
                 <p className="text-sm font-semibold text-zinc-900">{plan.label}</p>
                 <p className="text-2xl font-bold text-zinc-900">{profit.toFixed(0)} zł</p>
                 <p className="text-xs text-zinc-400">€{profitEUR.toFixed(0)} · ${profitUSD.toFixed(0)}</p>
                 <p className="text-xs text-zinc-500">Przychód: {revenue.toFixed(0)} zł</p>
                 <p className="text-xs text-zinc-500">Koszt: {cost.toFixed(0)} zł</p>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-2 ${margin > 20 ? "bg-brand-100 text-brand-500" : margin > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-2 ${margin > 20 ? "bg-brand-100 text-[#0d9488]" : margin > 0 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"}`}>
                   {margin.toFixed(1)}% marży
                 </span>
               </div>
@@ -262,7 +259,7 @@ export default function AdminProfitability() {
                       <td className="py-2 pr-3 text-right font-mono text-zinc-500">{p.costTotal.toFixed(2).replace(".",",")} zł</td>
                       <td className="py-2 pr-3 text-right font-mono text-green-600">{p.profitTotal.toFixed(2).replace(".",",")} zł</td>
                       <td className="py-2 pr-3 text-right font-mono text-green-600">{p.profitPerMin.toFixed(2).replace(".",",")} zł</td>
-                      <td className="py-2 text-right"><span className="bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full text-xs font-medium">{p.marginPercent}%</span></td></>
+                      <td className="py-2 text-right"><span className="bg-[#ccfbf1] text-[#0d9488] px-2 py-0.5 rounded-full text-xs font-medium">{p.marginPercent}%</span></td></>
                     )})()}
                   </tr>
                 );
@@ -277,7 +274,7 @@ export default function AdminProfitability() {
                       <td className="py-2 pr-3 text-right font-mono text-zinc-500">{p.costTotal.toFixed(2).replace(".",",")} zł</td>
                       <td className="py-2 pr-3 text-right font-mono text-green-600">{p.profitTotal.toFixed(2).replace(".",",")} zł</td>
                       <td className="py-2 pr-3 text-right font-mono text-green-600">{p.profitPerMin.toFixed(2).replace(".",",")} zł</td>
-                      <td className="py-2 text-right"><span className="bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full text-xs font-medium">{p.marginPercent}%</span></td>
+                      <td className="py-2 text-right"><span className="bg-[#ccfbf1] text-[#0d9488] px-2 py-0.5 rounded-full text-xs font-medium">{p.marginPercent}%</span></td>
                     </tr>
                   );
                 }
@@ -293,10 +290,10 @@ export default function AdminProfitability() {
       <div className="bg-white rounded-xl border border-zinc-200 p-6">
         <h2 className="text-base font-semibold text-zinc-900 mb-4">Źródła stawek</h2>
         <div className="space-y-2 text-sm text-zinc-600">
-          <p><strong>ElevenLabs ConvAI:</strong> $0.08/min (Interactive Voice AI) — <a href="https://elevenlabs.io/pricing" target="_blank" className="text-brand-400 underline" rel="noreferrer">elevenlabs.io/pricing</a></p>
-          <p><strong>OpenRouter Qwen 3.5 35B:</strong> input ~$0.15/1M tok, output ~$1.00/1M tok — <a href="https://openrouter.ai/models/qwen/qwen3.6-35b-a3b" target="_blank" className="text-brand-400 underline" rel="noreferrer">openrouter.ai</a></p>
-          <p><strong>Twilio SIP:</strong> $0.014/min (Polska) + ~$1.15/mc za numer — <a href="https://www.twilio.com/voice/pricing/pl" target="_blank" className="text-brand-400 underline" rel="noreferrer">twilio.com</a></p>
-          <p><strong>Twilio SMS:</strong> ~$0.0779/sms (Polska) — <a href="https://www.twilio.com/sms/pricing/pl" target="_blank" className="text-brand-400 underline" rel="noreferrer">twilio.com</a>. Doliczany proporcjonalnie do kosztu/min dla % rozmów kończących się SMS-em.</p>
+          <p><strong>ElevenLabs ConvAI:</strong> $0.08/min (Interactive Voice AI) — <a href="https://elevenlabs.io/pricing" target="_blank" className="text-[#0d9488] underline" rel="noreferrer">elevenlabs.io/pricing</a></p>
+          <p><strong>OpenRouter Qwen 3.5 35B:</strong> input ~$0.15/1M tok, output ~$1.00/1M tok — <a href="https://openrouter.ai/models/qwen/qwen3.6-35b-a3b" target="_blank" className="text-[#0d9488] underline" rel="noreferrer">openrouter.ai</a></p>
+          <p><strong>Twilio SIP:</strong> $0.014/min (Polska) + ~$1.15/mc za numer — <a href="https://www.twilio.com/voice/pricing/pl" target="_blank" className="text-[#0d9488] underline" rel="noreferrer">twilio.com</a></p>
+          <p><strong>Twilio SMS:</strong> ~$0.0779/sms (Polska) — <a href="https://www.twilio.com/sms/pricing/pl" target="_blank" className="text-[#0d9488] underline" rel="noreferrer">twilio.com</a>. Doliczany proporcjonalnie do kosztu/min dla % rozmów kończących się SMS-em.</p>
           <p className="text-xs text-zinc-400 mt-2">Stawki zmieniają się okresowo. Wpisz aktualne wartości ręcznie lub edytuj domyślne w komponencie.</p>
         </div>
       </div>

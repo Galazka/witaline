@@ -2,18 +2,53 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { calculateCost, getPlanConfig } from "@/lib/pricing";
 import { sendSms } from "@/lib/twilio-sms";
-import { sendWhatsApp, WHATSAPP_CONTINUITY_TEMPLATES } from "@/lib/twilio-whatsapp";
 import { addNotification } from "@/lib/notifications";
 import { sendWebhook } from "@/lib/webhook-outbound";
 import { enqueueJob } from "@/lib/job-queue";
 import { rateLimitMiddleware } from "@/lib/rate-limit";
 import { analyzeCall } from "@/lib/analyze-call";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
+
+function roundTo(n: number, decimals = 4) {
+  return Math.round(n * 10 ** decimals) / 10 ** decimals;
+}
+
+async function syncCallCosts(callLogId: string, conversationId: string) {
+  if (!conversationId) return;
+  try {
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) return;
+    const convRes = await fetch(
+      `https://api.elevenlabs.io/v1/convai/conversations/${conversationId}`,
+      { headers: { "xi-api-key": apiKey } }
+    );
+    if (!convRes.ok) return;
+    const conv = await convRes.json() as Record<string, unknown>;
+    const charging = conv.charging as Record<string, unknown> | undefined;
+    if (!charging) return;
+    const llmPrice = typeof charging.llm_price === "number" ? charging.llm_price : 0;
+    const platformPrice = typeof charging.platform_price === "number" ? charging.platform_price : 0;
+    const costEl = roundTo(llmPrice + platformPrice);
+    await supabaseAdmin
+      .from("call_logs")
+      .update({
+        cost_elevenlabs: costEl,
+        total_cost: roundTo((costEl || 0) + 0),
+      })
+      .eq("id", callLogId);
+  } catch (e) {
+    console.warn("[call-completed] sync-cost error:", e);
+  }
+}
 
 function verifyWebhook(request: Request): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
   if (!secret) return true;
   const sig = request.headers.get("elevenlabs-webhook-secret") || request.headers.get("x-elevenlabs-webhook-secret") || request.headers.get("webhook-secret");
-  if (sig !== secret) console.warn("[call-completed] webhook secret mismatch — accepting anyway");
+  if (sig !== secret) {
+    console.warn("[call-completed] webhook secret mismatch — rejecting");
+    return false;
+  }
   return true;
 }
 
@@ -28,12 +63,10 @@ function classifyCall(summary: string, transcript: string): Classification {
   return "unknown";
 }
 
-const WITALINE_MAIN_BUSINESS_ID = "00000000-0000-0000-0000-000000000001";
-
 const OFFER_SMS_TEXTS: Record<string, string> = {
-  elastic: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta ELASTYCZNA: 0 zł/mies, płacisz tylko za użycie, 1,00 zł/min. Sprawdź: https://witaline.pl/cennik`,
-  pro: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta PRO: 249 zł/mies, 300 minut wliczone. Sprawdź: https://witaline.pl/cennik`,
-  lux: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta LUX: 599 zł/mies, 800 minut wliczone. Sprawdź: https://witaline.pl/cennik`,
+  elastic: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta elastyczna: 0 zł/mies, płacisz tylko za minuty. Sprawdź widełki cenowe: https://witaline.pl/oferta-indywidualna`,
+  pro: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta elastyczna: 0 zł/mies, płacisz tylko za minuty. Sprawdź widełki cenowe: https://witaline.pl/oferta-indywidualna`,
+  lux: `Cześć! Dziękujemy za rozmowę z WitaLine. Oferta elastyczna: 0 zł/mies, płacisz tylko za minuty. Sprawdź widełki cenowe: https://witaline.pl/oferta-indywidualna`,
 };
 
 function extractReservation(data: Record<string, unknown>) {
@@ -131,6 +164,7 @@ export async function POST(request: Request) {
   }
 
   const { conversationId, callerId, durationSeconds, transcript, summary, wasHelpful, metadata, customData, recordingUrl } = parsed;
+  const callSidFromMetadata = (metadata.twilio_call_sid as string) || (metadata.call_sid as string) || "";
 
   let businessId = (metadata.businessId as string) || "";
   if (!businessId) {
@@ -167,7 +201,7 @@ export async function POST(request: Request) {
     metadata: metadata as Record<string, unknown>,
     currentPlan: isMainLine ? "main" : (await supabaseAdmin.from("businesses").select("current_plan, minutes_used_this_week").eq("id", businessId).maybeSingle())?.data?.current_plan || "start_100",
     minutesUsed: isMainLine ? 0 : (await supabaseAdmin.from("businesses").select("current_plan, minutes_used_this_week").eq("id", businessId).maybeSingle())?.data?.minutes_used_this_week || 0,
-  }).catch(() => {});
+  }).catch((e) => console.error("[call-completed] notify error:", e));
 
   if (isMainLine) {
     const classification = classifyCall(summary || "", transcript || "");
@@ -181,7 +215,7 @@ export async function POST(request: Request) {
         internal_cost_pln: mainLineCostPln,
         caller_id: callerId || "unknown",
         from_number: (metadata.from_number as string) || callerId || "",
-        twilio_call_sid: (metadata.twilio_call_sid as string) || "",
+        twilio_call_sid: callSidFromMetadata,
         routed_from_main: true,
         transcript: transcript || "",
         classification,
@@ -197,7 +231,8 @@ export async function POST(request: Request) {
       .single();
 
     if (callLog) {
-      analyzeCall(transcript || "", summary || "", callLog.id).catch(() => {});
+      analyzeCall(transcript || "", summary || "", callLog.id).catch((e) => console.error("[call-completed] analyze error:", e));
+      syncCallCosts(callLog.id, conversationId);
 
       await supabaseAdmin.from("conversations").insert({
         business_id: WITALINE_MAIN_BUSINESS_ID,
@@ -229,26 +264,6 @@ export async function POST(request: Request) {
       await sendSms(customData.sms_phone as string, finalText, callLog?.id, WITALINE_MAIN_BUSINESS_ID);
     }
 
-    if (customData.wa_consent && customData.wa_phone) {
-      const callerName = (customData.caller_name as string) || (customData.sms_contact_name as string) || "";
-      const name = callerName || "!";
-      let text: string;
-      const paymentLink = customData.payment_link as string | undefined;
-      const reservation = extractReservation(customData);
-      if (classification === "booking" && reservation) {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.booking(name, new Date(reservation.reserved_at).toLocaleDateString("pl-PL"), new Date(reservation.reserved_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }), reservation.service_type);
-      } else if (classification === "order") {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.order(name, summary.slice(0, 200), paymentLink);
-      } else if (classification === "offer") {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.offer(name, (customData.offer_plan as string) || "START", (customData.offer_price as string) || "299 zł", paymentLink);
-      } else if (paymentLink) {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.payment_reminder(name, paymentLink, (customData.payment_amount as string) || "");
-      } else {
-        text = WHATSAPP_CONTINUITY_TEMPLATES.default(name);
-      }
-      await sendWhatsApp(customData.wa_phone as string, text, undefined, callLog?.id, WITALINE_MAIN_BUSINESS_ID);
-    }
-
     if (callLog) {
       sendWebhook(WITALINE_MAIN_BUSINESS_ID, {
         event: "call.completed",
@@ -277,16 +292,53 @@ export async function POST(request: Request) {
 
   if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 });
   if (business.suspended) return NextResponse.json({ error: "Account suspended" }, { status: 403 });
-  if (business.subscription_status === "trialing" && business.trial_ends_at && new Date(business.trial_ends_at) < new Date()) {
-    return NextResponse.json({ error: "Trial expired" }, { status: 402 });
+
+  // Detect first ever call for this business → send congratulations email
+  const { count: existingCallCount } = await supabaseAdmin
+    .from("call_logs")
+    .select("*", { count: "exact", head: true })
+    .is("deleted_at", null)
+    .eq("business_id", businessId);
+
+  const isFirstCall = existingCallCount === 0 || (existingCallCount === 1 && callSidFromMetadata);
+  if (isFirstCall && business.owner_email) {
+    const { sendFirstCallEmail } = await import("@/lib/email");
+    sendFirstCallEmail(business.owner_email, business.name || "Firma", durationSeconds).catch(e =>
+      console.error("[call-completed] first-call email error:", e)
+    );
+  }
+  const TRIAL_MAX_MINUTES = 15;
+
+  if (business.subscription_status === "trialing") {
+    const trialExpired = business.trial_ends_at && new Date(business.trial_ends_at) < new Date();
+    const trialMinutesExceeded = (business.trial_minutes_used || 0) >= TRIAL_MAX_MINUTES;
+    if (trialExpired || trialMinutesExceeded) {
+      return NextResponse.json({ error: trialExpired ? "Trial expired" : "Trial minute limit reached" }, { status: 402 });
+    }
   }
 
   const planConfig = getPlanConfig(business.current_plan);
-  if (business.minutes_used_this_week >= planConfig.monthlyVoiceMinutes && business.current_plan !== "enterprise_2000" && business.current_plan !== "lux_599") {
-    return NextResponse.json({ error: "Limit exceeded" }, { status: 429 });
+
+  // Block non-elastic plans that exceed their monthly limit
+  if (business.current_plan !== "elastic_0" && business.current_plan !== "enterprise_2000") {
+    if (business.minutes_used_this_week >= planConfig.monthlyVoiceMinutes) {
+      return NextResponse.json({ error: "Limit exceeded" }, { status: 429 });
+    }
   }
 
-  const costPln = calculateCost(durationSeconds, business.current_plan);
+  // Get total monthly minutes for correct elastic tier rate
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0,0,0,0);
+  const { data: monthlyLogs } = await supabaseAdmin
+    .from("call_logs")
+    .select("duration_seconds")
+    .is("deleted_at", null)
+    .eq("business_id", businessId)
+    .gte("created_at", monthStart.toISOString());
+  const totalMonthlyMinutes = (monthlyLogs || []).reduce((sum, l) => sum + (l.duration_seconds || 0), 0) / 60 + (durationSeconds / 60);
+
+  const costPln = calculateCost(durationSeconds, business.current_plan, totalMonthlyMinutes);
   const internalCostPln = Math.round(estimatedTokens * 0.00065 * 100) / 100;
   const classification = classifyCall(summary || "", transcript || "");
 
@@ -301,7 +353,7 @@ export async function POST(request: Request) {
       revenue_pln: costPln,
       caller_id: callerId || "unknown",
       from_number: (metadata.from_number as string) || callerId || "",
-      twilio_call_sid: (metadata.twilio_call_sid as string) || "",
+      twilio_call_sid: callSidFromMetadata,
       routed_from_main: !!(metadata.routed_from_main),
       routed_to_extension: (metadata.routed_to_extension as string) || null,
       routed_business_name: (metadata.routed_business_name as string) || null,
@@ -321,7 +373,8 @@ export async function POST(request: Request) {
   const minutesToAdd = Math.ceil(durationSeconds / 60);
 
   if (callLog) {
-    analyzeCall(transcript || "", summary || "", callLog.id).catch(() => {});
+    analyzeCall(transcript || "", summary || "", callLog.id).catch((e) => console.error("[call-completed] analyze error:", e));
+    syncCallCosts(callLog.id, conversationId);
 
     await supabaseAdmin.from("conversations").insert({
       business_id: businessId,
@@ -346,16 +399,43 @@ export async function POST(request: Request) {
   });
 
   const currentPrepaid = parseFloat(business.prepaid_minutes || "0");
-  const newPrepaid = currentPrepaid > 0 ? Math.max(0, Math.round((currentPrepaid - minutesToAdd) * 100) / 100) : currentPrepaid;
+  const newPrepaid = currentPrepaid > 0 ? Math.round((currentPrepaid - minutesToAdd) * 100) / 100 : currentPrepaid;
+
+  const updateData: Record<string, unknown> = {
+    minutes_used_this_week: (business.minutes_used_this_week || 0) + minutesToAdd,
+    tokens_used_this_month: (business.tokens_used_this_month || 0) + estimatedTokens,
+    prepaid_minutes: newPrepaid,
+  };
+
+  // Track trial usage separately for abuse prevention
+  if (business.subscription_status === "trialing") {
+    const oldTrialMinutes = business.trial_minutes_used || 0;
+    const newTrialMinutes = oldTrialMinutes + minutesToAdd;
+    updateData.trial_minutes_used = newTrialMinutes;
+    // Send warning email when crossing 80% threshold (12 of 15 min)
+    const WARNING_THRESHOLD = 12;
+    if (oldTrialMinutes < WARNING_THRESHOLD && newTrialMinutes >= WARNING_THRESHOLD) {
+      const { sendTrialMinuteWarningEmail } = await import("@/lib/email");
+      if (business.owner_email) {
+        sendTrialMinuteWarningEmail(business.owner_email, business.name || "Firma", Math.ceil(newTrialMinutes), 15).catch(e =>
+          console.error("[call-completed] trial warning email error:", e)
+        );
+      }
+    }
+  }
 
   await supabaseAdmin
     .from("businesses")
-    .update({
-      minutes_used_this_week: (business.minutes_used_this_week || 0) + minutesToAdd,
-      tokens_used_this_month: (business.tokens_used_this_month || 0) + estimatedTokens,
-      prepaid_minutes: newPrepaid,
-    })
+    .update(updateData)
     .eq("id", businessId);
+
+  // Auto-topup: if balance below threshold, trigger immediately
+  if (business.auto_topup_enabled) {
+    const { executeAutoTopup } = await import("@/lib/auto-topup");
+    executeAutoTopup(businessId, { ...business, ...updateData }).catch((e: any) =>
+      console.error("[call-completed] auto-topup error:", e)
+    );
+  }
 
   const reservation = extractReservation(customData);
   if (reservation && callLog) {
@@ -375,11 +455,6 @@ export async function POST(request: Request) {
     });
   }
 
-  if (customData.wa_consent && customData.wa_phone) {
-    const callerName = (customData.caller_name as string) || "";
-    await sendWhatsApp(customData.wa_phone as string, WHATSAPP_CONTINUITY_TEMPLATES.default(callerName || "!"), undefined, callLog?.id, businessId);
-  }
-
   if (callLog) {
     sendWebhook(businessId, {
       event: "call.completed",
@@ -395,6 +470,32 @@ export async function POST(request: Request) {
       started_at: new Date(Date.now() - (durationSeconds || 0) * 1000).toISOString(),
       ended_at: new Date().toISOString(),
     }).catch(e => console.warn("[call-completed] webhook error:", e));
+  }
+
+  const { data: updatedBiz } = await supabaseAdmin
+    .from("businesses")
+    .select("prepaid_minutes, sms_limit, sms_used, sms_extra_purchased, owner_uid")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  if (updatedBiz) {
+    const remainingMins = parseFloat(updatedBiz.prepaid_minutes || "0");
+    const smsRemaining = Math.max(0, (updatedBiz.sms_limit || 0) + (updatedBiz.sms_extra_purchased || 0) - (updatedBiz.sms_used || 0));
+
+    if (remainingMins < 50 || smsRemaining < 20) {
+      const parts: string[] = [];
+      if (remainingMins < 20) parts.push("Krytycznie niskie saldo minut!");
+      else if (remainingMins < 50) parts.push("Pozostało mało minut.");
+      if (smsRemaining < 10) parts.push("Krytycznie niskie saldo SMS!");
+      else if (smsRemaining < 20) parts.push("Pozostało mało SMS.");
+
+      addNotification({
+        businessId,
+        type: "system",
+        title: "Niskie saldo",
+        message: parts.join(" ") + " Doładuj konto aby uniknąć przerwy w obsłudze.",
+      }).catch(e => console.warn("[call-completed] notify error:", e));
+    }
   }
 
   return NextResponse.json({ ok: true, callLogId: callLog?.id });

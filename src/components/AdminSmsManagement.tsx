@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  SMS_PACKAGES, WA_PACKAGES, DEFAULT_SMS_MARKUP_PERCENT,
-  TWILIO_SMS_COST_PLN, TWILIO_WHATSAPP_COST_PLN, formatSmsCost
+  SMS_PACKAGES,
+  TWILIO_SMS_COST_PLN, formatSmsCost, VAT_MULTIPLIER
 } from "@/lib/sms-pricing";
 
 interface BizSmsUsage {
@@ -110,11 +110,11 @@ export default function AdminSmsManagement() {
       {/* Tabs */}
       <div className="flex gap-1 bg-zinc-50 p-0.5 rounded-lg w-fit">
         <button onClick={() => setTab("usage")}
-          className={`px-4 py-2 text-xs font-medium rounded-md transition ${tab === "usage" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}>
+          className={`px-4 py-2 text-xs font-medium rounded-md transition ${tab === "usage" ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300"}`}>
           Zużycie SMS
         </button>
         <button onClick={() => setTab("pricing")}
-          className={`px-4 py-2 text-xs font-medium rounded-md transition ${tab === "pricing" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"}`}>
+          className={`px-4 py-2 text-xs font-medium rounded-md transition ${tab === "pricing" ? "bg-white dark:bg-brand-900 text-zinc-900 dark:text-zinc-100 shadow-sm" : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300"}`}>
           Cennik i marże
         </button>
       </div>
@@ -124,20 +124,20 @@ export default function AdminSmsManagement() {
           {/* KPI summary */}
           <div className="grid grid-cols-4 gap-3">
             <div className="bg-brand-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Firmy z SMS</p>
-              <p className="text-xl font-bold text-brand-500">{enabledCount}/{data.length}</p>
+              <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Firmy z SMS</p>
+              <p className="text-xl font-bold text-[#0d9488]">{enabledCount}/{data.length}</p>
             </div>
             <div className="bg-brand-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Pozostało</p>
-              <p className="text-xl font-bold text-brand-500">{totalRemaining}</p>
+              <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Pozostało</p>
+              <p className="text-xl font-bold text-[#0d9488]">{totalRemaining}</p>
             </div>
             <div className="bg-brand-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Łączny limit</p>
-              <p className="text-xl font-bold text-brand-500">{totalCapacity}</p>
+              <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Łączny limit</p>
+              <p className="text-xl font-bold text-[#0d9488]">{totalCapacity}</p>
             </div>
             <div className="bg-brand-50 rounded-xl p-3 text-center">
-              <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Koszt Twilio/SMS</p>
-              <p className="text-xl font-bold text-brand-500">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
+              <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Koszt Twilio/SMS</p>
+              <p className="text-xl font-bold text-[#0d9488]">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
             </div>
           </div>
 
@@ -152,7 +152,7 @@ export default function AdminSmsManagement() {
               Wyłącz SMS dla wszystkich
             </button>
             <button onClick={fetchUsage}
-              className="px-3 py-1.5 text-xs text-zinc-500 hover:text-zinc-700 border border-zinc-200 rounded-lg transition ml-auto">
+              className="px-3 py-1.5 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-brand-700 rounded-lg transition ml-auto">
               Odśwież
             </button>
           </div>
@@ -160,7 +160,7 @@ export default function AdminSmsManagement() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200">
+                <tr className="text-left text-zinc-400 dark:text-zinc-500 text-xs border-b border-zinc-200 dark:border-brand-700">
                   <th className="pb-3 pr-4 font-medium">Firma</th>
                   <th className="pb-3 pr-4 font-medium">Status</th>
                   <th className="pb-3 pr-4 font-medium">Limit</th>
@@ -173,18 +173,18 @@ export default function AdminSmsManagement() {
               </thead>
               <tbody>
                 {data.length === 0 ? (
-                  <tr><td colSpan={8} className="text-center py-8 text-zinc-400">Brak firm z konfiguracją SMS</td></tr>
+                  <tr><td colSpan={8} className="text-center py-8 text-zinc-400 dark:text-zinc-500">Brak firm z konfiguracją SMS</td></tr>
                 ) : (
                   data.map(b => (
-                    <tr key={b.id} className="border-b border-zinc-100 hover:bg-brand-50 transition">
+                    <tr key={b.id} className="border-b border-zinc-100 dark:border-brand-800 hover:bg-[#f0fdfa] transition">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-zinc-900">{b.name}</span>
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">{b.name}</span>
                           {b.suspended && <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-600 rounded">Zawieszona</span>}
                         </div>
                       </td>
                       <td className="py-3 pr-4">
-                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium ${b.smsEnabled ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"}`}>
+                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium ${b.smsEnabled ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500 dark:text-zinc-400 dark:text-zinc-500"}`}>
                           {b.smsEnabled ? "AKTYWNY" : "WYŁ."}
                         </span>
                       </td>
@@ -193,47 +193,47 @@ export default function AdminSmsManagement() {
                           <td className="py-3 pr-4">
                             <input type="number" min={0} value={editLimit}
                               onChange={e => setEditLimit(Number(e.target.value))}
-                              className="w-20 px-2 py-1 border border-zinc-200 rounded text-sm" />
+                              className="w-20 px-2 py-1 border border-zinc-200 dark:border-brand-700 rounded text-sm" />
                           </td>
                           <td className="py-3 pr-4">
                             <input type="number" min={0} value={editExtra}
                               onChange={e => setEditExtra(Number(e.target.value))}
-                              className="w-20 px-2 py-1 border border-zinc-200 rounded text-sm" />
+                              className="w-20 px-2 py-1 border border-zinc-200 dark:border-brand-700 rounded text-sm" />
                           </td>
-                          <td className="py-3 pr-4 text-zinc-700">{b.smsUsed}</td>
-                          <td className="py-3 pr-4 text-zinc-700">{Math.max(0, editLimit + editExtra - b.smsUsed)}</td>
+                          <td className="py-3 pr-4 text-zinc-700 dark:text-zinc-300">{b.smsUsed}</td>
+                          <td className="py-3 pr-4 text-zinc-700 dark:text-zinc-300">{Math.max(0, editLimit + editExtra - b.smsUsed)}</td>
                           <td className="py-3 pr-4" />
                           <td className="py-3 pr-2">
                             <div className="flex gap-1">
                               <button onClick={() => setEditingId(null)}
-                                className="px-2.5 py-1 text-[11px] text-zinc-500 hover:text-zinc-700 transition">Anuluj</button>
+                                className="px-2.5 py-1 text-[11px] text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 transition">Anuluj</button>
                               <button onClick={() => handleSave(b.id)}
-                                className="px-2.5 py-1 bg-brand-400 text-white text-[11px] font-medium rounded-lg hover:bg-brand-500 transition">Zapisz</button>
+                                className="px-2.5 py-1 bg-[#0d9488] text-white text-[11px] font-medium rounded-lg hover:bg-[#0f766e] transition">Zapisz</button>
                             </div>
                           </td>
                         </>
                       ) : (
                         <>
-                          <td className="py-3 pr-4 text-zinc-700">{b.smsLimit}</td>
-                          <td className="py-3 pr-4 text-zinc-700">+{b.smsExtra}</td>
-                          <td className="py-3 pr-4 text-zinc-700">{b.smsUsed}</td>
+                          <td className="py-3 pr-4 text-zinc-700 dark:text-zinc-300">{b.smsLimit}</td>
+                          <td className="py-3 pr-4 text-zinc-700 dark:text-zinc-300">+{b.smsExtra}</td>
+                          <td className="py-3 pr-4 text-zinc-700 dark:text-zinc-300">{b.smsUsed}</td>
                           <td className="py-3 pr-4">
-                            <span className={`font-medium ${b.remaining < 10 ? "text-red-600" : "text-zinc-700"}`}>
+                            <span className={`font-medium ${b.remaining < 10 ? "text-red-600" : "text-zinc-700 dark:text-zinc-300"}`}>
                               {b.remaining}
                             </span>
                           </td>
                           <td className="py-3 pr-4">
                             <div className="flex items-center gap-2">
                               <div className="w-24 bg-brand-50 rounded-full h-2">
-                                <div className={`h-2 rounded-full transition-all ${b.usagePercent > 80 ? "bg-red-500" : b.usagePercent > 50 ? "bg-amber-500" : "bg-brand-400"}`}
+                                <div className={`h-2 rounded-full transition-all ${b.usagePercent > 80 ? "bg-red-500" : b.usagePercent > 50 ? "bg-amber-500" : "bg-[#0d9488]"}`}
                                   style={{ width: `${Math.min(100, b.usagePercent)}%` }} />
                               </div>
-                              <span className="text-[11px] text-zinc-400">{b.usagePercent}%</span>
+                              <span className="text-[11px] text-zinc-400 dark:text-zinc-500">{b.usagePercent}%</span>
                             </div>
                           </td>
                           <td className="py-3 pr-2">
                             <button onClick={() => startEdit(b)}
-                              className="px-2.5 py-1 text-[11px] text-zinc-500 hover:text-zinc-700 border border-zinc-200 rounded-lg transition">
+                              className="px-2.5 py-1 text-[11px] text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-brand-700 rounded-lg transition">
                               Edytuj
                             </button>
                           </td>
@@ -251,51 +251,41 @@ export default function AdminSmsManagement() {
       {tab === "pricing" && (
         <div className="space-y-6">
           {/* WitaLine koszty */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Koszty WitaLine (Twilio)</h3>
+          <div className="bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Koszty WitaLine (Twilio)</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-zinc-50 rounded-xl p-4">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">SMS — koszt Twilio</p>
-                <p className="text-2xl font-bold text-zinc-900">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
-                <p className="text-[10px] text-zinc-400">za segment (Polska)</p>
-              </div>
-              <div className="bg-zinc-50 rounded-xl p-4">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">WhatsApp — koszt Twilio</p>
-                <p className="text-2xl font-bold text-zinc-900">{TWILIO_WHATSAPP_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
-                <p className="text-[10px] text-zinc-400">za wiadomość</p>
+                <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">SMS — koszt Twilio</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł</p>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">za segment (Polska)</p>
               </div>
             </div>
           </div>
 
           {/* Marża i cena klienta */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Marża i cena klienta</h3>
+          <div className="bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Marża i cena klienta</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-brand-50 rounded-xl p-4 text-center">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Marża</p>
-                <p className="text-2xl font-bold text-brand-500">{DEFAULT_SMS_MARKUP_PERCENT}%</p>
-                <p className="text-[10px] text-zinc-400">(100% = 2× kosztu Twilio)</p>
+                <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Marża</p>
+                <p className="text-2xl font-bold text-[#0d9488]">{100}%</p>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">(100% = 2× kosztu Twilio)</p>
               </div>
               <div className="bg-brand-50 rounded-xl p-4 text-center">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Cena klienta/SMS</p>
-                <p className="text-2xl font-bold text-brand-500">0,50 zł</p>
-                <p className="text-[10px] text-zinc-400">zysk: 0,25 zł/SMS</p>
-              </div>
-              <div className="bg-brand-50 rounded-xl p-4 text-center">
-                <p className="text-[10px] uppercase text-zinc-500 tracking-wider">Cena klienta/WhatsApp</p>
-                <p className="text-2xl font-bold text-brand-500">0,54 zł</p>
-                <p className="text-[10px] text-zinc-400">zysk: 0,24 zł/msg</p>
+                <p className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 tracking-wider">Cena klienta/SMS</p>
+                <p className="text-2xl font-bold text-[#0d9488]">{SMS_PACKAGES[0].clientPricePLN.toFixed(2).replace(".", ",")} zł</p>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">brutto | zysk: {SMS_PACKAGES[0].marginPLN.toFixed(2).replace(".", ",")} zł/SMS</p>
               </div>
             </div>
           </div>
 
           {/* SMS Pakiety */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Pakiety SMS — ceny dla klienta</h3>
+          <div className="bg-white dark:bg-brand-900 border border-zinc-200 dark:border-brand-700 rounded-2xl p-6">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Pakiety SMS — ceny dla klienta</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200">
+                  <tr className="text-left text-zinc-400 dark:text-zinc-500 text-xs border-b border-zinc-200 dark:border-brand-700">
                     <th className="pb-3 pr-4 font-medium">Pakiet</th>
                     <th className="pb-3 pr-4 font-medium">Cena klienta</th>
                     <th className="pb-3 pr-4 font-medium">Koszt WitaLine</th>
@@ -305,11 +295,11 @@ export default function AdminSmsManagement() {
                 </thead>
                 <tbody>
                   {SMS_PACKAGES.map(p => (
-                    <tr key={p.smsCount} className="border-b border-zinc-100">
+                    <tr key={p.smsCount} className="border-b border-zinc-100 dark:border-brand-800">
                       <td className="py-2 pr-4 font-medium">{p.smsCount} SMS</td>
                       <td className="py-2 pr-4">{p.clientPricePLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-zinc-500">{p.witalineCostPLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-brand-500">{p.marginPLN.toFixed(2).replace(".", ",")} zł</td>
+                      <td className="py-2 pr-4 text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">{p.witalineCostPLN.toFixed(2).replace(".", ",")} zł</td>
+                      <td className="py-2 pr-4 text-[#0d9488]">{p.marginPLN.toFixed(2).replace(".", ",")} zł</td>
                       <td className="py-2 pr-4">{p.pricePerSmsPLN.toFixed(2).replace(".", ",")} zł</td>
                     </tr>
                   ))}
@@ -318,40 +308,12 @@ export default function AdminSmsManagement() {
             </div>
           </div>
 
-          {/* WA Pakiety */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Pakiety WhatsApp</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-zinc-400 text-xs border-b border-zinc-200">
-                    <th className="pb-3 pr-4 font-medium">Pakiet</th>
-                    <th className="pb-3 pr-4 font-medium">Cena klienta</th>
-                    <th className="pb-3 pr-4 font-medium">Koszt WitaLine</th>
-                    <th className="pb-3 pr-4 font-medium">Marża</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {WA_PACKAGES.map(p => (
-                    <tr key={p.waCount} className="border-b border-zinc-100">
-                      <td className="py-2 pr-4 font-medium">{p.waCount} WA</td>
-                      <td className="py-2 pr-4">{p.clientPricePLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-zinc-500">{p.witalineCostPLN.toFixed(2).replace(".", ",")} zł</td>
-                      <td className="py-2 pr-4 text-brand-500">{(p.clientPricePLN - p.witalineCostPLN).toFixed(2).replace(".", ",")} zł</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           {/* Info */}
-          <div className="bg-zinc-50 rounded-xl p-4 text-xs text-zinc-500 space-y-1">
+          <div className="bg-zinc-50 rounded-xl p-4 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 space-y-1">
             <p><strong>Jak działa cennik SMS:</strong></p>
             <p>• Koszt Twilio do Polski: <strong>{TWILIO_SMS_COST_PLN.toFixed(2).replace(".", ",")} zł/SMS</strong> ($0.0457 × kurs ~4.15)</p>
-            <p>• Domyślna marża WitaLine: <strong>{DEFAULT_SMS_MARKUP_PERCENT}%</strong> (klient płaci 0,50 zł/SMS)</p>
+            <p>• Domyślna marża WitaLine: <strong>{100}%</strong> (klient płaci 0,50 zł/SMS)</p>
             <p>• Pakiety SMS są kupowane jednorazowo przez Stripe i dodawane do salda firmy (sms_extra_purchased)</p>
-            <p>• W planach Start/Pro/Growth/Lux klient ma wliczony limit SMS (sms_limit) — patrz SMS_PLAN_LIMITS</p>
             <p>• Administrator może wyłączyć SMS dla konkretnej firmy lub wszystkich firm naraz</p>
           </div>
         </div>

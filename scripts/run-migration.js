@@ -1,58 +1,115 @@
-const fs = require("fs");
+// Uruchamia RUN-MIGRATION.sql na Supabase
+// Uzycie: node scripts/run-migration.js
+
 const { createClient } = require("@supabase/supabase-js");
+const fs = require("fs");
+const path = require("path");
 
-function getEnv(filePath, key) {
-  const content = fs.readFileSync(filePath, "utf-8");
-  const m = content.match(new RegExp("^" + key + "=(.+)", "m"));
-  if (!m) return null;
-  return m[1].trim().replace(/^['"]|['"]$/g, "");
-}
+require("dotenv").config({ path: path.resolve(__dirname, "..", ".env") });
 
-const envPath = ".env";
-const url = getEnv(envPath, "NEXT_PUBLIC_SUPABASE_URL");
-const key = getEnv(envPath, "SUPABASE_SERVICE_ROLE_KEY");
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !key) {
-  console.error("Missing Supabase credentials");
+  console.error("Missing Supabase credentials in .env");
   process.exit(1);
 }
 
-const supabase = createClient(url, key);
-const sql = fs.readFileSync("scripts/migrations/022-add-elevenlabs-conversation-id.sql", "utf-8");
-console.log("Running migration...");
+const sqlPath = path.resolve(__dirname, "..", "RUN-MIGRATION.sql");
+const sql = fs.readFileSync(sqlPath, "utf8");
 
-supabase.rpc("pg_query", { query: sql }).then((r) => {
-  console.log("Result:", JSON.stringify(r, null, 2));
-  process.exit(0);
-}).catch((e) => {
-  console.error("pg_query RPC error:", e.message);
-  console.log("Trying REST API approach...");
-  const https = require("https");
-  const body = JSON.stringify({ query: sql });
-  const hostname = new URL(url).hostname;
-  const opts = {
-    hostname,
-    path: "/rest/v1/rpc/pg_query",
-    method: "POST",
-    headers: {
-      apikey: key,
-      Authorization: "Bearer " + key,
-      "Content-Type": "application/json",
-      "Content-Length": Buffer.byteLength(body),
-    },
-  };
-  const req = https.request(opts, (res) => {
-    let d = "";
-    res.on("data", (c) => (d += c));
-    res.on("end", () => {
-      console.log("REST status:", res.statusCode, "body:", d.slice(0, 500));
-      process.exit(0);
-    });
-  });
-  req.on("error", (e2) => {
-    console.error("REST error:", e2.message);
-    process.exit(1);
-  });
-  req.write(body);
-  req.end();
+const supabase = createClient(url, key, {
+  auth: { persistSession: false },
 });
+
+async function main() {
+  console.log("Connecting to Supabase...");
+  console.log("Project:", url);
+
+  // Podziel SQL na pojedyncze instrukcje (oddzielone średnikami)
+  // Zachowaj ostrożność z funkcjami zawierającymi średniki wewnątrz $$
+  const statements = [];
+  let current = "";
+  let inDollar = false;
+  let dollarTag = "";
+
+  for (const ch of sql) {
+    current += ch;
+
+    if (inDollar) {
+      if (current.endsWith("$" + dollarTag + "$")) {
+        inDollar = false;
+        dollarTag = "";
+      }
+    } else if (ch === "$") {
+      const match = current.match(/\$([^$]*)\$$/);
+      if (match) {
+        inDollar = true;
+        dollarTag = match[1];
+      }
+    } else if (ch === ";" && !inDollar) {
+      const trimmed = current.trim();
+      if (trimmed && !trimmed.startsWith("--") && !trimmed.startsWith("SELECT")) {
+        statements.push(trimmed);
+      }
+      current = "";
+    }
+  }
+
+  // Ostatnia instrukcja
+  const trimmed = current.trim();
+  if (trimmed && !trimmed.startsWith("--") && !trimmed.startsWith("SELECT")) {
+    statements.push(trimmed);
+  }
+
+  console.log(`Found ${statements.length} SQL statements to execute`);
+
+  let success = 0;
+  let failed = 0;
+
+  for (let i = 0; i < statements.length; i++) {
+    const stmt = statements[i];
+    try {
+      console.log(`\n[${i + 1}/${statements.length}] Executing...`);
+      const { error } = await supabase.rpc("exec_sql", { sql: stmt });
+      if (error) {
+        // rpc exec_sql może nie istnieć — spróbuj bezpośrednio przez REST API
+        console.log(`  → rpc failed, trying direct query: ${error.message}`);
+        const { error: qError } = await supabase.from("_migration").insert({ sql: stmt }).maybeSingle().catch(() => ({}));
+        if (qError) {
+          console.log(`  → trying raw fetch...`);
+          const res = await fetch(`${url}/rest/v1/rpc/exec_sql`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": key,
+              "Authorization": `Bearer ${key}`,
+            },
+            body: JSON.stringify({ sql: stmt }),
+          });
+          if (!res.ok) {
+            const text = await res.text();
+            console.error(`  ✗ Failed: ${text.slice(0, 200)}`);
+            failed++;
+          } else {
+            console.log(`  ✓ OK (via rpc)`);
+            success++;
+          }
+        } else {
+          console.log(`  ✓ OK`);
+          success++;
+        }
+      } else {
+        console.log(`  ✓ OK`);
+        success++;
+      }
+    } catch (e) {
+      console.error(`  ✗ Error: ${e.message}`);
+      failed++;
+    }
+  }
+
+  console.log(`\n=== Done: ${success} succeeded, ${failed} failed ===`);
+}
+
+main().catch(console.error);

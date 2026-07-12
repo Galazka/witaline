@@ -46,7 +46,7 @@ export default function VoiceDemo({ className = "" }: { className?: string }) {
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       <button
         onClick={handlePlay}
-        className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg bg-brand-400 hover:bg-brand-500 transition"
+        className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg bg-[#0d9488] hover:bg-[#0f766e] transition"
       >
         {playing ? (
           <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">

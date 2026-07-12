@@ -197,11 +197,11 @@ export default function AdminSecurityDashboard() {
                 <p className="text-sm text-zinc-400 text-center py-8">Brak wpisów</p>
               ) : (
                 logs.map(log => (
-                  <div key={log.id} className="flex items-start gap-3 py-2 px-3 hover:bg-brand-50 rounded-lg transition">
+                  <div key={log.id} className="flex items-start gap-3 py-2 px-3 hover:bg-[#f0fdfa] rounded-lg transition">
                     <div className="w-1.5 h-1.5 bg-brand-200 rounded-full mt-1.5 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-zinc-700">
-                        <span className="font-medium text-brand-600">{log.business_name}</span>
+                        <span className="font-medium text-[#0d9488]">{log.business_name}</span>
                         {" · "}
                         <span>{log.user_email}</span>
                         {" · "}

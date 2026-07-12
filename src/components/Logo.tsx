@@ -15,7 +15,7 @@ const sizes = {
 export default function Logo({ size = "md", withTagline = true, inverted = false }: LogoProps) {
   const s = sizes[size];
   const textColor = inverted ? "text-white" : "text-black";
-  const tagColor = inverted ? "text-brand-400" : "text-brand-500";
+  const tagColor = inverted ? "text-[#0d9488]" : "text-[#0d9488]";
   return (
     <div className={`inline-flex items-center ${s.gap}`}>
       <svg

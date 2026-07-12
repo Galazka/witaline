@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendWelcomeEmail, sendNewLeadEmail, sendTrialExpiryEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendNewLeadEmail, sendTrialExpiryEmail, sendTrialActivationEmail, sendFirstCallEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   const { type, to, businessName } = await request.json();
@@ -18,6 +18,12 @@ export async function POST(request: Request) {
       break;
     case "trial":
       result = await sendTrialExpiryEmail(to, businessName || "TestFirma", 3);
+      break;
+    case "trial-activation":
+      result = await sendTrialActivationEmail(to, businessName || "TestFirma", "+48 732 125 752");
+      break;
+    case "first-call":
+      result = await sendFirstCallEmail(to, businessName || "TestFirma", 125);
       break;
     default:
       return NextResponse.json({ error: `Unknown type: ${type}` }, { status: 400 });

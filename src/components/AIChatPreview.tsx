@@ -33,7 +33,7 @@ function Avatar({ role }: { role: "client" | "maja" }) {
   return (
     <div
       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-        isMaja ? "bg-brand-400 text-white" : "bg-brand-100 text-zinc-500"
+        isMaja ? "bg-[#0d9488] text-white" : "bg-brand-100 text-zinc-500"
       }`}
     >
       {isMaja ? "M" : "K"}
@@ -44,9 +44,9 @@ function Avatar({ role }: { role: "client" | "maja" }) {
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
-      <span className="w-1.5 h-1.5 bg-brand-400/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-      <span className="w-1.5 h-1.5 bg-brand-400/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-      <span className="w-1.5 h-1.5 bg-brand-400/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+      <span className="w-1.5 h-1.5 bg-[#0d9488]/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+      <span className="w-1.5 h-1.5 bg-[#0d9488]/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+      <span className="w-1.5 h-1.5 bg-[#0d9488]/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
     </div>
   );
 }
@@ -107,9 +107,9 @@ export default function AIChatPreview() {
   return (
     <div className="bg-white border border-brand-100 shadow-sm rounded-2xl p-3 md:p-4 max-w-md mx-auto">
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-brand-100">
-        <div className="w-2 h-2 bg-brand-400 rounded-full animate-pulse" />
+        <div className="w-2 h-2 bg-[#0d9488] rounded-full animate-pulse" />
         <span className="text-xs font-medium text-zinc-500">Maja — asystent AI</span>
-        <span className="text-[10px] text-brand-400/60 ml-auto">online</span>
+        <span className="text-[10px] text-[#0d9488]/60 ml-auto">online</span>
       </div>
 
       <div ref={chatContainerRef} className="space-y-3 min-h-[200px] max-h-[260px] overflow-y-auto scroll-smooth">
@@ -120,7 +120,7 @@ export default function AIChatPreview() {
               <Avatar role={msg.role} />
               <div
                 className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
-                  isMaja ? "bg-brand-400 text-white rounded-tl-sm" : "bg-white text-zinc-800 rounded-tr-sm"
+                  isMaja ? "bg-[#0d9488] text-white rounded-tl-sm" : "bg-white text-zinc-800 rounded-tr-sm"
                 }`}
               >
                 {msg.text}
@@ -132,7 +132,7 @@ export default function AIChatPreview() {
         {showTyping && (
           <div className="flex items-start gap-2">
             <Avatar role="maja" />
-            <div className="bg-brand-100 text-brand-600 px-3 py-2 rounded-2xl rounded-tl-sm text-sm">
+            <div className="bg-[#ccfbf1] text-[#0d9488] px-3 py-2 rounded-2xl rounded-tl-sm text-sm">
               <TypingDots />
             </div>
           </div>

@@ -2,6 +2,12 @@ import { supabaseAdmin } from "./supabase-admin";
 import { withCache } from "./cache";
 
 export async function setActiveCallSid(businessId: string, callSid: string): Promise<void> {
+  // Cleanup expired entries on each write
+  await supabaseAdmin
+    .from("active_calls")
+    .delete()
+    .lt("expires_at", new Date().toISOString());
+
   const { error } = await supabaseAdmin
     .from("active_calls")
     .upsert(

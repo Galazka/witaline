@@ -15,11 +15,11 @@ export async function POST(request: Request) {
   const stripe = getStripe();
   let event;
   try {
-    if (endpointSecret && endpointSecret !== "dev" && endpointSecret.startsWith("whsec_")) {
-      event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
-    } else {
-      event = JSON.parse(body);
+    if (!endpointSecret.startsWith("whsec_")) {
+      console.error("[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured — rejecting all webhooks");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
+    event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
@@ -32,13 +32,15 @@ export async function POST(request: Request) {
     const subscriptionId = obj?.subscription;
     const paymentType = obj?.metadata?.type;
     const currency = obj?.metadata?.currency || "pln";
-    const amountPLN = parseFloat(obj?.metadata?.amount_pln || obj?.metadata?.price_pln || "0");
+    const amountPLN = parseFloat(obj?.metadata?.amount_brutto_pln || obj?.metadata?.amount_pln || obj?.metadata?.price_pln || "0");
 
     if (!businessId) return NextResponse.json({ received: true });
 
     // Handle minute package purchase (one-time payment)
     if (paymentType === "minute_package") {
       const minutes = parseFloat(obj?.metadata?.minutes || "0");
+      const appliedCouponId = obj?.metadata?.applied_coupon_id || null;
+
       if (minutes > 0) {
         const { data: biz } = await supabaseAdmin
           .from("businesses")
@@ -63,16 +65,29 @@ export async function POST(request: Request) {
           })
           .eq("id", businessId);
 
-        // Notification about purchase with currency info
-        await supabaseAdmin.from("notifications").insert({
-          business_id: businessId,
-          type: "system",
-          title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
-          message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
-          metadata: { currency, amount_pln: amountPLN, minutes },
-        }).catch(() => {});
+        // Mark coupon as used
+        if (appliedCouponId) {
+          await supabaseAdmin
+            .from("referral_coupons")
+            .update({ used: true, used_at: new Date().toISOString() })
+            .eq("id", appliedCouponId);
+        }
 
-        console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance });
+        // Notification about purchase with currency info
+        const discountMsg = appliedCouponId ? ` (z kuponem rabatowym)` : "";
+        try {
+          await supabaseAdmin.from("notifications").insert({
+            business_id: businessId,
+            type: "system",
+            title: currency === "pln" ? "Zakupiono pakiet minut" : "Minute package purchased",
+            message: `${minutes} min — ${amountPLN.toFixed(2).replace(".", ",")} PLN${discountMsg}${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+            metadata: { currency, amount_pln: amountPLN, minutes, applied_coupon_id: appliedCouponId },
+          });
+        } catch (e) {
+          console.error("[stripe/webhook] notification insert error:", e);
+        }
+
+        console.log("[stripe] minute package purchased:", { businessId, minutes, currency, amountPLN, newBalance, appliedCouponId });
       }
       return NextResponse.json({ received: true });
     }
@@ -99,13 +114,17 @@ export async function POST(request: Request) {
           })
           .eq("id", businessId);
 
-        await supabaseAdmin.from("notifications").insert({
-          business_id: businessId,
-          type: "system",
-          title: currency === "pln" ? "Zakupiono pakiet SMS" : "SMS package purchased",
-          message: `${smsCount} SMS — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
-          metadata: { currency, amount_pln: amountPLN, sms_count: smsCount },
-        }).catch(() => {});
+        try {
+          await supabaseAdmin.from("notifications").insert({
+            business_id: businessId,
+            type: "system",
+            title: currency === "pln" ? "Zakupiono pakiet SMS" : "SMS package purchased",
+            message: `${smsCount} SMS — ${amountPLN.toFixed(2).replace(".", ",")} PLN${currency !== "pln" ? ` (płatność ${currency.toUpperCase()})` : ""}`,
+            metadata: { currency, amount_pln: amountPLN, sms_count: smsCount },
+          });
+        } catch (e) {
+          console.error("[stripe/webhook] notification insert error:", e);
+        }
 
         console.log("[stripe] sms package purchased:", { businessId, smsCount, currency, amountPLN });
       }
@@ -149,13 +168,17 @@ export async function POST(request: Request) {
         .eq("id", businessId);
 
       // Notification with currency info
-      await supabaseAdmin.from("notifications").insert({
-        business_id: businessId,
-        type: "system",
-        title: currency === "pln" ? "Subskrypcja aktywowana" : "Subscription activated",
-        message: `${obj?.metadata?.plan || "subscription"}${currency !== "pln" ? ` (${currency.toUpperCase()})` : ""} — ${amountPLN.toFixed(2).replace(".", ",")} PLN`,
-        metadata: { currency, amount_pln: amountPLN, plan: obj?.metadata?.plan },
-      }).catch(() => {});
+      try {
+        await supabaseAdmin.from("notifications").insert({
+          business_id: businessId,
+          type: "system",
+          title: currency === "pln" ? "Subskrypcja aktywowana" : "Subscription activated",
+          message: `${obj?.metadata?.plan || "subscription"}${currency !== "pln" ? ` (${currency.toUpperCase()})` : ""} — ${amountPLN.toFixed(2).replace(".", ",")} PLN`,
+          metadata: { currency, amount_pln: amountPLN, plan: obj?.metadata?.plan },
+        });
+      } catch (e) {
+        console.error("[stripe/webhook] notification insert error:", e);
+      }
 
       const { data: biz } = await supabaseAdmin
         .from("businesses")

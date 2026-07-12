@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { toolDefinitions, toolHandlers, getToolContext } from "@/lib/tools";
 import { rateLimitResponse, getClientIp } from "@/lib/rate-limit";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -18,7 +19,7 @@ interface ToolMessage {
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 }
 
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
   }
 
   const prompt = systemPrompt || `Jesteś asystentem AI firmy "${businessName || "WitaLine"}". Odpowiadaj po polsku, krótko i rzeczowo.`;
-  const chatChannel = channel || (businessId === "00000000-0000-0000-0000-000000000001" ? "widget" : "web");
+  const chatChannel = channel || (businessId === WITALINE_MAIN_BUSINESS_ID ? "widget" : "web");
 
   const supabase = getSupabase();
   let convId = conversationId;
@@ -270,10 +271,19 @@ function generateSmartReply(userMsg: string, systemPrompt: string, bizName: stri
   }
 
   if (userMsg.match(/(cen|cennik|ile koszt|koszt|oplata|platn|cena|darmow|bezpłat|trial|okres prób|test)/)) {
-    if (promptLower.includes("79") || promptLower.includes("start")) {
-      return `Oferujemy 3 plany:\n\n🟢 **Start** — 79 zł/mies (100 min)\n🔵 **Pro** — 249 zł/mies (500 min)\n🟣 **Enterprise** — 599 zł/mies (2000 min, FUP)\n\nKażdy plan obejmuje dedykowany numer i asystenta AI 24/7. Chcesz wybrany plan?`;
-    }
-    return `Ceny zależą od wybranego planu. Mogę podać szczegóły — jaki plan Cię interesuje?`;
+    return `Oferujemy elastyczny model rozliczeń — bez stałej opłaty miesięcznej. Płacisz tylko za wykorzystane minuty:
+
+📞 **Stawki minutowe** (netto):
+• 0–500 min: 1,20 PLN/min
+• 501–1000 min: 1,10 PLN/min
+• 1001–2000 min: 1,00 PLN/min
+• 2001–3000 min: 0,95 PLN/min
+• 3001–5000 min: 0,90 PLN/min
+• 5000+ min: 0,85 PLN/min
+
+💬 **SMS-y** — od 0,50 PLN/szt (netto)
+
+➡️ Skonfiguruj pakiet w zakładce Cennik lub skontaktuj się z nami po indywidualną ofertę.`;
   }
 
   if (userMsg.match(/(witaline|co to|jak dział|co oferuj|co rob|usług|asystent|bot|ai|recepcjonist|telefon|numer)/)) {

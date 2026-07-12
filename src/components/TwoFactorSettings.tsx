@@ -87,7 +87,7 @@ export default function TwoFactorSettings({ businessId, enabled, onToggle }: Pro
           <h4 className="text-sm font-semibold text-zinc-900">Dwuskładnikowa weryfikacja (2FA)</h4>
           <p className="text-xs text-zinc-400 mt-0.5">Dodaj dodatkową warstwę bezpieczeństwa do logowania</p>
         </div>
-        <div className={`w-10 h-6 rounded-full transition-colors cursor-pointer flex items-center px-0.5 ${enabled ? "bg-brand-400" : "bg-brand-100"}`}
+        <div className={`w-10 h-6 rounded-full transition-colors cursor-pointer flex items-center px-0.5 ${enabled ? "bg-[#0d9488]" : "bg-brand-100"}`}
           onClick={() => {
             if (enabled) { setStep("disable"); setToken(""); setError(""); }
             else { handleSetup(); }
@@ -122,14 +122,14 @@ export default function TwoFactorSettings({ businessId, enabled, onToggle }: Pro
               onChange={e => setToken(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
               maxLength={6}
-              className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-center text-lg font-mono tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+              className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-center text-lg font-mono tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
               onKeyDown={e => { if (e.key === "Enter") handleVerify(); }}
             />
           </div>
           {error && <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
           <div className="flex gap-2">
-            <button onClick={() => { setStep("idle"); setToken(""); setError(""); }} className="flex-1 py-2.5 bg-brand-50 text-zinc-600 rounded-xl text-sm font-medium hover:bg-brand-100 transition">Anuluj</button>
-            <button onClick={handleVerify} disabled={loading || token.length !== 6} className="flex-1 py-2.5 bg-brand-400 text-white rounded-xl text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50">
+            <button onClick={() => { setStep("idle"); setToken(""); setError(""); }} className="flex-1 py-2.5 bg-brand-50 text-zinc-600 rounded-xl text-sm font-medium hover:bg-[#ccfbf1] transition">Anuluj</button>
+            <button onClick={handleVerify} disabled={loading || token.length !== 6} className="flex-1 py-2.5 bg-[#0d9488] text-white rounded-xl text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50">
               {loading ? "Sprawdzanie..." : "Włącz 2FA"}
             </button>
           </div>
@@ -146,12 +146,12 @@ export default function TwoFactorSettings({ businessId, enabled, onToggle }: Pro
             onChange={e => setToken(e.target.value.replace(/\D/g, "").slice(0, 6))}
             placeholder="000000"
             maxLength={6}
-            className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-center text-lg font-mono tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+            className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-center text-lg font-mono tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
             onKeyDown={e => { if (e.key === "Enter") handleDisable(); }}
           />
           {error && <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
           <div className="flex gap-2">
-            <button onClick={() => { setStep("idle"); setToken(""); setError(""); }} className="flex-1 py-2.5 bg-brand-50 text-zinc-600 rounded-xl text-sm font-medium hover:bg-brand-100 transition">Anuluj</button>
+            <button onClick={() => { setStep("idle"); setToken(""); setError(""); }} className="flex-1 py-2.5 bg-brand-50 text-zinc-600 rounded-xl text-sm font-medium hover:bg-[#ccfbf1] transition">Anuluj</button>
             <button onClick={handleDisable} disabled={loading || token.length !== 6} className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600 transition disabled:opacity-50">
               {loading ? "Sprawdzanie..." : "Wyłącz 2FA"}
             </button>

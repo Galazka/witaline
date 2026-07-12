@@ -52,10 +52,10 @@ export default function KnowledgeEditor({
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-1">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
           System Prompt (instrukcja dla bota)
         </h3>
-        <p className="text-sm text-zinc-500 mb-3">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
           To jest instrukcja, którą bot głosowy otrzymuje na starcie każdej
           rozmowy. Określa jak bot się zachowuje, co mówi i jak przyjmuje
           zamówienia.
@@ -63,36 +63,36 @@ export default function KnowledgeEditor({
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 h-48 resize-none"
+          className="w-full px-4 py-2.5 border border-zinc-200 dark:border-brand-700 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] h-48 resize-none"
           placeholder="Jesteś recepcjonistą AI..."
         />
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 mb-1">
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
           Baza wiedzy (JSON)
         </h3>
-        <p className="text-sm text-zinc-500 mb-3">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
           Cennik, menu, godziny otwarcia, adres — wszystko co bot musi wiedzieć
           o firmie. Format JSON.
         </p>
         <textarea
           value={hours}
           onChange={(e) => setHours(e.target.value)}
-          className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-400/30 focus:border-brand-500 h-48 resize-none"
+          className="w-full px-4 py-2.5 border border-zinc-200 dark:border-brand-700 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30 focus:border-[#0d9488] h-48 resize-none"
         />
       </div>
 
       <button
         onClick={handleSave}
         disabled={saving}
-        className="bg-brand-400 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-500 transition disabled:opacity-50"
+        className="bg-[#0d9488] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0f766e] transition disabled:opacity-50"
       >
         {saving ? "Zapisywanie..." : "Zapisz zmiany"}
       </button>
 
       {message && (
-        <p className="text-sm text-brand-500 bg-brand-50 border border-brand-200 rounded-lg px-4 py-3">
+        <p className="text-sm text-[#0d9488] bg-brand-50 border border-[#0d9488]/20 rounded-lg px-4 py-3">
           {message}
         </p>
       )}

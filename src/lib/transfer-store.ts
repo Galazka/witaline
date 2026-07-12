@@ -11,7 +11,6 @@ export interface PendingTransfer {
 }
 
 export async function setPendingTransfer(callSid: string, data: PendingTransfer): Promise<void> {
-  // Upsert into a dedicated table for persistence across restarts
   const { error } = await supabaseAdmin
     .from("pending_transfers")
     .upsert(
@@ -31,6 +30,7 @@ export async function setPendingTransfer(callSid: string, data: PendingTransfer)
 
   if (error) {
     console.error("[transfer-store] set error:", error.message);
+    throw new Error(`Failed to save pending transfer: ${error.message}`);
   }
 }
 

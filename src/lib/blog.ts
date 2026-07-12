@@ -247,7 +247,7 @@ Wejdź na [witaline.pl/register](/register) i załóż konto. Potrzebujesz tylko
 - Nazwy firmy
 - Numeru telefonu (docelowo Twój numer zostanie przekierowany na WitaLine)
 
-Po rejestracji dostajesz 7-dniowy darmowy trial z pełną funkcjonalnością — żadnych ograniczeń, żadnej karty kredytowej.
+Po rejestracji dostajesz 7-dniowy darmowy trial (15 minut rozmów + 10 SMS gratis) — żadnej karty kredytowej.
 
 ## Krok 2: Wybór planu i numeru (2 minuty)
 
@@ -614,7 +614,7 @@ Gdy klient prosi o spotkanie:
 5. Klient wybiera termin
 6. Asystent wywoluje **create_reservation**
 7. Wydarzenie trafia do kalendarza
-8. Klient dostaje SMS/WhatsApp z potwierdzeniem
+8. Klient dostaje SMS z potwierdzeniem
 
 Caly proces trwa okolo 10-15 sekund.
 
@@ -741,7 +741,7 @@ Koszt voicebota AI zalezy od:
 - Lux: 599 PLN/mies (800 min)
 - Enterprise: 999 PLN/mies (1500 min)
 
-Dodatkowo: SMS 0,50 PLN netto, WhatsApp okolo 0,54 PLN netto.
+Dodatkowo: SMS 0,50 PLN netto.
 
 **Porównanie z etatem:**
 |Koszt|Voicebot (Growth)|Etat recepcjonisty|
@@ -771,7 +771,7 @@ Nie radzi sobie z:
 
 ## Jak zaczac?
 
-1. Zarejestruj sie na [witaline.pl](/register) — 7 dni darmowego triala
+1. Zarejestruj sie na [witaline.pl](/register) — 7 dni darmowego triala (15 min rozmów + 10 SMS gratis)
 2. Skonfiguruj prompt w 5 minut
 3. Przekieruj numer — instrukcja wyzej
 4. Przetestuj, zadzwon i sprawdz

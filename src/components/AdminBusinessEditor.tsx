@@ -162,7 +162,7 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
             <h2 className="text-lg font-bold text-zinc-900">{business.name}</h2>
             <p className="text-xs text-zinc-400">ID: {business.id}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-brand-50 rounded-lg transition">✕</button>
+          <button onClick={onClose} className="p-2 hover:bg-[#f0fdfa] rounded-lg transition">✕</button>
         </div>
 
         {/* Tabs */}
@@ -195,7 +195,7 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                   value={systemPrompt}
                   onChange={(e) => setSystemPrompt(e.target.value)}
                   rows={12}
-                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
                   placeholder="Instrukcja dla asystenta AI..."
                 />
               </div>
@@ -205,7 +205,7 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                   value={menuCatalog}
                   onChange={(e) => setMenuCatalog(e.target.value)}
                   rows={6}
-                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
                   placeholder='{"menu": [...], "hours": "..."}'
                 />
               </div>
@@ -243,7 +243,7 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                 <button
                   onClick={handleAddKnowledge}
                   disabled={!newKnowledge.title || !newKnowledge.content || saving}
-                  className="px-4 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50"
+                  className="px-4 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition disabled:opacity-50"
                 >
                   {saving ? "Dodawanie..." : "Dodaj wpis"}
                 </button>
@@ -295,12 +295,8 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                   onChange={(e) => setPlan(e.target.value)}
                   className="w-full px-4 py-2.5 border border-zinc-200 rounded-lg text-sm"
                 >
-                  <option value="elastic_0">Elastyczny — 0 zł/mies</option>
-                  <option value="start_100">Start — 299 zł/mies</option>
-                  <option value="pro_249">Pro — 249 zł/mies</option>
-                  <option value="pro_500">Growth — 599 zł/mies</option>
-                  <option value="lux_599">Lux — 599 zł/mies</option>
-                  <option value="enterprise_2000">Enterprise — 1199 zł/mies</option>
+                  <option value="elastic_0">Elastyczny — 0 zł/mies, pay-as-you-go</option>
+                  <option value="enterprise_2000">Enterprise — indywidualna wycena</option>
                 </select>
               </div>
               <div>
@@ -437,7 +433,7 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
                         setCreatingSubaccount(false);
                       }}
                       disabled={creatingSubaccount}
-                      className="px-4 py-1.5 bg-brand-400 text-white text-xs font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50"
+                      className="px-4 py-1.5 bg-[#0d9488] text-white text-xs font-medium rounded-lg hover:bg-[#0f766e] transition disabled:opacity-50"
                     >
                       {creatingSubaccount ? "Tworzenie..." : "⚡ Utwórz subkonto automatycznie"}
                     </button>
@@ -475,13 +471,13 @@ export default function AdminBusinessEditor({ businessId, onClose, onSaved }: Pr
         <div className="px-6 py-4 border-t border-zinc-200 flex items-center justify-between">
           <p className="text-sm text-zinc-500">{message}</p>
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 text-zinc-600 text-sm rounded-lg hover:bg-brand-50 transition">
+            <button onClick={onClose} className="px-4 py-2 text-zinc-600 text-sm rounded-lg hover:bg-[#f0fdfa] transition">
               Zamknij
             </button>
             <button
               onClick={activeTab === "settings" ? handleSaveSettings : handleSavePrompt}
               disabled={saving}
-              className="px-6 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition disabled:opacity-50"
+              className="px-6 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition disabled:opacity-50"
             >
               {saving ? "Zapisywanie..." : "Zapisz"}
             </button>

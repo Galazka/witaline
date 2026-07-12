@@ -28,8 +28,8 @@
       width: 60px; \
       height: 60px; \
       border-radius: 50%; \
-      background: linear-gradient(135deg, #3CBF4A, #2EA03A); \
-      box-shadow: 0 4px 20px rgba(60, 191, 74, 0.4); \
+      background: linear-gradient(135deg, #0d9488, #0f766e); \
+      box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4); \
       cursor: pointer; \
       display: flex; \
       align-items: center; \
@@ -39,7 +39,7 @@
     } \
     #witaline-bubble:hover { \
       transform: scale(1.1); \
-      box-shadow: 0 6px 28px rgba(60, 191, 74, 0.5); \
+      box-shadow: 0 6px 28px rgba(13, 148, 136, 0.5); \
     } \
     #witaline-bubble svg { \
       width: 28px; \

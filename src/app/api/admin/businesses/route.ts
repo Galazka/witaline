@@ -39,10 +39,12 @@ export async function GET(request: Request) {
       const { count: totalCalls } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id);
       const { count: orders } = await supabaseAdmin
         .from("call_logs")
         .select("*", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("business_id", b.id)
         .eq("classification", "order");
       return { ...b, stats: { totalCalls: totalCalls || 0, orders: orders || 0 } };

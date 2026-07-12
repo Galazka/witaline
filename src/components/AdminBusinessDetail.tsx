@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, Fragment } from "react";
 import AdminBusinessEditor from "./AdminBusinessEditor";
+import { getPlanLabel } from "@/lib/pricing";
 
 /* ── Types ── */
 
@@ -58,11 +59,6 @@ function fmtDuration(sec: number) {
   const s = sec % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
-
-const planLabels: Record<string, string> = {
-  start_100: "Start", pro_500: "Growth", enterprise_2000: "Enterprise",
-  elastic_0: "Elastyczny", pro_249: "Pro", lux_599: "Lux",
-};
 
 const classificationStyle: Record<string, string> = {
   order: "bg-green-100 text-green-700",
@@ -127,7 +123,7 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
         </div>
         {onEdit && (
           <button onClick={() => setShowEditor(true)}
-            className="px-4 py-2 bg-brand-400 text-white text-sm font-medium rounded-lg hover:bg-brand-500 transition flex items-center gap-1.5">
+            className="px-4 py-2 bg-[#0d9488] text-white text-sm font-medium rounded-lg hover:bg-[#0f766e] transition flex items-center gap-1.5">
             ✏️ Edytuj firmę
           </button>
         )}
@@ -156,11 +152,11 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
         <div className="bg-white rounded-xl border border-zinc-200 p-5">
           <p className="text-xs font-medium text-zinc-500 mb-2">⏱️ Minuty w pakiecie</p>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-xl font-bold text-brand-500">{business.minutes_used_this_week}</span>
+            <span className="text-xl font-bold text-[#0d9488]">{business.minutes_used_this_week}</span>
             <span className="text-sm text-zinc-400">/ {business.monthlyMinutesLimit} min</span>
           </div>
           <div className="h-2 bg-brand-50 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${minutesPct > 90 ? "bg-red-500" : minutesPct > 75 ? "bg-amber-500" : "bg-brand-500"}`}
+            <div className={`h-full rounded-full ${minutesPct > 90 ? "bg-red-500" : minutesPct > 75 ? "bg-amber-500" : "bg-[#0d9488]"}`}
               style={{ width: `${minutesPct}%` }} />
           </div>
           <p className="text-xs text-zinc-400 mt-1">{minutesPct}% wykorzystano</p>
@@ -185,7 +181,7 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <p className="text-[10px] text-zinc-400 uppercase">Plan</p>
-            <p className="font-medium text-zinc-900">{planLabels[business.current_plan] || business.current_plan}</p>
+            <p className="font-medium text-zinc-900">{getPlanLabel(business.current_plan)}</p>
           </div>
           <div>
             <p className="text-[10px] text-zinc-400 uppercase">Branża</p>
@@ -276,7 +272,7 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
                   return (
                     <Fragment key={log.id}>
                       <tr
-                        className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 cursor-pointer"
+                        className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] cursor-pointer"
                         onClick={() => setExpandedLog(isExpanded ? null : log.id)}
                       >
                         <td className="px-3 py-2 text-zinc-300">{isExpanded ? "▼" : "▶"}</td>
@@ -336,9 +332,9 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
               <span>Strona {callPage + 1} z {totalPages}</span>
               <div className="flex gap-2">
                 <button disabled={callPage === 0} onClick={() => setCallPage(callPage - 1)}
-                  className="px-3 py-1 rounded bg-brand-50 hover:bg-brand-100 disabled:opacity-30 font-medium">← Poprzednia</button>
+                  className="px-3 py-1 rounded bg-brand-50 hover:bg-[#ccfbf1] disabled:opacity-30 font-medium">← Poprzednia</button>
                 <button disabled={callPage >= totalPages - 1} onClick={() => setCallPage(callPage + 1)}
-                  className="px-3 py-1 rounded bg-brand-50 hover:bg-brand-100 disabled:opacity-30 font-medium">Następna →</button>
+                  className="px-3 py-1 rounded bg-brand-50 hover:bg-[#ccfbf1] disabled:opacity-30 font-medium">Następna →</button>
               </div>
             </div>
           )}
@@ -366,7 +362,7 @@ export default function AdminBusinessDetail({ businessId, onBack, onEdit }: Prop
                 </thead>
                 <tbody>
                   {data.reservations.map((r: any) => (
-                    <tr key={r.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                    <tr key={r.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                       <td className="px-3 py-2 text-zinc-700 whitespace-nowrap">{fmtDateTime(r.reserved_at)}</td>
                       <td className="px-3 py-2 font-medium text-zinc-900">{r.caller_name || "—"}</td>
                       <td className="px-3 py-2 font-mono text-zinc-600">{r.caller_phone || "—"}</td>

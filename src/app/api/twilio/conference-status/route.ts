@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { WITALINE_MAIN_BUSINESS_ID } from "@/lib/constants";
 
 export async function POST(request: Request) {
   const formData = await request.formData().catch(() => null);
@@ -18,12 +19,13 @@ export async function POST(request: Request) {
     const { data: consultCalls } = await supabaseAdmin
       .from("call_logs")
       .select("id")
+      .is("deleted_at", null)
       .eq("twilio_call_sid", callSid)
       .maybeSingle();
 
     if (!consultCalls) {
       await supabaseAdmin.from("notifications").insert({
-        business_id: "00000000-0000-0000-0000-000000000001",
+        business_id: WITALINE_MAIN_BUSINESS_ID,
         type: "call",
         title: "Konferencja zakonczona",
         message: `Uczestnik ${caller || callSid} opuscil konferencje ${roomName}`,

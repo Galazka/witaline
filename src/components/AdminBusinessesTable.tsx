@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { getPlanLabel } from "@/lib/pricing";
 
 /* ── Types ── */
 interface BizStats {
@@ -27,13 +28,13 @@ interface BizRecord {
   industry: string | null;
   website_url: string | null;
   phone: string | null;
-  whatsapp_number: string | null;
   consultant_count: number;
   ported_phone: string | null;
   port_status: string | null;
   created_at: string;
   trial_ends_at: string | null;
   subscription_current_period_end: string | null;
+  verification_status: string;
   stats: BizStats;
 }
 
@@ -43,23 +44,18 @@ interface Props {
   onDetail?: (id: string) => void;
 }
 
-const planLabels: Record<string, string> = {
-  start_100: "Start",
-  pro_500: "Growth",
-  enterprise_2000: "Enterprise",
-  elastic_0: "Elastyczny",
-  pro_249: "Pro",
-  lux_599: "Lux",
-};
+function getPlanList() {
+  return ["elastic_0", "enterprise_2000"];
+}
 
 /* ── Helpers ── */
 
 /** Dni do końca okresu + kolor + label */
 function periodInfo(endDate: string | null, status: string): { days: number | null; color: string; bgClass: string; textClass: string; label: string } {
   if (!endDate) {
-    if (status === "trialing") return { days: null, color: "#a1a1aa", bgClass: "bg-brand-100", textClass: "text-zinc-400", label: "Brak daty" };
+    if (status === "trialing") return { days: null, color: "#a1a1aa", bgClass: "bg-brand-100", textClass: "text-zinc-400 dark:text-zinc-500", label: "Brak daty" };
     if (status === "active") return { days: null, color: "#22c55e", bgClass: "bg-green-200", textClass: "text-green-600", label: "Bezterminowo" };
-    return { days: null, color: "#a1a1aa", bgClass: "bg-brand-100", textClass: "text-zinc-400", label: "—" };
+    return { days: null, color: "#a1a1aa", bgClass: "bg-brand-100", textClass: "text-zinc-400 dark:text-zinc-500", label: "—" };
   }
 
   const now = Date.now();
@@ -79,10 +75,10 @@ function statusConfig(status: string, suspended: boolean) {
     trialing: { label: "Test", bg: "bg-blue-50", text: "text-blue-700" },
     active: { label: "Aktywny", bg: "bg-green-50", text: "text-green-700" },
     past_due: { label: "Zaległy", bg: "bg-red-50", text: "text-red-700" },
-    canceled: { label: "Anulowany", bg: "bg-brand-50", text: "text-zinc-500" },
-    incomplete: { label: "Niekompletny", bg: "bg-brand-50", text: "text-zinc-500" },
+    canceled: { label: "Anulowany", bg: "bg-brand-50", text: "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500" },
+    incomplete: { label: "Niekompletny", bg: "bg-brand-50", text: "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500" },
   };
-  const cfg = map[status] || { label: status, bg: "bg-brand-50", text: "text-zinc-500" };
+  const cfg = map[status] || { label: status, bg: "bg-brand-50", text: "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500" };
   if (suspended) return { ...cfg, label: cfg.label + " (zaw.)", bg: "bg-red-50", text: "text-red-600" };
   return cfg;
 }
@@ -114,6 +110,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [verificationFilter, setVerificationFilter] = useState<string>("all");
 
   useEffect(() => {
     fetch("/api/admin/business-stats")
@@ -147,6 +144,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
   const filtered = useMemo(() => {
     return businesses
       .filter(b => {
+        if (verificationFilter !== "all" && b.verification_status !== verificationFilter) return false;
         if (!search) return true;
         const q = search.toLowerCase();
         return b.name.toLowerCase().includes(q)
@@ -199,18 +197,18 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
     return { total, trialing, active, pastDue, canceled, suspended, endingSoon, expired };
   }, [businesses]);
 
-  if (loading) return <p className="text-center text-zinc-400 py-8">Ładowanie firm...</p>;
+  if (loading) return <p className="text-center text-zinc-400 dark:text-zinc-500 py-8">Ładowanie firm...</p>;
 
   return (
     <div className="space-y-4">
       {/* ── Subscription summary cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
         {[
-          { label: "Wszystkie", value: summary.total, color: "bg-brand-50 text-zinc-700" },
+          { label: "Wszystkie", value: summary.total, color: "bg-brand-50 text-zinc-700 dark:text-zinc-300 dark:text-zinc-400" },
           { label: "Test", value: summary.trialing, color: "bg-blue-50 text-blue-700" },
           { label: "Aktywne", value: summary.active, color: "bg-green-50 text-green-700" },
           { label: "Zaległe", value: summary.pastDue, color: "bg-red-50 text-red-700" },
-          { label: "Anulowane", value: summary.canceled, color: "bg-brand-50 text-zinc-500" },
+          { label: "Anulowane", value: summary.canceled, color: "bg-brand-50 text-zinc-500 dark:text-zinc-400 dark:text-zinc-500" },
           { label: "⚠ Kończy się", value: summary.endingSoon, color: "bg-orange-50 text-orange-600" },
           { label: "✕ Wygasłe", value: summary.expired, color: "bg-red-100 text-red-600" },
         ].map(s => (
@@ -229,11 +227,22 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="🔍 Szukaj firmy, numeru, email..."
-            className="px-4 py-2 border border-zinc-200 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-brand-400/30"
+            className="px-4 py-2 border border-zinc-200 dark:border-brand-700 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/30"
           />
-          <span className="text-xs text-zinc-400">{filtered.length} / {businesses.length} firm</span>
+          <span className="text-xs text-zinc-400 dark:text-zinc-500">{filtered.length} / {businesses.length} firm</span>
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex items-center gap-2">
+          <select
+            value={verificationFilter}
+            onChange={e => setVerificationFilter(e.target.value)}
+            className="px-2.5 py-1.5 text-xs rounded-lg border border-zinc-200 bg-white text-zinc-600"
+          >
+            <option value="all">Weryfikacja: wszystkie</option>
+            <option value="verified">Zweryfikowane</option>
+            <option value="pending">Oczekujące</option>
+            <option value="rejected">Odrzucone</option>
+            <option value="unverified">Niezweryfikowane</option>
+          </select>
           {[
             { key: "name", label: "Nazwa" },
             { key: "created_at", label: "Data" },
@@ -246,8 +255,8 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
               onClick={() => handleSort(s.key as typeof sortBy)}
               className={`px-2.5 py-1.5 text-xs rounded-lg transition ${
                 sortBy === s.key
-                  ? "bg-brand-100 text-brand-600 font-medium"
-                  : "text-zinc-500 hover:text-zinc-700"
+                  ? "bg-[#ccfbf1] text-[#0d9488] font-medium"
+                  : "text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:text-zinc-300 dark:text-zinc-400"
               }`}
             >
               {s.label} {sortBy === s.key ? (sortDir === "asc" ? "↑" : "↓") : ""}
@@ -257,29 +266,29 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
       </div>
 
       {/* ── Table ── */}
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-brand-900 rounded-2xl border border-zinc-200 dark:border-brand-700 overflow-hidden shadow-sm">
         {filtered.length === 0 ? (
-          <div className="p-12 text-center"><p className="text-sm text-zinc-400">{search ? "Brak wyników wyszukiwania" : "Brak firm."}</p></div>
+          <div className="p-12 text-center"><p className="text-sm text-zinc-400 dark:text-zinc-500">{search ? "Brak wyników wyszukiwania" : "Brak firm."}</p></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-white text-left">
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Firma</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Plan</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Status</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Okres próbny</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Subskrypcja</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Kontakt</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">WhatsApp</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Numer</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Konsult.</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Założono</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Rozmowy</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Minuty</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">SMS</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Koszt</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 uppercase whitespace-nowrap">Akcje</th>
+                <tr className="bg-white dark:bg-brand-900 text-left">
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Firma</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Plan</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Status</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Weryfikacja</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Okres próbny</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Subskrypcja</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Kontakt</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Numer</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Konsult.</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Założono</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Rozmowy</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Minuty</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">SMS</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Koszt</th>
+                  <th className="px-3 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase whitespace-nowrap">Akcje</th>
                 </tr>
               </thead>
               <tbody>
@@ -291,20 +300,20 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                   const subProgress = periodProgress(b.subscription_current_period_end, b.created_at);
 
                   return (
-                    <tr key={b.id} onClick={() => onDetail?.(b.id)} className={`border-b border-zinc-50 hover:bg-brand-50/50 transition-colors cursor-pointer ${
+                    <tr key={b.id} onClick={() => onDetail?.(b.id)} className={`border-b border-zinc-50 hover:bg-[#f0fdfa]/50 transition-colors cursor-pointer ${
                       b.subscription_status === "past_due" ? "bg-red-50/30" :
-                      b.suspended ? "bg-white" : ""
+                      b.suspended ? "bg-white dark:bg-brand-900" : ""
                     }`}>
                       {/* Firma */}
                       <td className="px-3 py-2.5">
-                        <div className="font-medium text-zinc-900">{b.name}</div>
-                        {b.industry && <div className="text-xs text-zinc-400">{b.industry}</div>}
+                        <div className="font-medium text-zinc-900 dark:text-zinc-100">{b.name}</div>
+                        {b.industry && <div className="text-xs text-zinc-400 dark:text-zinc-500">{b.industry}</div>}
                       </td>
 
                       {/* Plan */}
                       <td className="px-3 py-2.5">
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-600">
-                          {planLabels[b.current_plan] || b.current_plan}
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-[#f0fdfa] text-[#0d9488]">
+                          {getPlanLabel(b.current_plan)}
                         </span>
                       </td>
 
@@ -315,6 +324,21 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                         </span>
                       </td>
 
+                      {/* Weryfikacja */}
+                      <td className="px-3 py-2.5">
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                          b.verification_status === "verified" ? "bg-green-50 text-green-700" :
+                          b.verification_status === "pending" ? "bg-amber-50 text-amber-700" :
+                          b.verification_status === "rejected" ? "bg-red-50 text-red-600" :
+                          "bg-zinc-100 text-zinc-500"
+                        }`}>
+                          {b.verification_status === "verified" ? "Zweryfikowana" :
+                           b.verification_status === "pending" ? "Oczekuje" :
+                           b.verification_status === "rejected" ? "Odrzucona" :
+                           "Niezweryfikowana"}
+                        </span>
+                      </td>
+
                       {/* Okres próbny */}
                       <td className="px-3 py-2.5">
                         {b.subscription_status === "trialing" ? (
@@ -322,7 +346,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                             <div className="flex items-center gap-1.5 mb-1">
                               <span className={`text-xs font-medium ${trialInfo.textClass}`}>{trialInfo.label}</span>
                               {b.trial_ends_at && (
-                                <span className="text-[10px] text-zinc-400">{fmtDate(b.trial_ends_at)}</span>
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{fmtDate(b.trial_ends_at)}</span>
                               )}
                             </div>
                             {b.trial_ends_at && b.created_at && (
@@ -335,7 +359,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                             )}
                           </div>
                         ) : (
-                          <span className="text-xs text-zinc-400">—</span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500">—</span>
                         )}
                       </td>
 
@@ -348,7 +372,7 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                                 {b.subscription_current_period_end ? subInfo.label : "Aktywna"}
                               </span>
                               {b.subscription_current_period_end && (
-                                <span className="text-[10px] text-zinc-400">{fmtDate(b.subscription_current_period_end)}</span>
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{fmtDate(b.subscription_current_period_end)}</span>
                               )}
                             </div>
                             {b.subscription_current_period_end && b.created_at && (
@@ -361,28 +385,19 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                             )}
                           </div>
                         ) : b.subscription_status === "trialing" ? (
-                          <span className="text-xs text-zinc-400">Po teście</span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500">Po teście</span>
                         ) : (
-                          <span className="text-xs text-zinc-400">—</span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500">—</span>
                         )}
                       </td>
 
                       {/* Kontakt */}
                       <td className="px-3 py-2.5">
                         <div className="flex flex-col gap-0.5">
-                          {b.phone && <a href={`tel:${b.phone}`} className="text-xs text-brand-500 hover:underline font-mono">{b.phone}</a>}
-                          {b.twilio_number && <span className="text-xs text-zinc-400 font-mono">{b.twilio_number}</span>}
+                          {b.phone && <a href={`tel:${b.phone}`} className="text-xs text-[#0d9488] hover:underline font-mono">{b.phone}</a>}
+                          {b.twilio_number && <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">{b.twilio_number}</span>}
                           {b.website_url && <a href={b.website_url} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline truncate max-w-[120px]">{b.website_url.replace(/^https?:\/\//, "")}</a>}
                         </div>
-                      </td>
-
-                      {/* WhatsApp */}
-                      <td className="px-3 py-2.5">
-                        {b.whatsapp_number ? (
-                          <span className="text-xs font-mono text-emerald-600">{b.whatsapp_number}</span>
-                        ) : (
-                          <span className="text-xs text-zinc-300">—</span>
-                        )}
                       </td>
 
                       {/* Numer (WitaLine centrala / portowany) */}
@@ -394,23 +409,23 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                             </span>
                           )}
                           {!b.ported_phone && (
-                            <span className="text-xs text-zinc-300 font-mono">—</span>
+                            <span className="text-xs text-zinc-300 dark:text-zinc-400 font-mono">—</span>
                           )}
                         </div>
                       </td>
 
                       {/* Konsultanci */}
                       <td className="px-3 py-2.5">
-                        <span className="text-xs font-semibold text-zinc-600">{b.consultant_count}</span>
+                        <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{b.consultant_count}</span>
                       </td>
 
                       {/* Założono */}
-                      <td className="px-3 py-2.5 text-xs text-zinc-500 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
                         {b.created_at ? new Date(b.created_at).toLocaleDateString("pl-PL") : "—"}
                       </td>
 
                       {/* Rozmowy */}
-                      <td className="px-3 py-2.5 font-semibold text-zinc-900">{b.stats.totalCalls}</td>
+                      <td className="px-3 py-2.5 font-semibold text-zinc-900 dark:text-zinc-100">{b.stats.totalCalls}</td>
 
                       {/* Minuty */}
                       <td className="px-3 py-2.5">{b.stats.totalMinutes}</td>
@@ -419,12 +434,12 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
                       <td className="px-3 py-2.5">{b.stats.smsCount}</td>
 
                       {/* Koszt */}
-                      <td className="px-3 py-2.5 font-mono text-xs text-zinc-600">{b.stats.totalCost} zł</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-zinc-600 dark:text-zinc-400">{b.stats.totalCost} zł</td>
 
                       {/* Akcje */}
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap gap-1.5">
-                          <button onClick={(e) => { e.stopPropagation(); onEdit(b.id); }} className="text-xs px-2 py-1 rounded font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition whitespace-nowrap">
+                          <button onClick={(e) => { e.stopPropagation(); onEdit(b.id); }} className="text-xs px-2 py-1 rounded font-medium text-[#0d9488] bg-brand-50 hover:bg-[#ccfbf1] transition whitespace-nowrap">
                             Edytuj
                           </button>
                           <button onClick={(e) => { e.stopPropagation(); onDetail?.(b.id); }} className="text-xs px-2 py-1 rounded font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 transition whitespace-nowrap">
@@ -447,13 +462,13 @@ export default function AdminBusinessesTable({ onEdit, onRefresh, onDetail }: Pr
       {/* ── Delete confirmation ── */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-zinc-900 mb-2">Usunąć firmę?</h3>
-            <p className="text-sm text-zinc-500 mb-6">
+          <div className="bg-white dark:bg-brand-900 rounded-2xl p-6 max-w-sm mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Usunąć firmę?</h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mb-6">
               Ta operacja trwale usunie firmę i wszystkie powiązane dane (rozmowy, SMS, opinie). Nie można cofnąć.
             </p>
             <div className="flex gap-3 justify-end">
-              <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-zinc-600 hover:text-zinc-800 transition-colors">Anuluj</button>
+              <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 transition-colors">Anuluj</button>
               <button onClick={() => handleDelete(deleteConfirm)} disabled={deleting} className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-50">
                 {deleting ? "Usuwanie..." : "Tak, usuń"}
               </button>

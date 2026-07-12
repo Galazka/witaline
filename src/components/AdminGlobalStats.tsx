@@ -126,7 +126,7 @@ export default function AdminGlobalStats() {
           {/* Range buttons */}
           {([["7", "7 dni"], ["30", "30 dni"], ["90", "90 dni"], ["all", "Wszystko"]] as [Range, string][]).map(([key, label]) => (
             <button key={key} onClick={() => handleRangeChange(key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${range === key ? "bg-brand-400 text-white" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"}`}>
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${range === key ? "bg-[#0d9488] text-white" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"}`}>
               {label}
             </button>
           ))}
@@ -140,14 +140,14 @@ export default function AdminGlobalStats() {
               className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs" />
             <button onClick={() => { if (fromDate && toDate) { setRange("custom"); fetchStats("custom", businessId, fromDate, toDate); } }}
               disabled={!fromDate || !toDate}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-400 text-white hover:bg-brand-500 disabled:opacity-50">
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#0d9488] text-white hover:bg-[#0f766e] disabled:opacity-50">
               Filtruj
             </button>
           </div>
 
           <div className="ml-auto flex gap-2">
             <button onClick={handleRefresh} disabled={isLoading}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-zinc-600 hover:bg-brand-100 disabled:opacity-50">
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1] disabled:opacity-50">
               {refreshing ? "..." : "🔄 Odśwież"}
             </button>
           </div>
@@ -163,7 +163,7 @@ export default function AdminGlobalStats() {
             {[
               ["📞", "Rozmowy", stats.totalCalls, "text-zinc-900"],
               ["💬", "Czaty", stats.totalConversations, "text-zinc-900"],
-              ["📞", "Dziś", stats.todayCalls, "text-brand-500"],
+              ["📞", "Dziś", stats.todayCalls, "text-[#0d9488]"],
               ["⏱️", "Śr. czas", fmtTime(stats.avgDuration), "text-zinc-900"],
               ["💰", "Koszt", `${stats.totalCost} PLN`, "text-amber-600"],
               ["🛒", "Zamówienia", stats.orders, "text-green-600"],
@@ -183,7 +183,7 @@ export default function AdminGlobalStats() {
               <h3 className="text-sm font-semibold text-zinc-900 mb-3">Źródła</h3>
               <div className="space-y-2">
                 {[
-                  ["Telefon (Twilio)", stats.sourceBreakdown.phone, "bg-brand-500"],
+                  ["Telefon (Twilio)", stats.sourceBreakdown.phone, "bg-[#0d9488]"],
                   ["Voice chat (widget)", stats.sourceBreakdown.voice + stats.sourceBreakdown.widget, "bg-purple-500"],
                   ["Czat (web)", stats.sourceBreakdown.web, "bg-blue-500"],
                   ["SMS", stats.sourceBreakdown.sms, "bg-amber-500"],
@@ -242,7 +242,7 @@ export default function AdminGlobalStats() {
                   <div key={h.hour} className="flex items-center gap-2 text-xs">
                     <span className="w-10 text-right text-zinc-400 shrink-0 font-mono">{h.hour}</span>
                     <div className="flex-1 h-5 bg-brand-50 rounded-full overflow-hidden">
-                      <div className="h-full bg-brand-400/80 rounded-full transition-all" style={{ width: `${(h.count / maxHourly) * 100}%`, minWidth: h.count ? 4 : 0 }} />
+                      <div className="h-full bg-[#0d9488]/80 rounded-full transition-all" style={{ width: `${(h.count / maxHourly) * 100}%`, minWidth: h.count ? 4 : 0 }} />
                     </div>
                     <span className="w-6 text-left text-zinc-500 font-medium">{h.count || ""}</span>
                   </div>
@@ -259,7 +259,7 @@ export default function AdminGlobalStats() {
                     <div key={d.date} className="flex items-center gap-2 text-xs">
                       <span className="w-24 text-zinc-400 shrink-0 font-mono">{d.date.slice(5)}</span>
                       <div className="flex-1 h-5 bg-brand-50 rounded-full overflow-hidden flex">
-                        <div className="h-full bg-brand-400/80 rounded-l-full transition-all" style={{ width: `${(d.calls / max) * 100}%`, minWidth: d.calls ? 4 : 0 }} />
+                        <div className="h-full bg-[#0d9488]/80 rounded-l-full transition-all" style={{ width: `${(d.calls / max) * 100}%`, minWidth: d.calls ? 4 : 0 }} />
                         <div className="h-full bg-blue-400/60 rounded-r-full transition-all" style={{ width: `${(d.convos / max) * 100}%`, minWidth: d.convos ? 4 : 0 }} />
                       </div>
                       <span className="w-14 text-right text-zinc-500 font-medium">{d.calls + d.convos}</span>
@@ -268,7 +268,7 @@ export default function AdminGlobalStats() {
                 })}
               </div>
               <div className="flex items-center gap-4 mt-3 text-[10px] text-zinc-400">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-brand-400" /> Rozmowy</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-[#0d9488]" /> Rozmowy</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-blue-400/60" /> Czaty</span>
               </div>
             </div>
@@ -292,7 +292,7 @@ export default function AdminGlobalStats() {
                   </thead>
                   <tbody>
                     {stats.bizBreakdown.map(b => (
-                      <tr key={b.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50 cursor-pointer"
+                      <tr key={b.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa] cursor-pointer"
                         onClick={() => setBusinessId(b.id)}>
                         <td className="px-3 py-2 font-medium text-zinc-900">{b.name}</td>
                         <td className="px-3 py-2">{b.calls}</td>
@@ -320,7 +320,7 @@ export default function AdminGlobalStats() {
                   </tr></thead>
                   <tbody>
                     {stats.topCallers.map(([num, count]) => (
-                      <tr key={num} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                      <tr key={num} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                         <td className="px-3 py-2 font-mono text-zinc-900">{num}</td>
                         <td className="px-3 py-2 font-semibold">{count}</td>
                       </tr>
@@ -342,7 +342,7 @@ export default function AdminGlobalStats() {
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <input type="text" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }}
                 placeholder="Szukaj firmę lub numer..."
-                className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs w-48 focus:outline-none focus:ring-2 focus:ring-brand-400/20" />
+                className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs w-48 focus:outline-none focus:ring-2 focus:ring-[#0d9488]/20" />
               <select value={classFilter} onChange={e => { setClassFilter(e.target.value); setPage(0); }}
                 className="px-3 py-1.5 border border-zinc-200 rounded-lg text-xs">
                 <option value="all">Wszystkie klasyfikacje</option>
@@ -359,7 +359,7 @@ export default function AdminGlobalStats() {
               {(["date", "duration", "cost"] as const).map(s => (
                 <button key={s} onClick={() => { if (sortKey === s) setSortAsc(!sortAsc); else { setSortKey(s); setSortAsc(s === "date"); } }}
                   className={`px-2.5 py-1 text-xs font-medium rounded-lg transition flex items-center gap-1 ${
-                    sortKey === s ? "bg-brand-100 text-brand-700" : "bg-brand-50 text-zinc-600 hover:bg-brand-100"
+                    sortKey === s ? "bg-[#ccfbf1] text-[#065f46]" : "bg-brand-50 text-zinc-600 hover:bg-[#ccfbf1]"
                   }`}>
                   {s === "date" ? "Data" : s === "duration" ? "Czas" : "Koszt"}
                   {sortKey === s && <span>{sortAsc ? "↑" : "↓"}</span>}
@@ -383,7 +383,7 @@ export default function AdminGlobalStats() {
                 </thead>
                 <tbody>
                   {paged.map(r => (
-                    <tr key={r.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-brand-50">
+                    <tr key={r.id} className="border-b border-zinc-100 last:border-b-0 hover:bg-[#f0fdfa]">
                       <td className="px-3 py-2 font-medium text-zinc-900 whitespace-nowrap">{r.business_name}</td>
                       <td className="px-3 py-2 text-zinc-500 whitespace-nowrap">{fmtDate(r.date)}</td>
                       <td className="px-3 py-2 font-mono text-zinc-700">{r.from_number}</td>
@@ -411,9 +411,9 @@ export default function AdminGlobalStats() {
                 <span>Strona {safePage + 1} z {totalPages}</span>
                 <div className="flex gap-2">
                   <button disabled={safePage === 0} onClick={() => setPage(safePage - 1)}
-                    className="px-3 py-1 rounded bg-brand-50 hover:bg-brand-100 disabled:opacity-30 font-medium">← Poprzednia</button>
+                    className="px-3 py-1 rounded bg-brand-50 hover:bg-[#ccfbf1] disabled:opacity-30 font-medium">← Poprzednia</button>
                   <button disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}
-                    className="px-3 py-1 rounded bg-brand-50 hover:bg-brand-100 disabled:opacity-30 font-medium">Następna →</button>
+                    className="px-3 py-1 rounded bg-brand-50 hover:bg-[#ccfbf1] disabled:opacity-30 font-medium">Następna →</button>
                 </div>
               </div>
             )}

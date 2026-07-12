@@ -1,12 +1,37 @@
 {
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "DOCKERFILE"
   },
   "deploy": {
-    "startCommand": "npm start",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
+  },
+  "cron": {
+    "auto-topup": {
+      "schedule": "*/5 * * * *",
+      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://witaline.pl/api/cron/auto-topup"
+    },
+    "process-jobs": {
+      "schedule": "* * * * *",
+      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://witaline.pl/api/cron/process-jobs"
+    },
+    "diagnostics": {
+      "schedule": "0 */6 * * *",
+      "command": "curl -H 'x-diagnostics-key: ${CRON_SECRET}' https://witaline.pl/api/diagnostics"
+    },
+    "cleanup-active-calls": {
+      "schedule": "0 */2 * * *",
+      "command": "curl -X POST -H 'x-cron-secret: ${CRON_SECRET}' https://witaline.pl/api/cron/cleanup-active-calls"
+    },
+    "check-provider-balances": {
+      "schedule": "0 8 * * *",
+      "command": "curl -X POST -H 'x-internal-secret: ${CRON_SECRET}' https://witaline.pl/api/cron/check-provider-balances"
+    },
+    "db-backup": {
+      "schedule": "0 4 * * *",
+      "command": "cd /app && npx supabase db dump --db-url '${SUPABASE_DB_URL}' --schema public --file backups/schema-$(date +%Y%m%d).sql && npx supabase db dump --db-url '${SUPABASE_DB_URL}' --data-only --use-copy --file backups/data-$(date +%Y%m%d).sql"
+    }
   }
 }

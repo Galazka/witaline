@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getPlanConfig } from "@/lib/pricing";
+import { getExchangeRates } from "@/lib/exchange-rates";
 
-function fmtPLN(v: number): string {
+function fmt(v: number): string {
   const s = Math.abs(v).toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return `${v < 0 ? "-" : ""}${s} zł`;
 }
@@ -25,14 +27,19 @@ function fmtDateFull(d: string): string {
   return new Date(d + "T12:00:00").toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" });
 }
 
+function fmtWarsawTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("pl-PL", { timeZone: "Europe/Warsaw", hour: "2-digit", minute: "2-digit" });
+}
+
 function todayStr(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function firstOfMonth(): string {
+function ninetyDaysBack(): string {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  d.setDate(d.getDate() - 90);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function daysInMonth(d = new Date()): number {
@@ -49,10 +56,11 @@ function dayOfMonth(d: string): number {
   return parseInt(d.slice(8, 10), 10);
 }
 
-const PLAN_REVENUE: Record<string, number> = {
-  start_100: 299, pro_500: 599, enterprise_2000: 1199,
-  elastic_0: 0, pro_249: 243.9, lux_599: 487.8,
-};
+function getPlanRevenue(planKey: string): number {
+  if (planKey === "elastic_0" || planKey === "self_service") return 0;
+  const cfg = getPlanConfig(planKey);
+  return cfg?.price ?? 199;
+}
 
 interface CallLog {
   id: string;
@@ -64,6 +72,7 @@ interface CallLog {
   cost_openrouter: number;
   total_cost: number;
   revenue_pln: number;
+  plan_revenue_pln: number;
   internal_cost_pln: number;
   from_number: string;
   created_at: string;
@@ -83,57 +92,103 @@ interface DailyGroup {
 }
 
 export default function AdminDailyCosts() {
-  const [from, setFrom] = useState(firstOfMonth);
+  type ViewCurrency = "PLN" | "EUR" | "USD";
+  const [from, setFrom] = useState(ninetyDaysBack);
   const [to, setTo] = useState(todayStr);
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [expandedCall, setExpandedCall] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<ViewCurrency>("USD");
+  const [rates, setRates] = useState<{ usdPln: number; eurPln: number } | null>(null);
+
+  useEffect(() => {
+    getExchangeRates().then((r) => {
+      setRates({ usdPln: r.usdPln, eurPln: r.eurPln });
+    });
+  }, []);
+
+  // All cost values from API are in USD
+  const fmt = (v: number): string => {
+    if (currency === "USD") {
+      const s = Math.abs(v).toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return v < 0 ? `-${s} $` : `${s} $`;
+    }
+    const usdPln = rates?.usdPln || 4.15;
+    if (currency === "PLN") {
+      const inPln = Math.abs(v) * usdPln;
+      const s = Math.round(inPln * 100) / 100;
+      return `${v < 0 ? "-" : ""}${s.toFixed(2).replace(".", ",")} zł`;
+    }
+    const eurPln = rates?.eurPln || 4.52;
+    const inEur = Math.abs(v) * usdPln / eurPln;
+    const s = Math.round(inEur * 100) / 100;
+    return `${v < 0 ? "-" : ""}${s.toFixed(2).replace(".", ",")} €`;
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setFetchError("");
     try {
       const res = await fetch(`/api/admin/real-costs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
-      if (res.ok) {
-        const json = await res.json();
+      const json = res.ok ? await res.json() : { call_logs: [] };
+      if (!res.ok) {
+        setFetchError(`Błąd ${res.status} — ${json.error || "brak dostępu"}`);
+      } else {
         const logs: CallLog[] = (json.call_logs || []).map((l: Record<string, unknown>) => ({
           ...l,
           cost_elevenlabs: Number(l.cost_elevenlabs) || 0,
           cost_twilio: Number(l.cost_twilio) || 0,
           cost_openrouter: Number(l.cost_openrouter) || 0,
-          total_cost: Number(l.total_cost) || Number(l.cost_pln) || 0,
+          // Always calculate total from components — never trust DB total_cost
+          total_cost: Math.round(((Number(l.cost_elevenlabs) || 0) + (Number(l.cost_twilio) || 0) + (Number(l.cost_openrouter) || 0)) * 100) / 100,
           revenue_pln: Number(l.revenue_pln) || 0,
+          plan_revenue_pln: Number(l.plan_revenue_pln) || 0,
           internal_cost_pln: Number(l.internal_cost_pln) || 0.65 * ((Number(l.duration_seconds) || 0) / 60),
         }));
         setCallLogs(logs);
+        setSmsTotal(json.sms_total || 0);
+        setCostSmsTotal(json.cost_sms_total || 0);
+        setDiagnostics({
+          totalCallLogs: (json as any).total_call_logs ?? -1,
+          totalBusinesses: json.businesses?.length ?? 0,
+        });
       }
-    } catch { /* ignore */ }
+    } catch (e) {
+      setFetchError("Nie udało się połączyć z API");
+    }
     setLoading(false);
   }, [from, to]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Auto-sync on mount: first pull calls from ElevenLabs, then sync costs
-  useEffect(() => {
-    if (!syncing) {
-      setSyncing(true);
-      setSyncMsg("Pobieranie rozmów z ElevenLabs...");
-      fetch("/api/admin/sync-calls", { method: "POST" })
-        .then(r => r.json())
-        .then(d1 => {
-          setSyncMsg("Synchronizowanie kosztów...");
-          return fetch("/api/admin/sync-costs", { method: "POST" }).then(r => r.json());
-        })
-        .then(d2 => {
-          setSyncMsg(d2.message || "OK");
-          fetchData();
-        })
-        .catch(() => setSyncMsg("Błąd synchronizacji"))
-        .finally(() => { setSyncing(false); setTimeout(() => setSyncMsg(""), 8000); });
+  async function handleSync() {
+    setSyncing(true);
+    setSyncMsg("Pobieranie rozmów z ElevenLabs...");
+    setFetchError("");
+    try {
+      const r1 = await fetch("/api/admin/sync-calls", { method: "POST" });
+      const d1 = await r1.json();
+      if (!r1.ok) {
+        setSyncMsg(`Błąd sync-calls: ${(d1 as any).error || r1.status}`);
+        setSyncing(false);
+        setTimeout(() => setSyncMsg(""), 8000);
+        return;
+      }
+      setSyncMsg(`Sync-calls: ${(d1 as any).saved || 0} nowych, ${(d1 as any).skipped || 0} pominięto. Synchronizowanie kosztów...`);
+      const r2 = await fetch("/api/admin/sync-costs", { method: "POST" });
+      const d2 = await r2.json();
+      setSyncMsg((d2 as any).message || "OK");
+      await fetchData();
+    } catch {
+      setSyncMsg("Błąd synchronizacji");
     }
-  }, []);
+    setSyncing(false);
+    setTimeout(() => setSyncMsg(""), 10000);
+  }
 
   // Group by day
   const days = new Map<string, CallLog[]>();
@@ -151,7 +206,7 @@ export default function AdminDailyCosts() {
       const totalElevenlabs = calls.reduce((s, c) => s + c.cost_elevenlabs, 0);
       const totalTwilio = calls.reduce((s, c) => s + c.cost_twilio, 0);
       const totalOpenrouter = calls.reduce((s, c) => s + c.cost_openrouter, 0);
-      const totalRevenue = calls.reduce((s, c) => s + (c.revenue_pln || 0), 0);
+      const totalRevenue = calls.reduce((s, c) => s + (c.plan_revenue_pln || 0), 0);
       const profit = totalRevenue - totalCost;
       return { date, calls, totalMinutes, totalCost, totalElevenlabs, totalTwilio, totalOpenrouter, totalRevenue, profit };
     });
@@ -169,11 +224,15 @@ export default function AdminDailyCosts() {
   const totalProfit = dailyGroups.reduce((s, d) => s + d.profit, 0);
   const totalCalls = callLogs.length;
 
-  // Projections
-  const avgProfitPerDay = daysElapsed > 0 ? totalProfit / daysElapsed : 0;
-  const projectedProfit = avgProfitPerDay * totalDays;
+  // SMS summary from API
+  const [smsTotal, setSmsTotal] = useState(0);
+  const [costSmsTotal, setCostSmsTotal] = useState(0);
+  const [diagnostics, setDiagnostics] = useState<{ totalCallLogs: number; totalBusinesses: number } | null>(null);
+
+  // Projections (for KPI cards only)
   const projectedRevenue = daysElapsed > 0 ? (totalRevenue / daysElapsed) * totalDays : 0;
   const projectedCost = daysElapsed > 0 ? (totalCost / daysElapsed) * totalDays : 0;
+  const projectedProfit = projectedRevenue - projectedCost;
 
   return (
     <div className="space-y-4">
@@ -183,16 +242,39 @@ export default function AdminDailyCosts() {
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Od:</label>
             <input type="date" value={from} onChange={e => setFrom(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+              className="px-2 py-1.5 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs text-zinc-700 dark:text-zinc-200 dark:bg-brand-800 focus:outline-none focus:border-[#0d9488]" />
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-zinc-400">Do:</label>
             <input type="date" value={to} onChange={e => setTo(e.target.value)}
-              className="px-2 py-1.5 border border-zinc-200 rounded-lg text-xs text-zinc-700 focus:outline-none focus:border-brand-400" />
+              className="px-2 py-1.5 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs text-zinc-700 dark:text-zinc-200 dark:bg-brand-800 focus:outline-none focus:border-[#0d9488]" />
           </div>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as "PLN" | "EUR" | "USD")}
+            className="px-2 py-1.5 border border-zinc-200 dark:border-brand-600 rounded-lg text-xs text-zinc-700 dark:text-zinc-200 bg-white dark:bg-brand-800 focus:outline-none focus:border-[#0d9488]"
+            title="Wyświetl w">
+            <option value="PLN">PLN</option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+          </select>
           <button onClick={fetchData}
-            className="px-3 py-1.5 text-xs font-medium bg-brand-400 text-white rounded-lg hover:bg-brand-500 transition">
+            className="px-3 py-1.5 text-xs font-medium bg-[#0d9488] text-white rounded-lg hover:bg-[#0f766e] transition">
             Odśwież
+          </button>
+          <button onClick={handleSync} disabled={syncing}
+            className="px-3 py-1.5 text-xs font-medium bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:opacity-50">
+            {syncing ? "Sync..." : "Sync koszty"}
+          </button>
+          <button
+            onClick={async () => {
+              if (!confirm("USUNĄĆ WSZYSTKIE DANE? call_logs, SMS, rozmowy, rezerwacje, leady. NIE MOŻNA cofnąć!")) return;
+              if (!confirm("NA PEWNO? Resetujesz WSZYSTKO.")) return;
+              try { const r = await fetch("/api/admin/reset-stats", { method: "POST" }); const d = await r.json(); alert(d.message || "OK"); if (r.ok) fetchData(); } catch { alert("Błąd"); }
+            }}
+            className="px-3 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            RESET
           </button>
           {syncMsg && (
             <span className={`text-xs ${syncing ? "text-amber-500" : "text-green-600"}`}>
@@ -202,57 +284,81 @@ export default function AdminDailyCosts() {
         </div>
       </div>
 
+      {fetchError && (
+        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-xs text-red-700 dark:text-red-300 flex items-center justify-between">
+          <span>{fetchError}</span>
+          <button onClick={fetchData} className="text-red-600 font-medium hover:text-red-800 underline ml-2">Spróbuj ponownie</button>
+        </div>
+      )}
+
+      {diagnostics && callLogs.length === 0 && !loading && !fetchError && (
+        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between">
+          <span>
+            W bazie: <strong>{diagnostics.totalCallLogs}</strong> call_logs, <strong>{diagnostics.totalBusinesses}</strong> biznesów.
+            Brak rozmów w wybranym zakresie dat ({from} – {to}).
+            Jeśli oczekujesz rozmów, uruchom najpierw Sync rozmów (pobiera z ElevenLabs API).
+          </span>
+        </div>
+      )}
+
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+        <div className="bg-white dark:bg-brand-900 rounded-lg border border-zinc-200 dark:border-brand-700 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Rozmowy</p>
-          <p className="text-lg font-bold text-zinc-900">{totalCalls}</p>
+          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{totalCalls}</p>
           <p className="text-[10px] text-zinc-400">{Math.round(totalMinutes)} min</p>
         </div>
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+        <div className="bg-white dark:bg-brand-900 rounded-lg border border-zinc-200 dark:border-brand-700 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Koszt</p>
-          <p className="text-lg font-bold text-red-500">{fmtPLN(totalCost)}</p>
-          <p className="text-[10px] text-zinc-400">{totalMinutes > 0 ? fmtPLN(totalCost / totalMinutes) + "/min" : "—"}</p>
+          <p className="text-lg font-bold text-red-500">{fmt(totalCost)}</p>
+          <p className="text-[10px] text-zinc-400">{totalMinutes > 0 ? fmt(totalCost / totalMinutes) + "/min" : "—"}</p>
         </div>
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+        <div className="bg-white dark:bg-brand-900 rounded-lg border border-zinc-200 dark:border-brand-700 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Przychód</p>
-          <p className="text-lg font-bold text-brand-500">{fmtPLN(totalRevenue)}</p>
+          <p className="text-lg font-bold text-[#0d9488]">{fmt(totalRevenue)}</p>
         </div>
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+        <div className="bg-white dark:bg-brand-900 rounded-lg border border-zinc-200 dark:border-brand-700 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Wynik</p>
           <p className={`text-lg font-bold ${totalProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-            {totalProfit >= 0 ? "+" : ""}{fmtPLN(totalProfit)}
+            {totalProfit >= 0 ? "+" : ""}{fmt(totalProfit)}
           </p>
           <p className="text-[10px] text-zinc-400">{totalRevenue > 0 ? fmtPct((totalProfit / totalRevenue) * 100) : "—"}</p>
         </div>
-        <div className="bg-white rounded-lg border border-zinc-200 p-3">
+        <div className="bg-white dark:bg-brand-900 rounded-lg border border-zinc-200 dark:border-brand-700 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Dni</p>
-          <p className="text-lg font-bold text-zinc-900">{daysElapsed}/{totalDays}</p>
+          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{daysElapsed}/{totalDays}</p>
           <p className="text-[10px] text-zinc-400">{daysRemaining} pozostało</p>
         </div>
-        <div className="bg-brand-50 rounded-lg border border-brand-200 p-3">
+        <div className="bg-brand-50 dark:bg-brand-800 rounded-lg border border-[#0d9488]/20 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Prognoza przychód</p>
-          <p className="text-lg font-bold text-brand-600">{fmtPLN(projectedRevenue)}</p>
+          <p className="text-lg font-bold text-[#0d9488]">{fmt(projectedRevenue)}</p>
         </div>
-        <div className="bg-brand-50 rounded-lg border border-brand-200 p-3">
+        <div className="bg-brand-50 dark:bg-brand-800 rounded-lg border border-[#0d9488]/20 p-3">
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Prognoza koszt</p>
-          <p className="text-lg font-bold text-amber-600">{fmtPLN(projectedCost)}</p>
+          <p className="text-lg font-bold text-amber-600">{fmt(projectedCost)}</p>
         </div>
-        <div className={`rounded-lg border p-3 ${projectedProfit >= 0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+        <div className={`rounded-lg border p-3 ${projectedProfit >= 0 ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800" : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800"}`}>
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Prognoza wynik</p>
           <p className={`text-lg font-bold ${projectedProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-            {projectedProfit >= 0 ? "+" : ""}{fmtPLN(projectedProfit)}
+            {projectedProfit >= 0 ? "+" : ""}{fmt(projectedProfit)}
           </p>
           <p className="text-[10px] text-zinc-400">{projectedRevenue > 0 ? fmtPct((projectedProfit / projectedRevenue) * 100) : "—"}</p>
         </div>
       </div>
 
+      {/* SMS KPI */}
+      <div className="bg-white dark:bg-brand-900 rounded-lg border border-zinc-200 dark:border-brand-700 p-3 w-fit">
+        <p className="text-[10px] text-zinc-400 uppercase tracking-wider">SMS wysłane</p>
+        <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{smsTotal}</p>
+        <p className="text-[10px] text-zinc-400">koszt: {fmt(costSmsTotal)}</p>
+      </div>
+
       {/* Daily breakdown table */}
-      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+      <div className="bg-white dark:bg-brand-900 rounded-xl border border-zinc-200 dark:border-brand-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-left text-zinc-400 border-b border-zinc-200 bg-zinc-50">
+              <tr className="text-left text-zinc-400 border-b border-zinc-200 dark:border-brand-700 bg-zinc-50 dark:bg-brand-800">
                 <th className="p-2.5 font-semibold text-[10px] uppercase tracking-wider">Dzień</th>
                 <th className="p-2.5 font-semibold text-[10px] uppercase tracking-wider text-right">Rozmowy</th>
                 <th className="p-2.5 font-semibold text-[10px] uppercase tracking-wider text-right">Minuty</th>
@@ -269,7 +375,13 @@ export default function AdminDailyCosts() {
               {loading ? (
                 <tr><td colSpan={10} className="text-center py-8 text-zinc-400">Ładowanie...</td></tr>
               ) : dailyGroups.length === 0 ? (
-                <tr><td colSpan={10} className="text-center py-8 text-zinc-400">Brak danych w wybranym zakresie</td></tr>
+                <tr><td colSpan={10} className="text-center py-8">
+                  <p className="text-zinc-400 mb-2">Brak danych w wybranym zakresie</p>
+                  <button onClick={handleSync} disabled={syncing}
+                    className="px-4 py-2 text-xs font-medium bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:opacity-50">
+                    {syncing ? "Synchronizowanie..." : "Synchronizuj rozmowy z ElevenLabs"}
+                  </button>
+                </td></tr>
               ) : (
                 dailyGroups.map((day) => {
                   const marginPct = day.totalRevenue > 0 ? (day.profit / day.totalRevenue) * 100 : 0;
@@ -280,24 +392,24 @@ export default function AdminDailyCosts() {
                       <tr
                         key={day.date}
                         onClick={() => setExpandedDay(isExpanded ? null : day.date)}
-                        className={`border-b border-zinc-100 cursor-pointer hover:bg-brand-50/50 transition ${isToday ? "bg-brand-50/30" : ""}`}
+                        className={`border-b border-zinc-100 dark:border-brand-700 cursor-pointer hover:bg-[#f0fdfa]/50 dark:hover:bg-brand-800 transition ${isToday ? "bg-brand-50/30 dark:bg-brand-800/50" : ""}`}
                       >
                         <td className="p-2.5">
                           <div className="flex items-center gap-2">
                             <span className={`w-1.5 h-1.5 rounded-full ${day.profit >= 0 ? "bg-green-500" : "bg-red-500"}`} />
-                            <span className="font-medium text-zinc-800">{fmtDateFull(day.date)}</span>
-                            {isToday && <span className="text-[9px] bg-brand-100 text-brand-600 rounded-full px-1.5 py-0.5 font-semibold">Dziś</span>}
+                            <span className="font-medium text-zinc-800 dark:text-zinc-100">{fmtDateFull(day.date)}</span>
+                            {isToday && <span className="text-[9px] bg-[#ccfbf1] text-[#0d9488] rounded-full px-1.5 py-0.5 font-semibold">Dziś</span>}
                           </div>
                         </td>
-                        <td className="p-2.5 text-right text-zinc-700 font-medium">{day.calls.length}</td>
-                        <td className="p-2.5 text-right text-zinc-600">{Math.round(day.totalMinutes)}</td>
-                        <td className="p-2.5 text-right text-zinc-500">{fmtPLN(day.totalElevenlabs)}</td>
-                        <td className="p-2.5 text-right text-zinc-500">{fmtPLN(day.totalTwilio)}</td>
-                        <td className="p-2.5 text-right text-zinc-500">{fmtPLN(day.totalOpenrouter)}</td>
-                        <td className="p-2.5 text-right text-red-600 font-medium">{fmtPLN(day.totalCost)}</td>
-                        <td className="p-2.5 text-right text-brand-600 font-medium">{fmtPLN(day.totalRevenue)}</td>
+                        <td className="p-2.5 text-right text-zinc-700 dark:text-zinc-200 font-medium">{day.calls.length}</td>
+                        <td className="p-2.5 text-right text-zinc-600 dark:text-zinc-300">{Math.round(day.totalMinutes)}</td>
+                        <td className="p-2.5 text-right text-zinc-500 dark:text-zinc-300">{fmt(day.totalElevenlabs)}</td>
+                        <td className="p-2.5 text-right text-zinc-500 dark:text-zinc-300">{fmt(day.totalTwilio)}</td>
+                        <td className="p-2.5 text-right text-zinc-500 dark:text-zinc-300">{fmt(day.totalOpenrouter)}</td>
+                        <td className="p-2.5 text-right text-red-600 font-medium">{fmt(day.totalCost)}</td>
+                        <td className="p-2.5 text-right text-[#0d9488] font-medium">{fmt(day.totalRevenue)}</td>
                         <td className={`p-2.5 text-right font-bold ${day.profit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                          {day.profit >= 0 ? "+" : ""}{fmtPLN(day.profit)}
+                          {day.profit >= 0 ? "+" : ""}{fmt(day.profit)}
                         </td>
                         <td className="p-2.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -314,18 +426,18 @@ export default function AdminDailyCosts() {
                       {/* Expanded: per-call breakdown */}
                       {isExpanded && (
                         <tr key={`${day.date}-details`}>
-                          <td colSpan={10} className="p-0 bg-zinc-50 border-b border-zinc-200">
+                          <td colSpan={10} className="p-0 bg-zinc-50 dark:bg-brand-800 border-b border-zinc-200 dark:border-brand-700">
                             <div className="p-3 space-y-1">
                               <div className="flex items-center gap-2 text-[10px] text-zinc-400 uppercase tracking-wider mb-2 font-semibold">
                                 <span>Rozmowy dnia</span>
-                                <span className="w-px h-3 bg-zinc-200" />
+                                <span className="w-px h-3 bg-zinc-200 dark:bg-brand-600" />
                                 <span>{day.calls.length} rozmów</span>
-                                <span className="w-px h-3 bg-zinc-200" />
+                                <span className="w-px h-3 bg-zinc-200 dark:bg-brand-600" />
                                 <span>{Math.round(day.totalMinutes)} min łącznie</span>
                               </div>
                               <table className="w-full text-[11px]">
                                 <thead>
-                                  <tr className="text-zinc-400 border-b border-zinc-200">
+                                  <tr className="text-zinc-400 border-b border-zinc-200 dark:border-brand-700">
                                     <th className="text-left pb-1 pr-2 font-medium">Godzina</th>
                                     <th className="text-left pb-1 pr-2 font-medium">Klient</th>
                                     <th className="text-right pb-1 pr-2 font-medium">Czas</th>
@@ -346,28 +458,28 @@ export default function AdminDailyCosts() {
                                         <tr
                                           key={call.id}
                                           onClick={() => setExpandedCall(isCallExpanded ? null : call.id)}
-                                          className="border-b border-zinc-100 hover:bg-white cursor-pointer"
+                                          className="border-b border-zinc-100 dark:border-brand-700 hover:bg-white dark:hover:bg-brand-900 cursor-pointer"
                                         >
-                                          <td className="py-1.5 pr-2 text-zinc-600 whitespace-nowrap">
-                                            {call.created_at?.slice(11, 16) || "—"}
+                                          <td className="py-1.5 pr-2 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">
+                                            {call.created_at ? fmtWarsawTime(call.created_at) : "—"}
                                           </td>
-                                          <td className="py-1.5 pr-2 text-zinc-700 truncate max-w-[120px]">
+                                          <td className="py-1.5 pr-2 text-zinc-700 dark:text-zinc-200 truncate max-w-[120px]">
                                             {call.from_number || call.business_name || "—"}
                                           </td>
-                                          <td className="py-1.5 pr-2 text-right text-zinc-600">{fmtTime(call.duration_seconds || 0)}</td>
-                                          <td className="py-1.5 pr-2 text-right text-zinc-500">{fmtPLN(call.cost_elevenlabs)}</td>
-                                          <td className="py-1.5 pr-2 text-right text-zinc-500">{fmtPLN(call.cost_twilio)}</td>
-                                          <td className="py-1.5 pr-2 text-right text-zinc-500">{fmtPLN(call.cost_openrouter)}</td>
-                                          <td className="py-1.5 pr-2 text-right text-red-500 font-medium">{fmtPLN(cost)}</td>
-                                          <td className="py-1.5 text-right text-brand-500 font-medium">{rev > 0 ? fmtPLN(rev) : "—"}</td>
+                                          <td className="py-1.5 pr-2 text-right text-zinc-600 dark:text-zinc-300">{fmtTime(call.duration_seconds || 0)}</td>
+                                          <td className="py-1.5 pr-2 text-right text-zinc-500 dark:text-zinc-300">{fmt(call.cost_elevenlabs)}</td>
+                                          <td className="py-1.5 pr-2 text-right text-zinc-500 dark:text-zinc-300">{fmt(call.cost_twilio)}</td>
+                                          <td className="py-1.5 pr-2 text-right text-zinc-500 dark:text-zinc-300">{fmt(call.cost_openrouter)}</td>
+                                          <td className="py-1.5 pr-2 text-right text-red-500 font-medium">{fmt(cost)}</td>
+                                          <td className="py-1.5 text-right text-[#0d9488] font-medium">{rev > 0 ? fmt(rev) : "—"}</td>
                                         </tr>
                                         {isCallExpanded && call.business_name && (
                                           <tr key={`${call.id}-meta`}>
                                             <td colSpan={8} className="pb-2">
                                               <div className="flex items-center gap-4 text-[10px] text-zinc-400 ml-4">
-                                                <span>Firma: <strong className="text-zinc-600">{call.business_name}</strong></span>
+                                                <span>Firma: <strong className="text-zinc-600 dark:text-zinc-300">{call.business_name}</strong></span>
                                                 {call.classification && (
-                                                  <span>Klasyfikacja: <strong className="text-zinc-600">{call.classification}</strong></span>
+                                                  <span>Klasyfikacja: <strong className="text-zinc-600 dark:text-zinc-300">{call.classification}</strong></span>
                                                 )}
                                                 <span>ID: <code className="text-zinc-500">{call.id.slice(0, 8)}...</code></span>
                                               </div>
@@ -391,44 +503,21 @@ export default function AdminDailyCosts() {
             {/* Footer row with totals */}
             {dailyGroups.length > 0 && !loading && (
               <tfoot>
-                <tr className="border-t-2 border-zinc-300 bg-zinc-50 font-semibold">
-                  <td className="p-2.5 text-zinc-800">SUMA</td>
-                  <td className="p-2.5 text-right text-zinc-800">{totalCalls}</td>
-                  <td className="p-2.5 text-right text-zinc-800">{Math.round(totalMinutes)}</td>
-                  <td className="p-2.5 text-right text-zinc-600">{fmtPLN(dailyGroups.reduce((s, d) => s + d.totalElevenlabs, 0))}</td>
-                  <td className="p-2.5 text-right text-zinc-600">{fmtPLN(dailyGroups.reduce((s, d) => s + d.totalTwilio, 0))}</td>
-                  <td className="p-2.5 text-right text-zinc-600">{fmtPLN(dailyGroups.reduce((s, d) => s + d.totalOpenrouter, 0))}</td>
-                  <td className="p-2.5 text-right text-red-600">{fmtPLN(totalCost)}</td>
-                  <td className="p-2.5 text-right text-brand-600">{fmtPLN(totalRevenue)}</td>
+                <tr className="border-t-2 border-zinc-300 dark:border-brand-600 bg-zinc-50 dark:bg-brand-800 font-semibold">
+                  <td className="p-2.5 text-zinc-800 dark:text-zinc-100">SUMA</td>
+                  <td className="p-2.5 text-right text-zinc-800 dark:text-zinc-100">{totalCalls}</td>
+                  <td className="p-2.5 text-right text-zinc-800 dark:text-zinc-100">{Math.round(totalMinutes)}</td>
+                  <td className="p-2.5 text-right text-zinc-600 dark:text-zinc-200">{fmt(dailyGroups.reduce((s, d) => s + d.totalElevenlabs, 0))}</td>
+                  <td className="p-2.5 text-right text-zinc-600 dark:text-zinc-200">{fmt(dailyGroups.reduce((s, d) => s + d.totalTwilio, 0))}</td>
+                  <td className="p-2.5 text-right text-zinc-600 dark:text-zinc-200">{fmt(dailyGroups.reduce((s, d) => s + d.totalOpenrouter, 0))}</td>
+                  <td className="p-2.5 text-right text-red-600">{fmt(totalCost)}</td>
+                  <td className="p-2.5 text-right text-[#0d9488]">{fmt(totalRevenue)}</td>
                   <td className={`p-2.5 text-right ${totalProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                    {totalProfit >= 0 ? "+" : ""}{fmtPLN(totalProfit)}
+                    {totalProfit >= 0 ? "+" : ""}{fmt(totalProfit)}
                   </td>
                   <td className="p-2.5 text-right">
                     <span className={`${totalProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
                       {totalRevenue > 0 ? fmtPct((totalProfit / totalRevenue) * 100) : "—"}
-                    </span>
-                  </td>
-                </tr>
-                {/* Projection row */}
-                <tr className="border-t border-zinc-200 bg-brand-50/50 text-xs">
-                  <td className="p-2.5 text-brand-700 font-semibold">PROGNOZA (koniec miesiąca)</td>
-                  <td className="p-2.5 text-right text-brand-700 font-medium">
-                    {daysElapsed > 0 ? Math.round((totalCalls / daysElapsed) * totalDays) : "—"}
-                  </td>
-                  <td className="p-2.5 text-right text-brand-700 font-medium">
-                    {daysElapsed > 0 ? Math.round((totalMinutes / daysElapsed) * totalDays) : "—"}
-                  </td>
-                  <td className="p-2.5 text-right text-zinc-500">—</td>
-                  <td className="p-2.5 text-right text-zinc-500">—</td>
-                  <td className="p-2.5 text-right text-zinc-500">—</td>
-                  <td className="p-2.5 text-right text-amber-600 font-medium">{fmtPLN(projectedCost)}</td>
-                  <td className="p-2.5 text-right text-brand-600 font-medium">{fmtPLN(projectedRevenue)}</td>
-                  <td className={`p-2.5 text-right font-bold ${projectedProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                    {projectedProfit >= 0 ? "+" : ""}{fmtPLN(projectedProfit)}
-                  </td>
-                  <td className="p-2.5 text-right">
-                    <span className={`${projectedProfit >= 0 ? "text-green-600" : "text-red-500"}`}>
-                      {projectedRevenue > 0 ? fmtPct((projectedProfit / projectedRevenue) * 100) : "—"}
                     </span>
                   </td>
                 </tr>

@@ -138,9 +138,9 @@ export default function PublicBookingWidget({ businessId, businessName, services
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-colors ${
                   typeof step === "number" && step >= s
-                    ? "bg-brand-500 text-white"
+                    ? "bg-[#0d9488] text-white"
                     : step === "done" && s === 5
-                    ? "bg-brand-500 text-white"
+                    ? "bg-[#0d9488] text-white"
                     : "bg-brand-50 text-zinc-400"
                 }`}
               >
@@ -150,9 +150,9 @@ export default function PublicBookingWidget({ businessId, businessName, services
                 <div
                   className={`h-1 flex-1 mx-1 rounded transition-colors ${
                     typeof step === "number" && step > s
-                      ? "bg-brand-500"
+                      ? "bg-[#0d9488]"
                       : step === "done"
-                      ? "bg-brand-500"
+                      ? "bg-[#0d9488]"
                       : "bg-brand-50"
                   }`}
                 />
@@ -170,7 +170,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
             <p className="text-zinc-500 mb-6">Szczegóły zostały wysłane SMS-em.</p>
             <button
               onClick={handleReset}
-              className="px-6 py-2.5 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+              className="px-6 py-2.5 bg-[#0d9488] text-white rounded-lg font-medium hover:bg-[#0d3d3a] transition-colors"
             >
               Nowa rezerwacja
             </button>
@@ -184,7 +184,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
             <p className="text-red-500 mb-6">{errorMessage}</p>
             <button
               onClick={handleReset}
-              className="px-6 py-2.5 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+              className="px-6 py-2.5 bg-[#0d9488] text-white rounded-lg font-medium hover:bg-[#0d3d3a] transition-colors"
             >
               Spróbuj ponownie
             </button>
@@ -201,8 +201,8 @@ export default function PublicBookingWidget({ businessId, businessName, services
                   onClick={() => handleServiceSelect(s)}
                   className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                     selectedService?.id === s.id
-                      ? "border-brand-500 bg-brand-50"
-                      : "border-zinc-200 hover:border-brand-300 hover:bg-brand-50"
+                      ? "border-[#0d9488] bg-brand-50"
+                      : "border-zinc-200 hover:border-[#0d9488]/30 hover:bg-[#f0fdfa]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -214,7 +214,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                     </div>
                     <div className="text-right shrink-0">
                       {s.price != null && (
-                        <div className="font-bold text-brand-600">{s.price} zł</div>
+                        <div className="font-bold text-[#0d9488]">{s.price} zł</div>
                       )}
                       <div className="text-xs text-zinc-400">{s.duration_minutes} min</div>
                     </div>
@@ -241,7 +241,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
               value={selectedDate}
               min={minDate}
               onChange={(e) => handleDateSelect(e.target.value)}
-              className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
             />
             {loading && (
               <div className="text-center py-4 text-zinc-400 text-sm">Sprawdzanie dostępności...</div>
@@ -268,7 +268,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                 <p className="text-zinc-500 mb-4">Brak wolnych terminów w tym dniu.</p>
                 <button
                   onClick={() => setStep(2)}
-                  className="px-4 py-2 text-brand-600 font-medium hover:underline"
+                  className="px-4 py-2 text-[#0d9488] font-medium hover:underline"
                 >
                   Wybierz inną datę
                 </button>
@@ -283,8 +283,8 @@ export default function PublicBookingWidget({ businessId, businessName, services
                     onClick={() => handleSlotSelect(slot.time)}
                     className={`px-4 py-3 rounded-lg text-sm font-medium border-2 transition-all ${
                       selectedSlot === slot.time
-                        ? "border-brand-500 bg-brand-50 text-brand-700"
-                        : "border-zinc-200 text-zinc-700 hover:border-brand-300 hover:bg-brand-50"
+                        ? "border-[#0d9488] bg-brand-50 text-brand-700"
+                        : "border-zinc-200 text-zinc-700 hover:border-[#0d9488]/30 hover:bg-[#f0fdfa]"
                     }`}
                   >
                     {slot.label}
@@ -316,7 +316,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Jan Kowalski"
-                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
                 />
               </div>
               <div>
@@ -326,7 +326,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   placeholder="+48 123 456 789"
-                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
                 />
               </div>
               <div>
@@ -336,7 +336,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder="jan@example.com"
-                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent"
                 />
               </div>
               <div>
@@ -346,7 +346,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Dodatkowe informacje..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-zinc-300 rounded-lg text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#0d9488] focus:border-transparent resize-none"
                 />
               </div>
 
@@ -358,7 +358,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
                   }
                   setStep(5);
                 }}
-                className="w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors"
+                className="w-full py-3 bg-[#0d9488] text-white rounded-lg font-medium hover:bg-[#0d3d3a] transition-colors"
               >
                 Dalej &rarr;
               </button>
@@ -397,7 +397,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
               {selectedService?.price != null && (
                 <div className="flex justify-between">
                   <span className="text-zinc-500 text-sm">Cena</span>
-                  <span className="font-bold text-brand-600">{selectedService.price} zł</span>
+                  <span className="font-bold text-[#0d9488]">{selectedService.price} zł</span>
                 </div>
               )}
               <div className="border-t border-zinc-200 pt-3 flex justify-between">
@@ -419,7 +419,7 @@ export default function PublicBookingWidget({ businessId, businessName, services
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full py-3 bg-brand-500 text-white rounded-lg font-medium hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#0d9488] text-white rounded-lg font-medium hover:bg-[#0d3d3a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading && (
                 <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

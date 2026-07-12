@@ -21,7 +21,7 @@ export async function GET() {
     .eq("active", true)
     .order("sort_order", { ascending: true });
 
-  const planOrder = ["start_100", "pro_500", "enterprise_2000"];
+  const planOrder = ["elastic_0", "enterprise_2000"];
   const bizIdx = planOrder.indexOf(biz.current_plan);
 
   const available = (allVoices || []).filter(v => {
@@ -60,7 +60,7 @@ export async function PATCH(request: Request) {
 
     if (!voice) return NextResponse.json({ error: "Voice not found" }, { status: 404 });
 
-const planOrder = ["elastic_0", "start_100", "pro_249", "pro_500", "lux_599", "enterprise_2000"];
+const planOrder = ["elastic_0", "enterprise_2000"];
     if (planOrder.indexOf(biz.current_plan) < planOrder.indexOf(voice.min_plan)) {
       return NextResponse.json({ error: "Ten głos nie jest dostępny dla Twojego planu." }, { status: 403 });
     }
