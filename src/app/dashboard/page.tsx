@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase";
 import DashboardHeader from "@/components/DashboardHeader";
 import AccountBalance from "@/components/AccountBalance";
 import ElasticCostCalculator from "@/components/ElasticCostCalculator";
@@ -67,8 +66,6 @@ export default function DashboardPage() {
   const session = useDashboardSession();
   const { setPerms, hasPerm } = useDashboardPerms();
 
-  const supabase = createClient();
-
   const isTrialExpired = subStatus === "trialing" && trialEndsAt && new Date(trialEndsAt) < new Date();
   const isBlocked = isTrialExpired || subStatus === "past_due" || subStatus === "canceled" || subStatus === "incomplete";
 
@@ -89,27 +86,29 @@ export default function DashboardPage() {
 
   async function fetchAll() {
     if (!session?.user) { setLoading(false); return; }
-    const uid = session.user.id;
-    const { data: biz } = await supabase.from("businesses").select("*").eq("owner_uid", uid).maybeSingle();
-    if (biz) {
-      setBusiness(biz as Business);
-      // Fetch permissions for RBAC
-      fetch(`/api/business/permissions?businessId=${biz.id}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(p => {
-          if (p && (p.role || p.isOwner)) {
-            setPerms(p.role || null, p.isOwner, p.isSuperAdmin, p.permissions || []);
-          }
-        })
-        .catch((e) => console.error("[dashboard] fetch error:", e));
-      const [logsRes, reservationsRes, feedbackRes] = await Promise.all([
-        supabase.from("call_logs").select("*").eq("business_id", biz.id).is("deleted_at", null).order("created_at", { ascending: false }).limit(50),
-        supabase.from("reservations").select("*").eq("business_id", biz.id).order("reserved_at", { ascending: false }).limit(100),
-        fetch(`/api/feedback?businessId=${biz.id}`).then((r) => r.ok ? r.json() : []),
-      ]);
-      if (logsRes.data) setCallLogs(logsRes.data as CallLog[]);
-      if (reservationsRes.data) setReservations(reservationsRes.data as Reservation[]);
-      if (Array.isArray(feedbackRes)) setFeedback(feedbackRes as Feedback[]);
+    try {
+      const res = await fetch("/api/business/my");
+      if (!res.ok) { setLoading(false); return; }
+      const data = await res.json();
+      if (data.business) {
+        setBusiness(data.business as Business);
+        fetch(`/api/business/permissions?businessId=${data.business.id}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(p => {
+            if (p && (p.role || p.isOwner)) {
+              setPerms(p.role || null, p.isOwner, p.isSuperAdmin, p.permissions || []);
+            }
+          })
+          .catch((e) => console.error("[dashboard] fetch error:", e));
+        setCallLogs((data.callLogs || []) as CallLog[]);
+        setReservations((data.reservations || []) as Reservation[]);
+        fetch(`/api/feedback?businessId=${data.business.id}`)
+          .then((r) => r.ok ? r.json() : [])
+          .then((fb) => { if (Array.isArray(fb)) setFeedback(fb as Feedback[]); })
+          .catch(() => {});
+      }
+    } catch (e) {
+      console.error("[dashboard] fetchAll error:", e);
     }
     setLoading(false);
   }
